@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext.js';
-import { Task } from '../../types/index.js';
+import type { Task, Priority } from '../../types/index.js';
 import { TaskKanban } from './TaskKanban.js';
 import { TaskModal } from './TaskModal.js';
 import { 
@@ -8,15 +8,12 @@ import {
   Plus, 
   RefreshCw, 
   Search, 
-  Filter, 
-  SlidersHorizontal,
-  Globe,
-  List,
-  Columns3,
-  Clock,
-  CheckCircle2,
+  Check, 
+  Clock, 
+  Edit3, 
   Trash2,
-  Edit3
+  Columns3,
+  List
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 
@@ -24,26 +21,36 @@ export const TaskManager: React.FC = () => {
   const { tasks, isSyncing, syncGoogleTasks, refreshAll, showToast } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
+  const [inlineTitle, setInlineTitle] = useState('');
+  const [inlinePriority, setInlinePriority] = useState<Priority>('medium');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (task.notes && task.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (task.tags && task.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())));
+      (task.notes && task.notes.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
     return matchesSearch && matchesPriority;
   });
 
-  const handleEdit = (task: Task) => {
-    setEditingTask(task);
-    setIsModalOpen(true);
-  };
+  const handleQuickAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inlineTitle.trim()) return;
 
-  const handleCreate = () => {
-    setEditingTask(null);
-    setIsModalOpen(true);
+    try {
+      await api.createTask({
+        title: inlineTitle.trim(),
+        status: 'todo',
+        priority: inlinePriority,
+        dueDate: new Date().toISOString().split('T')[0]
+      });
+      setInlineTitle('');
+      showToast('Task added', 'success');
+      await refreshAll();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
   };
 
   const handleToggleComplete = async (task: Task) => {
@@ -54,7 +61,17 @@ export const TaskManager: React.FC = () => {
         status: isCompleted ? 'todo' : 'completed',
         completedAt: !isCompleted ? new Date().toISOString() : undefined
       });
-      showToast(isCompleted ? 'Task marked active' : 'Task completed!', 'success');
+      showToast(isCompleted ? 'Active' : 'Completed', 'info');
+      await refreshAll();
+    } catch (e: any) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await api.deleteTask(id);
+      showToast('Task deleted', 'info');
       await refreshAll();
     } catch (e: any) {
       showToast(e.message, 'error');
@@ -62,161 +79,184 @@ export const TaskManager: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header & Google Tasks Sync Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="p-8 max-w-6xl mx-auto space-y-6 transition-colors duration-200">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <CheckSquare className="w-6 h-6 text-cyan-400" />
-            <h2 className="text-xl font-bold text-white tracking-tight">Task & Project Command</h2>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Manage your high-priority projects and 2-way synchronize with Google Tasks.
+          <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Tasks</h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            2-way synced with Google Tasks.
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* View Switcher */}
+          <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md text-xs transition-colors cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+              }`}
+              title="List View"
+            >
+              <List className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setViewMode('kanban')}
+              className={`p-1.5 rounded-md text-xs transition-colors cursor-pointer ${
+                viewMode === 'kanban'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-2xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+              }`}
+              title="Kanban Board"
+            >
+              <Columns3 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <button
             onClick={syncGoogleTasks}
             disabled={isSyncing}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-200 bg-slate-900 border border-slate-700 hover:border-cyan-500/50 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-2xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? 'Syncing...' : '2-Way Google Sync'}</span>
-          </button>
-
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:opacity-95 shadow-md glow-cyan transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Task</span>
+            <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>Sync</span>
           </button>
         </div>
       </div>
 
-      {/* Filter and View Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 glass-panel">
-        <div className="flex items-center gap-3 flex-1">
-          {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Filter tasks by name, note, or tag..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-            />
-          </div>
+      {/* Quick Add Bar */}
+      <form onSubmit={handleQuickAdd} className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
+        <Plus className="w-4 h-4 text-zinc-400 ml-2 shrink-0" />
+        <input
+          type="text"
+          placeholder="Add a new task and press Enter..."
+          value={inlineTitle}
+          onChange={e => setInlineTitle(e.target.value)}
+          className="w-full bg-transparent text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none"
+        />
+        <select
+          value={inlinePriority}
+          onChange={e => setInlinePriority(e.target.value as Priority)}
+          className="text-xs bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 rounded-lg px-2 py-1 focus:outline-none"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+        <button
+          type="submit"
+          disabled={!inlineTitle.trim()}
+          className="px-3 py-1 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-medium hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer shrink-0"
+        >
+          Add
+        </button>
+      </form>
 
-          {/* Priority Filter */}
-          <div className="flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <select
-              value={priorityFilter}
-              onChange={e => setPriorityFilter(e.target.value)}
-              className="bg-slate-950/80 text-xs text-slate-300 border border-slate-800 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-cyan-500"
-            >
-              <option value="all">All Priorities</option>
-              <option value="urgent">Urgent</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
+      {/* Filters Bar */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 shadow-2xs"
+          />
         </div>
 
-        {/* View Switcher */}
-        <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
-          <button
-            onClick={() => setViewMode('kanban')}
-            className={`p-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors ${
-              viewMode === 'kanban' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Columns3 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Kanban</span>
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors ${
-              viewMode === 'list' ? 'bg-slate-800 text-cyan-400 font-medium' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <List className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">List</span>
-          </button>
-        </div>
+        <select
+          value={priorityFilter}
+          onChange={e => setPriorityFilter(e.target.value)}
+          className="text-xs bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg px-2.5 py-1.5 focus:outline-none shadow-2xs"
+        >
+          <option value="all">All Priorities</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
       </div>
 
-      {/* Main View Display */}
+      {/* View Display */}
       {viewMode === 'kanban' ? (
-        <TaskKanban tasks={filteredTasks} onEditTask={handleEdit} />
+        <TaskKanban tasks={filteredTasks} onEditTask={t => { setEditingTask(t); setIsModalOpen(true); }} />
       ) : (
-        /* List View */
-        <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-4 space-y-2 glass-panel">
+        <div className="rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800/60 shadow-2xs overflow-hidden">
           {filteredTasks.map(task => (
             <div
               key={task.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-cyan-500/30 transition-all group"
+              className="flex items-center justify-between p-3.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors group"
             >
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleToggleComplete(task)}
-                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+                  className={`w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
                     task.status === 'completed'
-                      ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                      : 'border-slate-700 text-transparent hover:border-cyan-400 hover:text-cyan-400'
+                      ? 'bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900'
+                      : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-300 text-transparent'
                   }`}
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <Check className="w-3 h-3" />
                 </button>
+
                 <div>
-                  <div className={`text-xs font-semibold ${task.status === 'completed' ? 'line-through text-slate-500' : 'text-slate-100 group-hover:text-cyan-300'}`}>
+                  <span className={`text-xs font-medium ${task.status === 'completed' ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
                     {task.title}
-                  </div>
+                  </span>
                   {task.notes && (
-                    <div className="text-[11px] text-slate-400 truncate max-w-xl">{task.notes}</div>
+                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate max-w-md mt-0.5">
+                      {task.notes}
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full ${
-                  task.priority === 'urgent' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                  task.priority === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                  'bg-slate-800 text-slate-400'
-                }`}>
-                  {task.priority}
-                </span>
-
+              <div className="flex items-center gap-4">
                 {task.dueDate && (
-                  <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-cyan-400" /> {task.dueDate}
+                  <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {task.dueDate}
                   </span>
                 )}
 
-                <button
-                  onClick={() => handleEdit(task)}
-                  className="p-1 text-slate-400 hover:text-cyan-400"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                </button>
+                <span className={`w-2 h-2 rounded-full ${
+                  task.priority === 'urgent' ? 'bg-red-500' :
+                  task.priority === 'high' ? 'bg-amber-500' :
+                  'bg-zinc-300 dark:bg-zinc-700'
+                }`} title={`Priority: ${task.priority}`}></span>
+
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => { setEditingTask(task); setIsModalOpen(true); }}
+                    className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded cursor-pointer"
+                    title="Edit task"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(task.id)}
+                    className="p-1 text-zinc-400 hover:text-red-500 rounded cursor-pointer"
+                    title="Delete task"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
 
           {filteredTasks.length === 0 && (
-            <div className="text-center py-12 text-xs text-slate-500 font-mono">
-              No tasks match your filters.
+            <div className="text-center py-12 text-xs text-zinc-400 dark:text-zinc-500">
+              No tasks found.
             </div>
           )}
         </div>
       )}
 
-      {/* Create / Edit Modal */}
       {isModalOpen && (
         <TaskModal
           task={editingTask}

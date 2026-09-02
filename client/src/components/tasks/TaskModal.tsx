@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Task, Priority, TaskStatus } from '../../types/index.js';
-import { X, CheckSquare, Calendar, Clock, Tag, Sparkles } from 'lucide-react';
+import type { Task, Priority, TaskStatus } from '../../types/index.js';
+import { X } from 'lucide-react';
 import { api } from '../../services/api.js';
 import { useApp } from '../../context/AppContext.js';
 
@@ -17,9 +17,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'todo');
   const [priority, setPriority] = useState<Priority>(task?.priority || 'medium');
   const [dueDate, setDueDate] = useState(task?.dueDate || new Date().toISOString().split('T')[0]);
-  const [dueTime, setDueTime] = useState(task?.dueTime || '18:00');
-  const [estimatedMinutes, setEstimatedMinutes] = useState(task?.estimatedMinutes || 30);
-  const [tagsInput, setTagsInput] = useState(task?.tags?.join(', ') || 'Nayra');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,24 +25,20 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
 
     setIsSubmitting(true);
     try {
-      const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
       const payload: Partial<Task> = {
         title: title.trim(),
         notes: notes.trim(),
         status,
         priority,
-        dueDate,
-        dueTime,
-        estimatedMinutes: Number(estimatedMinutes),
-        tags
+        dueDate
       };
 
       if (task?.id) {
         await api.updateTask(task.id, payload);
-        showToast('Task updated and synced', 'success');
+        showToast('Task updated', 'success');
       } else {
         await api.createTask(payload);
-        showToast('Task created and queued for Google sync', 'success');
+        showToast('Task created', 'success');
       }
       onSaved();
       onClose();
@@ -57,65 +50,62 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-[#0f172a] border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden glass-panel glow-cyan">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <CheckSquare className="w-5 h-5 text-cyan-400" />
-            <h3 className="font-semibold text-white text-base">
-              {task ? 'Edit Task' : 'Create New Task'}
-            </h3>
-          </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-200 rounded-lg">
-            <X className="w-5 h-5" />
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
+            {task ? 'Edit Task' : 'New Task'}
+          </h3>
+          <button onClick={onClose} className="p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded cursor-pointer">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Task Title *</label>
+            <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">Title</label>
             <input
               type="text"
               required
-              placeholder="e.g. Implement Google Tasks two-way sync"
+              placeholder="Task name"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-sm focus:outline-none focus:border-cyan-500"
+              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Description & Notes</label>
+            <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">Notes</label>
             <textarea
               rows={3}
-              placeholder="Add extra context, links, or checklists..."
+              placeholder="Optional notes..."
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 resize-none"
+              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400 resize-none"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Status</label>
+              <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">Status</label>
               <select
                 value={status}
                 onChange={e => setStatus(e.target.value as TaskStatus)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-sm focus:outline-none focus:border-cyan-500"
+                className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
               >
                 <option value="todo">To Do</option>
                 <option value="in_progress">In Progress</option>
                 <option value="review">Review</option>
-                <option value="completed">Completed</option>
+                <option value="completed">Done</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Priority</label>
+              <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">Priority</label>
               <select
                 value={priority}
                 onChange={e => setPriority(e.target.value as Priority)}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-sm focus:outline-none focus:border-cyan-500"
+                className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -125,71 +115,30 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-cyan-400" /> Due Date
-              </label>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-purple-400" /> Due Time
-              </label>
-              <input
-                type="time"
-                value={dueTime}
-                onChange={e => setDueTime(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Est. Minutes</label>
-              <input
-                type="number"
-                min="5"
-                step="5"
-                value={estimatedMinutes}
-                onChange={e => setEstimatedMinutes(Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono"
-              />
-            </div>
-          </div>
-
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1">
-              <Tag className="w-3 h-3 text-cyan-400" /> Tags (comma separated)
-            </label>
+            <label className="block font-medium text-zinc-700 dark:text-zinc-300 mb-1">Due Date</label>
             <input
-              type="text"
-              placeholder="Nayra, Feature, Ops"
-              value={tagsInput}
-              onChange={e => setTagsInput(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-100 text-sm focus:outline-none focus:border-cyan-500"
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none font-mono"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              className="px-3 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-5 py-2 rounded-xl text-xs font-medium bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:opacity-95 disabled:opacity-50 shadow-md glow-cyan"
+              className="px-4 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-medium hover:opacity-90 disabled:opacity-40 cursor-pointer"
             >
-              {isSubmitting ? 'Saving...' : task ? 'Update Task' : 'Create Task'}
+              {isSubmitting ? 'Saving...' : task ? 'Update' : 'Create'}
             </button>
           </div>
         </form>

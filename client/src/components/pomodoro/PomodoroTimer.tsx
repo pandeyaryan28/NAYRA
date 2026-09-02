@@ -7,23 +7,17 @@ import {
   Pause, 
   RotateCcw, 
   FastForward, 
-  CheckCircle2, 
-  Flame, 
-  Clock, 
-  History,
-  TrendingUp,
-  Sparkles
+  History
 } from 'lucide-react';
 import { api } from '../../services/api.js';
-import confetti from 'canvas-confetti';
 
 type SessionType = 'focus' | 'deep_focus' | 'short_break' | 'long_break';
 
-const PRESETS: Record<SessionType, { label: string; minutes: number; color: string; border: string }> = {
-  focus: { label: 'Focus (25m)', minutes: 25, color: 'text-cyan-400', border: 'border-cyan-500' },
-  deep_focus: { label: 'Deep Focus (50m)', minutes: 50, color: 'text-purple-400', border: 'border-purple-500' },
-  short_break: { label: 'Short Break (5m)', minutes: 5, color: 'text-emerald-400', border: 'border-emerald-500' },
-  long_break: { label: 'Long Break (15m)', minutes: 15, color: 'text-amber-400', border: 'border-amber-500' }
+const PRESETS: Record<SessionType, { label: string; minutes: number }> = {
+  focus: { label: 'Focus 25m', minutes: 25 },
+  deep_focus: { label: 'Deep 50m', minutes: 50 },
+  short_break: { label: 'Break 5m', minutes: 5 },
+  long_break: { label: 'Break 15m', minutes: 15 }
 };
 
 export const PomodoroTimer: React.FC = () => {
@@ -66,8 +60,6 @@ export const PomodoroTimer: React.FC = () => {
 
   const handleComplete = async () => {
     setIsRunning(false);
-    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-
     const selectedTask = tasks.find(t => t.id === selectedTaskId);
     const durationMinutes = currentPreset.minutes;
 
@@ -79,7 +71,7 @@ export const PomodoroTimer: React.FC = () => {
         sessionType: sessionType.includes('break') ? 'short_break' : 'pomodoro',
         timestamp: new Date().toISOString()
       });
-      showToast(`Pomodoro complete! 🎉 Logged ${durationMinutes} mins.`, 'success');
+      showToast(`Completed ${durationMinutes}m focus session`, 'success');
       await refreshAll();
     } catch (e: any) {
       showToast(e.message, 'error');
@@ -94,50 +86,40 @@ export const PomodoroTimer: React.FC = () => {
   const minutesDisplay = Math.floor(timeLeft / 60).toString().padStart(2, '0');
   const secondsDisplay = (timeLeft % 60).toString().padStart(2, '0');
 
-  // Stats calculation
   const todayStr = new Date().toISOString().split('T')[0];
   const todayLogs = timeLogs.filter(l => l.timestamp.startsWith(todayStr));
   const totalFocusMinutes = todayLogs.reduce((acc, l) => acc + (l.durationMinutes || 0), 0);
-  const totalPomodoros = todayLogs.filter(l => l.sessionType === 'pomodoro').length;
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto space-y-6 transition-colors duration-200">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <Timer className="w-6 h-6 text-purple-400" />
-            <h2 className="text-xl font-bold text-white tracking-tight">Pomodoro & Focus Command</h2>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Track focused work intervals, record task time logs, and build productivity momentum.
+          <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Focus & Pomodoro</h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Minimalist distraction-free interval focus station.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs flex items-center gap-2">
-            <Flame className="w-4 h-4 text-amber-400" />
-            <span className="text-slate-400">Today:</span>
-            <span className="text-white font-mono font-bold">{totalFocusMinutes} min</span>
-            <span className="text-slate-500">({totalPomodoros} focus blocks)</span>
-          </div>
+        <div className="px-3.5 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+          <span>Today: </span>
+          <strong className="text-zinc-900 dark:text-zinc-100">{totalFocusMinutes} min</strong>
         </div>
       </div>
 
-      {/* Main Grid: Timer on Left, Manual Log & History on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Interactive Pomodoro Clock */}
-        <div className="lg:col-span-2 rounded-2xl bg-slate-900/60 border border-slate-800 p-8 glass-panel flex flex-col items-center justify-center space-y-8">
-          {/* Preset Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2 bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800">
+        {/* Left 2 Cols: Minimalist Clock */}
+        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-8 shadow-2xs flex flex-col items-center justify-center space-y-8 min-h-[480px]">
+          {/* Preset Switcher */}
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50">
             {(Object.keys(PRESETS) as SessionType[]).map(type => (
               <button
                 key={type}
                 onClick={() => setSessionType(type)}
-                className={`px-4 py-2 rounded-xl text-xs font-medium transition-all ${
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   sessionType === type
-                    ? 'bg-slate-800 text-cyan-300 shadow-md border border-cyan-500/40 glow-cyan'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xs font-semibold'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
               >
                 {PRESETS[type].label}
@@ -145,95 +127,85 @@ export const PomodoroTimer: React.FC = () => {
             ))}
           </div>
 
-          {/* Task Link Selector */}
-          <div className="w-full max-w-sm">
-            <label className="block text-[11px] text-slate-400 text-center mb-1">
-              Link Session to Active Task:
-            </label>
+          {/* Minimal Task Link */}
+          <div className="w-full max-w-xs">
             <select
               value={selectedTaskId}
               onChange={e => setSelectedTaskId(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 text-center"
+              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none text-center"
             >
-              <option value="">-- General Focus --</option>
+              <option value="">General Focus / Untracked</option>
               {tasks.filter(t => t.status !== 'completed').map(t => (
                 <option key={t.id} value={t.id}>{t.title}</option>
               ))}
             </select>
           </div>
 
-          {/* Circular Countdown Ring */}
-          <div className="relative flex items-center justify-center w-64 h-64">
+          {/* Circular Countdown */}
+          <div className="relative flex items-center justify-center w-56 h-56">
             <svg className="w-full h-full transform -rotate-90">
               <circle
-                cx="128"
-                cy="128"
-                r="110"
+                cx="112"
+                cy="112"
+                r="96"
                 stroke="currentColor"
-                strokeWidth="10"
-                className="text-slate-800/80 fill-transparent"
+                strokeWidth="6"
+                className="text-zinc-100 dark:text-zinc-800/80 fill-transparent"
               />
               <circle
-                cx="128"
-                cy="128"
-                r="110"
+                cx="112"
+                cy="112"
+                r="96"
                 stroke="currentColor"
-                strokeWidth="10"
-                strokeDasharray={2 * Math.PI * 110}
-                strokeDashoffset={2 * Math.PI * 110 * (1 - progressPercent / 100)}
+                strokeWidth="6"
+                strokeDasharray={2 * Math.PI * 96}
+                strokeDashoffset={2 * Math.PI * 96 * (1 - progressPercent / 100)}
                 strokeLinecap="round"
-                className={`transition-all duration-500 fill-transparent ${
-                  sessionType.includes('break') ? 'text-emerald-400' : 'text-cyan-400'
-                }`}
+                className="text-zinc-900 dark:text-zinc-100 transition-all duration-300 fill-transparent"
               />
             </svg>
 
-            {/* Inner Digits */}
             <div className="absolute flex flex-col items-center justify-center text-center">
-              <div className="text-5xl font-mono font-bold tracking-tight text-white glow-text">
+              <div className="text-4xl font-mono font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                 {minutesDisplay}:{secondsDisplay}
               </div>
-              <div className="text-xs uppercase font-mono tracking-widest text-slate-400 mt-2">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500 mt-1">
                 {sessionType.replace('_', ' ')}
-              </div>
+              </span>
             </div>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={handleReset}
-              className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-colors"
-              title="Reset Timer"
+              className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              title="Reset"
             >
-              <RotateCcw className="w-5 h-5" />
+              <RotateCcw className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => setIsRunning(!isRunning)}
-              className={`px-8 py-4 rounded-2xl text-white font-bold text-sm flex items-center gap-2.5 transition-all shadow-xl ${
-                isRunning
-                  ? 'bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-95'
-                  : 'bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-600 hover:opacity-95 glow-cyan'
-              }`}
+              className="px-6 py-2.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-2"
             >
               {isRunning ? (
                 <>
-                  <Pause className="w-5 h-5" /> Pause
+                  <Pause className="w-4 h-4" /> Pause
                 </>
               ) : (
                 <>
-                  <Play className="w-5 h-5" /> Start Focus
+                  <Play className="w-4 h-4" /> Start
                 </>
               )}
             </button>
 
             <button
               onClick={handleComplete}
-              className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/40 transition-colors"
-              title="Finish / Log Session"
+              className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              title="Finish session"
             >
-              <FastForward className="w-5 h-5" />
+              <FastForward className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -242,36 +214,26 @@ export const PomodoroTimer: React.FC = () => {
         <div className="space-y-6">
           <TimeEntryLogger />
 
-          {/* Focus History */}
-          <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 space-y-4 glass-panel">
+          {/* History */}
+          <div className="p-6 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm font-semibold text-white tracking-wide">Recent Focus Logs</h3>
-              </div>
-              <span className="text-[11px] font-mono text-slate-400">{timeLogs.length} total</span>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Recent Sessions</h3>
+              <span className="text-xs font-mono text-zinc-400">{timeLogs.length} total</span>
             </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className="space-y-2 max-h-56 overflow-y-auto">
               {timeLogs.slice().reverse().slice(0, 5).map(log => (
                 <div
                   key={log.id}
-                  className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs"
+                  className="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between text-xs"
                 >
-                  <div>
-                    <div className="font-medium text-slate-200">{log.taskTitle || 'Focus Session'}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">
-                      {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {log.sessionType}
-                    </div>
-                  </div>
-                  <span className="font-mono text-cyan-400 font-bold">
-                    +{log.durationMinutes}m
-                  </span>
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200 truncate">{log.taskTitle || 'Focus'}</span>
+                  <span className="font-mono text-zinc-900 dark:text-zinc-100 font-semibold shrink-0">+{log.durationMinutes}m</span>
                 </div>
               ))}
 
               {timeLogs.length === 0 && (
-                <div className="text-center py-6 text-xs text-slate-500">
+                <div className="text-center py-6 text-xs text-zinc-400 dark:text-zinc-500">
                   No sessions logged yet.
                 </div>
               )}

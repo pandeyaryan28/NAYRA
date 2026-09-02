@@ -1,5 +1,6 @@
 import React from 'react';
-import { useApp, TabType } from '../../context/AppContext.js';
+import { useApp } from '../../context/AppContext.js';
+import type { TabType } from '../../context/AppContext.js';
 import { 
   LayoutDashboard, 
   CheckSquare, 
@@ -8,10 +9,8 @@ import {
   Flame, 
   StickyNote, 
   Bot, 
-  RefreshCw, 
-  Sparkles,
-  Zap,
-  Activity
+  RefreshCw,
+  Globe
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -22,51 +21,36 @@ export const Sidebar: React.FC = () => {
   const todayEventsCount = calendarEvents.filter(e => e.startTime.startsWith(todayStr)).length;
   const remainingCalories = nutritionData?.summary?.remainingCalories ?? 0;
 
-  const navItems: { id: TabType; label: string; icon: any; badge?: string | number; badgeColor?: string }[] = [
-    { id: 'overview', label: 'Overview HUD', icon: LayoutDashboard },
-    { id: 'tasks', label: 'Tasks & Projects', icon: CheckSquare, badge: pendingTasksCount, badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' },
-    { id: 'calendar', label: 'Calendar Schedule', icon: CalendarIcon, badge: todayEventsCount > 0 ? todayEventsCount : undefined, badgeColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30' },
-    { id: 'pomodoro', label: 'Pomodoro Focus', icon: Timer },
-    { id: 'nutrition', label: 'Nutrition & Calories', icon: Flame, badge: remainingCalories > 0 ? `${remainingCalories} kcal` : undefined, badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' },
-    { id: 'keep', label: 'Keep Notes & Memos', icon: StickyNote, badge: notes.length > 0 ? notes.length : undefined, badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' },
-    { id: 'assistant', label: 'Nayra Intelligence', icon: Bot, badge: 'AI', badgeColor: 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-sm' },
+  const navItems: { id: TabType; label: string; icon: any; badge?: string | number }[] = [
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : undefined },
+    { id: 'calendar', label: 'Calendar', icon: CalendarIcon, badge: todayEventsCount > 0 ? todayEventsCount : undefined },
+    { id: 'pomodoro', label: 'Focus & Pomodoro', icon: Timer },
+    { id: 'nutrition', label: 'Nutrition & Calories', icon: Flame, badge: remainingCalories > 0 ? `${remainingCalories} kcal` : undefined },
+    { id: 'keep', label: 'Notes', icon: StickyNote, badge: notes.length > 0 ? notes.length : undefined },
+    { id: 'assistant', label: 'Assistant AI', icon: Bot },
   ];
 
   return (
-    <aside className="w-64 bg-[#0c121e]/90 border-r border-slate-800/80 flex flex-col justify-between shrink-0 select-none z-20">
-      {/* Brand & AI Core Status */}
+    <aside className="w-60 bg-zinc-50 dark:bg-[#0c0c0e] border-r border-zinc-200 dark:border-zinc-800/80 flex flex-col justify-between shrink-0 select-none z-20 transition-colors duration-200">
+      {/* Brand Header */}
       <div>
-        <div className="p-5 flex items-center gap-3 border-b border-slate-800/60">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 via-sky-600 to-purple-600 shadow-lg glow-cyan">
-            <Sparkles className="w-5 h-5 text-white animate-pulse" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"></span>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-bold text-lg tracking-wider text-white bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                NYRA
-              </h1>
-              <span className="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/50 font-mono">
-                v1.0
-              </span>
+        <div className="px-5 py-4 flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/80">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-md bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs tracking-tighter">
+              N
             </div>
-            <p className="text-xs text-slate-400">Personal Command Center</p>
+            <span className="font-semibold text-sm tracking-tight text-zinc-900 dark:text-zinc-100">
+              NAYRA
+            </span>
           </div>
-        </div>
-
-        {/* Quick System Metric Pill */}
-        <div className="px-4 py-3 mx-3 my-3 rounded-lg bg-slate-900/60 border border-slate-800/60 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-slate-300">
-            <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-            <span>Core Status:</span>
-          </div>
-          <span className="text-emerald-400 font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
+          <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400">
+            v1.0
           </span>
         </div>
 
         {/* Navigation List */}
-        <nav className="px-3 space-y-1 mt-2">
+        <nav className="p-3 space-y-0.5">
           {navItems.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -74,18 +58,18 @@ export const Sidebar: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-gradient-to-r from-cyan-900/40 to-purple-900/30 text-white border border-cyan-500/40 shadow-sm glow-cyan'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900/60'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 dark:text-zinc-500'}`} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
-                  <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${item.badgeColor || 'bg-slate-800 text-slate-300'}`}>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                     {item.badge}
                   </span>
                 )}
@@ -95,22 +79,23 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Footer / Quick Actions & Sync */}
-      <div className="p-4 border-t border-slate-800/60 space-y-2">
+      {/* Footer / Sync Button */}
+      <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-2">
         <button
           onClick={syncGoogleTasks}
           disabled={isSyncing}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-medium text-slate-300 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 hover:border-cyan-500/40 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-colors cursor-pointer shadow-2xs"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isSyncing ? 'animate-spin' : ''}`} />
-          <span>{isSyncing ? 'Syncing Ecosystem...' : '2-Way Google Sync'}</span>
+          <RefreshCw className={`w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400 ${isSyncing ? 'animate-spin' : ''}`} />
+          <span>{isSyncing ? 'Syncing...' : '2-Way Google Sync'}</span>
         </button>
 
-        <div className="flex items-center justify-between pt-2 text-[11px] text-slate-500 font-mono">
+        <div className="flex items-center justify-between px-1 text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
           <span className="flex items-center gap-1">
-            <Zap className="w-3 h-3 text-amber-400" /> Firebase Connected
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Cloud Synced
           </span>
-          <span className="text-cyan-400/80 font-mono">nayra-ap28</span>
+          <span>nayra-ap28</span>
         </div>
       </div>
     </aside>

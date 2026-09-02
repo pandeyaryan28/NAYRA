@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext.js';
-import { Clock, Plus, Tag, CheckSquare, Sparkles } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { api } from '../../services/api.js';
 
 export const TimeEntryLogger: React.FC = () => {
@@ -15,7 +15,7 @@ export const TimeEntryLogger: React.FC = () => {
     e.preventDefault();
     const totalMinutes = (Number(hours) * 60) + Number(minutes);
     if (totalMinutes <= 0) {
-      showToast('Please enter a duration greater than 0', 'warning');
+      showToast('Duration must be greater than 0', 'warning');
       return;
     }
 
@@ -24,14 +24,14 @@ export const TimeEntryLogger: React.FC = () => {
       const selectedTask = tasks.find(t => t.id === selectedTaskId);
       await api.logTime({
         taskId: selectedTaskId || undefined,
-        taskTitle: selectedTask?.title || 'Manual Work Entry',
+        taskTitle: selectedTask?.title || 'Manual Focus Log',
         durationMinutes: totalMinutes,
         sessionType: 'manual',
         notes: notes.trim() || undefined,
         timestamp: new Date().toISOString()
       });
 
-      showToast(`Logged ${totalMinutes} minutes of work!`, 'success');
+      showToast(`Logged ${totalMinutes}m of focus`, 'success');
       setNotes('');
       setHours(0);
       setMinutes(30);
@@ -44,21 +44,21 @@ export const TimeEntryLogger: React.FC = () => {
   };
 
   return (
-    <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 space-y-4 glass-panel">
+    <div className="p-6 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-2xs space-y-4">
       <div className="flex items-center gap-2">
-        <Clock className="w-4 h-4 text-purple-400" />
-        <h3 className="text-sm font-semibold text-white tracking-wide">Manual Work Entry Log</h3>
+        <Clock className="w-4 h-4 text-zinc-400" />
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Manual Time Log</h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+      <form onSubmit={handleSubmit} className="space-y-3 text-xs">
         <div>
-          <label className="block text-slate-300 font-medium mb-1.5">Associated Task (Optional)</label>
+          <label className="block text-zinc-600 dark:text-zinc-400 mb-1">Task</label>
           <select
             value={selectedTaskId}
             onChange={e => setSelectedTaskId(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700/80 text-slate-200 text-xs focus:outline-none focus:border-purple-500"
+            className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 focus:outline-none"
           >
-            <option value="">-- General Focus / No specific task --</option>
+            <option value="">General Focus / Untracked</option>
             {tasks.map(t => (
               <option key={t.id} value={t.id}>{t.title}</option>
             ))}
@@ -67,19 +67,18 @@ export const TimeEntryLogger: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Hours</label>
+            <label className="block text-zinc-600 dark:text-zinc-400 mb-1">Hours</label>
             <input
               type="number"
               min="0"
               max="24"
               value={hours}
               onChange={e => setHours(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700/80 text-slate-200 text-xs focus:outline-none focus:border-purple-500 font-mono"
+              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-mono"
             />
           </div>
-
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Minutes</label>
+            <label className="block text-zinc-600 dark:text-zinc-400 mb-1">Minutes</label>
             <input
               type="number"
               min="0"
@@ -87,28 +86,28 @@ export const TimeEntryLogger: React.FC = () => {
               step="5"
               value={minutes}
               onChange={e => setMinutes(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700/80 text-slate-200 text-xs focus:outline-none focus:border-purple-500 font-mono"
+              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-mono"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-slate-300 font-medium mb-1.5">Session Summary / Notes</label>
+          <label className="block text-zinc-600 dark:text-zinc-400 mb-1">Notes</label>
           <input
             type="text"
-            placeholder="e.g. Worked on Firebase rules, sync routines, and UI polishing"
+            placeholder="What did you accomplish?"
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700/80 text-slate-200 text-xs focus:outline-none focus:border-purple-500"
+            className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200"
           />
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 text-white font-medium text-xs hover:opacity-95 disabled:opacity-50 shadow-md glow-purple transition-all"
+          className="w-full py-2 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-medium hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer"
         >
-          {isSubmitting ? 'Logging...' : 'Log Time Spent'}
+          {isSubmitting ? 'Logging...' : 'Log Time'}
         </button>
       </form>
     </div>

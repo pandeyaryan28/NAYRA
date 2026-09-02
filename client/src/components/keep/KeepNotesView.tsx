@@ -1,42 +1,25 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext.js';
-import { KeepNote } from '../../types/index.js';
+import type { KeepNote } from '../../types/index.js';
 import { 
   StickyNote, 
   Plus, 
   Pin, 
   Trash2, 
-  Edit3, 
-  Search, 
-  Tag, 
-  Palette,
-  Check,
-  Globe
+  Search 
 } from 'lucide-react';
 import { api } from '../../services/api.js';
-
-const COLOR_OPTIONS = [
-  { id: 'default', bg: 'bg-slate-900/80', border: 'border-slate-800' },
-  { id: 'cyan', bg: 'bg-cyan-950/40', border: 'border-cyan-700/50' },
-  { id: 'purple', bg: 'bg-purple-950/40', border: 'border-purple-700/50' },
-  { id: 'amber', bg: 'bg-amber-950/40', border: 'border-amber-700/50' },
-  { id: 'emerald', bg: 'bg-emerald-950/40', border: 'border-emerald-700/50' },
-];
 
 export const KeepNotesView: React.FC = () => {
   const { notes, refreshAll, showToast } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isPinned, setIsPinned] = useState(false);
-  const [selectedColor, setSelectedColor] = useState('default');
-  const [tagsInput, setTagsInput] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
   const filteredNotes = notes.filter(n => 
     n.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    n.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    n.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+    n.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const pinnedNotes = filteredNotes.filter(n => n.isPinned);
@@ -47,20 +30,15 @@ export const KeepNotesView: React.FC = () => {
     if (!title.trim() && !content.trim()) return;
 
     try {
-      const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
       await api.createNote({
-        title: title.trim() || 'Untitled Memo',
+        title: title.trim() || 'Untitled Note',
         content: content.trim(),
-        isPinned,
-        color: selectedColor,
-        tags,
+        isPinned: false,
         isArchived: false
       });
-      showToast('Note saved!', 'success');
+      showToast('Note saved', 'success');
       setTitle('');
       setContent('');
-      setIsPinned(false);
-      setTagsInput('');
       setIsCreating(false);
       await refreshAll();
     } catch (e: any) {
@@ -71,7 +49,7 @@ export const KeepNotesView: React.FC = () => {
   const handleTogglePin = async (note: KeepNote) => {
     try {
       await api.updateNote(note.id, { ...note, isPinned: !note.isPinned });
-      showToast(note.isPinned ? 'Note unpinned' : 'Note pinned to top', 'info');
+      showToast(note.isPinned ? 'Unpinned' : 'Pinned', 'info');
       await refreshAll();
     } catch (e: any) {
       showToast(e.message, 'error');
@@ -89,105 +67,77 @@ export const KeepNotesView: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto space-y-6 transition-colors duration-200">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <StickyNote className="w-6 h-6 text-amber-400" />
-            <h2 className="text-xl font-bold text-white tracking-tight">Keep Notes & Scratchpad</h2>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Capture ideas, checklists, and quick architecture memos.
+          <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Notes & Memos</h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Minimalist scratchpad for thoughts, ideas, and directives.
           </p>
         </div>
 
         <button
-          onClick={() => setIsCreating(prev => !prev)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium bg-gradient-to-r from-amber-500 to-cyan-500 text-white hover:opacity-95 shadow-md transition-all self-start md:self-auto cursor-pointer"
+          onClick={() => setIsCreating(!isCreating)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity cursor-pointer shadow-2xs self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
-          <span>{isCreating ? 'Close Note Creator' : 'Take a Note'}</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>{isCreating ? 'Close' : 'New Note'}</span>
         </button>
       </div>
 
-      {/* Note Creation Card */}
+      {/* Note Creator Form */}
       {isCreating && (
-        <form onSubmit={handleSaveNote} className="rounded-2xl bg-slate-900/80 border border-slate-700 p-5 space-y-3 glass-panel glow-cyan max-w-2xl mx-auto">
-          <div className="flex items-center justify-between">
-            <input
-              type="text"
-              placeholder="Title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              className="w-full bg-transparent text-sm font-semibold text-white placeholder-slate-500 focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => setIsPinned(!isPinned)}
-              className={`p-1.5 rounded-lg transition-colors ${
-                isPinned ? 'text-amber-400 bg-amber-500/10' : 'text-slate-500 hover:text-slate-300'
-              }`}
-              title="Pin note"
-            >
-              <Pin className="w-4 h-4" />
-            </button>
-          </div>
-
+        <form onSubmit={handleSaveNote} className="p-5 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-2xs space-y-3">
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            className="w-full bg-transparent text-sm font-semibold text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none"
+          />
           <textarea
-            rows={4}
-            placeholder="Take a note, paste markdown, list tasks..."
+            rows={3}
+            placeholder="Take a note..."
             value={content}
             onChange={e => setContent(e.target.value)}
-            className="w-full bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none resize-none leading-relaxed"
+            className="w-full bg-transparent text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 focus:outline-none resize-none leading-relaxed"
           />
-
-          <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
-            <input
-              type="text"
-              placeholder="Tags (e.g. Ideas, Roadmap)"
-              value={tagsInput}
-              onChange={e => setTagsInput(e.target.value)}
-              className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 text-xs focus:outline-none w-48"
-            />
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsCreating(false)}
-                className="px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 transition-colors"
-              >
-                Save
-              </button>
-            </div>
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <button
+              type="button"
+              onClick={() => setIsCreating(false)}
+              className="px-3 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              Save Note
+            </button>
           </div>
         </form>
       )}
 
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
         <input
           type="text"
-          placeholder="Search notes and tags..."
+          placeholder="Search notes..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500"
+          className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none shadow-2xs"
         />
       </div>
 
       {/* Pinned Section */}
       {pinnedNotes.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-400">
-            <Pin className="w-3.5 h-3.5" />
-            <span>Pinned</span>
+          <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
+            Pinned
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {pinnedNotes.map(note => (
@@ -197,11 +147,11 @@ export const KeepNotesView: React.FC = () => {
         </div>
       )}
 
-      {/* Other Notes Section */}
+      {/* Other Notes */}
       <div className="space-y-3">
         {pinnedNotes.length > 0 && otherNotes.length > 0 && (
-          <div className="text-xs font-mono uppercase tracking-wider text-slate-500">
-            Others
+          <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">
+            All Notes
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -211,8 +161,8 @@ export const KeepNotesView: React.FC = () => {
         </div>
 
         {filteredNotes.length === 0 && (
-          <div className="text-center py-12 text-xs text-slate-500 font-mono">
-            No notes found. Create your first note above!
+          <div className="text-center py-12 text-xs text-zinc-400 dark:text-zinc-500">
+            No notes found.
           </div>
         )}
       </div>
@@ -226,43 +176,35 @@ const NoteCard: React.FC<{ note: KeepNote; onTogglePin: (n: KeepNote) => void; o
   onDelete
 }) => {
   return (
-    <div className="rounded-2xl bg-slate-900/70 border border-slate-800/90 p-4 space-y-3 glass-panel glass-panel-hover flex flex-col justify-between group">
+    <div className="p-4 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-2xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-all flex flex-col justify-between space-y-3 group">
       <div>
         <div className="flex items-start justify-between gap-2">
-          <h4 className="text-sm font-semibold text-white group-hover:text-amber-300 transition-colors">
+          <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
             {note.title}
           </h4>
           <button
             onClick={() => onTogglePin(note)}
-            className={`p-1 rounded transition-colors ${
-              note.isPinned ? 'text-amber-400' : 'text-slate-600 hover:text-slate-300 opacity-0 group-hover:opacity-100'
+            className={`p-1 rounded transition-colors cursor-pointer ${
+              note.isPinned ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-300 dark:text-zinc-600 opacity-0 group-hover:opacity-100'
             }`}
             title={note.isPinned ? 'Unpin' : 'Pin'}
           >
             <Pin className="w-3.5 h-3.5" />
           </button>
         </div>
-
-        <p className="text-xs text-slate-300 whitespace-pre-wrap leading-relaxed mt-2">
+        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-2 whitespace-pre-wrap leading-relaxed">
           {note.content}
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 text-[11px] text-slate-500">
-        <div className="flex flex-wrap gap-1">
-          {note.tags?.map((t, idx) => (
-            <span key={idx} className="px-2 py-0.5 rounded-full bg-slate-950 text-slate-400 border border-slate-800 text-[10px] font-mono">
-              #{t}
-            </span>
-          ))}
-        </div>
-
+      <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800/80 text-[10px] text-zinc-400">
+        <span>{new Date(note.createdAt).toLocaleDateString()}</span>
         <button
           onClick={() => onDelete(note.id)}
-          className="p-1 text-slate-500 hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-          title="Delete note"
+          className="p-1 text-zinc-400 hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          title="Delete"
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-3 h-3" />
         </button>
       </div>
     </div>

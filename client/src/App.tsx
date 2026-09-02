@@ -16,15 +16,15 @@ const MainContent: React.FC = () => {
   const { activeTab, isLoading } = useApp();
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#080c14] text-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
       <Sidebar />
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-radial from-slate-900/40 to-[#080c14]">
+        <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#09090b]">
           {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center space-y-3">
-              <div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-xs font-mono text-cyan-400">Initializing NAYRA Core Systems...</p>
+            <div className="h-full flex flex-col items-center justify-center space-y-2 text-zinc-400 dark:text-zinc-500">
+              <div className="w-6 h-6 border-2 border-zinc-900 dark:border-zinc-100 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-xs font-mono">Loading NAYRA...</p>
             </div>
           ) : (
             <>
@@ -34,11 +34,7 @@ const MainContent: React.FC = () => {
               {activeTab === 'pomodoro' && <PomodoroTimer />}
               {activeTab === 'nutrition' && <CalorieTracker />}
               {activeTab === 'keep' && <KeepNotesView />}
-              {activeTab === 'assistant' && (
-                <div className="p-6">
-                  <OverviewDashboard />
-                </div>
-              )}
+              {activeTab === 'assistant' && <OverviewDashboard />}
             </>
           )}
         </main>

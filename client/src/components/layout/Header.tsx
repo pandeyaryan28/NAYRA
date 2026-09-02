@@ -3,16 +3,18 @@ import { useApp } from '../../context/AppContext.js';
 import { 
   Search, 
   Command, 
-  Sparkles, 
+  Sun, 
+  Moon, 
   RefreshCw, 
-  CheckCircle2, 
-  Globe,
-  Bell
+  Sparkles,
+  CheckCircle2
 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export const Header: React.FC = () => {
   const { 
+    theme, 
+    toggleTheme, 
     authStatus, 
     isSyncing, 
     refreshAll, 
@@ -29,76 +31,76 @@ export const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className="h-16 bg-[#0c121e]/80 backdrop-blur-md border-b border-slate-800/80 px-6 flex items-center justify-between z-10">
-      {/* Search / Command Launcher Bar */}
-      <div className="flex items-center gap-4 w-96">
+    <header className="h-14 border-b border-zinc-200 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md px-6 flex items-center justify-between z-10 transition-colors duration-200">
+      {/* Left: Quick Search / Command Trigger */}
+      <div className="flex items-center gap-4">
         <button
           onClick={() => setIsCommandPaletteOpen(true)}
-          className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 text-slate-400 hover:text-slate-200 text-xs transition-all shadow-inner group"
+          className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 text-xs transition-all w-64 md:w-80 group cursor-pointer"
         >
-          <div className="flex items-center gap-2.5">
-            <Search className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400" />
-            <span>Search or trigger Nayra actions...</span>
-          </div>
-          <div className="flex items-center gap-1 font-mono text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 border border-slate-700">
+          <Search className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200" />
+          <span className="flex-1 text-left">Search or run command...</span>
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-500 dark:text-zinc-400 shadow-2xs">
             <Command className="w-2.5 h-2.5" /> K
-          </div>
+          </kbd>
         </button>
       </div>
 
-      {/* Center Live HUD Clock */}
-      <div className="hidden md:flex items-center gap-3 font-mono text-xs text-slate-400">
-        <span className="text-cyan-400 font-semibold">{format(currentTime, 'HH:mm:ss')}</span>
-        <span className="text-slate-600">|</span>
-        <span>{format(currentTime, 'EEEE, MMM do, yyyy')}</span>
+      {/* Center: Minimal HUD Date/Time */}
+      <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
+        <span>{format(currentTime, 'EEE, MMM d')}</span>
+        <span>•</span>
+        <span className="font-semibold text-zinc-800 dark:text-zinc-200">{format(currentTime, 'HH:mm:ss')}</span>
       </div>
 
-      {/* Right Actions & Account Status */}
-      <div className="flex items-center gap-3">
-        {/* Toast Notification Notification Pill */}
+      {/* Right: Actions, Theme Toggle & Account */}
+      <div className="flex items-center gap-2.5">
+        {/* Toast Notification */}
         {notification && (
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-cyan-950/80 text-cyan-300 border border-cyan-700/50 animate-bounce">
-            <Bell className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{notification.message}</span>
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 animate-fade-in">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="text-[11px] font-medium">{notification.message}</span>
           </div>
         )}
 
-        {/* Reload button */}
+        {/* Sync / Refresh */}
         <button
           onClick={refreshAll}
           title="Refresh Data"
-          className="p-2 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 border border-transparent hover:border-slate-700 transition-colors"
+          className="p-2 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
         >
-          <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-cyan-400' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-zinc-800 dark:text-zinc-200' : ''}`} />
         </button>
 
-        {/* Nayra AI Orb Trigger */}
+        {/* Dark / Light Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          className="p-2 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-zinc-700" />
+          )}
+        </button>
+
+        {/* Ask Nayra AI Trigger */}
         <button
           onClick={() => setIsNayraChatOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-purple-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-medium transition-all shadow-sm glow-cyan"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+          <Sparkles className="w-3.5 h-3.5" />
           <span>Ask Nayra</span>
         </button>
 
-        {/* Google User Status */}
-        <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-          <div className="relative">
-            <img
-              src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'}
-              alt="Commander"
-              className="w-8 h-8 rounded-full border border-cyan-500/50 bg-slate-800"
-            />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-900" title="Google Sync Active"></span>
-          </div>
-          <div className="hidden xl:block text-left">
-            <div className="text-xs font-medium text-slate-200 flex items-center gap-1">
-              {authStatus?.user?.name || 'Aryan Pandey'}
-            </div>
-            <div className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
-              <CheckCircle2 className="w-2.5 h-2.5" /> 2-Way Connected
-            </div>
-          </div>
+        {/* User Pill */}
+        <div className="flex items-center gap-2 pl-2 border-l border-zinc-200 dark:border-zinc-800">
+          <img
+            src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'}
+            alt="Commander"
+            className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700"
+          />
         </div>
       </div>
     </header>
