@@ -9,8 +9,7 @@ import {
   Flame, 
   StickyNote, 
   Bot, 
-  RefreshCw,
-  Globe
+  RefreshCw
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -32,25 +31,25 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-60 bg-zinc-50 dark:bg-[#0c0c0e] border-r border-zinc-200 dark:border-zinc-800/80 flex flex-col justify-between shrink-0 select-none z-20 transition-colors duration-200">
+    <aside className="w-60 bg-slate-50 dark:bg-[#0c0c0e] border-r border-slate-200 dark:border-zinc-800 flex flex-col justify-between shrink-0 select-none z-20 transition-colors duration-150">
       {/* Brand Header */}
       <div>
-        <div className="px-5 py-4 flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/80">
+        <div className="px-5 py-4 flex items-center justify-between border-b border-slate-200 dark:border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-md bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs tracking-tighter">
+            <div className="w-6 h-6 rounded-md bg-slate-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs tracking-tighter shadow-2xs">
               N
             </div>
-            <span className="font-semibold text-sm tracking-tight text-zinc-900 dark:text-zinc-100">
+            <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-zinc-100">
               NAYRA
             </span>
           </div>
-          <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400">
+          <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
             v1.0
           </span>
         </div>
 
         {/* Navigation List */}
-        <nav className="p-3 space-y-0.5">
+        <nav className="p-3 space-y-1">
           {navItems.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -60,16 +59,16 @@ export const Sidebar: React.FC = () => {
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-zinc-200/80 dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900/60'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white border border-slate-200/80 dark:border-zinc-700/50 shadow-2xs font-semibold'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-900/60'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 dark:text-zinc-500'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-zinc-500'}`} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
                     {item.badge}
                   </span>
                 )}
@@ -80,17 +79,17 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer / Sync Button */}
-      <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-2">
+      <div className="p-3 border-t border-slate-200 dark:border-zinc-800 space-y-2">
         <button
           onClick={syncGoogleTasks}
           disabled={isSyncing}
-          className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-colors cursor-pointer shadow-2xs"
+          className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 transition-colors cursor-pointer shadow-2xs"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400 ${isSyncing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-slate-500 dark:text-zinc-400 ${isSyncing ? 'animate-spin' : ''}`} />
           <span>{isSyncing ? 'Syncing...' : '2-Way Google Sync'}</span>
         </button>
 
-        <div className="flex items-center justify-between px-1 text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
+        <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             Cloud Synced

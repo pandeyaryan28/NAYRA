@@ -2,12 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext.js';
 import { TimeEntryLogger } from './TimeEntryLogger.js';
 import { 
-  Timer, 
   Play, 
   Pause, 
   RotateCcw, 
-  FastForward, 
-  History
+  FastForward
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 
@@ -91,35 +89,35 @@ export const PomodoroTimer: React.FC = () => {
   const totalFocusMinutes = todayLogs.reduce((acc, l) => acc + (l.durationMinutes || 0), 0);
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6 transition-colors duration-200">
+    <div className="p-8 max-w-6xl mx-auto space-y-6 transition-colors duration-150">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Focus & Pomodoro</h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">Focus & Pomodoro</h2>
+          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
             Minimalist distraction-free interval focus station.
           </p>
         </div>
 
-        <div className="px-3.5 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300">
+        <div className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-700 dark:text-zinc-300 shadow-2xs">
           <span>Today: </span>
-          <strong className="text-zinc-900 dark:text-zinc-100">{totalFocusMinutes} min</strong>
+          <strong className="text-slate-900 dark:text-zinc-100">{totalFocusMinutes} min</strong>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Minimalist Clock */}
-        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-8 shadow-2xs flex flex-col items-center justify-center space-y-8 min-h-[480px]">
+        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 p-8 shadow-2xs flex flex-col items-center justify-center space-y-8 min-h-[480px]">
           {/* Preset Switcher */}
-          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/50">
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/50">
             {(Object.keys(PRESETS) as SessionType[]).map(type => (
               <button
                 key={type}
                 onClick={() => setSessionType(type)}
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   sessionType === type
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-2xs font-semibold'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                    ? 'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 shadow-2xs font-semibold'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-zinc-200'
                 }`}
               >
                 {PRESETS[type].label}
@@ -132,7 +130,7 @@ export const PomodoroTimer: React.FC = () => {
             <select
               value={selectedTaskId}
               onChange={e => setSelectedTaskId(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none text-center"
+              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-700 dark:text-zinc-300 focus:outline-none text-center cursor-pointer"
             >
               <option value="">General Focus / Untracked</option>
               {tasks.filter(t => t.status !== 'completed').map(t => (
@@ -150,7 +148,7 @@ export const PomodoroTimer: React.FC = () => {
                 r="96"
                 stroke="currentColor"
                 strokeWidth="6"
-                className="text-zinc-100 dark:text-zinc-800/80 fill-transparent"
+                className="text-slate-100 dark:text-zinc-800/80 fill-transparent"
               />
               <circle
                 cx="112"
@@ -161,15 +159,15 @@ export const PomodoroTimer: React.FC = () => {
                 strokeDasharray={2 * Math.PI * 96}
                 strokeDashoffset={2 * Math.PI * 96 * (1 - progressPercent / 100)}
                 strokeLinecap="round"
-                className="text-zinc-900 dark:text-zinc-100 transition-all duration-300 fill-transparent"
+                className="text-slate-900 dark:text-zinc-100 transition-all duration-300 fill-transparent"
               />
             </svg>
 
             <div className="absolute flex flex-col items-center justify-center text-center">
-              <div className="text-4xl font-mono font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <div className="text-4xl font-mono font-bold tracking-tight text-slate-900 dark:text-zinc-100">
                 {minutesDisplay}:{secondsDisplay}
               </div>
-              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 dark:text-zinc-500 mt-1">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 dark:text-zinc-500 mt-1">
                 {sessionType.replace('_', ' ')}
               </span>
             </div>
@@ -179,7 +177,7 @@ export const PomodoroTimer: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={handleReset}
-              className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              className="p-3 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors cursor-pointer shadow-2xs"
               title="Reset"
             >
               <RotateCcw className="w-4 h-4" />
@@ -187,7 +185,7 @@ export const PomodoroTimer: React.FC = () => {
 
             <button
               onClick={() => setIsRunning(!isRunning)}
-              className="px-6 py-2.5 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-2"
+              className="px-6 py-2.5 rounded-lg bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-2 shadow-2xs"
             >
               {isRunning ? (
                 <>
@@ -202,7 +200,7 @@ export const PomodoroTimer: React.FC = () => {
 
             <button
               onClick={handleComplete}
-              className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              className="p-3 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors cursor-pointer shadow-2xs"
               title="Finish session"
             >
               <FastForward className="w-4 h-4" />
@@ -215,25 +213,25 @@ export const PomodoroTimer: React.FC = () => {
           <TimeEntryLogger />
 
           {/* History */}
-          <div className="p-6 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-2xs space-y-3">
+          <div className="p-6 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Recent Sessions</h3>
-              <span className="text-xs font-mono text-zinc-400">{timeLogs.length} total</span>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Recent Sessions</h3>
+              <span className="text-xs font-mono text-slate-400 dark:text-zinc-500">{timeLogs.length} total</span>
             </div>
 
             <div className="space-y-2 max-h-56 overflow-y-auto">
               {timeLogs.slice().reverse().slice(0, 5).map(log => (
                 <div
                   key={log.id}
-                  className="p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between text-xs"
+                  className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/60 dark:border-zinc-800/60 flex items-center justify-between text-xs"
                 >
-                  <span className="font-medium text-zinc-800 dark:text-zinc-200 truncate">{log.taskTitle || 'Focus'}</span>
-                  <span className="font-mono text-zinc-900 dark:text-zinc-100 font-semibold shrink-0">+{log.durationMinutes}m</span>
+                  <span className="font-medium text-slate-800 dark:text-zinc-200 truncate">{log.taskTitle || 'Focus'}</span>
+                  <span className="font-mono text-slate-900 dark:text-zinc-100 font-semibold shrink-0">+{log.durationMinutes}m</span>
                 </div>
               ))}
 
               {timeLogs.length === 0 && (
-                <div className="text-center py-6 text-xs text-zinc-400 dark:text-zinc-500">
+                <div className="text-center py-6 text-xs text-slate-400 dark:text-zinc-500">
                   No sessions logged yet.
                 </div>
               )}
