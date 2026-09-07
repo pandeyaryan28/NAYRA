@@ -1,7 +1,25 @@
 import type { Task, CalendarEvent } from '../types/index.js';
 import { nayraBackend } from './store.js';
 
-export const GOOGLE_CLIENT_ID = '595101892863-do2qv8thbu5fno4mbbchq4090stfl3de.apps.googleusercontent.com';
+export const DEFAULT_GOOGLE_CLIENT_ID = '595101892863-do2qv8thbu5fno4mbbchq4090stfl3de.apps.googleusercontent.com';
+
+export function getEffectiveClientId(): string {
+  try {
+    const custom = localStorage.getItem('nayra_google_client_id');
+    if (custom && custom.trim().length > 10) return custom.trim();
+  } catch {}
+  return DEFAULT_GOOGLE_CLIENT_ID;
+}
+
+export function setCustomClientId(clientId: string): void {
+  if (clientId && clientId.trim()) {
+    localStorage.setItem('nayra_google_client_id', clientId.trim());
+  } else {
+    localStorage.removeItem('nayra_google_client_id');
+  }
+}
+
+export const GOOGLE_CLIENT_ID = DEFAULT_GOOGLE_CLIENT_ID;
 
 export const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/tasks',
@@ -86,7 +104,7 @@ export class GoogleClientSyncService {
 
       try {
         const client = googleObj.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
+          client_id: getEffectiveClientId(),
           scope: GOOGLE_SCOPES,
           prompt: 'consent',
           callback: async (tokenResponse: any) => {

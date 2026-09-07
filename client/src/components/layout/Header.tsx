@@ -13,9 +13,12 @@ import {
   ExternalLink,
   LogOut,
   Key,
-  ShieldCheck
+  ShieldCheck,
+  Settings,
+  AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { getEffectiveClientId, setCustomClientId } from '../../services/googleClientSync.js';
 
 export const Header: React.FC = () => {
   const { 
@@ -32,15 +35,17 @@ export const Header: React.FC = () => {
     submitManualGoogleCode,
     setIsCommandPaletteOpen, 
     setIsNayraChatOpen,
-    notification
+    notification,
+    showToast
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [manualToken, setManualToken] = useState('');
   const [manualCode, setManualCode] = useState('');
+  const [customClientIdInput, setCustomClientIdInput] = useState(() => getEffectiveClientId());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [authTab, setAuthTab] = useState<'oneclick' | 'token' | 'code'>('oneclick');
+  const [authTab, setAuthTab] = useState<'oneclick' | 'token' | 'clientid'>('oneclick');
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -92,6 +97,15 @@ export const Header: React.FC = () => {
   const handleManualSync = async () => {
     await syncGoogleTasks();
     await syncGoogleCalendar();
+  };
+
+  const handleSaveClientId = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customClientIdInput.trim()) {
+      setCustomClientId(customClientIdInput.trim());
+      showToast('Saved Google OAuth Client ID!', 'success');
+      setAuthTab('oneclick');
+    }
   };
 
   return (
@@ -289,14 +303,14 @@ export const Header: React.FC = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setAuthTab('code')}
+                      onClick={() => setAuthTab('clientid')}
                       className={`flex-1 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer ${
-                        authTab === 'code'
+                        authTab === 'clientid'
                           ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xs'
                           : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
                       }`}
                     >
-                      OAuth Code
+                      Client ID
                     </button>
                   </div>
 
@@ -315,14 +329,19 @@ export const Header: React.FC = () => {
                         <span>{isSubmitting ? 'Opening Google...' : 'Sign in with Google'}</span>
                       </button>
 
-                      <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/40 text-[11px] text-sky-800 dark:text-sky-300">
-                        <p className="font-medium flex items-center gap-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                          <span>Authorized Origin Setup</span>
+                      {/* Error 401 Deleted Client / Setup Helper */}
+                      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 space-y-1.5">
+                        <div className="font-semibold flex items-center gap-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <span>Fixing "Error 401: deleted_client"</span>
+                        </div>
+                        <p className="text-[10px] leading-relaxed text-amber-700 dark:text-amber-400">
+                          If Google displays <em>"The OAuth client was deleted"</em>, your old GCP client ID was removed in Google Cloud Console.
                         </p>
-                        <p className="mt-1 text-[10px] leading-relaxed text-sky-700 dark:text-sky-400">
-                          If Google displays an origin mismatch, add <code className="px-1 py-0.5 rounded bg-sky-100 dark:bg-sky-900/60 font-mono text-[10px]">https://nayra-command-center.vercel.app</code> to <strong>Authorized JavaScript origins</strong> in Google Cloud Console, or use the <strong>Instant Token</strong> tab.
-                        </p>
+                        <div className="text-[10px] space-y-1 text-amber-900 dark:text-amber-200">
+                          <p>• <strong>Instant (0 setup):</strong> Open the <strong>Instant Token</strong> tab, paste an OAuth token from <a href="https://developers.google.com/oauthplayground" target="_blank" rel="noreferrer" className="underline font-semibold">Google OAuth Playground</a> with Tasks & Calendar scopes, and link instantly.</p>
+                          <p>• <strong>Permanent:</strong> Create an OAuth Client ID in your Google Cloud Console for project <code className="px-1 py-0.5 rounded bg-amber-200/60 dark:bg-amber-900/60 font-mono text-[10px]">nyra-ap28-2026</code>, paste it in the <strong>Client ID</strong> tab, and click Save!</p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -330,7 +349,7 @@ export const Header: React.FC = () => {
                   {authTab === 'token' && (
                     <form onSubmit={handleManualTokenSubmit} className="space-y-3">
                       <p className="text-slate-600 dark:text-zinc-400 text-[11px] leading-relaxed">
-                        Paste a valid Google OAuth Access Token (starts with <code className="font-mono text-[10px] bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">ya29...</code>) to link your account immediately:
+                        Paste a Google OAuth Access Token (starts with <code className="font-mono text-[10px] bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">ya29...</code>) to link your account immediately:
                       </p>
                       <div className="space-y-2">
                         <textarea
@@ -349,29 +368,40 @@ export const Header: React.FC = () => {
                           <span>{isSubmitting ? 'Verifying...' : 'Link with Access Token'}</span>
                         </button>
                       </div>
+                      <p className="text-[10px] text-slate-400 dark:text-zinc-500">
+                        Get a token in 30 seconds at <a href="https://developers.google.com/oauthplayground" target="_blank" rel="noreferrer" className="text-sky-500 underline">Google OAuth 2.0 Playground</a> with scopes for Tasks and Calendar.
+                      </p>
                     </form>
                   )}
 
-                  {authTab === 'code' && (
-                    <form onSubmit={handleManualCodeSubmit} className="space-y-3">
+                  {authTab === 'clientid' && (
+                    <form onSubmit={handleSaveClientId} className="space-y-3">
                       <p className="text-slate-600 dark:text-zinc-400 text-[11px] leading-relaxed">
-                        If running a backend callback or OAuth Playground, paste your Google OAuth authorization code:
+                        Update your active Google Cloud OAuth 2.0 Web Client ID:
                       </p>
-                      <div className="flex gap-2">
+                      <div className="space-y-2">
                         <input
                           type="text"
-                          value={manualCode}
-                          onChange={e => setManualCode(e.target.value)}
-                          placeholder="4/0AWtgzh..."
-                          className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-sky-500 font-mono"
+                          value={customClientIdInput}
+                          onChange={e => setCustomClientIdInput(e.target.value)}
+                          placeholder="...apps.googleusercontent.com"
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 font-mono focus:outline-hidden focus:ring-1 focus:ring-sky-500"
                         />
                         <button
                           type="submit"
-                          disabled={isSubmitting || !manualCode.trim()}
-                          className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-medium hover:bg-slate-300 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer text-xs"
+                          className="w-full py-2 px-3 rounded-lg bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-medium hover:opacity-90 transition-opacity cursor-pointer text-xs flex items-center justify-center gap-1.5"
                         >
-                          {isSubmitting ? 'Linking...' : 'Connect'}
+                          <Settings className="w-3.5 h-3.5" />
+                          <span>Save Client ID</span>
                         </button>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] text-slate-500 dark:text-zinc-400 space-y-1">
+                        <p className="font-semibold text-slate-700 dark:text-zinc-300">How to create a new Client ID in GCP (2 mins):</p>
+                        <p>1. Open Google Cloud Console &gt; APIs &amp; Services &gt; Credentials</p>
+                        <p>2. Select active project (e.g. <strong>nyra-ap28-2026</strong>)</p>
+                        <p>3. Click <strong>+ CREATE CREDENTIALS</strong> &gt; <strong>OAuth client ID</strong> &gt; <strong>Web application</strong></p>
+                        <p>4. Add Authorized Origin: <code className="font-mono text-sky-500">https://nayra-command-center.vercel.app</code></p>
+                        <p>5. Paste the new Client ID above and click Save!</p>
                       </div>
                     </form>
                   )}
