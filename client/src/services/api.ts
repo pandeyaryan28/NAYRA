@@ -11,16 +11,38 @@ import type {
   HabitStatsResponse
 } from '../types/index.js';
 import { nayraBackend } from './store.js';
+import { googleClientSync } from './googleClientSync.js';
 
 const API_BASE = '/api';
 
 export const api = {
   // --- Auth & Google Link ---
   async getAuthStatus() {
+    // 1. Client-side GIS Google Token
+    if (googleClientSync.isConnected()) {
+      const storedUser = googleClientSync.getStoredUser();
+      return {
+        authenticated: true,
+        isMock: false,
+        googleConnected: true,
+        googleConfigured: true,
+        user: {
+          name: storedUser?.name || 'Aryan Pandey',
+          email: storedUser?.email || 'aaryanpandey28@gmail.com',
+          picture: storedUser?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=AryanPandey'
+        }
+      };
+    }
+
+    // 2. Server-side session check if backend is running
     try {
       const res = await fetch(`${API_BASE}/auth/status`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        return data;
+      }
     } catch (e) {}
+
     return {
       authenticated: true,
       isMock: false,
@@ -28,10 +50,18 @@ export const api = {
       googleConfigured: true,
       user: {
         name: 'Aryan Pandey',
-        email: 'aryan@nayra.command',
-        picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'
+        email: 'aaryanpandey28@gmail.com',
+        picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=AryanPandey'
       }
     };
+  },
+
+  async connectGoogleGIS(): Promise<{ accessToken: string; user: any }> {
+    return await googleClientSync.promptGoogleLogin();
+  },
+
+  async connectGoogleManual(token: string): Promise<{ success: boolean; user: any }> {
+    return await googleClientSync.connectWithManualToken(token);
   },
 
   async getGoogleAuthUrl(): Promise<{ url?: string; error?: string }> {
@@ -61,15 +91,25 @@ export const api = {
   },
 
   async logoutGoogle() {
+    googleClientSync.disconnect();
     try {
-      const res = await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
-      if (res.ok) return await res.json();
+      await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
     } catch (e) {}
     return { success: true };
   },
 
   // --- Tasks ---
   async getTasks(): Promise<{ tasks: Task[] }> {
+    if (googleClientSync.isConnected()) {
+      try {
+        const googleTasks = await googleClientSync.fetchGoogleTasks();
+        if (googleTasks.length > 0 || !nayraBackend.getTasks().length) {
+          return { tasks: googleTasks };
+        }
+      } catch (err) {
+        console.warn('Could not fetch from Google Tasks API, using cached tasks:', err);
+      }
+    }
     try {
       const res = await fetch(`${API_BASE}/tasks`);
       if (res.ok) return await res.json();
@@ -78,18 +118,29 @@ export const api = {
   },
 
   async createTask(task: Partial<Task>): Promise<{ task: Task }> {
+    let googleTaskItem: Task | null = null;
+    if (googleClientSync.isConnected()) {
+      googleTaskItem = await googleClientSync.createGoogleTask(task);
+    }
+    const finalData = googleTaskItem ? { ...task, ...googleTaskItem } : task;
     try {
       const res = await fetch(`${API_BASE}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task)
+        body: JSON.stringify(finalData)
       });
       if (res.ok) return await res.json();
     } catch (e) {}
-    return { task: nayraBackend.createTask(task) };
+    return { task: nayraBackend.createTask(finalData) };
   },
 
   async updateTask(id: string, task: Partial<Task>): Promise<{ task: Task }> {
+    const existing = nayraBackend.getTasks().find(t => t.id === id);
+    const googleId = task.googleTaskId || existing?.googleTaskId;
+    const taskListId = task.googleTaskListId || existing?.googleTaskListId || '@default';
+    if (googleClientSync.isConnected() && googleId) {
+      googleClientSync.updateGoogleTask(googleId, task, taskListId).catch(() => {});
+    }
     try {
       const res = await fetch(`${API_BASE}/tasks/${id}`, {
         method: 'PUT',
@@ -102,6 +153,10 @@ export const api = {
   },
 
   async deleteTask(id: string): Promise<{ success: boolean }> {
+    const existing = nayraBackend.getTasks().find(t => t.id === id);
+    if (googleClientSync.isConnected() && existing?.googleTaskId) {
+      googleClientSync.deleteGoogleTask(existing.googleTaskId, existing.googleTaskListId || '@default').catch(() => {});
+    }
     try {
       const res = await fetch(`${API_BASE}/tasks/${id}`, { method: 'DELETE' });
       if (res.ok) return await res.json();
@@ -110,16 +165,44 @@ export const api = {
   },
 
   async syncTasks(): Promise<{ success: boolean; syncedCount: number; message: string; tasks?: Task[] }> {
+    if (googleClientSync.isConnected()) {
+      try {
+        const tasks = await googleClientSync.fetchGoogleTasks();
+        return {
+          success: true,
+          syncedCount: tasks.length,
+          message: `Synchronized ${tasks.length} live Google Tasks.`,
+          tasks
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          syncedCount: 0,
+          message: `Google Tasks sync error: ${err.message}`,
+          tasks: nayraBackend.getTasks()
+        };
+      }
+    }
     try {
       const res = await fetch(`${API_BASE}/tasks/sync`, { method: 'POST' });
       if (res.ok) return await res.json();
     } catch (e) {}
     const tasks = nayraBackend.getTasks();
-    return { success: true, syncedCount: tasks.length, message: `Local snapshot synchronized.`, tasks };
+    return { success: true, syncedCount: tasks.length, message: `Tasks up to date.`, tasks };
   },
 
   // --- Calendar ---
   async getCalendarEvents(): Promise<{ events: CalendarEvent[] }> {
+    if (googleClientSync.isConnected()) {
+      try {
+        const googleEvents = await googleClientSync.fetchGoogleCalendarEvents();
+        if (googleEvents.length > 0 || !nayraBackend.getCalendarEvents().length) {
+          return { events: googleEvents };
+        }
+      } catch (err) {
+        console.warn('Could not fetch from Google Calendar API, using cached events:', err);
+      }
+    }
     try {
       const res = await fetch(`${API_BASE}/calendar`);
       if (res.ok) return await res.json();
@@ -128,15 +211,20 @@ export const api = {
   },
 
   async createCalendarEvent(event: Partial<CalendarEvent>): Promise<{ event: CalendarEvent }> {
+    let googleEventItem: CalendarEvent | null = null;
+    if (googleClientSync.isConnected()) {
+      googleEventItem = await googleClientSync.createGoogleEvent(event);
+    }
+    const finalData = googleEventItem ? { ...event, ...googleEventItem } : event;
     try {
       const res = await fetch(`${API_BASE}/calendar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(event)
+        body: JSON.stringify(finalData)
       });
       if (res.ok) return await res.json();
     } catch (e) {}
-    return { event: nayraBackend.createCalendarEvent(event) };
+    return { event: nayraBackend.createCalendarEvent(finalData) };
   },
 
   async updateCalendarEvent(id: string, event: Partial<CalendarEvent>): Promise<{ event: CalendarEvent }> {
@@ -152,6 +240,10 @@ export const api = {
   },
 
   async deleteCalendarEvent(id: string): Promise<{ success: boolean }> {
+    const existing = nayraBackend.getCalendarEvents().find(e => e.id === id);
+    if (googleClientSync.isConnected() && existing?.googleEventId) {
+      googleClientSync.deleteGoogleEvent(existing.googleEventId).catch(() => {});
+    }
     try {
       const res = await fetch(`${API_BASE}/calendar/${id}`, { method: 'DELETE' });
       if (res.ok) return await res.json();
@@ -160,12 +252,30 @@ export const api = {
   },
 
   async syncCalendar(): Promise<{ success: boolean; syncedCount: number; message: string; events?: CalendarEvent[] }> {
+    if (googleClientSync.isConnected()) {
+      try {
+        const events = await googleClientSync.fetchGoogleCalendarEvents();
+        return {
+          success: true,
+          syncedCount: events.length,
+          message: `Synchronized ${events.length} live Google Calendar events.`,
+          events
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          syncedCount: 0,
+          message: `Google Calendar sync error: ${err.message}`,
+          events: nayraBackend.getCalendarEvents()
+        };
+      }
+    }
     try {
       const res = await fetch(`${API_BASE}/calendar/sync`, { method: 'POST' });
       if (res.ok) return await res.json();
     } catch (e) {}
     const events = nayraBackend.getCalendarEvents();
-    return { success: true, syncedCount: events.length, message: `Local snapshot synchronized.`, events };
+    return { success: true, syncedCount: events.length, message: `Calendar up to date.`, events };
   },
 
   // --- Habits ---
@@ -174,7 +284,7 @@ export const api = {
       const res = await fetch(`${API_BASE}/habits`);
       if (res.ok) return await res.json();
     } catch (e) {}
-    return { habits: [] };
+    return { habits: nayraBackend.getHabits() };
   },
 
   async createHabit(habit: Partial<Habit>): Promise<{ habit: Habit }> {
@@ -186,7 +296,7 @@ export const api = {
       });
       if (res.ok) return await res.json();
     } catch (e) {}
-    throw new Error('Failed to create habit');
+    return { habit: nayraBackend.createHabit(habit) };
   },
 
   async updateHabit(id: string, habit: Partial<Habit>): Promise<{ habit: Habit }> {
@@ -198,7 +308,7 @@ export const api = {
       });
       if (res.ok) return await res.json();
     } catch (e) {}
-    throw new Error('Failed to update habit');
+    return { habit: nayraBackend.updateHabit(id, habit) };
   },
 
   async toggleHabit(id: string, date?: string): Promise<{ success: boolean; habit: Habit; isCompletedToday: boolean }> {
@@ -210,7 +320,7 @@ export const api = {
       });
       if (res.ok) return await res.json();
     } catch (e) {}
-    throw new Error('Failed to toggle habit');
+    return nayraBackend.toggleHabit(id, date);
   },
 
   async deleteHabit(id: string): Promise<{ success: boolean }> {
@@ -218,7 +328,7 @@ export const api = {
       const res = await fetch(`${API_BASE}/habits/${id}`, { method: 'DELETE' });
       if (res.ok) return await res.json();
     } catch (e) {}
-    return { success: false };
+    return { success: nayraBackend.deleteHabit(id) };
   },
 
   async getHabitsStats(): Promise<HabitStatsResponse> {
@@ -226,14 +336,7 @@ export const api = {
       const res = await fetch(`${API_BASE}/habits/stats`);
       if (res.ok) return await res.json();
     } catch (e) {}
-    return {
-      totalHabits: 0,
-      completedTodayCount: 0,
-      completionRateToday: 0,
-      bestActiveStreak: 0,
-      overallBestStreak: 0,
-      habits: []
-    };
+    return nayraBackend.getHabitsStats();
   },
 
   // --- Keep Notes ---
@@ -405,6 +508,7 @@ export const api = {
     const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
     const pendingTasks = tasks.filter(t => t.status === 'todo').length;
     const urgentTasks = tasks.filter(t => t.priority === 'urgent').length;
+    const habitStats = nayraBackend.getHabitsStats();
 
     return {
       tasks: {
@@ -424,10 +528,10 @@ export const api = {
         pinnedNotes: notes.filter(n => n.isPinned).length
       },
       habits: {
-        total: 0,
-        completedToday: 0,
-        completionRate: 0,
-        bestStreak: 0
+        total: habitStats.totalHabits,
+        completedToday: habitStats.completedTodayCount,
+        completionRate: habitStats.completionRateToday,
+        bestStreak: habitStats.bestActiveStreak
       },
       pomodoro: {
         focusMinutesToday,

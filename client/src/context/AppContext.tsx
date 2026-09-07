@@ -37,6 +37,8 @@ interface AppContextType {
   syncGoogleTasks: () => Promise<void>;
   syncGoogleCalendar: () => Promise<void>;
   connectGoogle: () => Promise<void>;
+  connectGoogleManual: (token: string) => Promise<void>;
+  disconnectGoogle: () => Promise<void>;
   submitManualGoogleCode: (code: string) => Promise<void>;
   toggleHabit: (id: string, date?: string) => Promise<void>;
   createHabit: (habit: Partial<Habit>) => Promise<void>;
@@ -147,15 +149,47 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const connectGoogle = async () => {
     try {
+      // 1. Direct browser Google Identity Services popup
+      try {
+        const { user } = await api.connectGoogleGIS();
+        showToast(`Google connected as ${user.email}! Syncing live tasks & calendar...`, 'success');
+        await refreshAll();
+        return;
+      } catch (gisErr: any) {
+        console.warn('GIS popup note:', gisErr);
+        if (gisErr?.message && !gisErr.message.includes('initializing')) {
+          showToast(gisErr.message, 'warning');
+          return;
+        }
+      }
+
+      // 2. Fallback to server auth URL if server is configured
       const res = await api.getGoogleAuthUrl();
       if (res.url) {
         window.location.href = res.url;
       } else {
-        showToast(res.error || 'Could not generate Google login URL', 'error');
+        showToast('Click Connect Google to sign in, or paste an Access Token directly.', 'info');
       }
     } catch (e: any) {
-      showToast(e.message || 'Error initiating Google link', 'error');
+      showToast(e.message || 'Error connecting Google account', 'error');
     }
+  };
+
+  const connectGoogleManual = async (token: string) => {
+    try {
+      const res = await api.connectGoogleManual(token);
+      showToast(`Google Account linked: ${res.user.email}!`, 'success');
+      await refreshAll();
+    } catch (e: any) {
+      showToast(e.message || 'Invalid or expired Google token', 'error');
+      throw e;
+    }
+  };
+
+  const disconnectGoogle = async () => {
+    await api.logoutGoogle();
+    showToast('Google Account disconnected.', 'info');
+    await refreshAll();
   };
 
   const submitManualGoogleCode = async (code: string) => {
@@ -275,6 +309,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         syncGoogleTasks,
         syncGoogleCalendar,
         connectGoogle,
+        connectGoogleManual,
+        disconnectGoogle,
         submitManualGoogleCode,
         toggleHabit,
         createHabit,

@@ -108,20 +108,29 @@ export const Sidebar: React.FC = () => {
       {/* Footer / Sync Button & Google Ecosystem Status */}
       <div className="p-3 border-t border-slate-200 dark:border-zinc-800 space-y-2">
         <button
-          onClick={handleSyncAll}
+          onClick={authStatus?.googleConnected ? handleSyncAll : connectGoogle}
           disabled={isSyncing}
           className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 transition-colors cursor-pointer shadow-2xs"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-slate-500 dark:text-zinc-400 ${isSyncing ? 'animate-spin' : ''}`} />
-          <span>{isSyncing ? 'Syncing...' : '2-Way Google Sync'}</span>
+          {authStatus?.googleConnected ? (
+            <>
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-500 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>{isSyncing ? 'Syncing...' : 'Sync Google Cloud'}</span>
+            </>
+          ) : (
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span>Connect Google</span>
+            </>
+          )}
         </button>
 
         <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
           <span className="flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${authStatus?.googleConnected ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'}`} />
-            <span>{authStatus?.googleConnected ? 'Google Cloud Active' : 'Persistent Backend Active'}</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${authStatus?.googleConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+            <span>{authStatus?.googleConnected ? 'Google Cloud Active' : 'Standalone'}</span>
           </span>
-          <span>v1.1</span>
+          <span>v1.2</span>
         </div>
       </div>
     </aside>

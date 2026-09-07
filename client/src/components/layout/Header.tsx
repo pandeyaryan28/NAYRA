@@ -10,7 +10,10 @@ import {
   Link as LinkIcon,
   CheckCircle2,
   X,
-  ExternalLink
+  ExternalLink,
+  LogOut,
+  Key,
+  ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -22,6 +25,10 @@ export const Header: React.FC = () => {
     isSyncing, 
     refreshAll, 
     connectGoogle,
+    connectGoogleManual,
+    disconnectGoogle,
+    syncGoogleTasks,
+    syncGoogleCalendar,
     submitManualGoogleCode,
     setIsCommandPaletteOpen, 
     setIsNayraChatOpen,
@@ -30,26 +37,61 @@ export const Header: React.FC = () => {
 
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
+  const [manualToken, setManualToken] = useState('');
   const [manualCode, setManualCode] = useState('');
-  const [isSubmittingCode, setIsSubmittingCode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authTab, setAuthTab] = useState<'oneclick' | 'token' | 'code'>('oneclick');
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  const handleOneClickConnect = async () => {
+    setIsSubmitting(true);
+    try {
+      await connectGoogle();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleManualTokenSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualToken.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await connectGoogleManual(manualToken.trim());
+      setManualToken('');
+      setIsGoogleModalOpen(false);
+    } catch (e) {
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleManualCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualCode.trim()) return;
-    setIsSubmittingCode(true);
+    setIsSubmitting(true);
     try {
       await submitManualGoogleCode(manualCode.trim());
       setManualCode('');
       setIsGoogleModalOpen(false);
     } catch (e) {
     } finally {
-      setIsSubmittingCode(false);
+      setIsSubmitting(false);
     }
+  };
+
+  const handleDisconnect = async () => {
+    await disconnectGoogle();
+    setIsGoogleModalOpen(false);
+  };
+
+  const handleManualSync = async () => {
+    await syncGoogleTasks();
+    await syncGoogleCalendar();
   };
 
   return (
@@ -171,63 +213,168 @@ export const Header: React.FC = () => {
 
             <div className="p-5 space-y-4 text-xs">
               {authStatus?.googleConnected ? (
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-emerald-800 dark:text-emerald-300">
-                        Google Account Connected
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 flex items-start gap-3">
+                    <img
+                      src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=AryanPandey'}
+                      alt="Google User"
+                      className="w-10 h-10 rounded-full border border-emerald-300 dark:border-emerald-700 mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <p className="font-semibold text-emerald-900 dark:text-emerald-200 text-xs">
+                          {authStatus?.user?.name || 'Google Connected'}
+                        </p>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono truncate mt-0.5">
+                        {authStatus?.user?.email || 'aaryanpandey28@gmail.com'}
                       </p>
-                      <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5">
-                        Connected as <span className="font-mono">{authStatus?.user?.email || 'aryan@nayra.command'}</span>. 2-way sync with Google Tasks and Google Calendar is active.
+                      <p className="text-[10px] text-emerald-600/80 dark:text-emerald-500 mt-1">
+                        ✓ 2-Way Google Tasks & Calendar Sync Active
                       </p>
                     </div>
                   </div>
-                  <p className="text-slate-500 dark:text-zinc-400">
-                    All new tasks and calendar events created in Nayra are automatically mirrored to Google Cloud, and remote updates are pulled on sync.
+
+                  <p className="text-slate-500 dark:text-zinc-400 text-[11px] leading-relaxed">
+                    All tasks and calendar events created or updated in Nayra are synchronized with your real Google account in real time.
                   </p>
+
+                  <div className="pt-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleManualSync}
+                      disabled={isSyncing}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 font-medium transition-colors cursor-pointer text-xs"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                      <span>{isSyncing ? 'Syncing...' : 'Sync Now'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleDisconnect}
+                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 font-medium border border-rose-200 dark:border-rose-800/40 transition-colors cursor-pointer text-xs"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Disconnect</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-slate-600 dark:text-zinc-400">
-                    Link your actual Google Account to enable continuous 2-way synchronization with <span className="font-semibold text-slate-800 dark:text-zinc-200">Google Tasks</span> and <span className="font-semibold text-slate-800 dark:text-zinc-200">Google Calendar</span>.
-                  </p>
-
-                  <button
-                    onClick={connectGoogle}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-medium hover:opacity-90 transition-opacity cursor-pointer shadow-2xs"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Authorize with Google Account</span>
-                  </button>
-
-                  <div className="relative flex py-1 items-center">
-                    <div className="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
-                    <span className="flex-shrink mx-3 text-[10px] font-mono text-slate-400 dark:text-zinc-500 uppercase">Or manual authorization code</span>
-                    <div className="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
+                  {/* Tab switch */}
+                  <div className="flex p-0.5 bg-slate-100 dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800">
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('oneclick')}
+                      className={`flex-1 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer ${
+                        authTab === 'oneclick'
+                          ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xs'
+                          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      1-Click Sign-In
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('token')}
+                      className={`flex-1 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer ${
+                        authTab === 'token'
+                          ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xs'
+                          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      Instant Token
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('code')}
+                      className={`flex-1 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer ${
+                        authTab === 'code'
+                          ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xs'
+                          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      OAuth Code
+                    </button>
                   </div>
 
-                  <form onSubmit={handleManualCodeSubmit} className="space-y-2">
-                    <label className="block text-[11px] text-slate-500 dark:text-zinc-400">
-                      Paste OAuth authorization code:
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={manualCode}
-                        onChange={e => setManualCode(e.target.value)}
-                        placeholder="4/0AWtgzh..."
-                        className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
-                      />
+                  {authTab === 'oneclick' && (
+                    <div className="space-y-3">
+                      <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                        Sign in directly with your Google account to grant access to <span className="font-semibold text-slate-800 dark:text-zinc-200">Google Tasks</span> and <span className="font-semibold text-slate-800 dark:text-zinc-200">Google Calendar</span>.
+                      </p>
+
                       <button
-                        type="submit"
-                        disabled={isSubmittingCode || !manualCode.trim()}
-                        className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-medium hover:bg-slate-300 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer"
+                        onClick={handleOneClickConnect}
+                        disabled={isSubmitting}
+                        className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-lg bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-medium hover:opacity-90 transition-opacity cursor-pointer shadow-2xs text-xs"
                       >
-                        {isSubmittingCode ? 'Linking...' : 'Connect'}
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{isSubmitting ? 'Opening Google...' : 'Sign in with Google'}</span>
                       </button>
+
+                      <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/40 text-[11px] text-sky-800 dark:text-sky-300">
+                        <p className="font-medium flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                          <span>Authorized Origin Setup</span>
+                        </p>
+                        <p className="mt-1 text-[10px] leading-relaxed text-sky-700 dark:text-sky-400">
+                          If Google displays an origin mismatch, add <code className="px-1 py-0.5 rounded bg-sky-100 dark:bg-sky-900/60 font-mono text-[10px]">https://nayra-command-center.vercel.app</code> to <strong>Authorized JavaScript origins</strong> in Google Cloud Console, or use the <strong>Instant Token</strong> tab.
+                        </p>
+                      </div>
                     </div>
-                  </form>
+                  )}
+
+                  {authTab === 'token' && (
+                    <form onSubmit={handleManualTokenSubmit} className="space-y-3">
+                      <p className="text-slate-600 dark:text-zinc-400 text-[11px] leading-relaxed">
+                        Paste a valid Google OAuth Access Token (starts with <code className="font-mono text-[10px] bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">ya29...</code>) to link your account immediately:
+                      </p>
+                      <div className="space-y-2">
+                        <textarea
+                          rows={3}
+                          value={manualToken}
+                          onChange={e => setManualToken(e.target.value)}
+                          placeholder="ya29.a0AcM612..."
+                          className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 font-mono focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                        />
+                        <button
+                          type="submit"
+                          disabled={isSubmitting || !manualToken.trim()}
+                          className="w-full py-2 px-3 rounded-lg bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-medium hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                        >
+                          <Key className="w-3.5 h-3.5" />
+                          <span>{isSubmitting ? 'Verifying...' : 'Link with Access Token'}</span>
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {authTab === 'code' && (
+                    <form onSubmit={handleManualCodeSubmit} className="space-y-3">
+                      <p className="text-slate-600 dark:text-zinc-400 text-[11px] leading-relaxed">
+                        If running a backend callback or OAuth Playground, paste your Google OAuth authorization code:
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={manualCode}
+                          onChange={e => setManualCode(e.target.value)}
+                          placeholder="4/0AWtgzh..."
+                          className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-sky-500 font-mono"
+                        />
+                        <button
+                          type="submit"
+                          disabled={isSubmitting || !manualCode.trim()}
+                          className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-medium hover:bg-slate-300 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer text-xs"
+                        >
+                          {isSubmitting ? 'Linking...' : 'Connect'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               )}
             </div>

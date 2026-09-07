@@ -6,7 +6,9 @@ import type {
   MealEntry, 
   DailyNutritionTarget, 
   NutritionSummaryResponse,
-  OverviewStats
+  OverviewStats,
+  Habit,
+  HabitStatsResponse
 } from '../types/index.js';
 import { parseAndEstimateMeal } from './nutritionEngine.js';
 
@@ -18,7 +20,8 @@ const STORAGE_KEYS = {
   MEALS: 'nayra_meals',
   TARGET: 'nayra_nutrition_target',
   WATER: 'nayra_water_intake',
-  AUTH: 'nayra_auth_status'
+  AUTH: 'nayra_auth_status',
+  HABITS: 'nayra_habits'
 };
 
 function getStored<T>(key: string, defaultVal: T): T {
@@ -42,123 +45,72 @@ function setStored<T>(key: string, val: T): void {
 const nowStr = new Date().toISOString();
 const todayDateStr = nowStr.split('T')[0];
 
-// Initial starter seed data
-const INITIAL_TASKS: Task[] = [
-  {
-    id: 't-1',
-    title: 'Review Q3 Engineering Roadmap & Priorities',
-    status: 'in_progress',
-    priority: 'urgent',
-    dueDate: todayDateStr,
-    notes: 'Prioritize architecture scaling, multi-agent pipelines, and zero-latency latency targets.',
-    createdAt: nowStr,
-    updatedAt: nowStr
-  },
-  {
-    id: 't-2',
-    title: 'Deploy NAYRA Personal Command Center',
-    status: 'completed',
-    priority: 'high',
-    dueDate: todayDateStr,
-    completedAt: nowStr,
-    createdAt: nowStr,
-    updatedAt: nowStr
-  },
-  {
-    id: 't-3',
-    title: 'Sync Google Workspace, Tasks & Calendar endpoints',
-    status: 'todo',
-    priority: 'high',
-    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    createdAt: nowStr,
-    updatedAt: nowStr
-  },
-  {
-    id: 't-4',
-    title: 'Morning 5km Run & Protein Intake',
-    status: 'completed',
-    priority: 'medium',
-    dueDate: todayDateStr,
-    completedAt: nowStr,
-    createdAt: nowStr,
-    updatedAt: nowStr
-  }
-];
+// Clean initial state without dummy data
+const INITIAL_TASKS: Task[] = [];
+const INITIAL_EVENTS: CalendarEvent[] = [];
+const INITIAL_NOTES: KeepNote[] = [];
+const INITIAL_LOGS: TimeLog[] = [];
+const INITIAL_MEALS: MealEntry[] = [];
 
-const INITIAL_EVENTS: CalendarEvent[] = [
-  {
-    id: 'ev-1',
-    title: 'Daily Command Briefing & Alignment',
-    startTime: `${todayDateStr}T09:30:00Z`,
-    endTime: `${todayDateStr}T10:00:00Z`,
-    isAllDay: false,
-    meetLink: 'https://meet.google.com/nayra-command',
-    location: 'Remote',
-    createdAt: nowStr,
-    updatedAt: nowStr
-  },
-  {
-    id: 'ev-2',
-    title: 'Deep Work: Core Architecture Design',
-    startTime: `${todayDateStr}T14:00:00Z`,
-    endTime: `${todayDateStr}T16:30:00Z`,
-    isAllDay: false,
-    location: 'Office Desk',
-    createdAt: nowStr,
-    updatedAt: nowStr
-  }
-];
+// Automated cleanup routine to guarantee zero dummy data survives from past sessions
+export function purgeDummyData() {
+  const DUMMY_IDS = new Set([
+    't-1', 't-2', 't-3', 't-4',
+    'task-1', 'task-2', 'task-3',
+    'ev-1', 'ev-2', 'event-1',
+    'note-1', 'time-1', 'meal-1',
+    'habit-1', 'habit-2', 'habit-3', 'habit-4',
+    'proj-1', 'proj-2'
+  ]);
 
-const INITIAL_NOTES: KeepNote[] = [
-  {
-    id: 'n-1',
-    title: 'NAYRA Directives & Architecture',
-    content: '1. Ultra-minimalist interface with zero clutter.\n2. Instant two-way Google Tasks & Calendar sync.\n3. Automatic Antigravity natural language nutrition calculation.\n4. Precision Pomodoro interval tracker.',
-    isPinned: true,
-    isArchived: false,
-    createdAt: nowStr,
-    updatedAt: nowStr
-  }
-];
+  const DUMMY_KEYWORDS = [
+    'Complete Full-Stack Backend',
+    'Review Upcoming Google Calendar Events',
+    'Maintain Daily Habit Streaks',
+    'Nayra Core System Standup',
+    'Nayra Architecture & Directives',
+    'Morning Meditation & Breathing',
+    'Hydration Target (3 Liters)',
+    'Deep Work Focus Block (90m)',
+    'Evening Physical Training / Gym',
+    'Boiled Eggs',
+    'Whole Grain Toast with Butter',
+    'Implementing persistent backend storage'
+  ];
 
-const INITIAL_LOGS: TimeLog[] = [
-  {
-    id: 'log-1',
-    taskId: 't-1',
-    taskTitle: 'Review Q3 Engineering Roadmap',
-    durationMinutes: 50,
-    sessionType: 'pomodoro',
-    timestamp: nowStr
-  },
-  {
-    id: 'log-2',
-    taskId: 't-2',
-    taskTitle: 'Deploy NAYRA Command Center',
-    durationMinutes: 25,
-    sessionType: 'pomodoro',
-    timestamp: nowStr
-  }
-];
+  const isDummy = (item: any) => {
+    if (!item || typeof item !== 'object') return false;
+    if (item.id && DUMMY_IDS.has(item.id)) return true;
+    const text = `${item.title || ''} ${item.content || ''} ${item.rawText || ''} ${item.notes || ''}`;
+    return DUMMY_KEYWORDS.some(keyword => text.toLowerCase().includes(keyword.toLowerCase()));
+  };
 
-const INITIAL_MEALS: MealEntry[] = [
-  {
-    id: 'm-1',
-    mealType: 'breakfast',
-    date: todayDateStr,
-    rawText: '2 boiled eggs, whole wheat toast with butter, and black coffee',
-    items: [
-      { name: '2 boiled eggs', quantity: '2 piece', calories: 156, protein: 12.6, carbs: 1.2, fat: 10.6 },
-      { name: 'Whole wheat toast with butter', quantity: '1 slice', calories: 182, protein: 3.6, carbs: 14.0, fat: 12.5 },
-      { name: 'Black coffee', quantity: '1 cup', calories: 5, protein: 0.3, carbs: 0.0, fat: 0.0 }
-    ],
-    totalCalories: 343,
-    totalProtein: 16.5,
-    totalCarbs: 15.2,
-    totalFat: 23.1,
-    source: 'antigravity',
-    timestamp: nowStr
+  try {
+    const cleanKey = (key: string) => {
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter(item => !isDummy(item));
+          localStorage.setItem(key, JSON.stringify(cleaned));
+        }
+      } catch {}
+    };
+
+    cleanKey(STORAGE_KEYS.TASKS);
+    cleanKey(STORAGE_KEYS.EVENTS);
+    cleanKey(STORAGE_KEYS.NOTES);
+    cleanKey(STORAGE_KEYS.LOGS);
+    cleanKey(STORAGE_KEYS.MEALS);
+    cleanKey('nayra_habits');
+  } catch (e) {
+    console.warn('Error purging legacy dummy data:', e);
   }
-];
+}
+
+// Execute purge immediately
+purgeDummyData();
 
 const INITIAL_TARGET: DailyNutritionTarget = {
   date: todayDateStr,
@@ -166,10 +118,28 @@ const INITIAL_TARGET: DailyNutritionTarget = {
   targetProtein: 140,
   targetCarbs: 220,
   targetFat: 65,
-  waterIntakeMl: 1250
+  waterIntakeMl: 0
 };
 
 export class NayraLocalBackend {
+  public setTasksDirectly(tasks: Task[]): void {
+    setStored(STORAGE_KEYS.TASKS, tasks);
+  }
+
+  public setCalendarEventsDirectly(events: CalendarEvent[]): void {
+    setStored(STORAGE_KEYS.EVENTS, events);
+  }
+
+  public clearAllData(): void {
+    localStorage.removeItem(STORAGE_KEYS.TASKS);
+    localStorage.removeItem(STORAGE_KEYS.EVENTS);
+    localStorage.removeItem(STORAGE_KEYS.NOTES);
+    localStorage.removeItem(STORAGE_KEYS.LOGS);
+    localStorage.removeItem(STORAGE_KEYS.MEALS);
+    localStorage.removeItem(STORAGE_KEYS.WATER);
+    localStorage.removeItem('nayra_habits');
+  }
+
   // Tasks
   public getTasks(): Task[] {
     return getStored<Task[]>(STORAGE_KEYS.TASKS, INITIAL_TASKS);
@@ -447,6 +417,154 @@ export class NayraLocalBackend {
       pendingTasksCount: pendingTasks.length,
       todayEventsCount: todayEvents.length,
       consumedCalories: nut.summary.consumedCalories
+    };
+  }
+
+  // Habits
+  public getHabits(): Habit[] {
+    return getStored<Habit[]>(STORAGE_KEYS.HABITS, []);
+  }
+
+  private calculateHabitStreak(completedDates: string[], existingBest: number = 0): { streak: number; bestStreak: number } {
+    if (!completedDates || completedDates.length === 0) {
+      return { streak: 0, bestStreak: existingBest };
+    }
+    const dateSet = new Set(completedDates);
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    let currentStreak = 0;
+    let checkDate = new Date(today);
+
+    if (dateSet.has(todayStr)) {
+      currentStreak = 1;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else if (dateSet.has(yesterdayStr)) {
+      currentStreak = 1;
+      checkDate = new Date(yesterday);
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    if (currentStreak > 0) {
+      while (true) {
+        const dStr = checkDate.toISOString().split('T')[0];
+        if (dateSet.has(dStr)) {
+          currentStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    const bestStreak = Math.max(existingBest || 0, currentStreak);
+    return { streak: currentStreak, bestStreak };
+  }
+
+  public createHabit(data: Partial<Habit>): Habit {
+    const habits = this.getHabits();
+    const curTime = new Date().toISOString();
+    const newHabit: Habit = {
+      id: `habit-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      title: data.title || 'Untitled Habit',
+      description: data.description || '',
+      category: data.category || 'health',
+      frequency: data.frequency || 'daily',
+      targetDaysPerWeek: data.targetDaysPerWeek || 7,
+      color: data.color || '#38bdf8',
+      icon: data.icon || 'sparkles',
+      completedDates: [],
+      streak: 0,
+      bestStreak: 0,
+      createdAt: curTime,
+      updatedAt: curTime
+    };
+    habits.unshift(newHabit);
+    setStored(STORAGE_KEYS.HABITS, habits);
+    return newHabit;
+  }
+
+  public updateHabit(id: string, updates: Partial<Habit>): Habit {
+    const habits = this.getHabits();
+    const idx = habits.findIndex(h => h.id === id);
+    if (idx !== -1) {
+      const updatedDates = updates.completedDates || habits[idx].completedDates;
+      const { streak, bestStreak } = this.calculateHabitStreak(updatedDates, habits[idx].bestStreak);
+      habits[idx] = {
+        ...habits[idx],
+        ...updates,
+        streak,
+        bestStreak,
+        updatedAt: new Date().toISOString()
+      };
+      setStored(STORAGE_KEYS.HABITS, habits);
+      return habits[idx];
+    }
+    throw new Error('Habit not found');
+  }
+
+  public toggleHabit(id: string, dateStr?: string): { success: boolean; habit: Habit; isCompletedToday: boolean } {
+    const habits = this.getHabits();
+    const idx = habits.findIndex(h => h.id === id);
+    if (idx === -1) throw new Error('Habit not found');
+
+    const targetDate = dateStr || new Date().toISOString().split('T')[0];
+    const habit = habits[idx];
+    const completedDates = Array.isArray(habit.completedDates) ? [...habit.completedDates] : [];
+    const dateIdx = completedDates.indexOf(targetDate);
+    let isCompletedToday = false;
+
+    if (dateIdx >= 0) {
+      completedDates.splice(dateIdx, 1);
+    } else {
+      completedDates.push(targetDate);
+      isCompletedToday = true;
+    }
+
+    const { streak, bestStreak } = this.calculateHabitStreak(completedDates, habit.bestStreak);
+    const updated: Habit = {
+      ...habit,
+      completedDates,
+      streak,
+      bestStreak,
+      updatedAt: new Date().toISOString()
+    };
+    habits[idx] = updated;
+    setStored(STORAGE_KEYS.HABITS, habits);
+    return { success: true, habit: updated, isCompletedToday };
+  }
+
+  public deleteHabit(id: string): boolean {
+    let habits = this.getHabits();
+    habits = habits.filter(h => h.id !== id);
+    setStored(STORAGE_KEYS.HABITS, habits);
+    return true;
+  }
+
+  public getHabitsStats(): HabitStatsResponse {
+    const habits = this.getHabits();
+    const todayStr = new Date().toISOString().split('T')[0];
+    const totalHabits = habits.length;
+    const completedTodayCount = habits.filter(h => h.completedDates?.includes(todayStr)).length;
+    const completionRateToday = totalHabits > 0 ? Math.round((completedTodayCount / totalHabits) * 100) : 0;
+    const bestActiveStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+    const overallBestStreak = habits.reduce((max, h) => Math.max(max, h.bestStreak || 0), 0);
+
+    return {
+      totalHabits,
+      completedTodayCount,
+      completionRateToday,
+      bestActiveStreak,
+      overallBestStreak,
+      habits: habits.map(h => ({
+        id: h.id,
+        title: h.title,
+        streak: h.streak,
+        completedToday: (h.completedDates || []).includes(todayStr)
+      }))
     };
   }
 
