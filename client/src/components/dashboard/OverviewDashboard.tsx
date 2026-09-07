@@ -5,10 +5,13 @@ import {
   Calendar as CalendarIcon, 
   Timer, 
   Flame, 
+  Activity,
   ArrowRight, 
   Check, 
   Clock, 
-  Send
+  Send,
+  Sparkles,
+  Trophy
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 
@@ -16,9 +19,11 @@ export const OverviewDashboard: React.FC = () => {
   const { 
     tasks, 
     calendarEvents, 
+    habits,
     nutritionData, 
     timeLogs, 
     setActiveTab, 
+    toggleHabit,
     refreshAll,
     showToast
   } = useApp();
@@ -29,7 +34,7 @@ export const OverviewDashboard: React.FC = () => {
 
   useEffect(() => {
     api.getBriefing().then(res => setBriefing(res)).catch(() => {});
-  }, [tasks, calendarEvents, nutritionData]);
+  }, [tasks, calendarEvents, habits, nutritionData]);
 
   const todayStr = new Date().toISOString().split('T')[0];
   const pendingTasks = tasks.filter(t => t.status !== 'completed');
@@ -38,6 +43,10 @@ export const OverviewDashboard: React.FC = () => {
   const focusMinutesToday = timeLogs
     .filter(l => l.timestamp.startsWith(todayStr))
     .reduce((acc, l) => acc + (l.durationMinutes || 0), 0);
+
+  const completedHabitsToday = habits.filter(h => h.completedDates?.includes(todayStr)).length;
+  const habitCompletionRate = habits.length > 0 ? Math.round((completedHabitsToday / habits.length) * 100) : 0;
+  const bestStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 
   const consumedCalories = nutritionData?.summary?.consumedCalories || 0;
   const targetCalories = nutritionData?.summary?.targetCalories || 2200;
@@ -81,7 +90,7 @@ export const OverviewDashboard: React.FC = () => {
             {briefing?.greeting || 'Good day'}, Aryan
           </h2>
           <p className="text-xs text-slate-500 dark:text-zinc-400">
-            {briefing?.summaryText || `You have ${pendingTasks.length} active tasks, ${todayEvents.length} calendar events, and ${consumedCalories} kcal logged today.`}
+            {briefing?.summaryText || `You have ${pendingTasks.length} active tasks, ${completedHabitsToday}/${habits.length} habits done, and ${todayEvents.length} calendar events today.`}
           </p>
         </div>
 
@@ -89,7 +98,7 @@ export const OverviewDashboard: React.FC = () => {
         <form onSubmit={handleQuickCommand} className="flex items-center gap-2 w-full md:w-80">
           <input
             type="text"
-            placeholder="Tell Nayra: 'ate 2 eggs' or 'add task...'"
+            placeholder="Tell Nayra: 'did workout' or 'add task...'"
             value={quickInput}
             onChange={e => setQuickInput(e.target.value)}
             className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-slate-400 dark:focus:border-zinc-600 transition-colors shadow-2xs"
@@ -104,8 +113,8 @@ export const OverviewDashboard: React.FC = () => {
         </form>
       </div>
 
-      {/* 4 Minimal Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 5 Minimal Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Tasks Card */}
         <div 
           onClick={() => setActiveTab('tasks')}
@@ -119,7 +128,7 @@ export const OverviewDashboard: React.FC = () => {
             {pendingTasks.length}
           </div>
           <div className="text-[11px] text-slate-400 dark:text-zinc-500">
-            {urgentTasks.length} marked high priority
+            {urgentTasks.length} high priority
           </div>
         </div>
 
@@ -129,7 +138,7 @@ export const OverviewDashboard: React.FC = () => {
           className="p-5 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer space-y-2 shadow-2xs"
         >
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
-            <span>Today's Schedule</span>
+            <span>Schedule</span>
             <CalendarIcon className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
           </div>
           <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
@@ -137,6 +146,24 @@ export const OverviewDashboard: React.FC = () => {
           </div>
           <div className="text-[11px] text-slate-400 dark:text-zinc-500 truncate">
             {todayEvents[0] ? `Next: ${todayEvents[0].title}` : 'No events remaining'}
+          </div>
+        </div>
+
+        {/* Habits Card */}
+        <div 
+          onClick={() => setActiveTab('habits')}
+          className="p-5 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800/80 hover:border-slate-300 dark:hover:border-zinc-700 transition-all cursor-pointer space-y-2 shadow-2xs"
+        >
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
+            <span>Habits Today</span>
+            <Activity className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
+            {completedHabitsToday} <span className="text-xs font-normal text-slate-400">/ {habits.length}</span>
+          </div>
+          <div className="text-[11px] text-amber-500 font-medium flex items-center gap-1 font-mono">
+            <Flame className="w-3 h-3 fill-amber-500" />
+            <span>{bestStreak}d streak</span>
           </div>
         </div>
 
@@ -150,7 +177,7 @@ export const OverviewDashboard: React.FC = () => {
             <Timer className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
           </div>
           <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
-            {focusMinutesToday} <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">min</span>
+            {focusMinutesToday} <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">m</span>
           </div>
           <div className="text-[11px] text-slate-400 dark:text-zinc-500">
             {Math.round(focusMinutesToday / 25)} pomodoro blocks
@@ -167,7 +194,7 @@ export const OverviewDashboard: React.FC = () => {
             <Flame className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
           </div>
           <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
-            {consumedCalories} <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">/ {targetCalories} kcal</span>
+            {consumedCalories} <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">kcal</span>
           </div>
           <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
             <div className="bg-slate-900 dark:bg-zinc-200 h-full rounded-full transition-all duration-300" style={{ width: `${caloriePercent}%` }}></div>
@@ -175,12 +202,12 @@ export const OverviewDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main 2-Column Split: Active Tasks & Today's Schedule */}
+      {/* Main 2-Column Split: Active Tasks & Today's Habits / Schedule */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tasks Section */}
         <div className="p-6 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Tasks</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Active Tasks</h3>
             <button
               onClick={() => setActiveTab('tasks')}
               className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100 flex items-center gap-1 cursor-pointer"
@@ -222,18 +249,76 @@ export const OverviewDashboard: React.FC = () => {
 
             {pendingTasks.length === 0 && (
               <div className="text-center py-8 text-xs text-slate-400 dark:text-zinc-500">
-                No active tasks.
+                All tasks completed.
               </div>
             )}
           </div>
         </div>
 
-        {/* Schedule & Nutrition Section */}
+        {/* Habits & Schedule Column */}
         <div className="space-y-6">
+          {/* Habits Section */}
+          <div className="p-6 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Daily Habits</h3>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
+                  {completedHabitsToday}/{habits.length}
+                </span>
+              </div>
+              <button
+                onClick={() => setActiveTab('habits')}
+                className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100 flex items-center gap-1 cursor-pointer"
+              >
+                <span>Manage</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {habits.slice(0, 4).map(habit => {
+                const isDone = habit.completedDates?.includes(todayStr);
+                return (
+                  <div
+                    key={habit.id}
+                    onClick={() => toggleHabit(habit.id, todayStr)}
+                    className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                      isDone
+                        ? 'border-emerald-200/80 dark:border-emerald-950 bg-emerald-50/30 dark:bg-emerald-950/20'
+                        : 'border-slate-200/80 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                        isDone ? 'bg-emerald-500 text-white' : 'border border-slate-300 dark:border-zinc-700'
+                      }`}>
+                        {isDone && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
+                      <span className={`text-xs font-medium ${isDone ? 'line-through text-slate-400 dark:text-zinc-500' : 'text-slate-800 dark:text-zinc-200'}`}>
+                        {habit.title}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-amber-500">
+                      <Flame className="w-3 h-3 fill-amber-500" />
+                      <span>{habit.streak || 0}d</span>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {habits.length === 0 && (
+                <div className="text-center py-6 text-xs text-slate-400 dark:text-zinc-500">
+                  No habits tracked yet.
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Schedule */}
           <div className="p-6 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Schedule</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Today's Events</h3>
               <button
                 onClick={() => setActiveTab('calendar')}
                 className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100 flex items-center gap-1 cursor-pointer"
@@ -257,39 +342,10 @@ export const OverviewDashboard: React.FC = () => {
               ))}
 
               {todayEvents.length === 0 && (
-                <div className="text-center py-6 text-xs text-slate-400 dark:text-zinc-500">
-                  No events today.
+                <div className="text-center py-4 text-xs text-slate-400 dark:text-zinc-500">
+                  No upcoming events today.
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Macro Breakdown */}
-          <div className="p-6 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-900 dark:text-zinc-100">Nutrition Breakdown</span>
-              <span className="font-mono text-slate-500 dark:text-zinc-400">{consumedCalories} / {targetCalories} kcal</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 pt-2 text-center">
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40">
-                <div className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-mono">Protein</div>
-                <div className="text-sm font-semibold font-mono text-slate-900 dark:text-zinc-100 mt-0.5">
-                  {nutritionData?.summary?.consumedProtein || 0}g
-                </div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40">
-                <div className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-mono">Carbs</div>
-                <div className="text-sm font-semibold font-mono text-slate-900 dark:text-zinc-100 mt-0.5">
-                  {nutritionData?.summary?.consumedCarbs || 0}g
-                </div>
-              </div>
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-800/40">
-                <div className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-mono">Fats</div>
-                <div className="text-sm font-semibold font-mono text-slate-900 dark:text-zinc-100 mt-0.5">
-                  {nutritionData?.summary?.consumedFat || 0}g
-                </div>
-              </div>
             </div>
           </div>
         </div>

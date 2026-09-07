@@ -15,9 +15,11 @@ yarn-error.log*
 firebase-debug.log*
 firestore-debug.log*
 
-# Environment
+# Environment & Tokens
 .env
 .env*.local
+google_tokens.json
+server/data/google_tokens.json
 
 # Editor & OS
 .vscode/

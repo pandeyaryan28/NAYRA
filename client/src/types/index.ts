@@ -69,6 +69,41 @@ export interface TimeLog {
   timestamp: string;
 }
 
+export type HabitCategory = 'health' | 'productivity' | 'fitness' | 'learning' | 'mindfulness' | 'finance' | 'custom';
+export type HabitFrequency = 'daily' | 'weekly' | 'custom';
+
+export interface Habit {
+  id: string;
+  userId?: string;
+  title: string;
+  description?: string;
+  category: HabitCategory;
+  frequency: HabitFrequency;
+  targetDaysPerWeek?: number;
+  color: string;
+  icon?: string;
+  completedDates: string[]; // YYYY-MM-DD strings
+  streak: number;
+  bestStreak: number;
+  archived?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HabitStatsResponse {
+  totalHabits: number;
+  completedTodayCount: number;
+  completionRateToday: number;
+  bestActiveStreak: number;
+  overallBestStreak: number;
+  habits: Array<{
+    id: string;
+    title: string;
+    streak: number;
+    completedToday: boolean;
+  }>;
+}
+
 export interface FoodItem {
   name: string;
   quantity: string;
@@ -132,6 +167,12 @@ export interface OverviewStats {
   notes: {
     totalNotes: number;
     pinnedNotes: number;
+  };
+  habits?: {
+    total: number;
+    completedToday: number;
+    completionRate: number;
+    bestStreak: number;
   };
   pomodoro: {
     focusMinutesToday: number;

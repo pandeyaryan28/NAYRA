@@ -7,6 +7,7 @@ import { NayraOrb } from './components/layout/NayraOrb.js';
 import { OverviewDashboard } from './components/dashboard/OverviewDashboard.js';
 import { TaskManager } from './components/tasks/TaskManager.js';
 import { CalendarView } from './components/calendar/CalendarView.js';
+import { HabitsView } from './components/habits/HabitsView.js';
 import { PomodoroTimer } from './components/pomodoro/PomodoroTimer.js';
 import { CalorieTracker } from './components/nutrition/CalorieTracker.js';
 import { KeepNotesView } from './components/keep/KeepNotesView.js';
@@ -31,6 +32,7 @@ const MainContent: React.FC = () => {
               {activeTab === 'overview' && <OverviewDashboard />}
               {activeTab === 'tasks' && <TaskManager />}
               {activeTab === 'calendar' && <CalendarView />}
+              {activeTab === 'habits' && <HabitsView />}
               {activeTab === 'pomodoro' && <PomodoroTimer />}
               {activeTab === 'nutrition' && <CalorieTracker />}
               {activeTab === 'keep' && <KeepNotesView />}

@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { getAuthenticatedGoogleClient, getStoredTokens } from '../config/googleAuth.js';
+import { getAuthenticatedGoogleClient, isGoogleAuthenticated } from '../config/googleAuth.js';
 import { firestoreService } from './firestoreService.js';
 import { CalendarEvent } from '../types/index.js';
 
@@ -7,22 +7,14 @@ export class GoogleCalendarService {
   /**
    * Performs two-way synchronization between Google Calendar and Nayra Command Center.
    */
-  async syncCalendar(): Promise<{ success: boolean; syncedCount: number; message: string }> {
+  async syncCalendar(): Promise<{ success: boolean; syncedCount: number; message: string; events?: CalendarEvent[] }> {
     const authClient = getAuthenticatedGoogleClient();
-    const tokens = getStoredTokens();
 
-    if (!authClient || tokens.isMock) {
-      // Local sync simulation
-      const localEvents = await firestoreService.getCalendarEvents();
-      const updatedTimestamp = new Date().toISOString();
-      for (const e of localEvents) {
-        e.syncedAt = updatedTimestamp;
-        await firestoreService.saveCalendarEvent(e);
-      }
+    if (!authClient || !isGoogleAuthenticated()) {
       return {
-        success: true,
-        syncedCount: localEvents.length,
-        message: 'Synchronized with Nayra Cloud Calendar Engine (Google OAuth ready).'
+        success: false,
+        syncedCount: 0,
+        message: 'Google Account is not connected. Connect your Google Account to sync live with Google Calendar.'
       };
     }
 
@@ -30,8 +22,8 @@ export class GoogleCalendarService {
       const calendar = google.calendar({ version: 'v3', auth: authClient });
       
       const now = new Date();
-      const timeMin = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString();
-      const timeMax = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30).toISOString();
+      const timeMin = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30).toISOString();
+      const timeMax = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 90).toISOString();
 
       // 1. Fetch remote events
       const res = await calendar.events.list({
@@ -39,7 +31,8 @@ export class GoogleCalendarService {
         timeMin,
         timeMax,
         singleEvents: true,
-        orderBy: 'startTime'
+        orderBy: 'startTime',
+        maxResults: 250
       });
 
       const remoteEvents = res.data.items || [];
@@ -50,11 +43,11 @@ export class GoogleCalendarService {
       for (const gEvent of remoteEvents) {
         if (!gEvent.id || !gEvent.summary) continue;
 
-        const startTime = gEvent.start?.dateTime || (gEvent.start?.date ? `${gEvent.start.date}T00:00:00Z` : new Date().toISOString());
-        const endTime = gEvent.end?.dateTime || (gEvent.end?.date ? `${gEvent.end.date}T23:59:59Z` : new Date().toISOString());
+        const startTime = gEvent.start?.dateTime || (gEvent.start?.date ? `${gEvent.start.date}T00:00:00.000Z` : new Date().toISOString());
+        const endTime = gEvent.end?.dateTime || (gEvent.end?.date ? `${gEvent.end.date}T23:59:59.000Z` : new Date().toISOString());
         const isAllDay = !gEvent.start?.dateTime;
 
-        const existing = localEvents.find(e => e.googleEventId === gEvent.id || e.title.toLowerCase() === gEvent.summary?.toLowerCase());
+        const existing = localEvents.find(e => e.googleEventId === gEvent.id || (e.title.trim().toLowerCase() === gEvent.summary?.trim().toLowerCase() && e.startTime.split('T')[0] === startTime.split('T')[0]));
 
         if (existing) {
           existing.title = gEvent.summary;
@@ -109,16 +102,18 @@ export class GoogleCalendarService {
               await firestoreService.saveCalendarEvent(lEvent);
               syncCounter++;
             }
-          } catch (pushErr) {
-            console.warn('Error pushing event to Google Calendar:', pushErr);
+          } catch (pushErr: any) {
+            console.warn('Error pushing event to Google Calendar:', pushErr.message);
           }
         }
       }
 
+      const updatedEvents = await firestoreService.getCalendarEvents();
       return {
         success: true,
         syncedCount: syncCounter,
-        message: `Successfully 2-way synced ${syncCounter} events with Google Calendar.`
+        message: `Successfully 2-way synced ${syncCounter} events with actual Google Calendar.`,
+        events: updatedEvents
       };
     } catch (error: any) {
       console.error('Google Calendar sync error:', error);
@@ -135,7 +130,7 @@ export class GoogleCalendarService {
    */
   async pushEvent(event: CalendarEvent): Promise<void> {
     const authClient = getAuthenticatedGoogleClient();
-    if (!authClient) return;
+    if (!authClient || !isGoogleAuthenticated()) return;
 
     try {
       const calendar = google.calendar({ version: 'v3', auth: authClient });
@@ -168,8 +163,26 @@ export class GoogleCalendarService {
           await firestoreService.saveCalendarEvent(event);
         }
       }
-    } catch (e) {
-      console.warn('Error syncing event to Google Calendar:', e);
+    } catch (e: any) {
+      console.warn('Error syncing event to Google Calendar:', e.message);
+    }
+  }
+
+  /**
+   * Delete an event on Google Calendar
+   */
+  async deleteEvent(googleEventId: string): Promise<void> {
+    const authClient = getAuthenticatedGoogleClient();
+    if (!authClient || !isGoogleAuthenticated()) return;
+
+    try {
+      const calendar = google.calendar({ version: 'v3', auth: authClient });
+      await calendar.events.delete({
+        calendarId: 'primary',
+        eventId: googleEventId
+      });
+    } catch (e: any) {
+      console.warn('Error deleting event on Google Calendar:', e.message);
     }
   }
 }

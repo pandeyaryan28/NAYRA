@@ -1,6 +1,7 @@
 {
   "name": "nayra-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "Nayra Command Center Backend API",
   "main": "dist/index.js",
   "scripts": {

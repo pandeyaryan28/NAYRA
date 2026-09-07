@@ -5,30 +5,53 @@ import {
   LayoutDashboard, 
   CheckSquare, 
   Calendar as CalendarIcon, 
+  Activity,
   Timer, 
   Flame, 
   StickyNote, 
   Bot, 
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, tasks, calendarEvents, notes, nutritionData, isSyncing, syncGoogleTasks } = useApp();
+  const { 
+    activeTab, 
+    setActiveTab, 
+    tasks, 
+    calendarEvents, 
+    notes, 
+    habits, 
+    nutritionData, 
+    authStatus,
+    isSyncing, 
+    syncGoogleTasks,
+    syncGoogleCalendar,
+    connectGoogle
+  } = useApp();
 
   const pendingTasksCount = tasks.filter(t => t.status !== 'completed').length;
   const todayStr = new Date().toISOString().split('T')[0];
   const todayEventsCount = calendarEvents.filter(e => e.startTime.startsWith(todayStr)).length;
   const remainingCalories = nutritionData?.summary?.remainingCalories ?? 0;
+  
+  const uncompletedHabitsToday = habits.filter(h => !h.completedDates?.includes(todayStr)).length;
 
   const navItems: { id: TabType; label: string; icon: any; badge?: string | number }[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : undefined },
     { id: 'calendar', label: 'Calendar', icon: CalendarIcon, badge: todayEventsCount > 0 ? todayEventsCount : undefined },
+    { id: 'habits', label: 'Habits & Routine', icon: Activity, badge: uncompletedHabitsToday > 0 ? `${uncompletedHabitsToday} due` : (habits.length > 0 ? '✓' : undefined) },
     { id: 'pomodoro', label: 'Focus & Pomodoro', icon: Timer },
     { id: 'nutrition', label: 'Nutrition & Calories', icon: Flame, badge: remainingCalories > 0 ? `${remainingCalories} kcal` : undefined },
     { id: 'keep', label: 'Notes', icon: StickyNote, badge: notes.length > 0 ? notes.length : undefined },
     { id: 'assistant', label: 'Assistant AI', icon: Bot },
   ];
+
+  const handleSyncAll = async () => {
+    await syncGoogleTasks();
+    await syncGoogleCalendar();
+  };
 
   return (
     <aside className="w-60 bg-slate-50 dark:bg-[#0c0c0e] border-r border-slate-200 dark:border-zinc-800 flex flex-col justify-between shrink-0 select-none z-20 transition-colors duration-150">
@@ -44,7 +67,7 @@ export const Sidebar: React.FC = () => {
             </span>
           </div>
           <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-            v1.0
+            v1.1
           </span>
         </div>
 
@@ -68,7 +91,11 @@ export const Sidebar: React.FC = () => {
                   <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                    item.id === 'habits' && uncompletedHabitsToday === 0 && habits.length > 0
+                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold'
+                      : 'bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'
+                  }`}>
                     {item.badge}
                   </span>
                 )}
@@ -78,10 +105,10 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Footer / Sync Button */}
+      {/* Footer / Sync Button & Google Ecosystem Status */}
       <div className="p-3 border-t border-slate-200 dark:border-zinc-800 space-y-2">
         <button
-          onClick={syncGoogleTasks}
+          onClick={handleSyncAll}
           disabled={isSyncing}
           className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 transition-colors cursor-pointer shadow-2xs"
         >
@@ -90,11 +117,11 @@ export const Sidebar: React.FC = () => {
         </button>
 
         <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Cloud Synced
+          <span className="flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${authStatus?.googleConnected ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'}`} />
+            <span>{authStatus?.googleConnected ? 'Google Cloud Active' : 'Persistent Backend Active'}</span>
           </span>
-          <span>nayra-ap28</span>
+          <span>v1.1</span>
         </div>
       </div>
     </aside>

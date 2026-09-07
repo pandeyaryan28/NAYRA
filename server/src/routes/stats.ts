@@ -8,6 +8,7 @@ router.get('/overview', async (req, res) => {
     const tasks = await firestoreService.getTasks();
     const events = await firestoreService.getCalendarEvents();
     const notes = await firestoreService.getKeepNotes();
+    const habits = await firestoreService.getHabits();
     const todayStr = new Date().toISOString().split('T')[0];
     const meals = await firestoreService.getMealEntries(todayStr);
     const target = await firestoreService.getDailyTarget(todayStr);
@@ -25,6 +26,10 @@ router.get('/overview', async (req, res) => {
       .filter(l => l.timestamp.startsWith(todayStr))
       .reduce((acc, l) => acc + (l.durationMinutes || 0), 0);
 
+    const completedHabitsToday = habits.filter(h => h.completedDates?.includes(todayStr)).length;
+    const habitCompletionRate = habits.length > 0 ? Math.round((completedHabitsToday / habits.length) * 100) : 0;
+    const bestStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
+
     res.json({
       tasks: {
         total: tasks.length,
@@ -41,6 +46,12 @@ router.get('/overview', async (req, res) => {
       notes: {
         totalNotes: notes.length,
         pinnedNotes: notes.filter(n => n.isPinned).length
+      },
+      habits: {
+        total: habits.length,
+        completedToday: completedHabitsToday,
+        completionRate: habitCompletionRate,
+        bestStreak
       },
       pomodoro: {
         focusMinutesToday,

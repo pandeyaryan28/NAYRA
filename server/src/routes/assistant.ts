@@ -12,6 +12,7 @@ router.get('/briefing', async (req, res) => {
   try {
     const tasks = await firestoreService.getTasks();
     const events = await firestoreService.getCalendarEvents();
+    const habits = await firestoreService.getHabits();
     const todayStr = new Date().toISOString().split('T')[0];
     const meals = await firestoreService.getMealEntries(todayStr);
     const target = await firestoreService.getDailyTarget(todayStr);
@@ -25,6 +26,8 @@ router.get('/briefing', async (req, res) => {
       .filter(l => l.timestamp.startsWith(todayStr))
       .reduce((acc, l) => acc + (l.durationMinutes || 0), 0);
 
+    const completedHabitsToday = habits.filter(h => h.completedDates?.includes(todayStr)).length;
+
     const greeting = getGreeting();
 
     res.json({
@@ -34,6 +37,8 @@ router.get('/briefing', async (req, res) => {
         pendingTasksCount: pendingTasks.length,
         urgentTasksCount: urgentTasks.length,
         todayEventsCount: todayEvents.length,
+        habitsTotal: habits.length,
+        habitsCompletedToday: completedHabitsToday,
         caloriesLogged,
         targetCalories: target.targetCalories,
         caloriesRemaining: Math.max(0, target.targetCalories - caloriesLogged),
@@ -41,7 +46,7 @@ router.get('/briefing', async (req, res) => {
       },
       urgentTasks: urgentTasks.slice(0, 3),
       upcomingEvents: todayEvents.slice(0, 3),
-      summaryText: `${greeting}, Commander. You have ${pendingTasks.length} active tasks (${urgentTasks.length} high priority), ${todayEvents.length} scheduled events today, and ${focusMinutesToday} minutes of focus logged.`
+      summaryText: `${greeting}, Commander. You have ${pendingTasks.length} active tasks, ${completedHabitsToday}/${habits.length} habits completed today, ${todayEvents.length} scheduled events, and ${focusMinutesToday} minutes of focus logged.`
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -60,13 +65,36 @@ router.post('/chat', async (req, res) => {
     let reply = '';
     let actionTaken = null;
 
-    // 1. Food / Calorie command
-    if (textLower.includes('ate') || textLower.includes('had') || textLower.includes('breakfast') || textLower.includes('lunch') || textLower.includes('dinner') || textLower.includes('snack') || textLower.includes('calorie')) {
+    // 1. Habit command
+    if (textLower.includes('habit') || textLower.includes('meditat') || textLower.includes('workout') || textLower.includes('water')) {
+      const habits = await firestoreService.getHabits();
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Find matched habit
+      const matchedHabit = habits.find(h => 
+        textLower.includes(h.title.toLowerCase()) || 
+        (textLower.includes('water') && h.title.toLowerCase().includes('hydrat')) ||
+        (textLower.includes('workout') && (h.title.toLowerCase().includes('training') || h.title.toLowerCase().includes('gym'))) ||
+        (textLower.includes('meditat') && h.title.toLowerCase().includes('meditat')) ||
+        (textLower.includes('deep work') && h.title.toLowerCase().includes('deep work'))
+      );
+
+      if (matchedHabit && (textLower.includes('done') || textLower.includes('complete') || textLower.includes('check') || textLower.includes('finish') || textLower.includes('did'))) {
+        const updated = await firestoreService.toggleHabitCompletion(matchedHabit.id, todayStr);
+        reply = `Awesome work, Commander! Marked "${matchedHabit.title}" as completed for today! Current streak is now 🔥 ${updated?.streak || 1} days.`;
+        actionTaken = { type: 'habit_completed', data: updated };
+      } else {
+        const completedCount = habits.filter(h => h.completedDates?.includes(todayStr)).length;
+        reply = `Habit Status: You have completed ${completedCount} of ${habits.length} habits today. Keep up the momentum!`;
+      }
+    }
+    // 2. Food / Calorie command
+    else if (textLower.includes('ate') || textLower.includes('had') || textLower.includes('breakfast') || textLower.includes('lunch') || textLower.includes('dinner') || textLower.includes('snack') || textLower.includes('calorie')) {
       const meal = await nutritionEstimatorService.logMealFromAntigravity(message);
       reply = `Logged your meal! Calculated ${meal.totalCalories} kcal (${meal.totalProtein}g Protein, ${meal.totalCarbs}g Carbs, ${meal.totalFat}g Fat).`;
       actionTaken = { type: 'meal_logged', data: meal };
     }
-    // 2. Task creation command
+    // 3. Task creation command
     else if (textLower.startsWith('create task') || textLower.startsWith('add task') || textLower.startsWith('todo:')) {
       const title = message.replace(/^(create task|add task|todo:)\s*/i, '').trim();
       const newTask = await firestoreService.saveTask({
@@ -82,16 +110,16 @@ router.post('/chat', async (req, res) => {
       reply = `Created task: "${newTask.title}" and queued sync with Google Tasks.`;
       actionTaken = { type: 'task_created', data: newTask };
     }
-    // 3. Sync command
+    // 4. Sync command
     else if (textLower.includes('sync') || textLower.includes('google sync')) {
-      await googleTasksService.syncTasks();
-      await googleCalendarService.syncCalendar();
-      reply = 'Triggered full 2-way sync with Google Tasks and Google Calendar.';
-      actionTaken = { type: 'sync_completed' };
+      const tRes = await googleTasksService.syncTasks();
+      const cRes = await googleCalendarService.syncCalendar();
+      reply = `2-Way Google Sync: ${tRes.message} | ${cRes.message}`;
+      actionTaken = { type: 'sync_completed', data: { tasks: tRes, calendar: cRes } };
     }
-    // 4. Default Nayra AI conversational intelligence
+    // 5. Default Nayra AI conversational intelligence
     else {
-      reply = `Commander, I am online and tracking your command center. All systems (Tasks, Calendar, Pomodoro, Nutrition) are operational. How can I assist you?`;
+      reply = `Commander, all systems (Tasks, Calendar, Habits, Pomodoro, Nutrition) are online and active. How can I assist you with your schedule or workflow?`;
     }
 
     res.json({

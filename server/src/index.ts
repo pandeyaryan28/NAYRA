@@ -9,6 +9,7 @@ import pomodoroRouter from './routes/pomodoro.js';
 import caloriesRouter from './routes/calories.js';
 import assistantRouter from './routes/assistant.js';
 import statsRouter from './routes/stats.js';
+import habitsRouter from './routes/habits.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/pomodoro', pomodoroRouter);
 app.use('/api/calories', caloriesRouter);
 app.use('/api/assistant', assistantRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/habits', habitsRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({

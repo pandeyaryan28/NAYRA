@@ -4,9 +4,9 @@ import { getAuth } from 'firebase/auth';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBCuAqn3l06s2vOhehEo5a9wjJcCXTCkTI",
-  authDomain: "nayra-ap28-2026.firebaseapp.com",
-  projectId: "nayra-ap28-2026",
-  storageBucket: "nayra-ap28-2026.firebasestorage.app",
+  authDomain: "nyra-ap28-2026.firebaseapp.com",
+  projectId: "nyra-ap28-2026",
+  storageBucket: "nyra-ap28-2026.firebasestorage.app",
   messagingSenderId: "906360138563",
   appId: "1:906360138563:web:437761fd2997b035569df6"
 };

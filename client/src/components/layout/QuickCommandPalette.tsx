@@ -102,6 +102,17 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
+                onClick={() => handleSelect(() => setActiveTab('habits'))}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <Timer className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>Habits & Disciplines</span>
+                </div>
+                <ArrowRight className="w-3 h-3 text-zinc-400" />
+              </button>
+
+              <button
                 onClick={() => handleSelect(() => setActiveTab('nutrition'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >

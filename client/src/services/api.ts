@@ -6,35 +6,65 @@ import type {
   MealEntry, 
   DailyNutritionTarget, 
   OverviewStats, 
-  NutritionSummaryResponse 
+  NutritionSummaryResponse,
+  Habit,
+  HabitStatsResponse
 } from '../types/index.js';
 import { nayraBackend } from './store.js';
 
 const API_BASE = '/api';
 
 export const api = {
-  // --- Auth ---
+  // --- Auth & Google Link ---
   async getAuthStatus() {
     try {
       const res = await fetch(`${API_BASE}/auth/status`);
       if (res.ok) return await res.json();
     } catch (e) {}
-    return nayraBackend.getAuthStatus();
+    return {
+      authenticated: true,
+      isMock: false,
+      googleConnected: false,
+      googleConfigured: true,
+      user: {
+        name: 'Aryan Pandey',
+        email: 'aryan@nayra.command',
+        picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'
+      }
+    };
   },
 
-  async getGoogleAuthUrl() {
+  async getGoogleAuthUrl(): Promise<{ url?: string; error?: string }> {
     try {
       const res = await fetch(`${API_BASE}/auth/google/url`);
       if (res.ok) return await res.json();
+      const err = await res.json();
+      return { error: err.error || 'Failed to generate auth url' };
+    } catch (e: any) {
+      return { error: e.message };
+    }
+  },
+
+  async manualGoogleConnect(code: string): Promise<{ success: boolean; message: string; user?: any }> {
+    try {
+      const res = await fetch(`${API_BASE}/auth/google/manual-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      if (res.ok) return await res.json();
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to exchange authorization code');
+    } catch (e: any) {
+      throw e;
+    }
+  },
+
+  async logoutGoogle() {
+    try {
+      const res = await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
+      if (res.ok) return await res.json();
     } catch (e) {}
-    return { url: 'https://accounts.google.com/o/oauth2/v2/auth' };
-  },
-
-  async mockConnect() {
-    return { success: true, user: nayraBackend.getAuthStatus().user };
-  },
-
-  async logout() {
     return { success: true };
   },
 
@@ -79,13 +109,13 @@ export const api = {
     return { success: nayraBackend.deleteTask(id) };
   },
 
-  async syncTasks(): Promise<{ success: boolean; syncedCount: number; message: string; tasks: Task[] }> {
+  async syncTasks(): Promise<{ success: boolean; syncedCount: number; message: string; tasks?: Task[] }> {
     try {
       const res = await fetch(`${API_BASE}/tasks/sync`, { method: 'POST' });
       if (res.ok) return await res.json();
     } catch (e) {}
     const tasks = nayraBackend.getTasks();
-    return { success: true, syncedCount: tasks.length, message: `Synced ${tasks.length} tasks with Google Cloud`, tasks };
+    return { success: true, syncedCount: tasks.length, message: `Local snapshot synchronized.`, tasks };
   },
 
   // --- Calendar ---
@@ -129,13 +159,81 @@ export const api = {
     return { success: nayraBackend.deleteCalendarEvent(id) };
   },
 
-  async syncCalendar(): Promise<{ success: boolean; syncedCount: number; message: string; events: CalendarEvent[] }> {
+  async syncCalendar(): Promise<{ success: boolean; syncedCount: number; message: string; events?: CalendarEvent[] }> {
     try {
       const res = await fetch(`${API_BASE}/calendar/sync`, { method: 'POST' });
       if (res.ok) return await res.json();
     } catch (e) {}
     const events = nayraBackend.getCalendarEvents();
-    return { success: true, syncedCount: events.length, message: `Synced ${events.length} Google Calendar events`, events };
+    return { success: true, syncedCount: events.length, message: `Local snapshot synchronized.`, events };
+  },
+
+  // --- Habits ---
+  async getHabits(): Promise<{ habits: Habit[] }> {
+    try {
+      const res = await fetch(`${API_BASE}/habits`);
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return { habits: [] };
+  },
+
+  async createHabit(habit: Partial<Habit>): Promise<{ habit: Habit }> {
+    try {
+      const res = await fetch(`${API_BASE}/habits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(habit)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    throw new Error('Failed to create habit');
+  },
+
+  async updateHabit(id: string, habit: Partial<Habit>): Promise<{ habit: Habit }> {
+    try {
+      const res = await fetch(`${API_BASE}/habits/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(habit)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    throw new Error('Failed to update habit');
+  },
+
+  async toggleHabit(id: string, date?: string): Promise<{ success: boolean; habit: Habit; isCompletedToday: boolean }> {
+    try {
+      const res = await fetch(`${API_BASE}/habits/${id}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    throw new Error('Failed to toggle habit');
+  },
+
+  async deleteHabit(id: string): Promise<{ success: boolean }> {
+    try {
+      const res = await fetch(`${API_BASE}/habits/${id}`, { method: 'DELETE' });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return { success: false };
+  },
+
+  async getHabitsStats(): Promise<HabitStatsResponse> {
+    try {
+      const res = await fetch(`${API_BASE}/habits/stats`);
+      if (res.ok) return await res.json();
+    } catch (e) {}
+    return {
+      totalHabits: 0,
+      completedTodayCount: 0,
+      completionRateToday: 0,
+      bestActiveStreak: 0,
+      overallBestStreak: 0,
+      habits: []
+    };
   },
 
   // --- Keep Notes ---
@@ -201,6 +299,10 @@ export const api = {
   },
 
   async getPomodoroStats(): Promise<any> {
+    try {
+      const res = await fetch(`${API_BASE}/pomodoro/stats`);
+      if (res.ok) return await res.json();
+    } catch (e) {}
     const logs = nayraBackend.getTimeLogs();
     const today = new Date().toISOString().split('T')[0];
     const todayLogs = logs.filter(l => l.timestamp.startsWith(today));
@@ -239,6 +341,14 @@ export const api = {
   },
 
   async updateDailyTarget(target: Partial<DailyNutritionTarget>): Promise<{ target: DailyNutritionTarget }> {
+    try {
+      const res = await fetch(`${API_BASE}/calories/target`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(target)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
     return { target: target as DailyNutritionTarget };
   },
 
@@ -277,6 +387,11 @@ export const api = {
 
   // --- Global Stats ---
   async getOverviewStats(): Promise<OverviewStats> {
+    try {
+      const res = await fetch(`${API_BASE}/stats/overview`);
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
     const tasks = nayraBackend.getTasks();
     const events = nayraBackend.getCalendarEvents();
     const notes = nayraBackend.getNotes();
@@ -307,6 +422,12 @@ export const api = {
       notes: {
         totalNotes: notes.length,
         pinnedNotes: notes.filter(n => n.isPinned).length
+      },
+      habits: {
+        total: 0,
+        completedToday: 0,
+        completionRate: 0,
+        bestStreak: 0
       },
       pomodoro: {
         focusMinutesToday,

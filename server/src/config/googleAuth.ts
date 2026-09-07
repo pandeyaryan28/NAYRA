@@ -1,11 +1,27 @@
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback';
+// Ensure .env is loaded regardless of execution CWD
+const envPaths = [
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), 'server/.env'),
+  path.resolve(__dirname, '../../.env'),
+  path.resolve(__dirname, '../.env')
+];
+for (const p of envPaths) {
+  if (fs.existsSync(p)) {
+    dotenv.config({ path: p });
+  }
+}
+
+const DATA_DIR = path.resolve(__dirname, '../../data');
+const TOKEN_FILE = path.join(DATA_DIR, 'google_tokens.json');
 
 export const OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/tasks',
@@ -15,8 +31,7 @@ export const OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email'
 ];
 
-// In-memory token store (can be persisted to Firestore)
-interface TokenStore {
+export interface TokenStore {
   accessToken?: string;
   refreshToken?: string;
   expiryDate?: number;
@@ -28,22 +43,71 @@ interface TokenStore {
 }
 
 let storedTokens: TokenStore = {
-  // Pre-populate with active dummy session so user can immediately test sync features
-  isMock: !GOOGLE_CLIENT_ID,
+  isMock: false,
   userEmail: 'aryan@nayra.command',
   userName: 'Aryan Pandey',
   userPicture: 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'
 };
 
+function loadStoredTokens() {
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      const raw = fs.readFileSync(TOKEN_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      storedTokens = {
+        ...storedTokens,
+        ...parsed,
+        isMock: false
+      };
+      console.log('🔑 Loaded Google OAuth tokens from disk for:', storedTokens.userEmail || 'User');
+    }
+  } catch (e: any) {
+    console.warn('Could not read google_tokens.json:', e.message);
+  }
+}
+
+function persistTokens() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(TOKEN_FILE, JSON.stringify(storedTokens, null, 2), 'utf-8');
+  } catch (e: any) {
+    console.error('Failed to persist google_tokens.json:', e.message);
+  }
+}
+
+// Load tokens on init
+loadStoredTokens();
+
 export const getOAuth2Client = () => {
-  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback';
+
+  if (!clientId || !clientSecret) {
     return null;
   }
-  return new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URI
+  const oauth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    redirectUri
   );
+
+  oauth2Client.on('tokens', (tokens) => {
+    if (tokens.access_token) {
+      storedTokens.accessToken = tokens.access_token;
+    }
+    if (tokens.refresh_token) {
+      storedTokens.refreshToken = tokens.refresh_token;
+    }
+    if (tokens.expiry_date) {
+      storedTokens.expiryDate = tokens.expiry_date;
+    }
+    persistTokens();
+  });
+
+  return oauth2Client;
 };
 
 export const generateAuthUrl = () => {
@@ -54,21 +118,23 @@ export const generateAuthUrl = () => {
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: OAUTH_SCOPES,
-    prompt: 'consent'
+    prompt: 'consent',
+    include_granted_scopes: true
   });
 };
 
 export const saveTokens = (tokens: any, userInfo?: any) => {
   storedTokens = {
-    accessToken: tokens.access_token,
+    accessToken: tokens.access_token || storedTokens.accessToken,
     refreshToken: tokens.refresh_token || storedTokens.refreshToken,
-    expiryDate: tokens.expiry_date,
-    idToken: tokens.id_token,
+    expiryDate: tokens.expiry_date || storedTokens.expiryDate,
+    idToken: tokens.id_token || storedTokens.idToken,
     userEmail: userInfo?.email || storedTokens.userEmail,
     userName: userInfo?.name || storedTokens.userName,
     userPicture: userInfo?.picture || storedTokens.userPicture,
     isMock: false
   };
+  persistTokens();
   return storedTokens;
 };
 
@@ -76,13 +142,25 @@ export const getStoredTokens = () => storedTokens;
 
 export const clearTokens = () => {
   storedTokens = {
-    isMock: false
+    isMock: false,
+    userEmail: 'aryan@nayra.command',
+    userName: 'Aryan Pandey',
+    userPicture: 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'
   };
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      fs.unlinkSync(TOKEN_FILE);
+    }
+  } catch (e) {}
 };
+
+export const isGoogleConfigured = () => Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
+export const isGoogleAuthenticated = () => Boolean(storedTokens.accessToken || storedTokens.refreshToken);
 
 export const getAuthenticatedGoogleClient = () => {
   const oauth2Client = getOAuth2Client();
-  if (!oauth2Client || !storedTokens.accessToken) {
+  if (!oauth2Client || (!storedTokens.accessToken && !storedTokens.refreshToken)) {
     return null;
   }
   oauth2Client.setCredentials({
