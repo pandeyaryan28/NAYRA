@@ -3,8 +3,79 @@
   "calendarEvents": [],
   "keepNotes": [],
   "timeLogs": [],
-  "mealEntries": [],
-  "dailyTargets": {},
-  "habits": [],
+  "mealEntries": [
+    {
+      "id": "meal-2026-09-09-breakfast",
+      "mealType": "breakfast",
+      "date": "2026-09-09",
+      "rawText": "1.5 plates of appe and 1 pomegranate",
+      "items": [
+        {
+          "name": "Appe (Paddu / Paniyaram)",
+          "quantity": "1.5 plates (~9-10 pcs, 225g)",
+          "calories": 405,
+          "protein": 10.0,
+          "carbs": 72.0,
+          "fat": 10.8
+        },
+        {
+          "name": "Pomegranate",
+          "quantity": "1 medium fruit (~170g arils)",
+          "calories": 145,
+          "protein": 2.9,
+          "carbs": 32.5,
+          "fat": 1.6
+        }
+      ],
+      "totalCalories": 550,
+      "totalProtein": 12.9,
+      "totalCarbs": 104.5,
+      "totalFat": 12.4,
+      "source": "antigravity",
+      "timestamp": "2026-09-09T08:30:00.000Z"
+    }
+  ],
+  "dailyTargets": {
+    "2026-09-09": {
+      "date": "2026-09-09",
+      "targetCalories": 2200,
+      "targetProtein": 140,
+      "targetCarbs": 220,
+      "targetFat": 65,
+      "waterIntakeMl": 1250
+    }
+  },
+  "habits": [
+    {
+      "id": "habit-watch-100-news",
+      "title": "Watch 100 news",
+      "description": "Watch 100 news updates every day to stay informed on world and tech events.",
+      "category": "learning",
+      "frequency": "daily",
+      "targetDaysPerWeek": 7,
+      "color": "#6366f1",
+      "icon": "book-open",
+      "completedDates": [],
+      "streak": 0,
+      "bestStreak": 0,
+      "createdAt": "2026-09-09T12:57:41.000Z",
+      "updatedAt": "2026-09-09T12:57:41.000Z"
+    },
+    {
+      "id": "habit-100-pushups",
+      "title": "100 Pushups",
+      "description": "Complete 100 pushups every day for upper body strength, core stability, and endurance.",
+      "category": "fitness",
+      "frequency": "daily",
+      "targetDaysPerWeek": 7,
+      "color": "#f43f5e",
+      "icon": "activity",
+      "completedDates": [],
+      "streak": 0,
+      "bestStreak": 0,
+      "createdAt": "2026-09-09T12:57:41.000Z",
+      "updatedAt": "2026-09-09T12:57:41.000Z"
+    }
+  ],
   "projects": []
 }

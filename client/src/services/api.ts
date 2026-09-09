@@ -12,6 +12,7 @@ import type {
 } from '../types/index.js';
 import { nayraBackend } from './store.js';
 import { googleClientSync } from './googleClientSync.js';
+import { firestoreClient } from './firestoreClient.js';
 
 const API_BASE = '/api';
 
@@ -124,10 +125,23 @@ export const api = {
         console.warn('Could not fetch from Google Tasks API, using cached tasks:', err);
       }
     }
+    // 1. Try local Express API if running
     try {
       const res = await fetch(`${API_BASE}/tasks`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.tasks && data.tasks.length > 0) return data;
+      }
     } catch (e) {}
+
+    // 2. Query persistent cloud Firestore backend
+    try {
+      const fsTasks = await firestoreClient.getTasks();
+      if (fsTasks && fsTasks.length > 0) {
+        return { tasks: fsTasks };
+      }
+    } catch (e) {}
+
     return { tasks: nayraBackend.getTasks() };
   },
 
@@ -137,15 +151,22 @@ export const api = {
       googleTaskItem = await googleClientSync.createGoogleTask(task);
     }
     const finalData = googleTaskItem ? { ...task, ...googleTaskItem } : task;
+    const created = nayraBackend.createTask(finalData);
+
+    // Save to Firestore cloud backend
     try {
-      const res = await fetch(`${API_BASE}/tasks`, {
+      await firestoreClient.saveTask(created);
+    } catch (e) {}
+
+    try {
+      await fetch(`${API_BASE}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalData)
+        body: JSON.stringify(created)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { task: nayraBackend.createTask(finalData) };
+
+    return { task: created };
   },
 
   async updateTask(id: string, task: Partial<Task>): Promise<{ task: Task }> {
@@ -155,15 +176,22 @@ export const api = {
     if (googleClientSync.isConnected() && googleId) {
       googleClientSync.updateGoogleTask(googleId, task, taskListId).catch(() => {});
     }
+    const updated = nayraBackend.updateTask(id, task);
+
+    // Save to Firestore cloud backend
     try {
-      const res = await fetch(`${API_BASE}/tasks/${id}`, {
+      await firestoreClient.saveTask(updated);
+    } catch (e) {}
+
+    try {
+      await fetch(`${API_BASE}/tasks/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(task)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { task: nayraBackend.updateTask(id, task) };
+
+    return { task: updated };
   },
 
   async deleteTask(id: string): Promise<{ success: boolean }> {
@@ -171,11 +199,18 @@ export const api = {
     if (googleClientSync.isConnected() && existing?.googleTaskId) {
       googleClientSync.deleteGoogleTask(existing.googleTaskId, existing.googleTaskListId || '@default').catch(() => {});
     }
+    nayraBackend.deleteTask(id);
+
+    // Delete from Firestore cloud backend
     try {
-      const res = await fetch(`${API_BASE}/tasks/${id}`, { method: 'DELETE' });
-      if (res.ok) return await res.json();
+      await firestoreClient.deleteTask(id);
     } catch (e) {}
-    return { success: nayraBackend.deleteTask(id) };
+
+    try {
+      await fetch(`${API_BASE}/tasks/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+
+    return { success: true };
   },
 
   async syncTasks(): Promise<{ success: boolean; syncedCount: number; message: string; tasks?: Task[] }> {
@@ -294,55 +329,80 @@ export const api = {
 
   // --- Habits ---
   async getHabits(): Promise<{ habits: Habit[] }> {
+    // 1. Try local Express API if running
     try {
       const res = await fetch(`${API_BASE}/habits`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.habits && data.habits.length > 0) return data;
+      }
     } catch (e) {}
+
+    // 2. Query persistent cloud Firestore backend
+    try {
+      const fsHabits = await firestoreClient.getHabits();
+      if (fsHabits && fsHabits.length > 0) {
+        return { habits: fsHabits };
+      }
+    } catch (e) {}
+
     return { habits: nayraBackend.getHabits() };
   },
 
   async createHabit(habit: Partial<Habit>): Promise<{ habit: Habit }> {
+    const created = nayraBackend.createHabit(habit);
     try {
-      const res = await fetch(`${API_BASE}/habits`, {
+      await firestoreClient.saveHabit(created);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/habits`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(habit)
+        body: JSON.stringify(created)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { habit: nayraBackend.createHabit(habit) };
+    return { habit: created };
   },
 
   async updateHabit(id: string, habit: Partial<Habit>): Promise<{ habit: Habit }> {
+    const updated = nayraBackend.updateHabit(id, habit);
     try {
-      const res = await fetch(`${API_BASE}/habits/${id}`, {
+      await firestoreClient.saveHabit(updated);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/habits/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(habit)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { habit: nayraBackend.updateHabit(id, habit) };
+    return { habit: updated };
   },
 
   async toggleHabit(id: string, date?: string): Promise<{ success: boolean; habit: Habit; isCompletedToday: boolean }> {
+    const res = nayraBackend.toggleHabit(id, date);
     try {
-      const res = await fetch(`${API_BASE}/habits/${id}/toggle`, {
+      await firestoreClient.saveHabit(res.habit);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/habits/${id}/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date })
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return nayraBackend.toggleHabit(id, date);
+    return res;
   },
 
   async deleteHabit(id: string): Promise<{ success: boolean }> {
+    nayraBackend.deleteHabit(id);
     try {
-      const res = await fetch(`${API_BASE}/habits/${id}`, { method: 'DELETE' });
-      if (res.ok) return await res.json();
+      await firestoreClient.deleteHabit(id);
     } catch (e) {}
-    return { success: nayraBackend.deleteHabit(id) };
+    try {
+      await fetch(`${API_BASE}/habits/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+    return { success: true };
   },
 
   async getHabitsStats(): Promise<HabitStatsResponse> {
@@ -357,62 +417,96 @@ export const api = {
   async getNotes(): Promise<{ notes: KeepNote[] }> {
     try {
       const res = await fetch(`${API_BASE}/keep`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.notes && data.notes.length > 0) return data;
+      }
     } catch (e) {}
+
+    try {
+      const fsNotes = await firestoreClient.getNotes();
+      if (fsNotes && fsNotes.length > 0) {
+        return { notes: fsNotes };
+      }
+    } catch (e) {}
+
     return { notes: nayraBackend.getNotes() };
   },
 
   async createNote(note: Partial<KeepNote>): Promise<{ note: KeepNote }> {
+    const created = nayraBackend.createNote(note);
     try {
-      const res = await fetch(`${API_BASE}/keep`, {
+      await firestoreClient.saveNote(created);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/keep`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(note)
+        body: JSON.stringify(created)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { note: nayraBackend.createNote(note) };
+    return { note: created };
   },
 
   async updateNote(id: string, note: Partial<KeepNote>): Promise<{ note: KeepNote }> {
+    const updated = nayraBackend.updateNote(id, note);
     try {
-      const res = await fetch(`${API_BASE}/keep/${id}`, {
+      await firestoreClient.saveNote(updated);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/keep/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(note)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { note: nayraBackend.updateNote(id, note) };
+    return { note: updated };
   },
 
   async deleteNote(id: string): Promise<{ success: boolean }> {
+    nayraBackend.deleteNote(id);
     try {
-      const res = await fetch(`${API_BASE}/keep/${id}`, { method: 'DELETE' });
-      if (res.ok) return await res.json();
+      await firestoreClient.deleteNote(id);
     } catch (e) {}
-    return { success: nayraBackend.deleteNote(id) };
+    try {
+      await fetch(`${API_BASE}/keep/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+    return { success: true };
   },
 
   // --- Pomodoro & Time Tracking ---
   async getTimeLogs(): Promise<{ logs: TimeLog[] }> {
     try {
       const res = await fetch(`${API_BASE}/pomodoro/logs`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.logs && data.logs.length > 0) return data;
+      }
     } catch (e) {}
+
+    try {
+      const fsLogs = await firestoreClient.getTimeLogs();
+      if (fsLogs && fsLogs.length > 0) {
+        return { logs: fsLogs };
+      }
+    } catch (e) {}
+
     return { logs: nayraBackend.getTimeLogs() };
   },
 
   async logTime(entry: Partial<TimeLog>): Promise<{ log: TimeLog }> {
+    const created = nayraBackend.logTime(entry);
     try {
-      const res = await fetch(`${API_BASE}/pomodoro/log`, {
+      await firestoreClient.saveTimeLog(created);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/pomodoro/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entry)
+        body: JSON.stringify(created)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { log: nayraBackend.logTime(entry) };
+    return { log: created };
   },
 
   async getPomodoroStats(): Promise<any> {
@@ -429,56 +523,141 @@ export const api = {
 
   // --- Nutrition & Calorie Tracking ---
   async getNutritionSummary(date?: string): Promise<NutritionSummaryResponse> {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+
     try {
-      const url = date ? `${API_BASE}/calories?date=${date}` : `${API_BASE}/calories`;
+      const url = `${API_BASE}/calories?date=${targetDate}`;
       const res = await fetch(url);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.meals && data.meals.length > 0) return data;
+      }
     } catch (e) {}
-    return nayraBackend.getNutritionSummary(date);
+
+    try {
+      const fsMeals = await firestoreClient.getMealEntries(targetDate);
+      const fsTarget = await firestoreClient.getDailyTarget(targetDate);
+      if (fsMeals && (fsMeals.length > 0 || fsTarget)) {
+        const target = fsTarget || {
+          date: targetDate,
+          targetCalories: 2200,
+          targetProtein: 140,
+          targetCarbs: 220,
+          targetFat: 65,
+          waterIntakeMl: 1250
+        };
+
+        const consumedCalories = fsMeals.reduce((acc, m) => acc + (m.totalCalories || 0), 0);
+        const consumedProtein = Number(fsMeals.reduce((acc, m) => acc + (m.totalProtein || 0), 0).toFixed(1));
+        const consumedCarbs = Number(fsMeals.reduce((acc, m) => acc + (m.totalCarbs || 0), 0).toFixed(1));
+        const consumedFat = Number(fsMeals.reduce((acc, m) => acc + (m.totalFat || 0), 0).toFixed(1));
+
+        const mealBreakdown = {
+          breakfast: fsMeals.filter(m => m.mealType === 'breakfast').reduce((acc, m) => acc + (m.totalCalories || 0), 0),
+          lunch: fsMeals.filter(m => m.mealType === 'lunch').reduce((acc, m) => acc + (m.totalCalories || 0), 0),
+          dinner: fsMeals.filter(m => m.mealType === 'dinner').reduce((acc, m) => acc + (m.totalCalories || 0), 0),
+          snack: fsMeals.filter(m => m.mealType === 'snack').reduce((acc, m) => acc + (m.totalCalories || 0), 0)
+        };
+
+        return {
+          date: targetDate,
+          summary: {
+            targetCalories: target.targetCalories,
+            consumedCalories,
+            remainingCalories: Math.max(0, target.targetCalories - consumedCalories),
+            targetProtein: target.targetProtein,
+            consumedProtein,
+            targetCarbs: target.targetCarbs,
+            consumedCarbs,
+            targetFat: target.targetFat,
+            consumedFat,
+            waterIntakeMl: target.waterIntakeMl,
+            mealBreakdown
+          },
+          meals: fsMeals
+        };
+      }
+    } catch (e) {}
+
+    return nayraBackend.getNutritionSummary(targetDate);
   },
 
   async addMealFromText(text: string, mealType?: string): Promise<{ success: boolean; message: string; meal: MealEntry }> {
+    const res = nayraBackend.addMealFromText(text, mealType);
     try {
-      const res = await fetch(`${API_BASE}/calories/add-meal`, {
+      await firestoreClient.saveMealEntry(res.meal);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/calories/add-meal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, mealType })
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return nayraBackend.addMealFromText(text, mealType);
+    return res;
   },
 
   async deleteMeal(id: string): Promise<{ success: boolean }> {
+    nayraBackend.deleteMeal(id);
     try {
-      const res = await fetch(`${API_BASE}/calories/meal/${id}`, { method: 'DELETE' });
-      if (res.ok) return await res.json();
+      await firestoreClient.deleteMealEntry(id);
     } catch (e) {}
-    return { success: nayraBackend.deleteMeal(id) };
+    try {
+      await fetch(`${API_BASE}/calories/meal/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+    return { success: true };
   },
 
   async updateDailyTarget(target: Partial<DailyNutritionTarget>): Promise<{ target: DailyNutritionTarget }> {
+    const targetDate = target.date || new Date().toISOString().split('T')[0];
+    const fullTarget: DailyNutritionTarget = {
+      date: targetDate,
+      targetCalories: target.targetCalories || 2200,
+      targetProtein: target.targetProtein || 140,
+      targetCarbs: target.targetCarbs || 220,
+      targetFat: target.targetFat || 65,
+      waterIntakeMl: target.waterIntakeMl || 1250
+    };
     try {
-      const res = await fetch(`${API_BASE}/calories/target`, {
+      await firestoreClient.updateDailyTarget(fullTarget);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/calories/target`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(target)
+        body: JSON.stringify(fullTarget)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { target: target as DailyNutritionTarget };
+    return { target: fullTarget };
   },
 
   async logWater(amountMl: number = 250): Promise<{ success: boolean; waterIntakeMl: number }> {
+    const res = nayraBackend.logWater(amountMl);
+    const todayStr = new Date().toISOString().split('T')[0];
     try {
-      const res = await fetch(`${API_BASE}/calories/water`, {
+      let target = await firestoreClient.getDailyTarget(todayStr);
+      if (!target) {
+        target = {
+          date: todayStr,
+          targetCalories: 2200,
+          targetProtein: 140,
+          targetCarbs: 220,
+          targetFat: 65,
+          waterIntakeMl: res.waterIntakeMl
+        };
+      } else {
+        target.waterIntakeMl = res.waterIntakeMl;
+      }
+      await firestoreClient.updateDailyTarget(target);
+    } catch (e) {}
+    try {
+      await fetch(`${API_BASE}/calories/water`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amountMl })
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return nayraBackend.logWater(amountMl);
+    return res;
   },
 
   // --- Assistant & Briefing ---

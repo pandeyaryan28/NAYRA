@@ -40,7 +40,9 @@ const FOOD_DATABASE: NutritionRef[] = [
   { keywords: ['burger', 'sandwich'], unitCalories: 400, unitProtein: 20.0, unitCarbs: 38.0, unitFat: 18.0, defaultUnit: '1 serving' },
   { keywords: ['pasta'], unitCalories: 220, unitProtein: 8.0, unitCarbs: 43.0, unitFat: 1.5, defaultUnit: '1 cup cooked' },
   { keywords: ['butter', 'ghee'], unitCalories: 102, unitProtein: 0.1, unitCarbs: 0.0, unitFat: 11.5, defaultUnit: '1 tbsp' },
-  { keywords: ['olive oil', 'oil'], unitCalories: 119, unitProtein: 0.0, unitCarbs: 0.0, unitFat: 13.5, defaultUnit: '1 tbsp' }
+  { keywords: ['olive oil', 'oil'], unitCalories: 119, unitProtein: 0.0, unitCarbs: 0.0, unitFat: 13.5, defaultUnit: '1 tbsp' },
+  { keywords: ['appe', 'appam', 'paniyaram', 'paddu', 'kuzhi paniyaram'], unitCalories: 270, unitProtein: 6.6, unitCarbs: 48.0, unitFat: 7.2, defaultUnit: 'plate (6 pcs)' },
+  { keywords: ['pomegranate', 'anar', 'anaar'], unitCalories: 145, unitProtein: 2.9, unitCarbs: 32.5, unitFat: 1.6, defaultUnit: '1 medium fruit' }
 ];
 
 export class NutritionEstimatorService {
@@ -63,28 +65,38 @@ export class NutritionEstimatorService {
       mealType = 'snack';
     }
 
-    // 2. Extract food clauses (split by comma, 'and', '+', '&', 'with')
+    // 2. Extract food clauses (pre-normalize compound fraction expressions before splitting on 'and')
     const cleaned = textLower
       .replace(/for (breakfast|lunch|dinner|snack|my meal)/g, '')
-      .replace(/i (had|ate|consumed|drank|took)/g, '')
-      .replace(/today/g, '');
+      .replace(/i (had|ate|consumed|drank|took|got)/g, '')
+      .replace(/today/g, '')
+      .replace(/\b(one|1)\s+and\s+(a\s+)?half\b/gi, '1.5')
+      .replace(/\b(two|2)\s+and\s+(a\s+)?half\b/gi, '2.5')
+      .replace(/\b(three|3)\s+and\s+(a\s+)?half\b/gi, '3.5')
+      .replace(/\bhalf\s+(a\s+|an\s+)?/gi, '0.5 ');
 
     const clauses = cleaned.split(/,|\band\b|\+|\bwith\b|\n/).map(c => c.trim()).filter(c => c.length > 0);
 
     const items: FoodItem[] = [];
 
     for (const clause of clauses) {
-      // Find quantity multiplier (e.g. "2 eggs", "3 slices", "100g", "half")
+      // Find quantity multiplier (e.g. "2 eggs", "3 slices", "100g", "half", "one and a half")
       let count = 1;
-      const numMatch = clause.match(/(\d+(\.\d+)?)/);
-      if (numMatch) {
-        count = parseFloat(numMatch[1]);
-      } else if (clause.includes('half')) {
-        count = 0.5;
-      } else if (clause.includes('a pair') || clause.includes('couple')) {
-        count = 2;
-      } else if (clause.includes('a ') || clause.includes('an ') || clause.includes('one ')) {
-        count = 1;
+      if (clause.includes('one and a half') || clause.includes('1 and a half') || clause.includes('1.5')) {
+        count = 1.5;
+      } else if (clause.includes('two and a half') || clause.includes('2 and a half') || clause.includes('2.5')) {
+        count = 2.5;
+      } else {
+        const numMatch = clause.match(/(\d+(\.\d+)?)/);
+        if (numMatch) {
+          count = parseFloat(numMatch[1]);
+        } else if (clause.includes('half')) {
+          count = 0.5;
+        } else if (clause.includes('a pair') || clause.includes('couple')) {
+          count = 2;
+        } else if (clause.includes('a ') || clause.includes('an ') || clause.includes('one ')) {
+          count = 1;
+        }
       }
 
       // Match against food database
