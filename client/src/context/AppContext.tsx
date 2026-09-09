@@ -10,6 +10,7 @@ import type {
   Habit 
 } from '../types/index.js';
 import { api } from '../services/api.js';
+import { googleClientSync } from '../services/googleClientSync.js';
 
 export type TabType = 'overview' | 'tasks' | 'calendar' | 'habits' | 'pomodoro' | 'nutrition' | 'keep' | 'assistant';
 
@@ -26,6 +27,8 @@ interface AppContextType {
   nutritionData: NutritionSummaryResponse | null;
   stats: OverviewStats | null;
   authStatus: any;
+  isAuthenticated: boolean;
+  isGuestMode: boolean;
   isLoading: boolean;
   isSyncing: boolean;
   notification: { message: string; type: 'info' | 'success' | 'warning' | 'error' } | null;
@@ -39,6 +42,8 @@ interface AppContextType {
   connectGoogle: () => Promise<void>;
   connectGoogleManual: (token: string) => Promise<void>;
   disconnectGoogle: () => Promise<void>;
+  enterGuestMode: () => void;
+  logout: () => Promise<void>;
   submitManualGoogleCode: (code: string) => Promise<void>;
   toggleHabit: (id: string, date?: string) => Promise<void>;
   createHabit: (habit: Partial<Habit>) => Promise<void>;
@@ -65,11 +70,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [nutritionData, setNutritionData] = useState<NutritionSummaryResponse | null>(null);
   const [stats, setStats] = useState<OverviewStats | null>(null);
   const [authStatus, setAuthStatus] = useState<any>(null);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('nayra_guest_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: 'info' | 'success' | 'warning' | 'error' } | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const [isNayraChatOpen, setIsNayraChatOpen] = useState<boolean>(false);
+
+  const isAuthenticated = Boolean(
+    authStatus?.googleConnected || 
+    googleClientSync.isConnected() || 
+    isGuestMode
+  );
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -152,7 +170,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       // 1. Direct browser Google Identity Services popup
       try {
         const { user } = await api.connectGoogleGIS();
+        localStorage.removeItem('nayra_guest_mode');
+        setIsGuestMode(false);
         showToast(`Google connected as ${user.email}! Syncing live tasks & calendar...`, 'success');
+        await Promise.allSettled([syncGoogleTasks(), syncGoogleCalendar()]);
         await refreshAll();
         return;
       } catch (gisErr: any) {
@@ -172,13 +193,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     } catch (e: any) {
       showToast(e.message || 'Error connecting Google account', 'error');
+      throw e;
     }
   };
 
   const connectGoogleManual = async (token: string) => {
     try {
       const res = await api.connectGoogleManual(token);
+      localStorage.removeItem('nayra_guest_mode');
+      setIsGuestMode(false);
       showToast(`Google Account linked: ${res.user.email}!`, 'success');
+      await Promise.allSettled([syncGoogleTasks(), syncGoogleCalendar()]);
       await refreshAll();
     } catch (e: any) {
       showToast(e.message || 'Invalid or expired Google token', 'error');
@@ -186,10 +211,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  const disconnectGoogle = async () => {
-    await api.logoutGoogle();
-    showToast('Google Account disconnected.', 'info');
+  const enterGuestMode = () => {
+    localStorage.setItem('nayra_guest_mode', 'true');
+    setIsGuestMode(true);
+    showToast('Entered Command Center in Offline Terminal mode.', 'info');
+    refreshAll();
+  };
+
+  const logout = async () => {
+    googleClientSync.disconnect();
+    localStorage.removeItem('nayra_guest_mode');
+    setIsGuestMode(false);
+    try {
+      await api.logoutGoogle();
+    } catch {}
+    setAuthStatus({
+      authenticated: false,
+      isGuest: false,
+      googleConnected: false,
+      user: null
+    });
+    showToast('Terminal session locked. Signed out.', 'info');
     await refreshAll();
+  };
+
+  const disconnectGoogle = async () => {
+    await logout();
   };
 
   const submitManualGoogleCode = async (code: string) => {
@@ -298,6 +345,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         nutritionData,
         stats,
         authStatus,
+        isAuthenticated,
+        isGuestMode,
         isLoading,
         isSyncing,
         notification,
@@ -311,6 +360,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         connectGoogle,
         connectGoogleManual,
         disconnectGoogle,
+        enterGuestMode,
+        logout,
         submitManualGoogleCode,
         toggleHabit,
         createHabit,

@@ -23,6 +23,7 @@ export const api = {
       const storedUser = googleClientSync.getStoredUser();
       return {
         authenticated: true,
+        isGuest: false,
         isMock: false,
         googleConnected: true,
         googleConfigured: true,
@@ -34,7 +35,23 @@ export const api = {
       };
     }
 
-    // 2. Server-side session check if backend is running
+    // 2. Client-side Guest / Offline terminal mode
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('nayra_guest_mode') === 'true') {
+      return {
+        authenticated: true,
+        isGuest: true,
+        isMock: false,
+        googleConnected: false,
+        googleConfigured: true,
+        user: {
+          name: 'Aryan Pandey (Offline)',
+          email: 'offline@nayra.terminal',
+          picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=AryanOffline'
+        }
+      };
+    }
+
+    // 3. Server-side session check if backend is running
     try {
       const res = await fetch(`${API_BASE}/auth/status`);
       if (res.ok) {
@@ -44,15 +61,12 @@ export const api = {
     } catch (e) {}
 
     return {
-      authenticated: true,
+      authenticated: false,
+      isGuest: false,
       isMock: false,
       googleConnected: false,
       googleConfigured: true,
-      user: {
-        name: 'Aryan Pandey',
-        email: 'aaryanpandey28@gmail.com',
-        picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=AryanPandey'
-      }
+      user: null
     };
   },
 

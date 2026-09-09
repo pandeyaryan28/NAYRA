@@ -1,18 +1,31 @@
 import type { Task, CalendarEvent } from '../types/index.js';
 import { nayraBackend } from './store.js';
 
-export const DEFAULT_GOOGLE_CLIENT_ID = '595101892863-do2qv8thbu5fno4mbbchq4090stfl3de.apps.googleusercontent.com';
+export const DEFAULT_GOOGLE_CLIENT_ID = '906360138563-m704v2qgn2q9408i85m9ijpief98ovm2.apps.googleusercontent.com';
+
+export const GOOGLE_CLOUD_PROJECT_ID = 'nyra-ap28-2026';
+
+export const GOOGLE_API_ENABLE_LINKS = {
+  tasks: `https://console.cloud.google.com/apis/library/tasks.googleapis.com?project=${GOOGLE_CLOUD_PROJECT_ID}`,
+  calendar: `https://console.cloud.google.com/apis/library/calendar-json.googleapis.com?project=${GOOGLE_CLOUD_PROJECT_ID}`,
+  consent: `https://console.cloud.google.com/apis/credentials/consent?project=${GOOGLE_CLOUD_PROJECT_ID}`
+};
 
 export function getEffectiveClientId(): string {
   try {
     const custom = localStorage.getItem('nayra_google_client_id');
+    // Invalidate old deleted client ID from previous project
+    if (custom && (custom.includes('595101892863') || custom === DEFAULT_GOOGLE_CLIENT_ID)) {
+      localStorage.removeItem('nayra_google_client_id');
+      return DEFAULT_GOOGLE_CLIENT_ID;
+    }
     if (custom && custom.trim().length > 10) return custom.trim();
   } catch {}
   return DEFAULT_GOOGLE_CLIENT_ID;
 }
 
 export function setCustomClientId(clientId: string): void {
-  if (clientId && clientId.trim()) {
+  if (clientId && clientId.trim() && clientId.trim() !== DEFAULT_GOOGLE_CLIENT_ID) {
     localStorage.setItem('nayra_google_client_id', clientId.trim());
   } else {
     localStorage.removeItem('nayra_google_client_id');
@@ -187,7 +200,15 @@ export class GoogleClientSyncService {
         this.disconnect();
         throw new Error('Google token expired. Please reconnect.');
       }
-      throw new Error(`Failed to fetch task lists (${listsRes.status})`);
+      let errDetail = '';
+      try {
+        const errJson = await listsRes.json();
+        errDetail = errJson.error?.message || '';
+      } catch {}
+      if (listsRes.status === 403 && (errDetail.toLowerCase().includes('not been used') || errDetail.toLowerCase().includes('disabled') || errDetail.toLowerCase().includes('accessnotconfigured'))) {
+        throw new Error(`Google Tasks API is not enabled in project ${GOOGLE_CLOUD_PROJECT_ID}. Enable it here: ${GOOGLE_API_ENABLE_LINKS.tasks}`);
+      }
+      throw new Error(`Failed to fetch task lists (${listsRes.status})${errDetail ? `: ${errDetail}` : ''}`);
     }
 
     const listsData = await listsRes.json();
@@ -270,7 +291,15 @@ export class GoogleClientSyncService {
         this.disconnect();
         throw new Error('Google token expired. Please reconnect.');
       }
-      throw new Error(`Failed to fetch calendar events (${res.status})`);
+      let errDetail = '';
+      try {
+        const errJson = await res.json();
+        errDetail = errJson.error?.message || '';
+      } catch {}
+      if (res.status === 403 && (errDetail.toLowerCase().includes('not been used') || errDetail.toLowerCase().includes('disabled') || errDetail.toLowerCase().includes('accessnotconfigured'))) {
+        throw new Error(`Google Calendar API is not enabled in project ${GOOGLE_CLOUD_PROJECT_ID}. Enable it here: ${GOOGLE_API_ENABLE_LINKS.calendar}`);
+      }
+      throw new Error(`Failed to fetch calendar events (${res.status})${errDetail ? `: ${errDetail}` : ''}`);
     }
 
     const data = await res.json();

@@ -18,13 +18,20 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { getEffectiveClientId, setCustomClientId } from '../../services/googleClientSync.js';
+import { 
+  getEffectiveClientId, 
+  setCustomClientId, 
+  GOOGLE_CLOUD_PROJECT_ID, 
+  GOOGLE_API_ENABLE_LINKS 
+} from '../../services/googleClientSync.js';
 
 export const Header: React.FC = () => {
   const { 
     theme, 
     toggleTheme, 
     authStatus, 
+    isGuestMode,
+    logout,
     isSyncing, 
     refreshAll, 
     connectGoogle,
@@ -195,13 +202,27 @@ export const Header: React.FC = () => {
             <span>Ask Nayra</span>
           </button>
 
-          {/* User Pill */}
+          {/* User Pill & Lock/Signout */}
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-zinc-800">
-            <img
-              src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'}
-              alt="Commander"
-              className="w-7 h-7 rounded-full bg-slate-200 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700"
-            />
+            <button
+              onClick={() => setIsGoogleModalOpen(true)}
+              title={authStatus?.user?.email || (isGuestMode ? 'Guest / Offline' : 'Commander Aryan')}
+              className="flex items-center gap-1.5 p-0.5 rounded-full hover:ring-2 hover:ring-indigo-500/30 transition-all cursor-pointer"
+            >
+              <img
+                src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'}
+                alt="Commander"
+                className="w-7 h-7 rounded-full bg-slate-200 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 object-cover"
+              />
+            </button>
+
+            <button
+              onClick={logout}
+              title="Lock Command Center / Sign Out"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </header>
@@ -329,18 +350,38 @@ export const Header: React.FC = () => {
                         <span>{isSubmitting ? 'Opening Google...' : 'Sign in with Google'}</span>
                       </button>
 
-                      {/* Error 401 Deleted Client / Setup Helper */}
-                      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 space-y-1.5">
+                      {/* Active GCP Client Info & API Enablement Links */}
+                      <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 text-[11px] text-indigo-900 dark:text-indigo-200 space-y-2">
                         <div className="font-semibold flex items-center gap-1.5">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                          <span>Fixing "Error 401: deleted_client"</span>
+                          <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                          <span>Active Project: {GOOGLE_CLOUD_PROJECT_ID}</span>
                         </div>
-                        <p className="text-[10px] leading-relaxed text-amber-700 dark:text-amber-400">
-                          If Google displays <em>"The OAuth client was deleted"</em>, your old GCP client ID was removed in Google Cloud Console.
+                        <p className="text-[10px] leading-relaxed text-indigo-800 dark:text-indigo-300">
+                          Connected via Client ID: <code className="font-mono text-[9px] bg-indigo-100 dark:bg-indigo-900/60 px-1 py-0.5 rounded">906360138563-...</code>
                         </p>
-                        <div className="text-[10px] space-y-1 text-amber-900 dark:text-amber-200">
-                          <p>• <strong>Instant (0 setup):</strong> Open the <strong>Instant Token</strong> tab, paste an OAuth token from <a href="https://developers.google.com/oauthplayground" target="_blank" rel="noreferrer" className="underline font-semibold">Google OAuth Playground</a> with Tasks & Calendar scopes, and link instantly.</p>
-                          <p>• <strong>Permanent:</strong> Create an OAuth Client ID in your Google Cloud Console for project <code className="px-1 py-0.5 rounded bg-amber-200/60 dark:bg-amber-900/60 font-mono text-[10px]">nyra-ap28-2026</code>, paste it in the <strong>Client ID</strong> tab, and click Save!</p>
+                        <div className="text-[10px] space-y-1">
+                          <p className="text-zinc-600 dark:text-zinc-400">Ensure APIs are enabled in Google Cloud Console:</p>
+                          <div className="flex gap-2">
+                            <a
+                              href={GOOGLE_API_ENABLE_LINKS.tasks}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                            >
+                              <span>Enable Tasks API</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                            <span>•</span>
+                            <a
+                              href={GOOGLE_API_ENABLE_LINKS.calendar}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
+                            >
+                              <span>Enable Calendar API</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>

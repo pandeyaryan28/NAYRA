@@ -12,9 +12,23 @@ import { PomodoroTimer } from './components/pomodoro/PomodoroTimer.js';
 import { CalorieTracker } from './components/nutrition/CalorieTracker.js';
 import { KeepNotesView } from './components/keep/KeepNotesView.js';
 import { NayraChatModal } from './components/assistant/NayraChatModal.js';
+import { LoginPage } from './components/auth/LoginPage.js';
 
 const MainContent: React.FC = () => {
-  const { activeTab, isLoading } = useApp();
+  const { activeTab, isLoading, isAuthenticated } = useApp();
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center space-y-3 bg-[#0a0a0d] text-zinc-400">
+        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs font-mono tracking-widest text-zinc-400">INITIALIZING NAYRA COMMAND CENTER...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
@@ -22,23 +36,14 @@ const MainContent: React.FC = () => {
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#09090b]">
-          {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center space-y-2 text-zinc-400 dark:text-zinc-500">
-              <div className="w-6 h-6 border-2 border-zinc-900 dark:border-zinc-100 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-xs font-mono">Loading NAYRA...</p>
-            </div>
-          ) : (
-            <>
-              {activeTab === 'overview' && <OverviewDashboard />}
-              {activeTab === 'tasks' && <TaskManager />}
-              {activeTab === 'calendar' && <CalendarView />}
-              {activeTab === 'habits' && <HabitsView />}
-              {activeTab === 'pomodoro' && <PomodoroTimer />}
-              {activeTab === 'nutrition' && <CalorieTracker />}
-              {activeTab === 'keep' && <KeepNotesView />}
-              {activeTab === 'assistant' && <OverviewDashboard />}
-            </>
-          )}
+          {activeTab === 'overview' && <OverviewDashboard />}
+          {activeTab === 'tasks' && <TaskManager />}
+          {activeTab === 'calendar' && <CalendarView />}
+          {activeTab === 'habits' && <HabitsView />}
+          {activeTab === 'pomodoro' && <PomodoroTimer />}
+          {activeTab === 'nutrition' && <CalorieTracker />}
+          {activeTab === 'keep' && <KeepNotesView />}
+          {activeTab === 'assistant' && <OverviewDashboard />}
         </main>
       </div>
 
