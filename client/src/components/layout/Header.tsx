@@ -15,7 +15,8 @@ import {
   Key,
   ShieldCheck,
   Settings,
-  AlertTriangle
+  AlertTriangle,
+  Palette
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -29,6 +30,8 @@ export const Header: React.FC = () => {
   const { 
     theme, 
     toggleTheme, 
+    uiStyle,
+    setIsSettingsOpen,
     authStatus, 
     isGuestMode,
     logout,
@@ -178,6 +181,16 @@ export const Header: React.FC = () => {
             className="p-2 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-slate-800 dark:text-zinc-200' : ''}`} />
+          </button>
+
+          {/* Appearance & UI Style Studio */}
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            title="Appearance Studio - Switch UI Style (Glass, Neumorph, Clay, etc.) (Cmd+,)"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-zinc-800 bg-slate-100/80 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-200/80 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-2xs"
+          >
+            <Palette className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="capitalize font-mono text-[11px] hidden sm:inline">{uiStyle}</span>
           </button>
 
           {/* Dark / Light Theme Toggle */}

@@ -11,7 +11,10 @@ import {
   RefreshCw, 
   Plus, 
   X,
-  ArrowRight
+  ArrowRight,
+  Palette,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const QuickCommandPalette: React.FC = () => {
@@ -22,6 +25,10 @@ export const QuickCommandPalette: React.FC = () => {
     syncGoogleTasks, 
     syncGoogleCalendar,
     setIsNayraChatOpen,
+    setUiStyle,
+    setIsSettingsOpen,
+    toggleTheme,
+    showToast,
     tasks,
     notes
   } = useApp();
@@ -141,6 +148,95 @@ export const QuickCommandPalette: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Bot className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Ask Nayra AI</span>
+                </div>
+                <ArrowRight className="w-3 h-3 text-zinc-400" />
+              </button>
+
+              {/* Appearance & Themes */}
+              <button
+                onClick={() => handleSelect(() => setIsSettingsOpen(true))}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <Palette className="w-3.5 h-3.5" />
+                  <span className="font-medium">Appearance & UI Style Studio (Cmd+,)</span>
+                </div>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => { setUiStyle('glassmorphism'); showToast('Applied Glassmorphism style', 'success'); })}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span>Style: Glassmorphism</span>
+                </div>
+                <span className="text-[10px] text-zinc-400 font-mono">Frosted Glass</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => { setUiStyle('neumorphism'); showToast('Applied Neumorphism style', 'success'); })}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-slate-400" />
+                  <span>Style: Neumorphism</span>
+                </div>
+                <span className="text-[10px] text-zinc-400 font-mono">Soft Extrusions</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => { setUiStyle('claymorphism'); showToast('Applied Claymorphism style', 'success'); })}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Style: Claymorphism</span>
+                </div>
+                <span className="text-[10px] text-zinc-400 font-mono">Puffy 3D Clay</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => { setUiStyle('brutalism'); showToast('Applied Neo-Brutalism style', 'success'); })}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  <span>Style: Neo-Brutalism</span>
+                </div>
+                <span className="text-[10px] text-zinc-400 font-mono">Bold Retro</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => { setUiStyle('cyberpunk'); showToast('Applied Cyberpunk style', 'success'); })}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                  <span>Style: Cyberpunk Neon</span>
+                </div>
+                <span className="text-[10px] text-zinc-400 font-mono">Sci-Fi HUD</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => { setUiStyle('minimal'); showToast('Applied Modern Minimal style', 'success'); })}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-zinc-400" />
+                  <span>Style: Modern Minimal</span>
+                </div>
+                <span className="text-[10px] text-zinc-400 font-mono">Precision</span>
+              </button>
+
+              <button
+                onClick={() => handleSelect(() => toggleTheme())}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <Sun className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Toggle Dark / Light Mode</span>
                 </div>
                 <ArrowRight className="w-3 h-3 text-zinc-400" />
               </button>

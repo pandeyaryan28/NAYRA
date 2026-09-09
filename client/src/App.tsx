@@ -12,6 +12,7 @@ import { PomodoroTimer } from './components/pomodoro/PomodoroTimer.js';
 import { CalorieTracker } from './components/nutrition/CalorieTracker.js';
 import { KeepNotesView } from './components/keep/KeepNotesView.js';
 import { NayraChatModal } from './components/assistant/NayraChatModal.js';
+import { SettingsModal } from './components/settings/SettingsModal.js';
 import { LoginPage } from './components/auth/LoginPage.js';
 
 const MainContent: React.FC = () => {
@@ -50,6 +51,7 @@ const MainContent: React.FC = () => {
       <QuickCommandPalette />
       <NayraOrb />
       <NayraChatModal />
+      <SettingsModal />
     </div>
   );
 };

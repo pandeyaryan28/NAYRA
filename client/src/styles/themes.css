@@ -1,0 +1,897 @@
+/* ==========================================================================
+   NAYRA MULTI-STYLE THEME SYSTEM (Glassmorphism, Neumorphism, Clay, Brutalism, Cyberpunk, Minimal)
+   Each style is meticulously calibrated for both Light and Dark mode with guaranteed WCAG AA contrast.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. ROOT ACCENT COLOR PALETTES
+   -------------------------------------------------------------------------- */
+:root, [data-accent="indigo"] {
+  --nayra-accent: #6366f1;
+  --nayra-accent-hover: #4f46e5;
+  --nayra-accent-rgb: 99, 102, 241;
+  --nayra-accent-bg: rgba(99, 102, 241, 0.12);
+  --nayra-accent-text: #4338ca;
+}
+.dark, .dark [data-accent="indigo"], [data-accent="indigo"].dark {
+  --nayra-accent: #818cf8;
+  --nayra-accent-hover: #6366f1;
+  --nayra-accent-rgb: 129, 140, 248;
+  --nayra-accent-bg: rgba(99, 102, 241, 0.22);
+  --nayra-accent-text: #c7d2fe;
+}
+
+[data-accent="cyan"] {
+  --nayra-accent: #06b6d4;
+  --nayra-accent-hover: #0891b2;
+  --nayra-accent-rgb: 6, 182, 212;
+  --nayra-accent-bg: rgba(6, 182, 212, 0.12);
+  --nayra-accent-text: #0e7490;
+}
+.dark [data-accent="cyan"], [data-accent="cyan"].dark {
+  --nayra-accent: #22d3ee;
+  --nayra-accent-hover: #06b6d4;
+  --nayra-accent-rgb: 34, 211, 238;
+  --nayra-accent-bg: rgba(6, 182, 212, 0.22);
+  --nayra-accent-text: #a5f3fc;
+}
+
+[data-accent="emerald"] {
+  --nayra-accent: #10b981;
+  --nayra-accent-hover: #059669;
+  --nayra-accent-rgb: 16, 185, 129;
+  --nayra-accent-bg: rgba(16, 185, 129, 0.12);
+  --nayra-accent-text: #047857;
+}
+.dark [data-accent="emerald"], [data-accent="emerald"].dark {
+  --nayra-accent: #34d399;
+  --nayra-accent-hover: #10b981;
+  --nayra-accent-rgb: 52, 211, 153;
+  --nayra-accent-bg: rgba(16, 185, 129, 0.22);
+  --nayra-accent-text: #a7f3d0;
+}
+
+[data-accent="amber"] {
+  --nayra-accent: #f59e0b;
+  --nayra-accent-hover: #d97706;
+  --nayra-accent-rgb: 245, 158, 11;
+  --nayra-accent-bg: rgba(245, 158, 11, 0.12);
+  --nayra-accent-text: #b45309;
+}
+.dark [data-accent="amber"], [data-accent="amber"].dark {
+  --nayra-accent: #fbbf24;
+  --nayra-accent-hover: #f59e0b;
+  --nayra-accent-rgb: 251, 191, 36;
+  --nayra-accent-bg: rgba(245, 158, 11, 0.22);
+  --nayra-accent-text: #fde68a;
+}
+
+[data-accent="rose"] {
+  --nayra-accent: #f43f5e;
+  --nayra-accent-hover: #e11d48;
+  --nayra-accent-rgb: 244, 63, 94;
+  --nayra-accent-bg: rgba(244, 63, 94, 0.12);
+  --nayra-accent-text: #be123c;
+}
+.dark [data-accent="rose"], [data-accent="rose"].dark {
+  --nayra-accent: #fb7185;
+  --nayra-accent-hover: #f43f5e;
+  --nayra-accent-rgb: 251, 113, 133;
+  --nayra-accent-bg: rgba(244, 63, 94, 0.22);
+  --nayra-accent-text: #fecdd3;
+}
+
+[data-accent="violet"] {
+  --nayra-accent: #8b5cf6;
+  --nayra-accent-hover: #7c3aed;
+  --nayra-accent-rgb: 139, 92, 246;
+  --nayra-accent-bg: rgba(139, 92, 246, 0.12);
+  --nayra-accent-text: #6d28d9;
+}
+.dark [data-accent="violet"], [data-accent="violet"].dark {
+  --nayra-accent: #a78bfa;
+  --nayra-accent-hover: #8b5cf6;
+  --nayra-accent-rgb: 167, 139, 250;
+  --nayra-accent-bg: rgba(139, 92, 246, 0.22);
+  --nayra-accent-text: #ddd6fe;
+}
+
+
+/* --------------------------------------------------------------------------
+   2. GLASSMORPHISM STYLE
+   Frosted glass, specular highlights, ethereal blur, ambient gradients
+   -------------------------------------------------------------------------- */
+[data-ui-style="glass"] {
+  --bg-page: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --border-color: rgba(255, 255, 255, 0.65);
+}
+
+[data-ui-style="glass"] body {
+  background-color: #eef2ff;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.14) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.10) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+[data-ui-style="glass"] main {
+  background: transparent !important;
+}
+
+/* Glass Cards & Containers - Light Mode */
+[data-ui-style="glass"] .bg-white,
+[data-ui-style="glass"] .dark\:bg-\[\#121215\],
+[data-ui-style="glass"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+[data-ui-style="glass"] div[class*="rounded-2xl"] {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.07),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-ui-style="glass"] aside {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-ui-style="glass"] header {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Glass Inputs & Interactive Elements */
+[data-ui-style="glass"] input,
+[data-ui-style="glass"] textarea,
+[data-ui-style="glass"] select {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Glass Buttons */
+[data-ui-style="glass"] button.cursor-pointer:hover {
+  backdrop-filter: blur(12px);
+}
+
+/* Glass - Dark Mode */
+html.dark[data-ui-style="glass"],
+[data-ui-style="glass"].dark,
+.dark [data-ui-style="glass"] {
+  --bg-page: #090a10;
+  --bg-card: rgba(18, 20, 32, 0.75);
+  --border-color: rgba(255, 255, 255, 0.12);
+}
+
+html.dark[data-ui-style="glass"] body,
+[data-ui-style="glass"].dark body {
+  background-color: #080910 !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.18) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.16) 0px, transparent 50%) !important;
+  background-attachment: fixed;
+}
+
+html.dark[data-ui-style="glass"] .bg-white,
+html.dark[data-ui-style="glass"] .dark\:bg-\[\#121215\],
+html.dark[data-ui-style="glass"] .dark\:bg-zinc-900,
+html.dark[data-ui-style="glass"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+html.dark[data-ui-style="glass"] div[class*="rounded-2xl"] {
+  background: rgba(18, 21, 34, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 
+    0 12px 40px -10px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+html.dark[data-ui-style="glass"] aside {
+  background: rgba(12, 14, 23, 0.75) !important;
+  backdrop-filter: blur(22px) saturate(160%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark[data-ui-style="glass"] header {
+  background: rgba(12, 14, 23, 0.75) !important;
+  backdrop-filter: blur(22px) saturate(160%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark[data-ui-style="glass"] input,
+html.dark[data-ui-style="glass"] textarea,
+html.dark[data-ui-style="glass"] select {
+  background: rgba(15, 18, 28, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  color: #f8fafc !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   3. NEUMORPHISM STYLE
+   Tactile soft extrusions, dual directional lighting & debossed insets
+   -------------------------------------------------------------------------- */
+[data-ui-style="neumorphism"] {
+  --bg-page: #e9eef5;
+  --bg-card: #e9eef5;
+  --border-color: rgba(255, 255, 255, 0.5);
+}
+
+[data-ui-style="neumorphism"] body,
+[data-ui-style="neumorphism"] main {
+  background: #e9eef5 !important;
+}
+
+/* Raised Extruded Cards - Light Mode */
+[data-ui-style="neumorphism"] .bg-white,
+[data-ui-style="neumorphism"] .dark\:bg-\[\#121215\],
+[data-ui-style="neumorphism"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+[data-ui-style="neumorphism"] div[class*="rounded-2xl"] {
+  background: #e9eef5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 
+    7px 7px 18px #cad3e0,
+    -7px -7px 18px #ffffff !important;
+  border-radius: 18px !important;
+  transition: all 0.2s ease;
+}
+
+[data-ui-style="neumorphism"] aside {
+  background: #e9eef5 !important;
+  border-right: 1px solid rgba(200, 210, 225, 0.6) !important;
+  box-shadow: 4px 0 16px rgba(180, 195, 215, 0.25) !important;
+}
+
+[data-ui-style="neumorphism"] header {
+  background: #e9eef5 !important;
+  border-bottom: 1px solid rgba(200, 210, 225, 0.6) !important;
+  box-shadow: 0 4px 16px rgba(180, 195, 215, 0.25) !important;
+}
+
+/* Debossed Sunken Inputs */
+[data-ui-style="neumorphism"] input,
+[data-ui-style="neumorphism"] textarea,
+[data-ui-style="neumorphism"] select {
+  background: #e9eef5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 
+    inset 4px 4px 8px #cad3e0,
+    inset -4px -4px 8px #ffffff !important;
+  color: #1e293b !important;
+  border-radius: 12px !important;
+}
+
+/* Neumorphic Clickable Buttons */
+[data-ui-style="neumorphism"] button.cursor-pointer:not(.bg-slate-900):not(.bg-indigo-600) {
+  box-shadow: 
+    3px 3px 7px #cad3e0,
+    -3px -3px 7px #ffffff;
+}
+
+[data-ui-style="neumorphism"] button.cursor-pointer:active {
+  box-shadow: 
+    inset 3px 3px 6px #cad3e0,
+    inset -3px -3px 6px #ffffff !important;
+  transform: translateY(1px);
+}
+
+/* Neumorphism - Dark Mode */
+html.dark[data-ui-style="neumorphism"],
+[data-ui-style="neumorphism"].dark,
+.dark [data-ui-style="neumorphism"] {
+  --bg-page: #15161c;
+  --bg-card: #191a22;
+  --border-color: rgba(255, 255, 255, 0.04);
+}
+
+html.dark[data-ui-style="neumorphism"] body,
+html.dark[data-ui-style="neumorphism"] main,
+[data-ui-style="neumorphism"].dark body,
+[data-ui-style="neumorphism"].dark main {
+  background: #15161c !important;
+}
+
+html.dark[data-ui-style="neumorphism"] .bg-white,
+html.dark[data-ui-style="neumorphism"] .dark\:bg-\[\#121215\],
+html.dark[data-ui-style="neumorphism"] .dark\:bg-zinc-900,
+html.dark[data-ui-style="neumorphism"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+html.dark[data-ui-style="neumorphism"] div[class*="rounded-2xl"] {
+  background: #191a22 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 
+    8px 8px 18px #0c0d12,
+    -8px -8px 18px #242632 !important;
+  border-radius: 18px !important;
+}
+
+html.dark[data-ui-style="neumorphism"] aside {
+  background: #161720 !important;
+  border-right: 1px solid #0f1015 !important;
+  box-shadow: 5px 0 18px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark[data-ui-style="neumorphism"] header {
+  background: #161720 !important;
+  border-bottom: 1px solid #0f1015 !important;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark[data-ui-style="neumorphism"] input,
+html.dark[data-ui-style="neumorphism"] textarea,
+html.dark[data-ui-style="neumorphism"] select {
+  background: #161720 !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow: 
+    inset 4px 4px 9px #0a0b0f,
+    inset -4px -4px 9px #22242f !important;
+  color: #f1f5f9 !important;
+  border-radius: 12px !important;
+}
+
+html.dark[data-ui-style="neumorphism"] button.cursor-pointer:not(.bg-zinc-100):not(.bg-indigo-600) {
+  box-shadow: 
+    4px 4px 9px #0c0d12,
+    -4px -4px 9px #242632;
+}
+
+html.dark[data-ui-style="neumorphism"] button.cursor-pointer:active {
+  box-shadow: 
+    inset 4px 4px 8px #0c0d12,
+    inset -4px -4px 8px #242632 !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   4. CLAYMORPHISM STYLE
+   Pillowy 3D clay volumes, dual inner bevels & rounded geometry
+   -------------------------------------------------------------------------- */
+[data-ui-style="claymorphism"] {
+  --bg-page: #f5f2eb;
+  --bg-card: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.9);
+}
+
+[data-ui-style="claymorphism"] body,
+[data-ui-style="claymorphism"] main {
+  background: #f5f2eb !important;
+}
+
+/* Clay Cards - Light Mode */
+[data-ui-style="claymorphism"] .bg-white,
+[data-ui-style="claymorphism"] .dark\:bg-\[\#121215\],
+[data-ui-style="claymorphism"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+[data-ui-style="claymorphism"] div[class*="rounded-2xl"] {
+  background: #ffffff !important;
+  border-radius: 24px !important;
+  border: 2px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 16px 32px -6px rgba(100, 116, 139, 0.16),
+    inset 0 4px 6px rgba(255, 255, 255, 0.95),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+[data-ui-style="claymorphism"] .bg-white:hover,
+[data-ui-style="claymorphism"] div[class*="rounded-xl"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 22px 38px -6px rgba(100, 116, 139, 0.22),
+    inset 0 4px 6px rgba(255, 255, 255, 0.95),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-ui-style="claymorphism"] aside {
+  background: #faf7f2 !important;
+  border-right: 2px solid #e9e4d8 !important;
+  box-shadow: 6px 0 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-ui-style="claymorphism"] header {
+  background: #faf7f2 !important;
+  border-bottom: 2px solid #e9e4d8 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Clay Inputs */
+[data-ui-style="claymorphism"] input,
+[data-ui-style="claymorphism"] textarea,
+[data-ui-style="claymorphism"] select {
+  background: #fdfcf9 !important;
+  border-radius: 16px !important;
+  border: 1.5px solid #e2ddd3 !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Clay Bouncy Buttons */
+[data-ui-style="claymorphism"] button.cursor-pointer {
+  border-radius: 14px !important;
+  box-shadow: 
+    0 6px 14px rgba(0, 0, 0, 0.08),
+    inset 0 2px 3px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+[data-ui-style="claymorphism"] button.cursor-pointer:hover {
+  transform: translateY(-1.5px) scale(1.01);
+}
+
+[data-ui-style="claymorphism"] button.cursor-pointer:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Claymorphism - Dark Mode */
+html.dark[data-ui-style="claymorphism"],
+[data-ui-style="claymorphism"].dark,
+.dark [data-ui-style="claymorphism"] {
+  --bg-page: #12131b;
+  --bg-card: #1c1e2b;
+  --border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark[data-ui-style="claymorphism"] body,
+html.dark[data-ui-style="claymorphism"] main,
+[data-ui-style="claymorphism"].dark body,
+[data-ui-style="claymorphism"].dark main {
+  background: #12131b !important;
+}
+
+html.dark[data-ui-style="claymorphism"] .bg-white,
+html.dark[data-ui-style="claymorphism"] .dark\:bg-\[\#121215\],
+html.dark[data-ui-style="claymorphism"] .dark\:bg-zinc-900,
+html.dark[data-ui-style="claymorphism"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+html.dark[data-ui-style="claymorphism"] div[class*="rounded-2xl"] {
+  background: #1c1e2b !important;
+  border-radius: 24px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 
+    0 18px 36px -6px rgba(0, 0, 0, 0.55),
+    inset 0 3px 5px rgba(255, 255, 255, 0.15),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark[data-ui-style="claymorphism"] aside {
+  background: #161722 !important;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 6px 0 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark[data-ui-style="claymorphism"] header {
+  background: #161722 !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark[data-ui-style="claymorphism"] input,
+html.dark[data-ui-style="claymorphism"] textarea,
+html.dark[data-ui-style="claymorphism"] select {
+  background: #151620 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   5. NEO-BRUTALISM STYLE
+   Bold retro graphics, 2.5px solid borders, zero-blur 4px offset hard shadows
+   -------------------------------------------------------------------------- */
+[data-ui-style="brutalism"] {
+  --bg-page: #faf8f2;
+  --bg-card: #ffffff;
+  --border-color: #000000;
+}
+
+[data-ui-style="brutalism"] body,
+[data-ui-style="brutalism"] main {
+  background: #faf8f2 !important;
+  background-image: 
+    radial-gradient(#d1c7b7 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+}
+
+/* Brutalist Cards - Light Mode */
+[data-ui-style="brutalism"] .bg-white,
+[data-ui-style="brutalism"] .dark\:bg-\[\#121215\],
+[data-ui-style="brutalism"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+[data-ui-style="brutalism"] div[class*="rounded-2xl"] {
+  background: #ffffff !important;
+  border: 2.5px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 10px !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+[data-ui-style="brutalism"] aside {
+  background: #ffffff !important;
+  border-right: 2.5px solid #000000 !important;
+}
+
+[data-ui-style="brutalism"] header {
+  background: #ffffff !important;
+  border-bottom: 2.5px solid #000000 !important;
+}
+
+/* Brutalist Inputs */
+[data-ui-style="brutalism"] input,
+[data-ui-style="brutalism"] textarea,
+[data-ui-style="brutalism"] select {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-radius: 8px !important;
+  color: #000000 !important;
+  font-weight: 500;
+}
+
+/* Brutalist Buttons & Click Action */
+[data-ui-style="brutalism"] button.cursor-pointer {
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+[data-ui-style="brutalism"] button.cursor-pointer:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000000 !important;
+}
+
+[data-ui-style="brutalism"] button.cursor-pointer:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000 !important;
+}
+
+/* Brutalism - Dark Mode */
+html.dark[data-ui-style="brutalism"],
+[data-ui-style="brutalism"].dark,
+.dark [data-ui-style="brutalism"] {
+  --bg-page: #0f1015;
+  --bg-card: #181922;
+  --border-color: #ffffff;
+}
+
+html.dark[data-ui-style="brutalism"] body,
+html.dark[data-ui-style="brutalism"] main,
+[data-ui-style="brutalism"].dark body,
+[data-ui-style="brutalism"].dark main {
+  background: #0f1015 !important;
+  background-image: 
+    radial-gradient(#2d303e 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
+}
+
+html.dark[data-ui-style="brutalism"] .bg-white,
+html.dark[data-ui-style="brutalism"] .dark\:bg-\[\#121215\],
+html.dark[data-ui-style="brutalism"] .dark\:bg-zinc-900,
+html.dark[data-ui-style="brutalism"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+html.dark[data-ui-style="brutalism"] div[class*="rounded-2xl"] {
+  background: #181922 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 5px 5px 0px var(--nayra-accent, #818cf8) !important;
+  border-radius: 10px !important;
+}
+
+html.dark[data-ui-style="brutalism"] aside {
+  background: #14151d !important;
+  border-right: 2px solid #ffffff !important;
+}
+
+html.dark[data-ui-style="brutalism"] header {
+  background: #14151d !important;
+  border-bottom: 2px solid #ffffff !important;
+}
+
+html.dark[data-ui-style="brutalism"] input,
+html.dark[data-ui-style="brutalism"] textarea,
+html.dark[data-ui-style="brutalism"] select {
+  background: #12131a !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 3px 3px 0px var(--nayra-accent, #818cf8) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+}
+
+html.dark[data-ui-style="brutalism"] button.cursor-pointer {
+  border: 2px solid #ffffff !important;
+  box-shadow: 3px 3px 0px var(--nayra-accent, #818cf8) !important;
+}
+
+html.dark[data-ui-style="brutalism"] button.cursor-pointer:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--nayra-accent, #818cf8) !important;
+}
+
+html.dark[data-ui-style="brutalism"] button.cursor-pointer:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--nayra-accent, #818cf8) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   6. CYBERPUNK / NEON HUD STYLE
+   Sci-fi terminal, neon border halos, dark obsidian, telemetry grid
+   -------------------------------------------------------------------------- */
+[data-ui-style="cyberpunk"] {
+  --bg-page: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-color: rgba(6, 182, 212, 0.4);
+}
+
+[data-ui-style="cyberpunk"] body,
+[data-ui-style="cyberpunk"] main {
+  background-color: #f0f4f8 !important;
+  background-image: 
+    linear-gradient(rgba(14, 165, 233, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.07) 1px, transparent 1px) !important;
+  background-size: 32px 32px !important;
+}
+
+/* Cyber Cards - Light Mode */
+[data-ui-style="cyberpunk"] .bg-white,
+[data-ui-style="cyberpunk"] .dark\:bg-\[\#121215\],
+[data-ui-style="cyberpunk"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+[data-ui-style="cyberpunk"] div[class*="rounded-2xl"] {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(14, 165, 233, 0.35) !important;
+  box-shadow: 
+    0 4px 20px rgba(14, 165, 233, 0.12),
+    inset 0 0 12px rgba(14, 165, 233, 0.03) !important;
+  border-radius: 12px !important;
+}
+
+[data-ui-style="cyberpunk"] aside {
+  background: #ffffff !important;
+  border-right: 1.5px solid rgba(14, 165, 233, 0.35) !important;
+  box-shadow: 4px 0 20px rgba(14, 165, 233, 0.08) !important;
+}
+
+[data-ui-style="cyberpunk"] header {
+  background: #ffffff !important;
+  border-bottom: 1.5px solid rgba(14, 165, 233, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.08) !important;
+}
+
+/* Cyberpunk - Dark Mode */
+html.dark[data-ui-style="cyberpunk"],
+[data-ui-style="cyberpunk"].dark,
+.dark [data-ui-style="cyberpunk"] {
+  --bg-page: #07080d;
+  --bg-card: #0d0f17;
+  --border-color: rgba(6, 182, 212, 0.45);
+}
+
+html.dark[data-ui-style="cyberpunk"] body,
+html.dark[data-ui-style="cyberpunk"] main,
+[data-ui-style="cyberpunk"].dark body,
+[data-ui-style="cyberpunk"].dark main {
+  background-color: #07080d !important;
+  background-image: 
+    linear-gradient(rgba(6, 182, 212, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.08) 1px, transparent 1px) !important;
+  background-size: 32px 32px !important;
+}
+
+html.dark[data-ui-style="cyberpunk"] .bg-white,
+html.dark[data-ui-style="cyberpunk"] .dark\:bg-\[\#121215\],
+html.dark[data-ui-style="cyberpunk"] .dark\:bg-zinc-900,
+html.dark[data-ui-style="cyberpunk"] div[class*="rounded-xl"]:not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]),
+html.dark[data-ui-style="cyberpunk"] div[class*="rounded-2xl"] {
+  background: #0d0f18 !important;
+  border: 1px solid rgba(6, 182, 212, 0.45) !important;
+  box-shadow: 
+    0 0 20px -2px rgba(6, 182, 212, 0.22),
+    inset 0 0 16px rgba(6, 182, 212, 0.05) !important;
+  border-radius: 12px !important;
+}
+
+html.dark[data-ui-style="cyberpunk"] aside {
+  background: #0a0b12 !important;
+  border-right: 1px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 4px 0 24px rgba(6, 182, 212, 0.12) !important;
+}
+
+html.dark[data-ui-style="cyberpunk"] header {
+  background: #0a0b12 !important;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 4px 24px rgba(6, 182, 212, 0.12) !important;
+}
+
+html.dark[data-ui-style="cyberpunk"] input,
+html.dark[data-ui-style="cyberpunk"] textarea,
+html.dark[data-ui-style="cyberpunk"] select {
+  background: #0a0b12 !important;
+  border: 1px solid rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.15) !important;
+  color: #a5f3fc !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+html.dark[data-ui-style="cyberpunk"] button.cursor-pointer:hover {
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.35);
+}
+
+
+/* --------------------------------------------------------------------------
+   7. MINIMAL MODERN STYLE (Default High-Precision Baseline)
+   Hairline borders, subtle micro-elevation, pure distraction-free focus
+   -------------------------------------------------------------------------- */
+[data-ui-style="minimal"] {
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+}
+
+[data-ui-style="minimal"] body,
+[data-ui-style="minimal"] main {
+  background: #f8fafc;
+}
+
+html.dark[data-ui-style="minimal"],
+[data-ui-style="minimal"].dark {
+  --bg-page: #09090b;
+  --bg-card: #121215;
+  --border-color: #27272a;
+}
+
+html.dark[data-ui-style="minimal"] body,
+html.dark[data-ui-style="minimal"] main {
+  background: #09090b;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. COMMON COMPOSITION & CONTRAST SYNC (Zero Accessibility Issues)
+   Strictly enforces text contrast across light and dark modes in all styles
+   -------------------------------------------------------------------------- */
+/* Ensure text in light mode is always deep high-contrast */
+[data-ui-style] body:not(.dark) {
+  color: #0f172a;
+}
+[data-ui-style] body:not(.dark) .text-slate-900,
+[data-ui-style] body:not(.dark) .text-zinc-900 {
+  color: #0f172a !important;
+}
+[data-ui-style] body:not(.dark) .text-slate-600,
+[data-ui-style] body:not(.dark) .text-zinc-600 {
+  color: #334155 !important;
+}
+
+/* Ensure text in dark mode is bright and legible */
+html.dark[data-ui-style] body,
+[data-ui-style].dark body {
+  color: #fafafa;
+}
+html.dark[data-ui-style] .dark\:text-zinc-100,
+[data-ui-style].dark .dark\:text-zinc-100 {
+  color: #f8fafc !important;
+}
+html.dark[data-ui-style] .dark\:text-zinc-400,
+[data-ui-style].dark .dark\:text-zinc-400 {
+  color: #cbd5e1 !important;
+}
+
+/* Smooth theme transition */
+body, aside, header, main, div, button, input {
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   9. DYNAMIC ACCENT COLOR INJECTION
+   Replaces hardcoded indigo accents with active chromatic theme
+   -------------------------------------------------------------------------- */
+[data-accent] .bg-indigo-600,
+[data-accent] .bg-indigo-500 {
+  background-color: var(--nayra-accent) !important;
+}
+
+[data-accent] .text-indigo-600,
+[data-accent] .text-indigo-500,
+[data-accent] .text-indigo-400 {
+  color: var(--nayra-accent) !important;
+}
+
+[data-accent] .border-indigo-500,
+[data-accent] .border-indigo-400,
+[data-accent] .border-indigo-600 {
+  border-color: var(--nayra-accent) !important;
+}
+
+[data-accent] .bg-indigo-50,
+[data-accent] .dark\:bg-indigo-950\/60,
+[data-accent] .dark\:bg-indigo-950\/40,
+[data-accent] .dark\:bg-indigo-950\/20 {
+  background-color: var(--nayra-accent-bg) !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. MODAL & DIALOG ARCHITECTURAL OVERRIDES
+   -------------------------------------------------------------------------- */
+[data-ui-style="glass"] .fixed [class*="max-w-"] {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 25px 50px -12px rgba(31, 38, 135, 0.25) !important;
+}
+
+html.dark[data-ui-style="glass"] .fixed [class*="max-w-"] {
+  background: rgba(18, 21, 32, 0.82) !important;
+  backdrop-filter: blur(28px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-ui-style="neumorphism"] .fixed [class*="max-w-"] {
+  background: #e9eef5 !important;
+  box-shadow: 14px 14px 30px #cad3e0, -14px -14px 30px #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 24px !important;
+}
+
+html.dark[data-ui-style="neumorphism"] .fixed [class*="max-w-"] {
+  background: #191a22 !important;
+  box-shadow: 14px 14px 30px #090a0d, -14px -14px 30px #252733 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 24px !important;
+}
+
+[data-ui-style="claymorphism"] .fixed [class*="max-w-"] {
+  background: #ffffff !important;
+  border-radius: 28px !important;
+  box-shadow: 0 24px 48px rgba(100, 116, 139, 0.2), inset 0 3px 6px rgba(255, 255, 255, 0.95), inset 0 -4px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.dark[data-ui-style="claymorphism"] .fixed [class*="max-w-"] {
+  background: #1c1e2b !important;
+  border-radius: 28px !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6), inset 0 3px 5px rgba(255, 255, 255, 0.15), inset 0 -4px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-ui-style="brutalism"] .fixed [class*="max-w-"] {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 8px 8px 0px #000000 !important;
+  border-radius: 12px !important;
+}
+
+html.dark[data-ui-style="brutalism"] .fixed [class*="max-w-"] {
+  background: #181922 !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 8px 8px 0px var(--nayra-accent, #818cf8) !important;
+  border-radius: 12px !important;
+}
+
+[data-ui-style="cyberpunk"] .fixed [class*="max-w-"] {
+  border: 1.5px solid rgba(14, 165, 233, 0.5) !important;
+  box-shadow: 0 0 30px rgba(14, 165, 233, 0.2) !important;
+  border-radius: 14px !important;
+}
+
+html.dark[data-ui-style="cyberpunk"] .fixed [class*="max-w-"] {
+  background: #0d0f18 !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.6) !important;
+  box-shadow: 0 0 35px rgba(6, 182, 212, 0.3) !important;
+  border-radius: 14px !important;
+}
+

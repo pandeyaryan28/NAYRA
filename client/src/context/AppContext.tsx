@@ -9,6 +9,7 @@ import type {
   NutritionSummaryResponse,
   Habit 
 } from '../types/index.js';
+import type { UIStyle, AccentColor } from '../types/theme.js';
 import { api } from '../services/api.js';
 import { googleClientSync } from '../services/googleClientSync.js';
 
@@ -19,6 +20,12 @@ interface AppContextType {
   setActiveTab: (tab: TabType) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  uiStyle: UIStyle;
+  setUiStyle: (style: UIStyle) => void;
+  accentColor: AccentColor;
+  setAccentColor: (color: AccentColor) => void;
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (open: boolean) => void;
   tasks: Task[];
   calendarEvents: CalendarEvent[];
   notes: KeepNote[];
@@ -62,6 +69,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark';
   });
 
+  const [uiStyle, setUiStyle] = useState<UIStyle>(() => {
+    const saved = localStorage.getItem('nayra_ui_style') as UIStyle;
+    if (['minimal', 'glassmorphism', 'neumorphism', 'claymorphism', 'brutalism', 'cyberpunk'].includes(saved)) {
+      return saved;
+    }
+    return 'glassmorphism';
+  });
+
+  const [accentColor, setAccentColor] = useState<AccentColor>(() => {
+    const saved = localStorage.getItem('nayra_accent_color') as AccentColor;
+    if (['indigo', 'cyan', 'emerald', 'amber', 'rose', 'violet'].includes(saved)) {
+      return saved;
+    }
+    return 'indigo';
+  });
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [notes, setNotes] = useState<KeepNote[]>([]);
@@ -97,6 +122,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     localStorage.setItem('nayra_theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-ui-style', uiStyle);
+    localStorage.setItem('nayra_ui_style', uiStyle);
+  }, [uiStyle]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-accent', accentColor);
+    localStorage.setItem('nayra_accent_color', accentColor);
+  }, [accentColor]);
 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
@@ -325,6 +360,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         e.preventDefault();
         setIsCommandPaletteOpen(prev => !prev);
       }
+      if ((e.metaKey || e.ctrlKey) && (e.key === ',' || e.key === 'p')) {
+        e.preventDefault();
+        setIsSettingsOpen(prev => !prev);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -337,6 +376,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setActiveTab,
         theme,
         toggleTheme,
+        uiStyle,
+        setUiStyle,
+        accentColor,
+        setAccentColor,
+        isSettingsOpen,
+        setIsSettingsOpen,
         tasks,
         calendarEvents,
         notes,
