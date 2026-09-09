@@ -10,6 +10,7 @@ import caloriesRouter from './routes/calories.js';
 import assistantRouter from './routes/assistant.js';
 import statsRouter from './routes/stats.js';
 import habitsRouter from './routes/habits.js';
+import caTrackerRouter from './routes/caTracker.js';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/calories', caloriesRouter);
 app.use('/api/assistant', assistantRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/habits', habitsRouter);
+app.use('/api/ca-tracker', caTrackerRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({

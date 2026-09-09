@@ -13,7 +13,7 @@ import type { UIStyle, AccentColor } from '../types/theme.js';
 import { api } from '../services/api.js';
 import { googleClientSync } from '../services/googleClientSync.js';
 
-export type TabType = 'overview' | 'tasks' | 'calendar' | 'habits' | 'pomodoro' | 'nutrition' | 'keep' | 'assistant';
+export type TabType = 'overview' | 'tasks' | 'calendar' | 'habits' | 'pomodoro' | 'nutrition' | 'keep' | 'assistant' | 'ca-tracker';
 
 interface AppContextType {
   activeTab: TabType;

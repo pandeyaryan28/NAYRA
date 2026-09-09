@@ -1,0 +1,3809 @@
+{
+  "id": "icai-ca-foundation-syllabus-2024-new-scheme",
+  "version": "2024.1-New-Scheme",
+  "title": "ICAI CA Foundation Comprehensive Syllabus Blueprint",
+  "academicBody": "The Institute of Chartered Accountants of India (ICAI)",
+  "scheme": "New Scheme of Education and Training",
+  "lastUpdated": "2026-08-28",
+  "totalPapers": 4,
+  "totalMarks": 400,
+  "passingCriteria": {
+    "individualPaperMinPercentage": 40,
+    "individualPaperMinMarks": 40,
+    "aggregateMinPercentage": 50,
+    "aggregateMinMarks": 200,
+    "negativeMarking": {
+      "paper1": 0,
+      "paper2": 0,
+      "paper3": 0.25,
+      "paper4": 0.25
+    },
+    "paperTypes": {
+      "paper1": "Subjective / Descriptive (100 Marks)",
+      "paper2": "Subjective / Descriptive (100 Marks)",
+      "paper3": "Objective / MCQ (100 Marks)",
+      "paper4": "Objective / MCQ (100 Marks)"
+    }
+  },
+  "subjects": [
+    {
+      "id": "paper-1-accounting",
+      "paperNumber": 1,
+      "code": "ACC",
+      "title": "Accounting",
+      "shortTitle": "Accounting",
+      "type": "Descriptive",
+      "totalMarks": 100,
+      "estimatedStudyHours": 140,
+      "color": {
+        "light": "#2563EB",
+        "dark": "#60A5FA",
+        "theme": "blue"
+      },
+      "description": "To develop an understanding of the basic concepts and principles of accounting and acquire the ability to apply the same in preparing financial statements, computing accounting ratios, and solving accounting problems.",
+      "chapters": [
+        {
+          "id": "acc-ch-01",
+          "chapterNumber": 1,
+          "title": "Theoretical Framework",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 12,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Foundational concepts, accounting principles, conventions, terminology, policies, and accounting standards overview.",
+          "topics": [
+            {
+              "id": "acc-top-0101",
+              "topicNumber": 1,
+              "title": "Meaning and Scope of Accounting",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Understand bookkeeping vs accounting vs accountancy",
+                "Identify internal and external users of accounting information",
+                "Explore sub-fields of accounting (Financial, Cost, Management, Social)"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88093bos-aps2240-ch1u1.pdf",
+              "pdfTitle": "Unit 1: Meaning and Scope of Accounting"
+            },
+            {
+              "id": "acc-top-0102",
+              "topicNumber": 2,
+              "title": "Accounting Concepts, Principles and Conventions",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Master Fundamental Accounting Assumptions (Going Concern, Consistency, Accrual)",
+                "Understand Business Entity, Money Measurement, Periodicity, Matching, Full Disclosure, Materiality, Prudence/Conservatism, Cost Concept, Realisation Concept"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88094bos-aps2240-ch1u2.pdf",
+              "pdfTitle": "Unit 2: Accounting Concepts, Principles and Conventions",
+              "videoUrl": "https://www.youtube.com/watch?v=9Wk6WKHgB08",
+              "videoTitle": "Accounting Principle & Assumption in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0103",
+              "topicNumber": 3,
+              "title": "Capital and Revenue Expenditures & Receipts",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Distinguish capital vs revenue expenditures with practical test rules",
+                "Analyze deferred revenue expenditures",
+                "Classify capital receipts and revenue receipts"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88095bos-aps2240-ch1u3.pdf",
+              "pdfTitle": "Unit 3: Capital and Revenue Expenditures and Receipts"
+            },
+            {
+              "id": "acc-top-0104",
+              "topicNumber": 4,
+              "title": "Contingent Assets and Contingent Liabilities",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Differentiate provisions, liabilities, contingent liabilities, and contingent assets",
+                "Understand disclosure requirements in notes to accounts"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88096bos-aps2240-ch1u4.pdf",
+              "pdfTitle": "Unit 4: Contingent Assets and Contingent Liabilities"
+            },
+            {
+              "id": "acc-top-0105",
+              "topicNumber": 5,
+              "title": "Accounting Policies and Measurement Discipline",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Understand selection and change of accounting policies per AS-1",
+                "Grasp Valuation Principles: Historical Cost, Current Cost, Realisable Value, Present Value",
+                "Differentiate accounting estimates and policy modifications"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88097bos-aps2240-ch1u5.pdf",
+              "pdfTitle": "Unit 5: Accounting Policies"
+            },
+            {
+              "id": "acc-top-0106",
+              "topicNumber": 6,
+              "title": "Accounting Standards & Indian Accounting Standards (Ind AS)",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Understand the standard setting process of ICAI and NFRA",
+                "Grasp convergence with IFRS and applicability of Ind AS vs AS"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88098bos-aps2240-ch1u6.pdf",
+              "pdfTitle": "Unit 6: Accounting as a Measurement Discipline"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88093bos-aps2240-ch1u1.pdf",
+          "pdfTitle": "Ch 1: Theoretical Framework"
+        },
+        {
+          "id": "acc-ch-02",
+          "chapterNumber": 2,
+          "title": "Accounting Process",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 16,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Double entry book-keeping, Journal, Subsidiary Books, Cash Books, Ledger Posting, Trial Balance, and Rectification of Errors.",
+          "topics": [
+            {
+              "id": "acc-top-0201",
+              "topicNumber": 1,
+              "title": "Journals and Subsidiary Books",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Apply rules of debit and credit (Traditional vs Modern approach)",
+                "Draft journal entries and maintain Purchases, Sales, Returns books, Bills books, and Journal Proper"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88100bos-aps2240-ch2u1.pdf",
+              "pdfTitle": "Unit 1: Basic Accounting Procedures – Journal entries",
+              "videoUrl": "https://www.youtube.com/watch?v=9vUMhazMkkM",
+              "videoTitle": "Basic of 11th with Journal Entry in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0202",
+              "topicNumber": 2,
+              "title": "Cash Book and Petty Cash Book",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Prepare Simple, Two-column (Cash & Discount), and Three-column (Cash, Bank, Discount) Cash Books",
+                "Maintain Imprest Petty Cash Book with analytical columns"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88101bos-aps2240-ch2u2.pdf",
+              "pdfTitle": "Unit 2: Ledgers"
+            },
+            {
+              "id": "acc-top-0203",
+              "topicNumber": 3,
+              "title": "Ledger Accounts and Trial Balance",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Post journal transactions to ledger and balance ledger accounts",
+                "Prepare Trial Balance (Totals Method, Balances Method, Total & Balances Method)",
+                "Identify errors disclosed and not disclosed by Trial Balance"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88102bos-aps2240-ch2u3.pdf",
+              "pdfTitle": "Unit 3: Trial Balance",
+              "videoUrl": "https://www.youtube.com/watch?v=Zu2L40u-JxQ",
+              "videoTitle": "Ledger Posting & Trial Balance in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0204",
+              "topicNumber": 4,
+              "title": "Rectification of Errors",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Classify errors: Omission, Commission, Principle, Compensating",
+                "Rectify errors before Trial Balance preparation",
+                "Rectify errors after Trial Balance using Suspense Account",
+                "Rectify errors in subsequent accounting periods through Profit & Loss Adjustment Account"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88103bos-aps2240-ch2u4.pdf",
+              "pdfTitle": "Unit 4: Subsidiary Books",
+              "videoUrl": "https://www.youtube.com/watch?v=B0LkDE_hn3w",
+              "videoTitle": "Rectification Of Error in One Shot | CA Foundation | Accountancy🔥"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88100bos-aps2240-ch2u1.pdf",
+          "pdfTitle": "Ch 2: Accounting Process"
+        },
+        {
+          "id": "acc-ch-03",
+          "chapterNumber": 3,
+          "title": "Bank Reconciliation Statement (BRS)",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Easy",
+          "importance": "High",
+          "description": "Causes of divergence between Cash Book and Pass Book / Bank Statement balances, and methods of reconciliation.",
+          "topics": [
+            {
+              "id": "acc-top-0301",
+              "topicNumber": 1,
+              "title": "Causes of Differences & Concept of Overdraft",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Identify timing differences (cheques issued not presented, cheques deposited not cleared)",
+                "Identify transactions initiated by bank (interest, bank charges, direct debits/credits)",
+                "Handle favorable balances and overdraft (unfavorable) balances"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88106bos-aps2240-ch3.pdf",
+              "pdfTitle": "Ch 3: Bank Reconciliation Statement",
+              "videoUrl": "https://www.youtube.com/watch?v=7qTYc7os4_Q",
+              "videoTitle": "Bank Reconciliation Statement in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0302",
+              "topicNumber": 2,
+              "title": "Preparation of BRS without Adjusting Cash Book",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Construct BRS starting from Cash Book balance/overdraft to reach Pass Book balance",
+                "Construct BRS starting from Pass Book balance/overdraft to reach Cash Book balance"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88106bos-aps2240-ch3.pdf",
+              "pdfTitle": "Ch 3: Bank Reconciliation Statement (Adjusted Cash Book)"
+            },
+            {
+              "id": "acc-top-0303",
+              "topicNumber": 3,
+              "title": "Preparation of BRS with Adjusted (Amended) Cash Book",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Identify items to be adjusted in the amended cash book prior to reconciliation",
+                "Prepare BRS using adjusted cash book balance for correct financial reporting"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88106bos-aps2240-ch3.pdf",
+              "pdfTitle": "Bank Reconciliation Statement (BRS) - Preparation of BRS with Adjusted (Amended) Cash Book"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88106bos-aps2240-ch3.pdf",
+          "pdfTitle": "Ch 3: Bank Reconciliation Statement",
+          "videoUrl": "https://www.youtube.com/watch?v=7qTYc7os4_Q",
+          "videoTitle": "Bank Reconciliation Statement in One Shot | CA Foundation | Accountancy 🔥"
+        },
+        {
+          "id": "acc-ch-04",
+          "chapterNumber": 4,
+          "title": "Inventories",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Techniques of inventory valuation, AS-2 compliance, periodic vs perpetual inventory systems, and physical stocktaking reconciliation.",
+          "topics": [
+            {
+              "id": "acc-top-0401",
+              "topicNumber": 1,
+              "title": "Concept of Inventory & AS-2 Valuation Principles",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Understand components of inventory (Raw material, WIP, Finished goods, Stores)",
+                "Apply valuation rule: Lower of Cost and Net Realisable Value (NRV)",
+                "Calculate Net Realisable Value considering estimated selling expenses"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88107bos-aps2240-ch4.pdf",
+              "pdfTitle": "Ch 4: Inventories Valuation",
+              "videoUrl": "https://www.youtube.com/watch?v=U3cf5G6nZ-E",
+              "videoTitle": "Inventory in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0402",
+              "topicNumber": 2,
+              "title": "Inventory Costing Methods (FIFO, LIFO, Weighted Average, Retail Method)",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Maintain Stores Ledger Card using First-In-First-Out (FIFO)",
+                "Compute cost using Weighted Average Price and Simple Average Price",
+                "Apply Adjusted Selling Price (Retail) Method and Standard Cost Method"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88107bos-aps2240-ch4.pdf",
+              "pdfTitle": "Ch 4: Inventory Systems (Periodic & Perpetual)",
+              "videoUrl": "https://www.youtube.com/watch?v=J6MOd20uz0I",
+              "videoTitle": "Calculation Of Normal Loss & Abnormal Loss - 10 Minutes CApsule | CA Foundation | #Accountancy🔥"
+            },
+            {
+              "id": "acc-top-0403",
+              "topicNumber": 3,
+              "title": "Inventory Systems and Physical Stock Count Adjustments",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Compare Periodic vs Perpetual Inventory Systems",
+                "Calculate inventory value when physical stock count is taken before or after the balance sheet date"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88107bos-aps2240-ch4.pdf",
+              "pdfTitle": "Inventories - Inventory Systems and Physical Stock Count Adjustments"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88107bos-aps2240-ch4.pdf",
+          "pdfTitle": "Ch 4: Inventories",
+          "videoUrl": "https://www.youtube.com/watch?v=U3cf5G6nZ-E",
+          "videoTitle": "Inventory in One Shot | CA Foundation | Accountancy 🔥"
+        },
+        {
+          "id": "acc-ch-05",
+          "chapterNumber": 5,
+          "title": "Depreciation and Amortisation",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 12,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Depreciation of Property, Plant & Equipment (AS-10), calculation methods, change in methods, change in useful life, and asset disposal.",
+          "topics": [
+            {
+              "id": "acc-top-0501",
+              "topicNumber": 1,
+              "title": "Depreciation Concepts & Cost of PPE per AS-10",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Understand causes and factors affecting depreciation",
+                "Determine total cost of PPE (Purchase price, directly attributable costs, dismantling)",
+                "Differentiate depreciation, amortisation, and depletion"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88108bos-aps2240-ch5.pdf",
+              "pdfTitle": "Ch 5: Depreciation Concepts & Methods",
+              "videoUrl": "https://www.youtube.com/watch?v=ebVM_95SfdE",
+              "videoTitle": "Depreciation in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0502",
+              "topicNumber": 2,
+              "title": "Methods of Calculating Depreciation",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Straight Line Method (SLM) / Fixed Installment",
+                "Written Down Value Method (WDV) / Reducing Balance",
+                "Sum of Years' Digits Method, Machine Hour Rate, Production Units Method"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88108bos-aps2240-ch5.pdf",
+              "pdfTitle": "Ch 5: Accounting Treatment of Depreciation"
+            },
+            {
+              "id": "acc-top-0503",
+              "topicNumber": 3,
+              "title": "Accounting Treatment, Asset Disposal & Revaluation",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Account for Provision for Depreciation Account",
+                "Prepare Asset Disposal Account on sale or retirement of asset",
+                "Handle prospective accounting for change in method and change in useful life/residual value"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88108bos-aps2240-ch5.pdf",
+              "pdfTitle": "Depreciation and Amortisation - Accounting Treatment, Asset Disposal & Revaluation"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88108bos-aps2240-ch5.pdf",
+          "pdfTitle": "Ch 5: Depreciation and Amortisation",
+          "videoUrl": "https://www.youtube.com/watch?v=ebVM_95SfdE",
+          "videoTitle": "Depreciation in One Shot | CA Foundation | Accountancy 🔥"
+        },
+        {
+          "id": "acc-ch-06",
+          "chapterNumber": 6,
+          "title": "Bills of Exchange and Promissory Notes",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Medium",
+          "importance": "Medium",
+          "description": "Negotiable instruments in accounting, discounting, endorsement, dishonour, noting charges, renewal, insolvency, and accommodation bills.",
+          "topics": [
+            {
+              "id": "acc-top-0601",
+              "topicNumber": 1,
+              "title": "Nature and Terminology of Bills of Exchange",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Parties to Bills of Exchange and Promissory Notes (Drawer, Drawee, Payee)",
+                "Calculate days of grace and due dates for bills payable at sight vs after date/sight"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88109bos-aps2240-ch6.pdf",
+              "pdfTitle": "Ch 6: Bills of Exchange & Promissory Notes",
+              "videoUrl": "https://www.youtube.com/watch?v=32qZcArJbro",
+              "videoTitle": "Bill Of Exchange in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-0602",
+              "topicNumber": 2,
+              "title": "Standard Accounting Entries & Dishonour with Noting Charges",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Record retention till maturity, discounting with bank, and endorsement to creditor",
+                "Handle dishonour of bills and recording of noting charges",
+                "Bill sent for collection entries"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88109bos-aps2240-ch6.pdf",
+              "pdfTitle": "Ch 6: Accommodation Bills & Insolvency"
+            },
+            {
+              "id": "acc-top-0603",
+              "topicNumber": 3,
+              "title": "Renewal of Bills, Insolvency, and Accommodation Bills",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Record renewal of bills with interest computation",
+                "Account for insolvency of drawee and bad debts recovery",
+                "Pass entries for accommodation bills and apportionment of proceeds"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88109bos-aps2240-ch6.pdf",
+              "pdfTitle": "Bills of Exchange and Promissory Notes - Renewal of Bills, Insolvency, and Accommodation Bills"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88109bos-aps2240-ch6.pdf",
+          "pdfTitle": "Ch 6: Bills of Exchange and Promissory Notes",
+          "videoUrl": "https://www.youtube.com/watch?v=32qZcArJbro",
+          "videoTitle": "Bill Of Exchange in One Shot | CA Foundation | Accountancy 🔥"
+        },
+        {
+          "id": "acc-ch-07",
+          "chapterNumber": 7,
+          "title": "Preparation of Final Accounts of Sole Proprietors",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 16,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Preparation of Manufacturing Account, Trading Account, Profit and Loss Account, and Balance Sheet with comprehensive year-end adjustments.",
+          "topics": [
+            {
+              "id": "acc-top-0701",
+              "topicNumber": 1,
+              "title": "Manufacturing Account & Cost of Production",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Identify Raw Material Consumed, Direct Wages, Direct Expenses, Factory Overheads",
+                "Adjust Opening and Closing WIP to compute Cost of Finished Goods Produced"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88110bos-aps2240-ch7u1.pdf",
+              "pdfTitle": "Unit 1: Final Accounts of Non-Manufacturing Entities",
+              "videoUrl": "https://www.youtube.com/watch?v=Yr1MbyCmc7k",
+              "videoTitle": "Final Account - Manufacturing in One Shot (Part - 02) | CA Foundation | Accountancy🔥"
+            },
+            {
+              "id": "acc-top-0702",
+              "topicNumber": 2,
+              "title": "Trading and Profit & Loss Account",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Calculate Gross Profit / Loss and Net Profit / Loss",
+                "Distinguish operating income/expenses and non-operating income/expenses"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88111bos-aps2240-ch7u2.pdf",
+              "pdfTitle": "Unit 2: Final Accounts of Manufacturing Entities",
+              "videoUrl": "https://www.youtube.com/watch?v=tXucmR0cduo",
+              "videoTitle": "Final Account (Mfg & Non-Mfg) in One Shot | CA Foundation | Accountancy🔥"
+            },
+            {
+              "id": "acc-top-0703",
+              "topicNumber": 3,
+              "title": "Balance Sheet & Year-End Adjustments",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Group and marshal assets and liabilities (Order of Liquidity vs Permanence)",
+                "Handle complex adjustments: Bad Debts & Provision for Doubtful/Discount on Debtors, Manager's Commission (Before/After charging), Goods in transit, Goods sent on approval basis, Abnormal loss of stock"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88110bos-aps2240-ch7u1.pdf",
+              "pdfTitle": "Preparation of Final Accounts of Sole Proprietors - Balance Sheet & Year-End Adjustments",
+              "videoUrl": "https://www.youtube.com/watch?v=QPtUw6x_5Fk",
+              "videoTitle": "Final Accounts With Adjustment - 25 Minutes CApsule | CA Foundation | #Accountancy🔥"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88110bos-aps2240-ch7u1.pdf",
+          "pdfTitle": "Ch 7: Preparation of Final Accounts of Sole Proprietors",
+          "videoUrl": "https://www.youtube.com/watch?v=tXucmR0cduo",
+          "videoTitle": "Final Account (Mfg & Non-Mfg) in One Shot | CA Foundation | Accountancy🔥"
+        },
+        {
+          "id": "acc-ch-08",
+          "chapterNumber": 8,
+          "title": "Financial Statements of Not-for-Profit Organisations (NPO)",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 14,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Receipts and Payments Account, Income and Expenditure Account, Capital Fund, Subscription Ledger, and Balance Sheet.",
+          "topics": [
+            {
+              "id": "acc-top-0801",
+              "topicNumber": 1,
+              "title": "NPO Concept & Receipts and Payments Account",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Features of NPO, Capital vs Revenue items in NPO",
+                "Preparation and characteristics of Receipts and Payments Account (Cash basis)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88115bos-aps2240-ch8.pdf",
+              "pdfTitle": "Ch 8: Not-for-Profit Organisations (Receipts & Payments, Income & Expenditure)",
+              "videoUrl": "https://www.youtube.com/watch?v=4ebQXe8DRao",
+              "videoTitle": "NPO in One Shot | CA Foundation | Accountancy🔥"
+            },
+            {
+              "id": "acc-top-0802",
+              "topicNumber": 2,
+              "title": "Income and Expenditure Account & Subscription Accounting",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Construct Income & Expenditure Account (Accrual basis) showing Surplus/Deficit",
+                "Master Subscription Account computation (Outstanding, Advance, Arrears)",
+                "Handle Consumable Items (Medicines, Sports material, Stationery) and Fund-based Accounting"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88115bos-aps2240-ch8.pdf",
+              "pdfTitle": "Ch 8: NPO Balance Sheet & Special Funds"
+            },
+            {
+              "id": "acc-top-0803",
+              "topicNumber": 3,
+              "title": "Opening & Closing Balance Sheet of NPO",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Ascertain opening Capital Fund from Opening Balance Sheet",
+                "Prepare comprehensive Closing Balance Sheet with specific funds, endowments, and legacies"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88115bos-aps2240-ch8.pdf",
+              "pdfTitle": "Financial Statements of Not-for-Profit Organisations (NPO) - Opening & Closing Balance Sheet of NPO"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88115bos-aps2240-ch8.pdf",
+          "pdfTitle": "Ch 8: Financial Statements of Not-for-Profit Organisations",
+          "videoUrl": "https://www.youtube.com/watch?v=4ebQXe8DRao",
+          "videoTitle": "NPO in One Shot | CA Foundation | Accountancy🔥"
+        },
+        {
+          "id": "acc-ch-09",
+          "chapterNumber": 9,
+          "title": "Accounts from Incomplete Records (Single Entry System)",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 12,
+          "difficulty": "Hard",
+          "importance": "High",
+          "description": "Determination of profit or loss under single entry system via Statement of Affairs and Conversion method to double entry.",
+          "topics": [
+            {
+              "id": "acc-top-0901",
+              "topicNumber": 1,
+              "title": "Statement of Affairs Method",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Ascertain opening and closing capital using Statement of Affairs",
+                "Calculate net profit/loss adjusting for drawings, additional capital, and depreciation"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88116bos-aps2240-ch9.pdf",
+              "pdfTitle": "Ch 9: Single Entry System & Statement of Affairs"
+            },
+            {
+              "id": "acc-top-0902",
+              "topicNumber": 2,
+              "title": "Conversion Method to Double Entry",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Reconstruct Total Debtors and Total Creditors Accounts to find credit sales/purchases",
+                "Prepare Bills Receivable / Payable Accounts and Cash / Bank summary",
+                "Draft Final Accounts from incomplete transactional records"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88116bos-aps2240-ch9.pdf",
+              "pdfTitle": "Ch 9: Incomplete Records to Double Entry Conversion"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88116bos-aps2240-ch9.pdf",
+          "pdfTitle": "Ch 9: Accounts from Incomplete Records"
+        },
+        {
+          "id": "acc-ch-10",
+          "chapterNumber": 10,
+          "title": "Partnership and LLP Accounts",
+          "icaiWeightage": {
+            "minPercentage": 15,
+            "maxPercentage": 20,
+            "typicalMarks": "15-20 Marks"
+          },
+          "estimatedStudyHours": 24,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Fundamentals, P&L Appropriation, Goodwill valuation, Admission, Retirement, Death, and Dissolution of Partnership Firms.",
+          "topics": [
+            {
+              "id": "acc-top-1001",
+              "topicNumber": 1,
+              "title": "Partnership Fundamentals, P&L Appropriation & Capital Accounts",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Fixed vs Fluctuating Capital Accounts",
+                "Calculate Interest on Capital, Interest on Drawings (Average Period method, Product method)",
+                "Solve Past Adjustments and Guarantee of Minimum Profits"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88117bos-aps2240-ch10u1.pdf",
+              "pdfTitle": "Unit 1: Introduction to Partnership Accounts",
+              "videoUrl": "https://www.youtube.com/watch?v=mU2AWQ-M6Hs",
+              "videoTitle": "Partnership Accounts in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-1002",
+              "topicNumber": 2,
+              "title": "Goodwill Valuation and Accounting Treatment",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Compute Goodwill: Average Profit, Super Profit, Capitalisation Methods",
+                "Account for Goodwill on change in PSR without raising Goodwill account (Sacrificing/Gaining ratio)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88118bos-aps2240-ch10u2.pdf",
+              "pdfTitle": "Unit 2: Treatment of Goodwill in Partnership Accounts"
+            },
+            {
+              "id": "acc-top-1003",
+              "topicNumber": 3,
+              "title": "Admission of a Partner",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Calculate New Profit Sharing Ratio and Sacrificing Ratio",
+                "Prepare Revaluation Account and Memorandum Revaluation Account",
+                "Adjust accumulated reserves, hidden goodwill, and adjust partners' capitals"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88119bos-aps2240-ch10u3.pdf",
+              "pdfTitle": "Unit 3: Admission of a New Partner"
+            },
+            {
+              "id": "acc-top-1004",
+              "topicNumber": 4,
+              "title": "Retirement and Death of a Partner",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Calculate Gaining Ratio and treatment of goodwill on retirement/death",
+                "Account for Joint Life Policy (JLP) and Individual Life Policies",
+                "Prepare Retiring Partner's Loan Account and Deceased Partner's Executor Account with interim profit share (Sec 37)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88120bos-aps2240-ch10u4.pdf",
+              "pdfTitle": "Unit 4: Retirement of a Partner"
+            },
+            {
+              "id": "acc-top-1005",
+              "topicNumber": 5,
+              "title": "Dissolution of Partnership Firm & Piecemeal Distribution",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Prepare Realisation Account, Partner's Loan Account, and Bank/Cash Account",
+                "Apply settlement rules under Section 48 of the Indian Partnership Act",
+                "Calculate Piecemeal Distribution using Proportionate Capital Method and Maximum Loss Method"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88121bos-aps2240-ch10u5.pdf",
+              "pdfTitle": "Unit 5: Death of a Partner"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88117bos-aps2240-ch10u1.pdf",
+          "pdfTitle": "Ch 10: Partnership and LLP Accounts",
+          "videoUrl": "https://www.youtube.com/watch?v=mU2AWQ-M6Hs",
+          "videoTitle": "Partnership Accounts in One Shot | CA Foundation | Accountancy 🔥"
+        },
+        {
+          "id": "acc-ch-11",
+          "chapterNumber": 11,
+          "title": "Company Accounts",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 18,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Issue of Shares and Debentures, Forfeiture, Re-issue, Redemption of Preference Shares, Redemption of Debentures, and Company Balance Sheet overview.",
+          "topics": [
+            {
+              "id": "acc-top-1101",
+              "topicNumber": 1,
+              "title": "Issue, Forfeiture, and Re-issue of Shares",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Account for Issue at Par, Premium, Calls in Arrears, Calls in Advance with Interest",
+                "Master Pro-rata Allotment with excess application money adjustment",
+                "Record Forfeiture of shares and Re-issue at Discount, transferring profit to Capital Reserve"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88134bos-aps2240-ch11u1.pdf",
+              "pdfTitle": "Unit 1: Introduction to Company Accounts",
+              "videoUrl": "https://www.youtube.com/watch?v=jagao8xP2Kc",
+              "videoTitle": "Share Capital in One Shot | CA Foundation | Accountancy🔥"
+            },
+            {
+              "id": "acc-top-1102",
+              "topicNumber": 2,
+              "title": "Redemption of Preference Shares",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Apply legal provisions of Section 55 of Companies Act, 2013",
+                "Creation of Capital Redemption Reserve (CRR) out of divisible profits",
+                "Issue of fresh equity shares for redemption purposes"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88135bos-aps2240-ch11u2.pdf",
+              "pdfTitle": "Unit 2: Issue, Forfeiture and Re-Issue of Shares"
+            },
+            {
+              "id": "acc-top-1103",
+              "topicNumber": 3,
+              "title": "Issue and Redemption of Debentures",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Account for issue of debentures with redemption terms (Par, Premium, Discount)",
+                "Issue of debentures as Collateral Security",
+                "Methods of redemption and writing off Loss on Issue of Debentures"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88136bos-aps2240-ch11u3.pdf",
+              "pdfTitle": "Unit 3: Issue of Debentures",
+              "videoUrl": "https://www.youtube.com/watch?v=iWAcaqUFvhg",
+              "videoTitle": "Debenture in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-1104",
+              "topicNumber": 4,
+              "title": "Company Financial Statements (Schedule III Overview)",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Format of Balance Sheet and Statement of Profit and Loss per Schedule III (Division I)",
+                "Presentation of Share Capital and Reserves & Surplus in Notes to Accounts"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88137bos-aps2240-ch11u4.pdf",
+              "pdfTitle": "Unit 4: Accounting for Bonus Issue and Right Issue"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88134bos-aps2240-ch11u1.pdf",
+          "pdfTitle": "Ch 11: Company Accounts"
+        },
+        {
+          "id": "acc-ch-12",
+          "subjectId": "paper-1-accounting",
+          "chapterNumber": 12,
+          "title": "Special Transactions (Reference Modules)",
+          "icaiWeightage": {
+            "minPercentage": 0,
+            "maxPercentage": 10,
+            "typicalMarks": "Reference / Bonus"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Medium",
+          "importance": "Medium",
+          "description": "Special accounting transactions including Consignment Accounts, Average Due Date, and Account Current.",
+          "topics": [
+            {
+              "id": "acc-top-1201",
+              "topicNumber": 1,
+              "title": "Consignment Accounts",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Understand consignment transactions vs normal sales",
+                "Accounting entries in consignor and consignee books",
+                "Valuation of unsold consignment stock and commission calculations"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "videoUrl": "https://www.youtube.com/watch?v=Wy3Xq8on4K0",
+              "videoTitle": "Consignment in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-1202",
+              "topicNumber": 2,
+              "title": "Average Due Date",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Concept of average due date and base date determination",
+                "Calculation of interest in trade accounts and loans"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "videoUrl": "https://www.youtube.com/watch?v=Qy5ZkXFDI0I",
+              "videoTitle": "Average Due Date in One Shot | CA Foundation | Accountancy 🔥"
+            },
+            {
+              "id": "acc-top-1203",
+              "topicNumber": 3,
+              "title": "Account Current",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Preparation of Account Current using Interest Tables, Means Product, and Red-ink interest"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "videoUrl": "https://www.youtube.com/watch?v=8IBI_7njOUM",
+              "videoTitle": "Account Current in One Shot | CA Foundation | Accountancy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "paper-2-business-laws",
+      "paperNumber": 2,
+      "code": "BLAW",
+      "title": "Business Laws",
+      "shortTitle": "Business Laws",
+      "type": "Descriptive",
+      "totalMarks": 100,
+      "estimatedStudyHours": 130,
+      "color": {
+        "light": "#D97706",
+        "dark": "#FBBF24",
+        "theme": "amber"
+      },
+      "description": "To develop general legal awareness, understand fundamental principles of mercantile and corporate laws, and acquire skills to analyze legal problems and formulate logical legal solutions.",
+      "chapters": [
+        {
+          "id": "law-ch-01",
+          "chapterNumber": 1,
+          "title": "Indian Regulatory Framework",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-10 Marks"
+          },
+          "estimatedStudyHours": 8,
+          "difficulty": "Easy",
+          "importance": "Medium",
+          "description": "Introduction to the Indian legal system, sources of law, legislative process, hierarchy of courts, and major regulatory authorities (RBI, SEBI, MCA, IRDAI, CCI, IBBI).",
+          "topics": [
+            {
+              "id": "law-top-0101",
+              "topicNumber": 1,
+              "title": "Structure of the Indian Legal System & Sources of Law",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Understand Primary & Secondary sources of law (Constitution, Statutes, Case Law, Customs)",
+                "Trace the legislative law-making process in Parliament (Bill to Act)"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88015bos-aps2231-ch1.pdf",
+              "pdfTitle": "Ch 1: Indian Legal System & Sources of Law"
+            },
+            {
+              "id": "law-top-0102",
+              "topicNumber": 2,
+              "title": "Hierarchy of Courts and Key Regulatory Bodies",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Hierarchy of Civil and Criminal Courts (Supreme Court, High Courts, District Courts, Tribunals)",
+                "Roles of MCA, SEBI, RBI, IRDAI, CCI, and IBBI in Indian commercial regulation"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88015bos-aps2231-ch1.pdf",
+              "pdfTitle": "Ch 1: Legislative Process in India"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88015bos-aps2231-ch1.pdf",
+          "pdfTitle": "Ch 1: Indian Regulatory Framework"
+        },
+        {
+          "id": "law-ch-02",
+          "chapterNumber": 2,
+          "title": "The Indian Contract Act, 1872",
+          "icaiWeightage": {
+            "minPercentage": 20,
+            "maxPercentage": 30,
+            "typicalMarks": "20-25 Marks"
+          },
+          "estimatedStudyHours": 32,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "General principles of contract law including formation, consideration, capacity, free consent, performance, breach and remedies, plus special contracts (Indemnity, Guarantee, Bailment, Pledge, Agency).",
+          "topics": [
+            {
+              "id": "law-top-0201",
+              "topicNumber": 1,
+              "title": "Nature and Classification of Contracts",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Define Contract (Sec 2(h)) and Agreement (Sec 2(e))",
+                "Analyze Essential Elements of a Valid Contract (Sec 10)",
+                "Classify contracts by Validity, Formation, and Performance"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88017bos-aps2231-ch2u1.pdf",
+              "pdfTitle": "Unit 1: Nature of Contracts"
+            },
+            {
+              "id": "law-top-0202",
+              "topicNumber": 2,
+              "title": "Offer and Acceptance",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Rules for a valid Proposal/Offer vs Invitation to Offer",
+                "Legal rules regarding valid Acceptance",
+                "Communication and Revocation of Offer and Acceptance (Postal rule - Sec 4 & 5)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88018bos-aps2231-ch2u2.pdf",
+              "pdfTitle": "Unit 2: Consideration"
+            },
+            {
+              "id": "law-top-0203",
+              "topicNumber": 3,
+              "title": "Consideration & Doctrine of Privity",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Define Consideration (Sec 2(d)) and legal rules for valid consideration",
+                "Doctrine of Privity of Contract and its exceptions (Dunlop v Selfridge)",
+                "Exceptions to 'No Consideration, No Contract' (Sec 25)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88019bos-aps2231-ch2u3.pdf",
+              "pdfTitle": "Unit 3: Other Essential Elements of a Contract"
+            },
+            {
+              "id": "law-top-0204",
+              "topicNumber": 4,
+              "title": "Capacity to Contract",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Position of Minor: Mohori Bibee case, agreements void ab initio, rule of estoppel, necessaries",
+                "Persons of Unsound Mind and Disqualified Persons (Alien enemy, convicts, insolvents)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88020bos-aps2231-ch2u4.pdf",
+              "pdfTitle": "Unit 4: Performance of Contract"
+            },
+            {
+              "id": "law-top-0205",
+              "topicNumber": 5,
+              "title": "Free Consent & Factors Vitiating Consent",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Coercion (Sec 15) vs Undue Influence (Sec 16 - Burden of proof, fiduciary relationships)",
+                "Fraud (Sec 17 - Silence as fraud) vs Misrepresentation (Sec 18)",
+                "Mistake of Fact vs Mistake of Law (Bilateral vs Unilateral mistake)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88021bos-aps2231-ch2u5.pdf",
+              "pdfTitle": "Unit 5: Breach of Contract and its Remedies"
+            },
+            {
+              "id": "law-top-0206",
+              "topicNumber": 6,
+              "title": "Legality of Object, Void Agreements & Contingent Contracts",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Agreements opposed to public policy and unlawful considerations",
+                "Wagering Agreements (Sec 30) vs Insurance contracts",
+                "Contingent Contracts (Sec 31-36) and Quasi Contracts (Sec 68-72)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88022bos-aps2231-ch2u6.pdf",
+              "pdfTitle": "Unit 6: Contingent and Quasi Contracts"
+            },
+            {
+              "id": "law-top-0207",
+              "topicNumber": 7,
+              "title": "Performance and Discharge of Contracts",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Performance by Promisor/Agent, Time and Place of performance, Joint promisors",
+                "Appropriation of Payments (Clayton's Case - Sec 59-61)",
+                "Modes of Discharge: Performance, Novation, Rescission, Frustration/Supervening Impossibility"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88023bos-aps2231-ch2u7.pdf",
+              "pdfTitle": "Unit 7: Contract of Indemnity and Guarantee"
+            },
+            {
+              "id": "law-top-0208",
+              "topicNumber": 8,
+              "title": "Breach of Contract and its Remedies",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Actual vs Anticipatory Breach and options available to aggrieved party",
+                "Types of Damages: Ordinary (Hadley v Baxendale), Special, Vindictive, Nominal, Pre-fixed",
+                "Remedies: Rescission, Suit for Damages, Specific Performance, Injunction, Quantum Meruit"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88024bos-aps2231-ch2u8.pdf",
+              "pdfTitle": "Unit 8: Bailment and Pledge"
+            },
+            {
+              "id": "law-top-0209",
+              "topicNumber": 9,
+              "title": "Special Contracts: Indemnity, Guarantee, Bailment, Pledge & Agency",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Contract of Indemnity (Sec 124) vs Contract of Guarantee (Sec 126), Rights & Discharge of Surety",
+                "Bailment & Pledge: Rights, duties, finder of goods, pledge by non-owners",
+                "Contract of Agency: Creation, types of agents, rights/duties, principal's liability, termination"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88025bos-aps2231-ch2u9.pdf",
+              "pdfTitle": "Unit 9: Agency"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88017bos-aps2231-ch2u1.pdf",
+          "pdfTitle": "Ch 2: The Indian Contract Act, 1872"
+        },
+        {
+          "id": "law-ch-03",
+          "chapterNumber": 3,
+          "title": "The Sale of Goods Act, 1930",
+          "icaiWeightage": {
+            "minPercentage": 15,
+            "maxPercentage": 20,
+            "typicalMarks": "15-20 Marks"
+          },
+          "estimatedStudyHours": 20,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Formation of contract of sale, conditions and warranties, transfer of property/ownership, performance of contract, and unpaid seller's rights.",
+          "topics": [
+            {
+              "id": "law-top-0301",
+              "topicNumber": 1,
+              "title": "Formation of the Contract of Sale",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Define Contract of Sale, Sale vs Agreement to Sell, Sale vs Hire Purchase vs Bailment",
+                "Types of Goods: Existing (Specific, Ascertained, Unascertained), Future, Contingent",
+                "Effect of perishing of goods (Sec 7 & 8) and ascertainment of price"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88026bos-aps2231-ch3u1.pdf",
+              "pdfTitle": "Unit 1: Formation of the Contract of Sale"
+            },
+            {
+              "id": "law-top-0302",
+              "topicNumber": 2,
+              "title": "Conditions and Warranties",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Distinction between Condition and Warranty (Stipulation vital vs collateral)",
+                "When condition is treated as warranty (Sec 13)",
+                "Express and Implied Conditions & Warranties",
+                "Doctrine of Caveat Emptor and its statutory exceptions"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88027bos-aps2231-ch3u2.pdf",
+              "pdfTitle": "Unit 2: Conditions & Warranties"
+            },
+            {
+              "id": "law-top-0303",
+              "topicNumber": 3,
+              "title": "Transfer of Ownership and Delivery of Goods",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Passing of property in specific goods in deliverable / non-deliverable state",
+                "Passing of property in unascertained goods and goods sent on approval",
+                "Risk follows ownership principle and its exceptions",
+                "Sale by Non-Owners (Nemo Dat Quod Non Habet) and all statutory exceptions (Sec 27-30)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88028bos-aps2231-ch3u3.pdf",
+              "pdfTitle": "Unit 3: Transfer of Ownership and Delivery of Goods"
+            },
+            {
+              "id": "law-top-0304",
+              "topicNumber": 4,
+              "title": "Unpaid Seller and Rights against Goods & Buyer",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Definition of Unpaid Seller (Sec 45)",
+                "Rights against goods: Right of Lien, Right of Stoppage in Transit, Right of Resale",
+                "Rights against buyer personally: Suit for price, damages for non-acceptance, interest",
+                "Auction Sale rules (Sec 64)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88029bos-aps2231-ch3u4.pdf",
+              "pdfTitle": "Unit 4: Unpaid Seller"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88026bos-aps2231-ch3u1.pdf",
+          "pdfTitle": "Ch 3: The Sale of Goods Act, 1930"
+        },
+        {
+          "id": "law-ch-04",
+          "chapterNumber": 4,
+          "title": "The Indian Partnership Act, 1932",
+          "icaiWeightage": {
+            "minPercentage": 15,
+            "maxPercentage": 20,
+            "typicalMarks": "15-20 Marks"
+          },
+          "estimatedStudyHours": 20,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Nature of partnership, relation of partners to one another and third parties, incoming and outgoing partners, registration, and dissolution.",
+          "topics": [
+            {
+              "id": "law-top-0401",
+              "topicNumber": 1,
+              "title": "General Nature of Partnership",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Definition of Partnership (Sec 4) and 5 essential elements",
+                "True test of Partnership: Sharing of profits vs Mutual Agency (Cox v Hickman)",
+                "Types of Partners (Active, Sleeping, Nominal, Sub-partner, Partner by Estoppel/Holding Out)",
+                "Types of Partnerships (Partnership at Will, Particular Partnership)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88030bos-aps2231-ch4u1.pdf",
+              "pdfTitle": "Unit 1: General Nature of Partnership"
+            },
+            {
+              "id": "law-top-0402",
+              "topicNumber": 2,
+              "title": "Relations of Partners to One Another & Third Parties",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Mutual rights and duties of partners, determination of partnership property",
+                "Implied Authority of a Partner: Scope, statutory restrictions (Sec 19(2)), emergency powers",
+                "Liability of firm for wrongful acts of partner and misapplication of money",
+                "Minor admitted to benefits of partnership (Sec 30) - Rights, liabilities, election upon attaining majority"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88031bos-aps2231-ch4u2.pdf",
+              "pdfTitle": "Unit 2: Relations of Partners"
+            },
+            {
+              "id": "law-top-0403",
+              "topicNumber": 3,
+              "title": "Reconstitution, Registration & Dissolution of Firm",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Incoming, outgoing partners, expulsion, retirement, insolvency, and death of a partner",
+                "Procedure and consequences of non-registration of a firm (Sec 69) and exceptions",
+                "Dissolution of Partnership vs Dissolution of Firm",
+                "Modes of dissolution (Agreement, Compulsory, Contingent, Notice, Court Order) and Sec 48 settlement"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88032bos-aps2231-ch4u3.pdf",
+              "pdfTitle": "Unit 3: Registration and Dissolution of a Firm"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88030bos-aps2231-ch4u1.pdf",
+          "pdfTitle": "Ch 4: The Indian Partnership Act, 1932"
+        },
+        {
+          "id": "law-ch-05",
+          "chapterNumber": 5,
+          "title": "The Limited Liability Partnership Act, 2008",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 14,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Salient features of LLP, designated partners, incorporation procedure, LLP agreement, relationship of partners, and conversion/winding up.",
+          "topics": [
+            {
+              "id": "law-top-0501",
+              "topicNumber": 1,
+              "title": "Salient Features & Designated Partners",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Meaning, concept, and key characteristics of LLP (Body corporate, perpetual succession, mutual agency absent between partners)",
+                "Designated Partners (DPIN requirement, minimum 2 individuals with at least 1 resident in India)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88033bos-aps2231-ch5.pdf",
+              "pdfTitle": "Ch 5: Salient Features & Designated Partners of LLP"
+            },
+            {
+              "id": "law-top-0502",
+              "topicNumber": 2,
+              "title": "Incorporation of LLP & LLP Agreement",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Steps in incorporation: RUN-LLP, FiLLiP, Certificate of Incorporation",
+                "LLP Agreement (Form 3) and default provisions under First Schedule in absence of agreement",
+                "Registered office, change of name, and partner registration"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88033bos-aps2231-ch5.pdf",
+              "pdfTitle": "Ch 5: Incorporation of LLP & LLP Agreement"
+            },
+            {
+              "id": "law-top-0503",
+              "topicNumber": 3,
+              "title": "Differences, Conversion, and Winding Up of LLP",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Detailed comparative analysis: LLP vs Traditional Partnership vs Private Limited Company",
+                "Conversion of firm/private company into LLP",
+                "Winding up of LLP (Voluntary vs By Tribunal under Sec 64)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88033bos-aps2231-ch5.pdf",
+              "pdfTitle": "Ch 5: Conversion, Differences & Winding Up of LLP"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88033bos-aps2231-ch5.pdf",
+          "pdfTitle": "Ch 5: The Limited Liability Partnership Act, 2008"
+        },
+        {
+          "id": "law-ch-06",
+          "chapterNumber": 6,
+          "title": "The Companies Act, 2013",
+          "icaiWeightage": {
+            "minPercentage": 15,
+            "maxPercentage": 20,
+            "typicalMarks": "15-20 Marks"
+          },
+          "estimatedStudyHours": 20,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Company characteristics, lifting of corporate veil, classes of companies, incorporation process, MOA & AOA, and corporate doctrines.",
+          "topics": [
+            {
+              "id": "law-top-0601",
+              "topicNumber": 1,
+              "title": "Company Characteristics & Lifting of Corporate Veil",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Definition (Sec 2(20)) and characteristics (Separate Legal Entity - Salomon v Salomon, Limited Liability, Common Seal)",
+                "Doctrine of Lifting / Piercing the Corporate Veil (Judicial interpretations: protection of revenue, fraud avoidance, enemy character)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88034bos-aps2231-ch6.pdf",
+              "pdfTitle": "Ch 6: Company Characteristics & Corporate Veil"
+            },
+            {
+              "id": "law-top-0602",
+              "topicNumber": 2,
+              "title": "Classification and Types of Companies",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Private Company (Sec 2(68)), Public Company (Sec 2(71)), One Person Company (OPC - Sec 2(62))",
+                "Small Company (Sec 2(85)), Holding & Subsidiary Company (Sec 2(46)/Sec 2(87)), Associate Company",
+                "Section 8 (Non-profit) Companies: Formation, privileges, revocation of license",
+                "Government Companies, Listed/Unlisted, Foreign Companies, Dormant Companies"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88034bos-aps2231-ch6.pdf",
+              "pdfTitle": "Ch 6: Classification and Types of Companies"
+            },
+            {
+              "id": "law-top-0603",
+              "topicNumber": 3,
+              "title": "Incorporation of Company & SPICe+ Process",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Incorporation procedure under SPICe+ (Part A: Name Reservation, Part B: Incorporation, PAN, TAN, DIN, EPFO, ESIC, Bank A/c)",
+                "Certificate of Incorporation, CIN, Commencement of Business (Sec 10A)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88034bos-aps2231-ch6.pdf",
+              "pdfTitle": "Ch 6: Incorporation of Company & SPICe+"
+            },
+            {
+              "id": "law-top-0604",
+              "topicNumber": 4,
+              "title": "Memorandum of Association (MOA) & Articles of Association (AOA)",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Clauses of MOA (Name, Registered Office, Object, Liability, Capital, Association/Subscription)",
+                "Articles of Association contents and entrenchment provisions",
+                "Doctrine of Ultra Vires (Ashbury Railway Carriage case) and effects",
+                "Doctrine of Constructive Notice vs Doctrine of Indoor Management (Turquand Rule) and exceptions"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88034bos-aps2231-ch6.pdf",
+              "pdfTitle": "Ch 6: Memorandum (MOA) & Articles of Association (AOA)"
+            },
+            {
+              "id": "law-top-0605",
+              "topicNumber": 5,
+              "title": "Share Capital Basics & Debentures",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Authorized, Issued, Subscribed, Called-up, Paid-up capital",
+                "Equity shares (with voting rights / differential voting rights) and Preference shares",
+                "Debentures and statutory restrictions"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88034bos-aps2231-ch6.pdf",
+              "pdfTitle": "Ch 6: Share Capital Basics & Debentures"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88034bos-aps2231-ch6.pdf",
+          "pdfTitle": "Ch 6: The Companies Act, 2013"
+        },
+        {
+          "id": "law-ch-07",
+          "chapterNumber": 7,
+          "title": "The Negotiable Instruments Act, 1881",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 16,
+          "difficulty": "Hard",
+          "importance": "High",
+          "description": "Meaning and essential characteristics of Promissory Notes, Bills of Exchange, and Cheques; Holder and Holder in Due Course; Negotiation; Dishonour and Sec 138 penalties.",
+          "topics": [
+            {
+              "id": "law-top-0701",
+              "topicNumber": 1,
+              "title": "Instruments: Promissory Notes, Bills of Exchange & Cheques",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Definition and essential characteristics of Promissory Note (Sec 4), Bill of Exchange (Sec 5), Cheque (Sec 6)",
+                "Distinction between Promissory Note, Bill of Exchange, and Cheque",
+                "Electronic Cheque and Truncated Cheque definitions"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88035bos-aps2231-ch7.pdf",
+              "pdfTitle": "Ch 7: Promissory Notes, Bills of Exchange & Cheques"
+            },
+            {
+              "id": "law-top-0702",
+              "topicNumber": 2,
+              "title": "Holder, Holder in Due Course (HDC) & Negotiation",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Define Holder (Sec 8) vs Holder in Due Course (Sec 9)",
+                "Privileges of Holder in Due Course (Inchoate stamped instruments, fictitious payee, prior defects cleansed)",
+                "Modes of Negotiation: By Delivery and By Endorsement (Blank, Special, Restrictive, Conditional, Sans Recourse)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88035bos-aps2231-ch7.pdf",
+              "pdfTitle": "Ch 7: Holder, Holder in Due Course (HDC) & Negotiation"
+            },
+            {
+              "id": "law-top-0703",
+              "topicNumber": 3,
+              "title": "Crossing of Cheques & Material Alteration",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Types of Crossing: General Crossing, Special Crossing, Account Payee Crossing, Not Negotiable Crossing",
+                "Protection to Paying Banker and Collecting Banker (Sec 85, 128, 131)",
+                "Material Alteration (Sec 87) and alterations allowed by law"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88035bos-aps2231-ch7.pdf",
+              "pdfTitle": "Ch 7: Crossing of Cheques & Material Alteration"
+            },
+            {
+              "id": "law-top-0704",
+              "topicNumber": 4,
+              "title": "Dishonour of Cheques & Penalties under Section 138-142",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Dishonour by Non-acceptance and Non-payment, Notice of Dishonour, Noting and Protest",
+                "Offence under Section 138: Dishonour for insufficiency of funds",
+                "Ingredients and strict statutory timelines: Notice within 30 days, payment within 15 days, complaint within 1 month",
+                "Offences by companies (Sec 141) and Interim Compensation (Sec 143A & 148)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88035bos-aps2231-ch7.pdf",
+              "pdfTitle": "Ch 7: Dishonour of Cheques & Penalties"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88035bos-aps2231-ch7.pdf",
+          "pdfTitle": "Ch 7: The Negotiable Instruments Act, 1881"
+        }
+      ]
+    },
+    {
+      "id": "paper-3-quantitative-aptitude",
+      "paperNumber": 3,
+      "code": "QA",
+      "title": "Quantitative Aptitude",
+      "shortTitle": "Quantitative Aptitude",
+      "type": "Objective (MCQ)",
+      "totalMarks": 100,
+      "estimatedStudyHours": 160,
+      "color": {
+        "light": "#059669",
+        "dark": "#34D399",
+        "theme": "emerald"
+      },
+      "description": "To test the ability of students to understand mathematical, logical, and statistical tools and apply them in business, finance, and accounting problems.",
+      "parts": [
+        {
+          "id": "qa-part-a",
+          "title": "Part A: Business Mathematics",
+          "marks": 40,
+          "percentage": 40
+        },
+        {
+          "id": "qa-part-b",
+          "title": "Part B: Logical Reasoning",
+          "marks": 20,
+          "percentage": 20
+        },
+        {
+          "id": "qa-part-c",
+          "title": "Part C: Statistics",
+          "marks": 40,
+          "percentage": 40
+        }
+      ],
+      "chapters": [
+        {
+          "id": "qa-ch-01",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 1,
+          "title": "Ratio, Proportion, Indices, and Logarithms",
+          "icaiWeightage": {
+            "minPercentage": 6,
+            "maxPercentage": 8,
+            "typicalMarks": "6-8 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Easy",
+          "importance": "High",
+          "description": "Foundational algebra: Ratios, compound/duplicate ratios, laws of indices, logarithms laws, characteristic and mantissa.",
+          "topics": [
+            {
+              "id": "qa-top-0101",
+              "topicNumber": 1,
+              "title": "Ratio and Proportion",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Properties of ratios, inverse ratio, compound ratio, duplicate, sub-duplicate, triplicate, sub-triplicate ratio",
+                "Direct, inverse, and continued proportion, componendo and dividendo rules"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88037bos-aps2232-ch1.pdf",
+              "pdfTitle": "Ch 1: Ratio and Proportion"
+            },
+            {
+              "id": "qa-top-0102",
+              "topicNumber": 2,
+              "title": "Laws of Indices",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Basic exponential rules: product law, quotient law, power of power",
+                "Fractional exponents, zero exponent, and negative powers simplification"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88037bos-aps2232-ch1.pdf",
+              "pdfTitle": "Ch 1: Laws of Indices"
+            },
+            {
+              "id": "qa-top-0103",
+              "topicNumber": 3,
+              "title": "Logarithms",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Fundamental laws of logarithms: Product, Quotient, Power rules",
+                "Base change theorem, Common Logarithms, Characteristic and Mantissa calculation"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88037bos-aps2232-ch1.pdf",
+              "pdfTitle": "Ch 1: Logarithms"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88037bos-aps2232-ch1.pdf",
+          "pdfTitle": "Ch 1: Ratio and Proportion, Indices, Logarithms"
+        },
+        {
+          "id": "qa-ch-02",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 2,
+          "title": "Equations",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 7,
+            "typicalMarks": "4-6 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Medium",
+          "importance": "Medium",
+          "description": "Linear equations in 1, 2, and 3 variables, quadratic equations, nature of roots, and symmetric expressions of roots.",
+          "topics": [
+            {
+              "id": "qa-top-0201",
+              "topicNumber": 1,
+              "title": "Linear Equations (1, 2, and 3 Variables)",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Solve simultaneous linear equations using substitution, elimination, and matrix/cross-multiplication methods",
+                "Word problems involving speed, distance, age, and cost"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88038bos-aps2232-ch2.pdf",
+              "pdfTitle": "Ch 2: Linear Equations"
+            },
+            {
+              "id": "qa-top-0202",
+              "topicNumber": 2,
+              "title": "Quadratic and Cubic Equations",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Solve quadratic equations using factoring and quadratic formula",
+                "Examine nature of roots using Discriminant (D = b^2 - 4ac)",
+                "Calculate sum (alpha + beta) and product (alpha * beta) of roots and construct equations",
+                "Solve symmetric expressions of roots and factor simple cubic polynomials"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88038bos-aps2232-ch2.pdf",
+              "pdfTitle": "Ch 2: Quadratic and Cubic Equations"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88038bos-aps2232-ch2.pdf",
+          "pdfTitle": "Ch 2: Equations"
+        },
+        {
+          "id": "qa-ch-03",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 3,
+          "title": "Linear Inequalities",
+          "icaiWeightage": {
+            "minPercentage": 3,
+            "maxPercentage": 5,
+            "typicalMarks": "2-4 Marks"
+          },
+          "estimatedStudyHours": 6,
+          "difficulty": "Easy",
+          "importance": "Medium",
+          "description": "Linear inequalities in one and two variables, graphical representation, and finding the common feasible region.",
+          "topics": [
+            {
+              "id": "qa-top-0301",
+              "topicNumber": 1,
+              "title": "Linear Inequalities in One and Two Variables",
+              "estimatedMinutes": 60,
+              "learningObjectives": [
+                "Algebraic solution of linear inequalities in one variable",
+                "Graphical solution of system of linear inequalities in two variables",
+                "Identify bounded vs unbounded feasible regions"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88039bos-aps2232-ch3.pdf",
+              "pdfTitle": "Ch 3: Linear Inequalities"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88039bos-aps2232-ch3.pdf",
+          "pdfTitle": "Ch 3: Linear Inequalities"
+        },
+        {
+          "id": "qa-ch-04",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 4,
+          "title": "Time Value of Money (TVM)",
+          "icaiWeightage": {
+            "minPercentage": 12,
+            "maxPercentage": 15,
+            "typicalMarks": "12-16 Marks"
+          },
+          "estimatedStudyHours": 24,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Simple and compound interest, effective rate of interest, annuities, sinking funds, bond valuation, perpetuity, NPV, CAGR, and leasing decisions (highest weightage in QA Math).",
+          "topics": [
+            {
+              "id": "qa-top-0401",
+              "topicNumber": 1,
+              "title": "Simple Interest and Compound Interest",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Calculate Simple Interest and Amount (I = Prt)",
+                "Compute Compound Interest across varying compounding periods (annual, semi-annual, quarterly, monthly, continuous)",
+                "Calculate Effective Rate of Interest: E = (1 + i)^n - 1"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88040bos-aps2232-ch4.pdf",
+              "pdfTitle": "Ch 4: Simple Interest and Compound Interest"
+            },
+            {
+              "id": "qa-top-0402",
+              "topicNumber": 2,
+              "title": "Annuities: Future Value and Present Value",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Distinguish Annuity Regular (Ordinary) vs Annuity Due",
+                "Calculate Future Value of Annuity Regular and Annuity Due",
+                "Calculate Present Value of Annuity Regular and Annuity Due",
+                "Amortization table and loan installment computation"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88040bos-aps2232-ch4.pdf",
+              "pdfTitle": "Ch 4: Annuities: Future Value and Present Value"
+            },
+            {
+              "id": "qa-top-0403",
+              "topicNumber": 3,
+              "title": "Applications: Sinking Fund, Leasing, Perpetuity, Bond Valuation, NPV & CAGR",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Sinking fund deposit calculation for asset replacement",
+                "Lease vs Buy decision analysis using PV",
+                "Perpetuity and Growing Perpetuity valuation (PV = A / i)",
+                "Net Present Value (NPV) criteria for capital budgeting",
+                "Compound Annual Growth Rate (CAGR) formula and calculation"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88040bos-aps2232-ch4.pdf",
+              "pdfTitle": "Ch 4: Sinking Fund, Leasing, Perpetuity, Bond & NPV"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88040bos-aps2232-ch4.pdf",
+          "pdfTitle": "Ch 4: Mathematics of Finance"
+        },
+        {
+          "id": "qa-ch-05",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 5,
+          "title": "Permutations and Combinations",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 8,
+            "typicalMarks": "5-7 Marks"
+          },
+          "estimatedStudyHours": 12,
+          "difficulty": "Hard",
+          "importance": "High",
+          "description": "Fundamental principles of counting, factorial, permutations (linear, circular, restricted), combinations, division into groups, and combinatorial problem solving.",
+          "topics": [
+            {
+              "id": "qa-top-0501",
+              "topicNumber": 1,
+              "title": "Principles of Counting & Permutations",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Fundamental principles of multiplication and addition",
+                "Linear permutations: nPr = n! / (n - r)!",
+                "Permutations with repeated items: n! / (p! q! r!)",
+                "Circular permutations: (n - 1)! for persons, (n - 1)! / 2 for necklaces/garlands",
+                "Restricted permutations (items together vs never together)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88041bos-aps2232-ch5.pdf",
+              "pdfTitle": "Ch 5: Principles of Counting & Permutations"
+            },
+            {
+              "id": "qa-top-0502",
+              "topicNumber": 2,
+              "title": "Combinations and Grouping",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Combinations formula: nCr = n! / (r! (n - r)!)",
+                "Combinatorial identities: nCr = nC(n-r), nCr + nC(r-1) = (n+1)Cr",
+                "Division of items into equal and unequal groups",
+                "Geometry problems (number of lines, triangles, diagonals of polygon = n(n-3)/2)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88041bos-aps2232-ch5.pdf",
+              "pdfTitle": "Ch 5: Combinations and Grouping"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88041bos-aps2232-ch5.pdf",
+          "pdfTitle": "Ch 5: Basic Concepts of Permutations and Combinations"
+        },
+        {
+          "id": "qa-ch-06",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 6,
+          "title": "Sequence and Series (AP and GP)",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "4-6 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Arithmetic Progression (AP), Geometric Progression (GP), nth term, sum of n terms, arithmetic & geometric means, and special series.",
+          "topics": [
+            {
+              "id": "qa-top-0601",
+              "topicNumber": 1,
+              "title": "Arithmetic Progression (AP)",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Identify common difference 'd', nth term: Tn = a + (n - 1)d",
+                "Sum of n terms: Sn = n/2 * [2a + (n - 1)d] = n/2 * (a + l)",
+                "Arithmetic Mean (AM) insertion between numbers"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88042bos-aps2232-ch6.pdf",
+              "pdfTitle": "Ch 6: Arithmetic Progression (AP)"
+            },
+            {
+              "id": "qa-top-0602",
+              "topicNumber": 2,
+              "title": "Geometric Progression (GP) & Special Series",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Identify common ratio 'r', nth term: Tn = a * r^(n-1)",
+                "Sum of n terms of GP: Sn = a(r^n - 1) / (r - 1)",
+                "Sum of infinite GP: S_inf = a / (1 - r) for |r| < 1",
+                "Geometric Mean (GM) and sum of first n natural numbers (Sigma n, Sigma n^2, Sigma n^3)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88042bos-aps2232-ch6.pdf",
+              "pdfTitle": "Ch 6: Geometric Progression (GP) & Special Series"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88042bos-aps2232-ch6.pdf",
+          "pdfTitle": "Ch 6: Sequence and Series - AP and GP"
+        },
+        {
+          "id": "qa-ch-07",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 7,
+          "title": "Sets, Relations, and Functions",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "4-6 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Medium",
+          "importance": "Medium",
+          "description": "Set theory, Venn diagrams, Cartesian products, Relations (reflexive, symmetric, transitive, equivalence), and Functions (domain, co-domain, range, composite, inverse).",
+          "topics": [
+            {
+              "id": "qa-top-0701",
+              "topicNumber": 1,
+              "title": "Sets and Venn Diagrams",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Representation of sets (Roster vs Set-builder), Types of sets (Null, Universal, Finite, Infinite, Power set 2^n)",
+                "Set operations: Union, Intersection, Difference, Complement, De Morgan's Laws",
+                "Practical word problems using 2-set and 3-set Venn diagrams"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88043bos-aps2232-ch7.pdf",
+              "pdfTitle": "Ch 7: Sets and Venn Diagrams"
+            },
+            {
+              "id": "qa-top-0702",
+              "topicNumber": 2,
+              "title": "Relations and Functions",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Cartesian product of sets, Domain and Range of relation",
+                "Types of relations: Reflexive, Symmetric, Transitive, Equivalence relation",
+                "Types of functions: One-to-One (Injective), Onto (Surjective), Bijective",
+                "Composite functions (fog, gof) and Inverse functions f^(-1)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88043bos-aps2232-ch7.pdf",
+              "pdfTitle": "Ch 7: Relations and Functions"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88043bos-aps2232-ch7.pdf",
+          "pdfTitle": "Ch 7: Sets, Relations and Functions"
+        },
+        {
+          "id": "qa-ch-08",
+          "partId": "qa-part-a",
+          "partName": "Part A: Business Mathematics",
+          "chapterNumber": 8,
+          "title": "Basic Applications of Differential and Integral Calculus",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "4-6 Marks"
+          },
+          "estimatedStudyHours": 12,
+          "difficulty": "Hard",
+          "importance": "Medium",
+          "description": "Derivatives of algebraic, exponential, and logarithmic functions, product/quotient/chain rules, marginal cost/revenue, maxima/minima, basic integration, consumer and producer surplus.",
+          "topics": [
+            {
+              "id": "qa-top-0801",
+              "topicNumber": 1,
+              "title": "Differential Calculus & Business Applications",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Derivatives of standard functions: x^n, e^x, a^x, ln(x)",
+                "Rules of differentiation: Sum, Difference, Product (uv), Quotient (u/v), Chain Rule",
+                "Marginal Cost (MC = dTC/dQ), Marginal Revenue (MR = dTR/dQ), Elasticity",
+                "Maxima and Minima of single variable functions (First and Second derivative tests)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88045bos-aps2232-ch8u2.pdf",
+              "pdfTitle": "Ch 8: Differential Calculus"
+            },
+            {
+              "id": "qa-top-0802",
+              "topicNumber": 2,
+              "title": "Integral Calculus & Consumer/Producer Surplus",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Indefinite integrals of standard algebraic, exponential, and fractional functions",
+                "Definite integrals and fundamental theorem of calculus",
+                "Finding Total Cost from Marginal Cost and Total Revenue from Marginal Revenue",
+                "Calculate Consumer Surplus and Producer Surplus using definite integrals"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88045bos-aps2232-ch8u2.pdf",
+              "pdfTitle": "Ch 8: Integral Calculus & Consumer/Producer Surplus"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88045bos-aps2232-ch8u2.pdf",
+          "pdfTitle": "Ch 8: Basic Applications of Differential and Integral Calculus"
+        },
+        {
+          "id": "qa-ch-09",
+          "partId": "qa-part-b",
+          "partName": "Part B: Logical Reasoning",
+          "chapterNumber": 9,
+          "title": "Number Series, Coding and Decoding, and Odd Man Out",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "5 Marks"
+          },
+          "estimatedStudyHours": 8,
+          "difficulty": "Easy",
+          "importance": "High",
+          "description": "Patterns in number sequences, alphabetic series, letter and numerical coding-decoding, and odd-one-out classification.",
+          "topics": [
+            {
+              "id": "qa-top-0901",
+              "topicNumber": 1,
+              "title": "Number Series and Letter Series",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Identify patterns: Arithmetic differences, geometric multiples, square/cube offsets, Fibonacci sequence",
+                "Alpha-numeric and alternating positional patterns"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88046bos-aps2232-ch9.pdf",
+              "pdfTitle": "Ch 9: Number Series and Letter Series"
+            },
+            {
+              "id": "qa-top-0902",
+              "topicNumber": 2,
+              "title": "Coding-Decoding & Odd Man Out",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Letter coding (shifting positions), number coding, substitution ciphering",
+                "Odd Man Out classification based on mathematical and logical properties"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88046bos-aps2232-ch9.pdf",
+              "pdfTitle": "Ch 9: Coding-Decoding & Odd Man Out"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88046bos-aps2232-ch9.pdf",
+          "pdfTitle": "Ch 9: Number Series, Coding and Decoding and Odd Man Out"
+        },
+        {
+          "id": "qa-ch-10",
+          "partId": "qa-part-b",
+          "partName": "Part B: Logical Reasoning",
+          "chapterNumber": 10,
+          "title": "Direction Sense Test",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "5 Marks"
+          },
+          "estimatedStudyHours": 6,
+          "difficulty": "Easy",
+          "importance": "High",
+          "description": "Cardinal and intercardinal direction tracking, angular turns, shadow concepts (morning/evening), and shortest distance calculation via Pythagoras theorem.",
+          "topics": [
+            {
+              "id": "qa-top-1001",
+              "topicNumber": 1,
+              "title": "Direction Tracking and Shortest Distance",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Master 8 directions: North, South, East, West, NE, NW, SE, SW",
+                "Track left/right turns, clockwise/anticlockwise angles (45 deg, 90 deg, 135 deg, 180 deg)",
+                "Calculate displacement and shortest path using Pythagoras Theorem",
+                "Solve shadow problems at sunrise and sunset"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88047bos-aps2232-ch10.pdf",
+              "pdfTitle": "Ch 10: Direction Sense Test"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88047bos-aps2232-ch10.pdf",
+          "pdfTitle": "Ch 10: Direction Sense Test"
+        },
+        {
+          "id": "qa-ch-11",
+          "partId": "qa-part-b",
+          "partName": "Part B: Logical Reasoning",
+          "chapterNumber": 11,
+          "title": "Seating Arrangements",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "5 Marks"
+          },
+          "estimatedStudyHours": 8,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Linear arrangements (single row, double row, north/south facing), circular arrangements (facing center, facing outward), and complex seating constraints.",
+          "topics": [
+            {
+              "id": "qa-top-1101",
+              "topicNumber": 1,
+              "title": "Linear and Circular Seating Arrangements",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Linear arrangements: Single row facing North or South, parallel rows facing each other",
+                "Circular arrangements: Persons facing center (Left = Clockwise, Right = Anticlockwise) vs facing outward",
+                "Step-by-step constraint mapping and positional deduction"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88048bos-aps2232-ch11.pdf",
+              "pdfTitle": "Ch 11: Linear and Circular Seating Arrangements"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88048bos-aps2232-ch11.pdf",
+          "pdfTitle": "Ch 11: Seating Arrangements"
+        },
+        {
+          "id": "qa-ch-12",
+          "partId": "qa-part-b",
+          "partName": "Part B: Logical Reasoning",
+          "chapterNumber": 12,
+          "title": "Blood Relations",
+          "icaiWeightage": {
+            "minPercentage": 4,
+            "maxPercentage": 6,
+            "typicalMarks": "5 Marks"
+          },
+          "estimatedStudyHours": 6,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Family relationships, genealogical family tree diagrams, conversation-based relation puzzles, and coded blood relation questions.",
+          "topics": [
+            {
+              "id": "qa-top-1201",
+              "topicNumber": 1,
+              "title": "Blood Relations & Coded Puzzles",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Identify maternal vs paternal relations, generations, and in-law relations",
+                "Construct structured Family Tree diagrams with standard gender (+/-) and marriage (=) notation",
+                "Decode pointing-to-a-person statements and solve coded relations (A + B means A is father of B)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": false,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88049bos-aps2232-ch12.pdf",
+              "pdfTitle": "Ch 12: Blood Relations & Coded Puzzles"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88049bos-aps2232-ch12.pdf",
+          "pdfTitle": "Ch 12: Blood Relations"
+        },
+        {
+          "id": "qa-ch-13",
+          "partId": "qa-part-c",
+          "partName": "Part C: Statistics",
+          "chapterNumber": 13,
+          "title": "Statistical Representation of Data",
+          "icaiWeightage": {
+            "minPercentage": 6,
+            "maxPercentage": 8,
+            "typicalMarks": "6-8 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Easy",
+          "importance": "High",
+          "description": "Collection and classification of data, tabulation, bar diagrams, pie charts, histograms, frequency polygons, and ogives.",
+          "topics": [
+            {
+              "id": "qa-top-1301",
+              "topicNumber": 1,
+              "title": "Collection and Classification of Data",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Primary vs Secondary data, methods of data collection",
+                "Classification: Chronological, Geographical, Qualitative (Ordinal), Quantitative (Discrete/Continuous)",
+                "Frequency distributions: Class limits, Class boundaries, Class mark/mid-point, Class width, Cumulative frequency"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88050bos-aps2232-ch13u1.pdf",
+              "pdfTitle": "Unit I: Statistical Description of Data"
+            },
+            {
+              "id": "qa-top-1302",
+              "topicNumber": 2,
+              "title": "Diagrammatic and Graphical Representation",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Parts of a formal statistical table (Stub, Caption, Body, Title, Source)",
+                "Bar diagrams (Simple, Multiple, Subdivided, Percentage) and Pie Chart angle computation",
+                "Histogram (equal vs unequal class intervals - frequency density), Frequency Polygon, and Less-than/More-than Ogives (graphical determination of Median)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88051bos-aps2232-ch13u2.pdf",
+              "pdfTitle": "Unit II: Sampling & Diagrammatic Representation"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88050bos-aps2232-ch13u1.pdf",
+          "pdfTitle": "Ch 13: Statistical Description of Data & Sampling"
+        },
+        {
+          "id": "qa-ch-14",
+          "partId": "qa-part-c",
+          "partName": "Part C: Statistics",
+          "chapterNumber": 14,
+          "title": "Measures of Central Tendency and Dispersion",
+          "icaiWeightage": {
+            "minPercentage": 12,
+            "maxPercentage": 15,
+            "typicalMarks": "12-16 Marks"
+          },
+          "estimatedStudyHours": 20,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Mean, Median, Mode, GM, HM, Quartiles, Deciles, Percentiles, Range, Mean Deviation, Standard Deviation, Variance, Coefficient of Variation, and change of origin/scale properties.",
+          "topics": [
+            {
+              "id": "qa-top-1401",
+              "topicNumber": 1,
+              "title": "Measures of Central Tendency (Mean, Median, Mode, GM, HM)",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Arithmetic Mean: Simple, Weighted, Combined Mean formula",
+                "Median, Quartiles (Q1, Q3), Deciles, Percentiles for grouped and ungrouped data",
+                "Mode formula for grouped data and Empirical relation: Mode = 3*Median - 2*Mean",
+                "Geometric Mean (GM) and Harmonic Mean (HM) properties: AM >= GM >= HM",
+                "Master effect of change of origin and scale on central tendency measures"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88052bos-aps2232-ch14u1.pdf",
+              "pdfTitle": "Unit I: Measures of Central Tendency (Mean, Median, Mode)"
+            },
+            {
+              "id": "qa-top-1402",
+              "topicNumber": 2,
+              "title": "Measures of Dispersion (SD, Variance, MD, QD & CV)",
+              "estimatedMinutes": 180,
+              "learningObjectives": [
+                "Range and Coefficient of Range",
+                "Mean Deviation from Mean and Median, and Coefficient of MD",
+                "Standard Deviation (SD / sigma), Variance, Combined Standard Deviation",
+                "Quartile Deviation (QD = (Q3 - Q1)/2) and Coefficient of QD",
+                "Coefficient of Variation (CV = (SD / Mean) * 100) to compare consistency",
+                "Master effect of change of origin (no effect) and scale (affected by absolute scale factor) on dispersion"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88057bos-aps2232-ch14u2.pdf",
+              "pdfTitle": "Unit II: Measures of Dispersion (SD, Variance, MD, QD, CV)"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88052bos-aps2232-ch14u1.pdf",
+          "pdfTitle": "Ch 14: Measures of Central Tendency and Dispersion"
+        },
+        {
+          "id": "qa-ch-15",
+          "partId": "qa-part-c",
+          "partName": "Part C: Statistics",
+          "chapterNumber": 15,
+          "title": "Probability",
+          "icaiWeightage": {
+            "minPercentage": 6,
+            "maxPercentage": 8,
+            "typicalMarks": "6-8 Marks"
+          },
+          "estimatedStudyHours": 12,
+          "difficulty": "Hard",
+          "importance": "High",
+          "description": "Classical, empirical, and axiomatic probability, sample space, independent events, conditional probability, addition and multiplication theorems, and Bayes' Theorem.",
+          "topics": [
+            {
+              "id": "qa-top-1501",
+              "topicNumber": 1,
+              "title": "Basic Probability & Theorems of Probability",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Sample space, Mutually exclusive, Exhaustive, Independent, and Equally likely events",
+                "Odds in favour: a / b, Odds against: b / a",
+                "Addition Theorem: P(A U B) = P(A) + P(B) - P(A n B)",
+                "Multiplication Theorem for independent events: P(A n B) = P(A) * P(B)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88053bos-aps2232-ch15.pdf",
+              "pdfTitle": "Ch 15: Basic Probability & Theorems"
+            },
+            {
+              "id": "qa-top-1502",
+              "topicNumber": 2,
+              "title": "Conditional Probability, Mathematical Expectation & Bayes' Theorem",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Conditional Probability: P(A|B) = P(A n B) / P(B)",
+                "Mathematical Expectation: E(X) = Sigma [x * P(x)], Variance V(X) = E(X^2) - [E(X)]^2",
+                "Bayes' Theorem for posterior probability estimation given prior evidence"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88053bos-aps2232-ch15.pdf",
+              "pdfTitle": "Ch 15: Conditional Probability & Bayes Theorem"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88053bos-aps2232-ch15.pdf",
+          "pdfTitle": "Ch 15: Probability"
+        },
+        {
+          "id": "qa-ch-16",
+          "partId": "qa-part-c",
+          "partName": "Part C: Statistics",
+          "chapterNumber": 16,
+          "title": "Theoretical Distributions",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 7,
+            "typicalMarks": "5-7 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Hard",
+          "importance": "High",
+          "description": "Binomial Distribution, Poisson Distribution, and Normal Distribution with all properties, parameters, and applications.",
+          "topics": [
+            {
+              "id": "qa-top-1601",
+              "topicNumber": 1,
+              "title": "Binomial Distribution",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "PMF: P(X = r) = nCr * p^r * q^(n-r), where p + q = 1",
+                "Parameters n and p; Mean = np, Variance = npq (Mean > Variance)",
+                "Uni-modal and bi-modal conditions, additive property"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88054bos-aps2232-ch16.pdf",
+              "pdfTitle": "Ch 16: Binomial Distribution"
+            },
+            {
+              "id": "qa-top-1602",
+              "topicNumber": 2,
+              "title": "Poisson Distribution",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "PMF: P(X = r) = (e^(-m) * m^r) / r!, for rare events where n -> inf, p -> 0",
+                "Single parameter m / lambda; Mean = Variance = m",
+                "Additive property of independent Poisson variates"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88054bos-aps2232-ch16.pdf",
+              "pdfTitle": "Ch 16: Poisson Distribution"
+            },
+            {
+              "id": "qa-top-1603",
+              "topicNumber": 3,
+              "title": "Normal (Gaussian) Distribution",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Bell-shaped symmetrical curve around Mean = Median = Mode = mu",
+                "Total area under curve = 1; Standard Normal Variate z = (X - mu) / sigma",
+                "Key empirical ratios: QD ~ (2/3) sigma, MD ~ (4/5) sigma",
+                "Standard areas: mu +/- 1 sigma (68.27%), mu +/- 2 sigma (95.45%), mu +/- 3 sigma (99.73%)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88054bos-aps2232-ch16.pdf",
+              "pdfTitle": "Ch 16: Normal (Gaussian) Distribution"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88054bos-aps2232-ch16.pdf",
+          "pdfTitle": "Ch 16: Theoretical Distributions"
+        },
+        {
+          "id": "qa-ch-17",
+          "partId": "qa-part-c",
+          "partName": "Part C: Statistics",
+          "chapterNumber": 17,
+          "title": "Correlation and Regression",
+          "icaiWeightage": {
+            "minPercentage": 8,
+            "maxPercentage": 10,
+            "typicalMarks": "8-10 Marks"
+          },
+          "estimatedStudyHours": 14,
+          "difficulty": "Medium",
+          "importance": "Essential",
+          "description": "Scatter diagram, Karl Pearson's r, Spearman's rank correlation, concurrent deviations, regression lines, regression coefficients (byx, bxy), and angle between regression lines.",
+          "topics": [
+            {
+              "id": "qa-top-1701",
+              "topicNumber": 1,
+              "title": "Correlation Analysis (Karl Pearson, Spearman Rank, Concurrent Deviation)",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Types of correlation: Positive, Negative, Zero, Linear, Non-linear",
+                "Karl Pearson's coefficient of correlation r (-1 <= r <= 1), formula: Cov(X,Y) / (sigma_x * sigma_y)",
+                "Properties of r: Independent of change of origin and scale (sign depends on signs of scale changes)",
+                "Spearman's Rank Correlation: R = 1 - [6 * Sigma d^2] / [n(n^2 - 1)] (with tied rank correction)",
+                "Coefficient of Concurrent Deviations: r_c = +/- sqrt[ +/- (2c - m) / m ]"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88055bos-aps2232-ch17.pdf",
+              "pdfTitle": "Ch 17: Correlation Analysis"
+            },
+            {
+              "id": "qa-top-1702",
+              "topicNumber": 2,
+              "title": "Regression Analysis & Properties",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Regression equation of Y on X: (Y - Y_bar) = byx * (X - X_bar), where byx = r * (sigma_y / sigma_x)",
+                "Regression equation of X on Y: (X - X_bar) = bxy * (Y - Y_bar), where bxy = r * (sigma_x / sigma_y)",
+                "Properties of regression coefficients: r = +/- sqrt(byx * bxy); both must have same sign",
+                "If one coefficient > 1, the other must be < 1; AM of byx and bxy >= r",
+                "Regression lines intersect at Mean Point (X_bar, Y_bar)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88055bos-aps2232-ch17.pdf",
+              "pdfTitle": "Ch 17: Regression Analysis & Properties"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88055bos-aps2232-ch17.pdf",
+          "pdfTitle": "Ch 17: Correlation and Regression"
+        },
+        {
+          "id": "qa-ch-18",
+          "partId": "qa-part-c",
+          "partName": "Part C: Statistics",
+          "chapterNumber": 18,
+          "title": "Index Numbers",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 7,
+            "typicalMarks": "5-7 Marks"
+          },
+          "estimatedStudyHours": 8,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Price and quantity index numbers, Laspeyres, Paasche, Fisher's ideal, Marshall-Edgeworth, tests of adequacy (Time Reversal, Factor Reversal, Circular), base shifting, splicing, deflating, and CPI.",
+          "topics": [
+            {
+              "id": "qa-top-1801",
+              "topicNumber": 1,
+              "title": "Index Number Formulas & Weighted Aggregative Methods",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Simple aggregative method and Simple average of price relatives",
+                "Weighted aggregative methods: Laspeyres (Base weights P01^L = [Sigma p1 q0 / Sigma p0 q0] * 100), Paasche (Current weights P01^P), Fisher's Ideal (Geometric mean of L and P), Marshall-Edgeworth, Bowley-Dorbisch",
+                "Consumer Price Index (CPI) / Cost of Living Index: Aggregate Expenditure & Family Budget methods"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88056bos-aps2232-ch18.pdf",
+              "pdfTitle": "Ch 18: Index Number Formulas & Weighted Aggregates"
+            },
+            {
+              "id": "qa-top-1802",
+              "topicNumber": 2,
+              "title": "Tests of Adequacy, Shifting, Splicing & Deflating",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Tests of Adequacy: Time Reversal Test (P01 * P10 = 1 - satisfied by Fisher, Marshall-Edgeworth), Factor Reversal Test (P01 * Q01 = V01 - satisfied only by Fisher's Ideal), Circular Test",
+                "Base shifting, Splicing overlapping series, and Deflating index numbers (Real Wage = Money Wage / CPI * 100)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88056bos-aps2232-ch18.pdf",
+              "pdfTitle": "Ch 18: Tests of Adequacy, Splicing & Deflating"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88056bos-aps2232-ch18.pdf",
+          "pdfTitle": "Ch 18: Index Numbers"
+        }
+      ]
+    },
+    {
+      "id": "paper-4-business-economics",
+      "paperNumber": 4,
+      "code": "BECO",
+      "title": "Business Economics",
+      "shortTitle": "Economics",
+      "type": "Objective (MCQ)",
+      "totalMarks": 100,
+      "estimatedStudyHours": 140,
+      "color": {
+        "light": "#7C3AED",
+        "dark": "#A78BFA",
+        "theme": "purple"
+      },
+      "description": "To develop an understanding of the concepts and theories of Economics (Micro & Macro) and acquire the ability for addressing real-world economic and business issues.",
+      "chapters": [
+        {
+          "id": "eco-ch-01",
+          "chapterNumber": 1,
+          "title": "Introduction to Business Economics",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-8 Marks"
+          },
+          "estimatedStudyHours": 8,
+          "difficulty": "Easy",
+          "importance": "Medium",
+          "description": "Definition, nature, and scope of Business Economics, central economic problems, and economic systems (Capitalism, Socialism, Mixed).",
+          "topics": [
+            {
+              "id": "eco-top-0101",
+              "topicNumber": 1,
+              "title": "Nature and Scope of Business Economics",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Distinguish Microeconomics vs Macroeconomics",
+                "Nature of Business Economics: Science, Art, Micro-based, Macro-aware, Normative vs Positive, Pragmatic",
+                "Scope of Business Economics in business decision-making"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88059bos-aps2233-ch1u1.pdf",
+              "pdfTitle": "Unit 1: Introduction to Business Economics"
+            },
+            {
+              "id": "eco-top-0102",
+              "topicNumber": 2,
+              "title": "Basic Problems of an Economy & Economic Systems",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Four Central Economic Problems: What to produce, How to produce, For whom to produce, Provisions for growth",
+                "Capitalist Economy: Features, Merits, Demerits",
+                "Socialist Economy: Features, Merits, Demerits",
+                "Mixed Economy: Characteristics and Role of Public & Private sectors"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88060bos-aps2233-ch1u2.pdf",
+              "pdfTitle": "Unit 2: Basic Problems of Economy & Price Mechanism"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88059bos-aps2233-ch1u1.pdf",
+          "pdfTitle": "Ch 1: Nature & Scope of Business Economics"
+        },
+        {
+          "id": "eco-ch-02",
+          "chapterNumber": 2,
+          "title": "Theory of Demand and Supply",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 18,
+          "difficulty": "Medium",
+          "importance": "Essential",
+          "description": "Law of Demand, Elasticity of Demand (Price, Income, Cross), Consumer Behaviour (Cardinal Utility, Indifference Curves), Law of Supply, and Demand Forecasting.",
+          "topics": [
+            {
+              "id": "eco-top-0201",
+              "topicNumber": 1,
+              "title": "Law of Demand & Elasticity of Demand",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Law of Demand, Demand Schedule, Demand Curve, Expansion/Contraction vs Increase/Decrease",
+                "Price Elasticity of Demand methods: Percentage, Point (Derivative / Segment), Arc, Total Outlay method",
+                "Income Elasticity (Normal, Inferior, Giffen goods) and Cross Elasticity (Substitutes vs Complements)",
+                "Advertisement / Promotional Elasticity of Demand"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88061bos-aps2233-ch2u1.pdf",
+              "pdfTitle": "Unit 1: Law of Demand & Elasticity of Demand"
+            },
+            {
+              "id": "eco-top-0202",
+              "topicNumber": 2,
+              "title": "Theory of Consumer Behaviour (Cardinal & Ordinal Approaches)",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Cardinal Utility: Total Utility, Marginal Utility, Law of Diminishing Marginal Utility, Consumer Surplus (Marshallian)",
+                "Ordinal Utility: Indifference Curve properties (Downward sloping, Convex to origin - Diminishing MRSxy, Non-intersecting)",
+                "Budget Line / Price Line and Consumer Equilibrium (MRSxy = Px / Py)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88062bos-aps2233-ch2u2.pdf",
+              "pdfTitle": "Unit 2: Theory of Consumer Behaviour"
+            },
+            {
+              "id": "eco-top-0203",
+              "topicNumber": 3,
+              "title": "Supply and Elasticity of Supply",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Law of Supply, Determinants of Supply, Movements along curve vs Shift in supply curve",
+                "Price Elasticity of Supply formulas: Point and Arc methods"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88063bos-aps2233-ch2u3.pdf",
+              "pdfTitle": "Unit 3: Supply and Elasticity of Supply"
+            },
+            {
+              "id": "eco-top-0204",
+              "topicNumber": 4,
+              "title": "Demand Forecasting Techniques",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Survey Methods: Survey of buyer's intentions, Delphi technique, Sales force opinion",
+                "Statistical Methods: Trend projection, Fitting trend line, Regression analysis, Controlled experiments, Barometric technique"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88061bos-aps2233-ch2u1.pdf",
+              "pdfTitle": "Demand Forecasting Techniques"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88061bos-aps2233-ch2u1.pdf",
+          "pdfTitle": "Ch 2: Theory of Demand and Supply"
+        },
+        {
+          "id": "eco-ch-03",
+          "chapterNumber": 3,
+          "title": "Theory of Production and Cost",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 16,
+          "difficulty": "Medium",
+          "importance": "Essential",
+          "description": "Production function, Short-run vs Long-run, Law of Variable Proportions (3 Stages), Returns to Scale, Isoquants, Cost Concepts, Short-run & Long-run Cost Curves.",
+          "topics": [
+            {
+              "id": "eco-top-0301",
+              "topicNumber": 1,
+              "title": "Theory of Production & Returns to Scale",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Factors of Production (Land, Labour, Capital, Entrepreneur) and Cobb-Douglas Production Function",
+                "Law of Variable Proportions: Total Product (TP), Average Product (AP), Marginal Product (MP) relationships and 3 Stages (Stage of rational production)",
+                "Law of Returns to Scale: Increasing, Constant, Diminishing returns; Internal and External Economies/Diseconomies of scale",
+                "Isoquants, Isocost Lines, Marginal Rate of Technical Substitution (MRTS), Expansion Path"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88064bos-aps2233-ch3u1.pdf",
+              "pdfTitle": "Unit 1: Theory of Production & Returns to Scale"
+            },
+            {
+              "id": "eco-top-0302",
+              "topicNumber": 2,
+              "title": "Theory of Cost (Short-Run & Long-Run Cost Curves)",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Cost concepts: Accounting Cost vs Economic Cost, Explicit vs Implicit Cost, Opportunity Cost, Sunk Cost",
+                "Short-Run Cost Curves: Total Fixed Cost (TFC), Total Variable Cost (TVC), Total Cost (TC), Average Fixed Cost (AFC - Rectangular Hyperbola), Average Variable Cost (AVC), Average Total Cost (ATC), Marginal Cost (MC)",
+                "Long-Run Average Cost Curve (LAC / Envelope Curve / Planning Curve) and Minimum Efficient Scale"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88065bos-aps2233-ch3u2.pdf",
+              "pdfTitle": "Unit 2: Theory of Cost (Short & Long Run)"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88064bos-aps2233-ch3u1.pdf",
+          "pdfTitle": "Ch 3: Theory of Production and Cost"
+        },
+        {
+          "id": "eco-ch-04",
+          "chapterNumber": 4,
+          "title": "Price Determination in Different Markets",
+          "icaiWeightage": {
+            "minPercentage": 15,
+            "maxPercentage": 20,
+            "typicalMarks": "15-18 Marks"
+          },
+          "estimatedStudyHours": 18,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "Revenue concepts (AR, MR, TR), Perfect Competition, Monopoly, Monopolistic Competition, Oligopoly, and pricing models.",
+          "topics": [
+            {
+              "id": "eco-top-0401",
+              "topicNumber": 1,
+              "title": "Revenue Concepts & Market Structures Overview",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "TR, AR, MR definitions and relationships",
+                "Formula relating AR, MR and Price Elasticity: MR = AR * (1 - 1/e)",
+                "Classification of markets by degree of competition, geographic area, time, and regulation"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88066bos-aps2233-ch4u1.pdf",
+              "pdfTitle": "Unit 1: Meaning and Types of Markets"
+            },
+            {
+              "id": "eco-top-0402",
+              "topicNumber": 2,
+              "title": "Perfect Competition Equilibrium",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Characteristics of Perfect Competition (Price taker firm, horizontal demand curve P = AR = MR)",
+                "Short-run equilibrium conditions (MR = MC, MC cuts MR from below; Supernormal profit, Normal profit, Subnormal loss, Shutdown point P < AVC)",
+                "Long-run equilibrium of firm and industry: P = AR = MR = LMC = LAC (Zero economic profit)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88067bos-aps2233-ch4u2.pdf",
+              "pdfTitle": "Unit 2: Determination of Prices"
+            },
+            {
+              "id": "eco-top-0403",
+              "topicNumber": 3,
+              "title": "Monopoly & Price Discrimination",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Features of Monopoly (Single seller, barriers to entry, downward sloping AR and MR curves)",
+                "Short-run and long-run equilibrium of Monopolist",
+                "Price Discrimination: First degree (perfect), Second degree, Third degree (Pigou); Conditions necessary for profitable price discrimination"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88068bos-aps2233-ch4u3.pdf",
+              "pdfTitle": "Unit 3: Price Output Determination (Monopoly)"
+            },
+            {
+              "id": "eco-top-0404",
+              "topicNumber": 4,
+              "title": "Monopolistic Competition & Oligopoly",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Monopolistic Competition: Features, Product Differentiation, Equilibrium, Excess Capacity theorem",
+                "Oligopoly: Features (Interdependence, Few sellers, Group behaviour), Collusive vs Non-collusive, Cartels, Price Leadership",
+                "Paul Sweezy's Kinked Demand Curve Model (Price rigidity explanation)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88068bos-aps2233-ch4u3.pdf",
+              "pdfTitle": "Unit 3: Monopolistic Competition & Oligopoly"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88066bos-aps2233-ch4u1.pdf",
+          "pdfTitle": "Ch 4: Price Determination in Different Markets"
+        },
+        {
+          "id": "eco-ch-05",
+          "chapterNumber": 5,
+          "title": "Determination of National Income",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-15 Marks"
+          },
+          "estimatedStudyHours": 16,
+          "difficulty": "Hard",
+          "importance": "Essential",
+          "description": "National income accounting aggregates (GDP, GNP, NDP, NNP at MP & FC), measurement methods (Product, Income, Expenditure), and Keynesian determination models (2, 3, 4 sectors, Multipliers).",
+          "topics": [
+            {
+              "id": "eco-top-0501",
+              "topicNumber": 1,
+              "title": "National Income Aggregates & Circular Flow",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Aggregates: GDP_MP, GDP_FC, GNP_MP, GNP_FC, NDP_MP, NDP_FC (Domestic Income), NNP_FC (National Income)",
+                "Adjustments: Net Indirect Taxes (NIT = Indirect Taxes - Subsidies), Net Factor Income from Abroad (NFIA = Factor Income from abroad - Factor Income paid abroad), Depreciation",
+                "Personal Income, Disposable Personal Income, Real vs Nominal GDP, GDP Deflator"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88070bos-aps2233-ch6u1.pdf",
+              "pdfTitle": "Unit 1: National Income Accounting"
+            },
+            {
+              "id": "eco-top-0502",
+              "topicNumber": 2,
+              "title": "Measurement of National Income (Value Added, Income & Expenditure Methods)",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Value Added / Product Method: Gross Value of Output - Intermediate Consumption, Problem of double counting",
+                "Income Method: Compensation of Employees (COE) + Operating Surplus (Rent, Interest, Royalty, Profit) + Mixed Income",
+                "Expenditure Method: Private Final Consumption Expenditure (C) + Government Final Consumption (G) + Gross Domestic Capital Formation (I) + Net Exports (X - M)",
+                "Precautions and treatment of transfer payments, second-hand goods, illegal income"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88070bos-aps2233-ch6u1.pdf",
+              "pdfTitle": "Unit 1: Measurement of National Income"
+            },
+            {
+              "id": "eco-top-0503",
+              "topicNumber": 3,
+              "title": "Keynesian Theory of National Income Determination & Multipliers",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Consumption function C = a + bY, Marginal Propensity to Consume (MPC = b), Average Propensity to Consume (APC)",
+                "Savings function S = -a + (1-b)Y, MPS = (1-b); MPC + MPS = 1, APC + APS = 1",
+                "Equilibrium in 2-Sector (Y = C + I, S = I), 3-Sector (Y = C + I + G), and 4-Sector (Y = C + I + G + X - M) economies",
+                "Investment Multiplier: K = 1 / (1 - MPC) = 1 / MPS; Foreign trade multiplier"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88071bos-aps2233-ch6u2.pdf",
+              "pdfTitle": "Unit 2: Keynesian Theory of National Income Determination"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88070bos-aps2233-ch6u1.pdf",
+          "pdfTitle": "Ch 5: Determination of National Income"
+        },
+        {
+          "id": "eco-ch-06",
+          "chapterNumber": 6,
+          "title": "Public Finance",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-12 Marks"
+          },
+          "estimatedStudyHours": 14,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Fiscal functions of government (Allocation, Distribution, Stabilization), market failure & externalities, public goods, fiscal policy instruments, public debt, and budget deficits.",
+          "topics": [
+            {
+              "id": "eco-top-0601",
+              "topicNumber": 1,
+              "title": "Fiscal Functions & Market Failure",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Richard Musgrave's Three Fiscal Functions: Allocation, Distribution, Stabilization",
+                "Causes of Market Failure: Pure Public Goods (Non-rival & Non-excludable, Free rider problem), Merit goods, Externalities (Positive & Negative), Asymmetric Information (Moral hazard, Adverse selection)",
+                "Government corrective interventions: Pigouvian taxes, Subsidies, Regulations"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88072bos-aps2233-ch7u1.pdf",
+              "pdfTitle": "Unit 1 & 2: Fiscal Functions & Market Failure"
+            },
+            {
+              "id": "eco-top-0602",
+              "topicNumber": 2,
+              "title": "Fiscal Policy, Public Debt & Budget Deficits",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Fiscal policy objectives: Economic growth, full employment, price stability",
+                "Instruments: Government expenditure, Taxation (Direct vs Indirect, Progressive/Regressive), Public Debt",
+                "Expansionary vs Contractionary Fiscal Policy, Automatic stabilizers vs Discretionary fiscal policy",
+                "Budget Deficits: Revenue Deficit, Fiscal Deficit, Primary Deficit definitions and economic impact"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88074bos-aps2233-ch7u3.pdf",
+              "pdfTitle": "Unit 3 & 4: Budget Making & Fiscal Policy"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88072bos-aps2233-ch7u1.pdf",
+          "pdfTitle": "Ch 6: Public Finance"
+        },
+        {
+          "id": "eco-ch-07",
+          "chapterNumber": 7,
+          "title": "Money Market",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-12 Marks"
+          },
+          "estimatedStudyHours": 14,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Theories of demand for money (Classical, Cambridge, Keynesian Liquidity Preference), money supply measures (M1, M2, M3, M4, Reserve Money), money multiplier, and RBI monetary policy.",
+          "topics": [
+            {
+              "id": "eco-top-0701",
+              "topicNumber": 1,
+              "title": "Concept of Money Demand",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Classical Quantity Theory: Fisher's Equation of Exchange (MV = PT)",
+                "Cambridge Cash Balance Approach (M = kPY - Marshall, Pigou, Robertson)",
+                "Keynesian Liquidity Preference Theory: Transaction Motive, Precautionary Motive, Speculative Motive (Liquidity Trap concept)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88076bos-aps2233-ch8u1.pdf",
+              "pdfTitle": "Unit 1: Concept of Money Demand"
+            },
+            {
+              "id": "eco-top-0702",
+              "topicNumber": 2,
+              "title": "Money Supply Measures & Money Multiplier",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "RBI Measures of Money Supply: M1 (Narrow Money = Currency + Demand Deposits + Other Deposits with RBI), M2, M3 (Broad Money = M1 + Time Deposits), M4",
+                "High Powered Money / Reserve Money (M0 = Currency in circulation + Bankers' deposits with RBI + Other deposits with RBI)",
+                "Money Multiplier process: m = M3 / M0; Credit creation formula = Primary Deposit * (1 / LRR)"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88077bos-aps2233-ch8u2.pdf",
+              "pdfTitle": "Unit 2: Money Supply Measures"
+            },
+            {
+              "id": "eco-top-0703",
+              "topicNumber": 3,
+              "title": "Monetary Policy Instruments of RBI",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Monetary Policy Framework and Objectives",
+                "Quantitative Instruments: Cash Reserve Ratio (CRR), Statutory Liquidity Ratio (SLR), Repo Rate, Reverse Repo Rate, Standing Deposit Facility (SDF), Marginal Standing Facility (MSF), Bank Rate, Open Market Operations (OMO)",
+                "Qualitative / Selective Instruments: Margin requirements, Moral suasion, Credit rationing"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88078bos-aps2233-ch8u3.pdf",
+              "pdfTitle": "Unit 3: Monetary Policy Instruments of RBI"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88076bos-aps2233-ch8u1.pdf",
+          "pdfTitle": "Ch 7: Money Market"
+        },
+        {
+          "id": "eco-ch-08",
+          "chapterNumber": 8,
+          "title": "International Trade",
+          "icaiWeightage": {
+            "minPercentage": 10,
+            "maxPercentage": 15,
+            "typicalMarks": "10-12 Marks"
+          },
+          "estimatedStudyHours": 14,
+          "difficulty": "Medium",
+          "importance": "High",
+          "description": "Theories of international trade (Adam Smith, David Ricardo, Heckscher-Ohlin), trade policy instruments (tariffs & non-tariffs), foreign exchange regimes, balance of payments, and trade agreements.",
+          "topics": [
+            {
+              "id": "eco-top-0801",
+              "topicNumber": 1,
+              "title": "Theories of International Trade",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Mercantilist view of trade",
+                "Theory of Absolute Advantage (Adam Smith)",
+                "Theory of Comparative Advantage (David Ricardo - Opportunity cost)",
+                "Heckscher-Ohlin Modern Theory of Factor Endowments (H-O Theorem) and Leontief Paradox"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88079bos-aps2233-ch9u1.pdf",
+              "pdfTitle": "Unit 1: Theories of International Trade"
+            },
+            {
+              "id": "eco-top-0802",
+              "topicNumber": 2,
+              "title": "Trade Policy Instruments: Tariffs & Non-Tariff Measures",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Tariffs: Specific, Ad-valorem, Mixed, Compound, Protective vs Revenue tariffs, Anti-dumping duties, Countervailing duties",
+                "Non-Tariff Measures: Import Quotas, Voluntary Export Restraints (VER), Sanitary and Phytosanitary (SPS) measures, Technical Barriers to Trade (TBT)"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88080bos-aps2233-ch9u2.pdf",
+              "pdfTitle": "Unit 2: Instruments of Trade Policy"
+            },
+            {
+              "id": "eco-top-0803",
+              "topicNumber": 3,
+              "title": "Exchange Rates, International Capital Flows & WTO",
+              "estimatedMinutes": 150,
+              "learningObjectives": [
+                "Fixed vs Floating / Flexible Exchange Rate Regimes",
+                "Appreciation & Depreciation vs Devaluation & Revaluation",
+                "Purchasing Power Parity (PPP) Theory",
+                "Foreign Direct Investment (FDI) vs Foreign Portfolio Investment (FPI)",
+                "World Trade Organization (WTO): Principles (MFN, National Treatment), Agreements (TRIPS, TRIMS, GATS), Dispute Settlement Mechanism"
+              ],
+              "hasPracticalProblems": true,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88081bos-aps2233-ch9u3.pdf",
+              "pdfTitle": "Unit 3 & 4: Trade Negotiations & Exchange Rates"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88079bos-aps2233-ch9u1.pdf",
+          "pdfTitle": "Ch 8: International Trade"
+        },
+        {
+          "id": "eco-ch-09",
+          "chapterNumber": 9,
+          "title": "Indian Economy (Contemporary Perspectives)",
+          "icaiWeightage": {
+            "minPercentage": 5,
+            "maxPercentage": 10,
+            "typicalMarks": "5-8 Marks"
+          },
+          "estimatedStudyHours": 10,
+          "difficulty": "Easy",
+          "importance": "Medium",
+          "description": "Sectoral evolution of Indian economy (Agriculture, Industry, Services), 1991 Economic Reforms (LPG), NITI Aayog, financial inclusion, digital economy, and macroeconomic trends.",
+          "topics": [
+            {
+              "id": "eco-top-0901",
+              "topicNumber": 1,
+              "title": "Sectoral Growth and Evolution of the Indian Economy",
+              "estimatedMinutes": 90,
+              "learningObjectives": [
+                "Structural transition of GDP contributions: Agriculture vs Industry vs Services sector",
+                "Key challenges in Indian agriculture, manufacturing, and infrastructure",
+                "Demographic dividend and employment patterns"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88084bos-aps2233-ch10.pdf",
+              "pdfTitle": "Ch 9: Sectoral Growth & Evolution of Indian Economy"
+            },
+            {
+              "id": "eco-top-0902",
+              "topicNumber": 2,
+              "title": "Economic Reforms, NITI Aayog & Contemporary Initiatives",
+              "estimatedMinutes": 120,
+              "learningObjectives": [
+                "Economic Crisis of 1991 and LPG Reforms (Liberalisation, Privatisation, Globalisation)",
+                "Planning Commission to NITI Aayog: Cooperative federalism, policy innovation",
+                "Financial Inclusion (PMJDY, UPI, Fintech revolution), Digital Public Infrastructure, GST impact, and contemporary economic trends"
+              ],
+              "hasPracticalProblems": false,
+              "hasTheoryQuestions": true,
+              "revisionCycleDefaultDays": [
+                1,
+                7,
+                21,
+                45
+              ],
+              "pdfUrl": "https://resource.cdn.icai.org/88084bos-aps2233-ch10.pdf",
+              "pdfTitle": "Ch 9: Economic Reforms & Contemporary Initiatives"
+            }
+          ],
+          "pdfUrl": "https://resource.cdn.icai.org/88084bos-aps2233-ch10.pdf",
+          "pdfTitle": "Ch 9: Indian Economy"
+        }
+      ]
+    }
+  ]
+}

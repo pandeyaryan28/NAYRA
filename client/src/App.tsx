@@ -14,6 +14,7 @@ import { KeepNotesView } from './components/keep/KeepNotesView.js';
 import { NayraChatModal } from './components/assistant/NayraChatModal.js';
 import { SettingsModal } from './components/settings/SettingsModal.js';
 import { LoginPage } from './components/auth/LoginPage.js';
+import { CaTrackerView } from './ca-tracker/CaTrackerView.js';
 
 const MainContent: React.FC = () => {
   const { activeTab, isLoading, isAuthenticated } = useApp();
@@ -38,6 +39,7 @@ const MainContent: React.FC = () => {
         <Header />
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#09090b]">
           {activeTab === 'overview' && <OverviewDashboard />}
+          {activeTab === 'ca-tracker' && <CaTrackerView />}
           {activeTab === 'tasks' && <TaskManager />}
           {activeTab === 'calendar' && <CalendarView />}
           {activeTab === 'habits' && <HabitsView />}

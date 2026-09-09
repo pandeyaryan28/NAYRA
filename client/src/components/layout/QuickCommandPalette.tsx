@@ -14,7 +14,8 @@ import {
   ArrowRight,
   Palette,
   Sun,
-  Moon
+  Moon,
+  GraduationCap
 } from 'lucide-react';
 
 export const QuickCommandPalette: React.FC = () => {
@@ -86,6 +87,17 @@ export const QuickCommandPalette: React.FC = () => {
               Actions
             </div>
             <div className="space-y-0.5">
+              <button
+                onClick={() => handleSelect(() => setActiveTab('ca-tracker'))}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>CA Tracker (Foundation 2024)</span>
+                </div>
+                <ArrowRight className="w-3 h-3 text-zinc-400" />
+              </button>
+
               <button
                 onClick={() => handleSelect(() => setActiveTab('tasks'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
