@@ -134,7 +134,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [accentColor]);
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      api.saveUserSettings({ theme: next }).catch(() => {});
+      return next;
+    });
+  };
+
+  const updateUiStyle = (style: UIStyle) => {
+    setUiStyle(style);
+    api.saveUserSettings({ uiStyle: style }).catch(() => {});
+  };
+
+  const updateAccentColor = (color: AccentColor) => {
+    setAccentColor(color);
+    api.saveUserSettings({ accentColor: color }).catch(() => {});
   };
 
   const showToast = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
@@ -355,6 +369,57 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     refreshAll();
 
+    // Live Cross-Device Cloud Sync via Firestore
+    const unsubHabits = api.subscribeHabits(cloudHabits => {
+      if (Array.isArray(cloudHabits)) {
+        setHabits(cloudHabits);
+      }
+    });
+
+    const unsubTasks = api.subscribeTasks(cloudTasks => {
+      if (Array.isArray(cloudTasks)) {
+        setTasks(cloudTasks);
+      }
+    });
+
+    const unsubCalendar = api.subscribeCalendarEvents(cloudEvents => {
+      if (Array.isArray(cloudEvents)) {
+        setCalendarEvents(cloudEvents);
+      }
+    });
+
+    const unsubNotes = api.subscribeNotes(cloudNotes => {
+      if (Array.isArray(cloudNotes)) {
+        setNotes(cloudNotes);
+      }
+    });
+
+    const unsubLogs = api.subscribeTimeLogs(cloudLogs => {
+      if (Array.isArray(cloudLogs)) {
+        setTimeLogs(cloudLogs);
+      }
+    });
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const unsubMeals = api.subscribeMeals(todayStr, async () => {
+      const nut = await api.getNutritionSummary(todayStr);
+      if (nut) setNutritionData(nut);
+    });
+
+    const unsubSettings = api.subscribeUserSettings(cloudSettings => {
+      if (cloudSettings) {
+        if (cloudSettings.theme && (cloudSettings.theme === 'dark' || cloudSettings.theme === 'light')) {
+          setTheme(cloudSettings.theme);
+        }
+        if (cloudSettings.uiStyle) {
+          setUiStyle(cloudSettings.uiStyle as UIStyle);
+        }
+        if (cloudSettings.accentColor) {
+          setAccentColor(cloudSettings.accentColor as AccentColor);
+        }
+      }
+    });
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -366,7 +431,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      unsubHabits();
+      unsubTasks();
+      unsubCalendar();
+      unsubNotes();
+      unsubLogs();
+      unsubMeals();
+      unsubSettings();
+    };
   }, []);
 
   return (
@@ -377,9 +452,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         theme,
         toggleTheme,
         uiStyle,
-        setUiStyle,
+        setUiStyle: updateUiStyle,
         accentColor,
-        setAccentColor,
+        setAccentColor: updateAccentColor,
         isSettingsOpen,
         setIsSettingsOpen,
         tasks,

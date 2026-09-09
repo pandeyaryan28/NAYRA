@@ -50,71 +50,8 @@ const INITIAL_TASKS: Task[] = [];
 const INITIAL_EVENTS: CalendarEvent[] = [];
 const INITIAL_NOTES: KeepNote[] = [];
 const INITIAL_LOGS: TimeLog[] = [];
-const INITIAL_MEALS: MealEntry[] = [
-  {
-    id: 'meal-2026-09-09-breakfast',
-    mealType: 'breakfast',
-    date: todayDateStr,
-    rawText: '1.5 plates of appe and 1 pomegranate',
-    items: [
-      {
-        name: 'Appe (Paddu / Paniyaram)',
-        quantity: '1.5 plates (~9-10 pcs, 225g)',
-        calories: 405,
-        protein: 10.0,
-        carbs: 72.0,
-        fat: 10.8
-      },
-      {
-        name: 'Pomegranate',
-        quantity: '1 medium fruit (~170g arils)',
-        calories: 145,
-        protein: 2.9,
-        carbs: 32.5,
-        fat: 1.6
-      }
-    ],
-    totalCalories: 550,
-    totalProtein: 12.9,
-    totalCarbs: 104.5,
-    totalFat: 12.4,
-    source: 'antigravity',
-    timestamp: `${todayDateStr}T08:30:00.000Z`
-  }
-];
-
-const INITIAL_HABITS: Habit[] = [
-  {
-    id: 'habit-watch-100-news',
-    title: 'Watch 100 news',
-    description: 'Watch 100 news updates every day to stay informed on world and tech events.',
-    category: 'learning',
-    frequency: 'daily',
-    targetDaysPerWeek: 7,
-    color: '#6366f1',
-    icon: 'book-open',
-    completedDates: [],
-    streak: 0,
-    bestStreak: 0,
-    createdAt: `${todayDateStr}T12:57:41.000Z`,
-    updatedAt: `${todayDateStr}T12:57:41.000Z`
-  },
-  {
-    id: 'habit-100-pushups',
-    title: '100 Pushups',
-    description: 'Complete 100 pushups every day for upper body strength, core stability, and endurance.',
-    category: 'fitness',
-    frequency: 'daily',
-    targetDaysPerWeek: 7,
-    color: '#f43f5e',
-    icon: 'activity',
-    completedDates: [],
-    streak: 0,
-    bestStreak: 0,
-    createdAt: `${todayDateStr}T12:57:41.000Z`,
-    updatedAt: `${todayDateStr}T12:57:41.000Z`
-  }
-];
+const INITIAL_MEALS: MealEntry[] = [];
+const INITIAL_HABITS: Habit[] = [];
 
 // Automated cleanup routine to guarantee zero dummy data survives from past sessions
 export function purgeDummyData() {
@@ -352,8 +289,8 @@ export class NayraLocalBackend {
   // Nutrition & Calories
   public getNutritionSummary(dateStr?: string): NutritionSummaryResponse {
     const targetDate = dateStr || new Date().toISOString().split('T')[0];
-    const rawMeals = getStored<MealEntry[]>(STORAGE_KEYS.MEALS, INITIAL_MEALS);
-    const allMeals = (rawMeals && rawMeals.length > 0) ? rawMeals : INITIAL_MEALS;
+    const rawMeals = getStored<MealEntry[]>(STORAGE_KEYS.MEALS, []);
+    const allMeals = rawMeals || [];
     const meals = allMeals.filter(m => m.date === targetDate);
     const target = getStored<DailyNutritionTarget>(STORAGE_KEYS.TARGET, INITIAL_TARGET);
     const waterIntakeMl = getStored<number>(STORAGE_KEYS.WATER, 1250);
@@ -488,12 +425,8 @@ export class NayraLocalBackend {
 
   // Habits
   public getHabits(): Habit[] {
-    const raw = getStored<Habit[]>(STORAGE_KEYS.HABITS, INITIAL_HABITS);
-    if (!raw || raw.length === 0) {
-      setStored(STORAGE_KEYS.HABITS, INITIAL_HABITS);
-      return INITIAL_HABITS;
-    }
-    return raw;
+    const raw = getStored<Habit[]>(STORAGE_KEYS.HABITS, []);
+    return raw || [];
   }
 
   private calculateHabitStreak(completedDates: string[], existingBest: number = 0): { streak: number; bestStreak: number } {

@@ -12,7 +12,7 @@ import type {
 } from '../types/index.js';
 import { nayraBackend } from './store.js';
 import { googleClientSync } from './googleClientSync.js';
-import { firestoreClient } from './firestoreClient.js';
+import { firestoreClient, type UserSettings } from './firestoreClient.js';
 
 const API_BASE = '/api';
 
@@ -245,17 +245,35 @@ export const api = {
     if (googleClientSync.isConnected()) {
       try {
         const googleEvents = await googleClientSync.fetchGoogleCalendarEvents();
-        if (googleEvents.length > 0 || !nayraBackend.getCalendarEvents().length) {
+        if (googleEvents.length > 0) {
+          // Sync Google events to Firestore for cross-device access
+          for (const ev of googleEvents) {
+            await firestoreClient.saveCalendarEvent(ev);
+          }
           return { events: googleEvents };
         }
       } catch (err) {
-        console.warn('Could not fetch from Google Calendar API, using cached events:', err);
+        console.warn('Could not fetch from Google Calendar API, using cloud events:', err);
       }
     }
+
+    // Query Cloud Firestore
+    try {
+      const fsEvents = await firestoreClient.getCalendarEvents();
+      if (fsEvents && fsEvents.length > 0) {
+        return { events: fsEvents };
+      }
+    } catch (e) {}
+
+    // Try Express backend if running
     try {
       const res = await fetch(`${API_BASE}/calendar`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.events && data.events.length > 0) return data;
+      }
     } catch (e) {}
+
     return { events: nayraBackend.getCalendarEvents() };
   },
 
@@ -265,27 +283,41 @@ export const api = {
       googleEventItem = await googleClientSync.createGoogleEvent(event);
     }
     const finalData = googleEventItem ? { ...event, ...googleEventItem } : event;
+    const created = nayraBackend.createCalendarEvent(finalData);
+
+    // Save to Cloud Firestore
     try {
-      const res = await fetch(`${API_BASE}/calendar`, {
+      await firestoreClient.saveCalendarEvent(created);
+    } catch (e) {}
+
+    try {
+      await fetch(`${API_BASE}/calendar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(finalData)
+        body: JSON.stringify(created)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { event: nayraBackend.createCalendarEvent(finalData) };
+
+    return { event: created };
   },
 
   async updateCalendarEvent(id: string, event: Partial<CalendarEvent>): Promise<{ event: CalendarEvent }> {
+    const updated = nayraBackend.updateCalendarEvent(id, event);
+    
+    // Save to Cloud Firestore
     try {
-      const res = await fetch(`${API_BASE}/calendar/${id}`, {
+      await firestoreClient.saveCalendarEvent(updated);
+    } catch (e) {}
+
+    try {
+      await fetch(`${API_BASE}/calendar/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(event)
       });
-      if (res.ok) return await res.json();
     } catch (e) {}
-    return { event: nayraBackend.updateCalendarEvent(id, event) };
+
+    return { event: updated };
   },
 
   async deleteCalendarEvent(id: string): Promise<{ success: boolean }> {
@@ -293,21 +325,32 @@ export const api = {
     if (googleClientSync.isConnected() && existing?.googleEventId) {
       googleClientSync.deleteGoogleEvent(existing.googleEventId).catch(() => {});
     }
+    nayraBackend.deleteCalendarEvent(id);
+
+    // Delete from Cloud Firestore
     try {
-      const res = await fetch(`${API_BASE}/calendar/${id}`, { method: 'DELETE' });
-      if (res.ok) return await res.json();
+      await firestoreClient.deleteCalendarEvent(id);
     } catch (e) {}
-    return { success: nayraBackend.deleteCalendarEvent(id) };
+
+    try {
+      await fetch(`${API_BASE}/calendar/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+
+    return { success: true };
   },
 
   async syncCalendar(): Promise<{ success: boolean; syncedCount: number; message: string; events?: CalendarEvent[] }> {
     if (googleClientSync.isConnected()) {
       try {
         const events = await googleClientSync.fetchGoogleCalendarEvents();
+        // Persist to Cloud Firestore
+        for (const ev of events) {
+          await firestoreClient.saveCalendarEvent(ev);
+        }
         return {
           success: true,
           syncedCount: events.length,
-          message: `Synchronized ${events.length} live Google Calendar events.`,
+          message: `Synchronized ${events.length} live Google Calendar events to cloud.`,
           events
         };
       } catch (err: any) {
@@ -315,7 +358,7 @@ export const api = {
           success: false,
           syncedCount: 0,
           message: `Google Calendar sync error: ${err.message}`,
-          events: nayraBackend.getCalendarEvents()
+          events: await firestoreClient.getCalendarEvents()
         };
       }
     }
@@ -323,7 +366,7 @@ export const api = {
       const res = await fetch(`${API_BASE}/calendar/sync`, { method: 'POST' });
       if (res.ok) return await res.json();
     } catch (e) {}
-    const events = nayraBackend.getCalendarEvents();
+    const events = await firestoreClient.getCalendarEvents();
     return { success: true, syncedCount: events.length, message: `Calendar up to date.`, events };
   },
 
@@ -738,5 +781,43 @@ export const api = {
       },
       projectsCount: 1
     };
+  },
+
+  // --- Cross-Device User Settings ---
+  async getUserSettings(): Promise<UserSettings | null> {
+    return await firestoreClient.getUserSettings();
+  },
+
+  async saveUserSettings(settings: Partial<UserSettings>): Promise<void> {
+    await firestoreClient.saveUserSettings(settings);
+  },
+
+  // --- Real-Time Cloud Subscriptions ---
+  subscribeHabits(onUpdate: (habits: Habit[]) => void) {
+    return firestoreClient.subscribeHabits(onUpdate);
+  },
+
+  subscribeTasks(onUpdate: (tasks: Task[]) => void) {
+    return firestoreClient.subscribeTasks(onUpdate);
+  },
+
+  subscribeCalendarEvents(onUpdate: (events: CalendarEvent[]) => void) {
+    return firestoreClient.subscribeCalendarEvents(onUpdate);
+  },
+
+  subscribeNotes(onUpdate: (notes: KeepNote[]) => void) {
+    return firestoreClient.subscribeNotes(onUpdate);
+  },
+
+  subscribeTimeLogs(onUpdate: (logs: TimeLog[]) => void) {
+    return firestoreClient.subscribeTimeLogs(onUpdate);
+  },
+
+  subscribeMeals(dateStr: string, onUpdate: (meals: MealEntry[]) => void) {
+    return firestoreClient.subscribeMeals(dateStr, onUpdate);
+  },
+
+  subscribeUserSettings(onUpdate: (settings: UserSettings) => void) {
+    return firestoreClient.subscribeUserSettings(onUpdate);
   }
 };
