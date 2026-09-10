@@ -245,7 +245,7 @@ export const SettingsModal: React.FC = () => {
                       {/* Mini Preview Box */}
                       <div className={`h-14 rounded-lg p-2.5 my-2.5 border overflow-hidden flex items-center justify-between text-xs transition-all ${
                         style.id === 'glassmorphism'
-                          ? 'bg-slate-100/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/60 backdrop-blur-sm shadow-2xs'
+                          ? 'bg-white/40 dark:bg-white/10 border-white/80 dark:border-white/20 backdrop-blur-md shadow-[0_4px_16px_0_rgba(31,38,135,0.07)] dark:shadow-[0_4px_16px_0_rgba(0,0,0,0.4)] ring-1 ring-white/20'
                           : style.id === 'neumorphism'
                           ? 'bg-slate-200/70 dark:bg-zinc-800 border-white/50 dark:border-zinc-700/50 shadow-[2px_2px_5px_#cbd5e1,-2px_-2px_5px_#ffffff] dark:shadow-[2px_2px_5px_#09090b,-2px_-2px_5px_#27272a]'
                           : style.id === 'claymorphism'

@@ -72,7 +72,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [uiStyle, setUiStyle] = useState<UIStyle>(() => {
     const saved = localStorage.getItem('nayra_ui_style') as UIStyle;
-    if (['minimal', 'glassmorphism', 'neumorphism', 'claymorphism', 'brutalism', 'cyberpunk'].includes(saved)) {
+    if (saved === ('glass' as any) || saved === 'glassmorphism') {
+      return 'glassmorphism';
+    }
+    if (['minimal', 'neumorphism', 'claymorphism', 'brutalism', 'cyberpunk'].includes(saved)) {
       return saved;
     }
     return 'glassmorphism';
@@ -148,8 +151,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateUiStyle = (style: UIStyle) => {
-    setUiStyle(style);
-    api.saveUserSettings({ uiStyle: style }).catch(() => {});
+    const normalized = (style === ('glass' as any) ? 'glassmorphism' : style) as UIStyle;
+    setUiStyle(normalized);
+    api.saveUserSettings({ uiStyle: normalized }).catch(() => {});
   };
 
   const updateAccentColor = (color: AccentColor) => {
@@ -418,7 +422,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           setTheme(cloudSettings.theme);
         }
         if (cloudSettings.uiStyle) {
-          setUiStyle(cloudSettings.uiStyle as UIStyle);
+          const normalized = (cloudSettings.uiStyle === 'glass' ? 'glassmorphism' : cloudSettings.uiStyle) as UIStyle;
+          setUiStyle(normalized);
         }
         if (cloudSettings.accentColor) {
           setAccentColor(cloudSettings.accentColor as AccentColor);

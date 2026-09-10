@@ -12,6 +12,10 @@
         } else {
           document.documentElement.classList.remove('dark');
         }
+        const style = localStorage.getItem('nayra_ui_style') || 'glassmorphism';
+        document.documentElement.setAttribute('data-ui-style', style === 'glass' ? 'glassmorphism' : style);
+        const accent = localStorage.getItem('nayra_accent_color') || 'indigo';
+        document.documentElement.setAttribute('data-accent', accent);
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">

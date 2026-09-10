@@ -29,12 +29,12 @@ export const UI_STYLES: UIStyleInfo[] = [
   {
     id: 'glassmorphism',
     name: 'Glassmorphism',
-    tagline: 'Frosted glass & subtle crystalline depth',
-    description: 'Translucent glass surfaces with refined backdrop blur, hairline rim borders, and clean neutral depth.',
+    tagline: 'Frosted glass & ethereal ambient depth',
+    description: 'Translucent glass surfaces with refined backdrop blur, specular crystalline rim borders, and clean chromatic depth.',
     badge: 'Trending',
     iconName: 'Sparkles',
-    previewClass: 'from-slate-200/50 via-indigo-100/30 to-slate-200/50 dark:from-zinc-800/50 dark:to-zinc-900/50',
-    features: ['Backdrop Blur (12px)', 'Hairline Rim Borders', 'Subtle Frosted Depth', 'Floating Layer Architecture']
+    previewClass: 'from-blue-500/20 via-indigo-500/10 to-cyan-500/20 dark:from-indigo-950/40 dark:via-zinc-900 dark:to-cyan-950/40',
+    features: ['Backdrop Blur (20px)', 'Specular Rim Borders', 'Ambient Canvas Mesh', 'Floating Layer Architecture']
   },
   {
     id: 'neumorphism',

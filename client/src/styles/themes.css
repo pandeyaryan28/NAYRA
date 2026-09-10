@@ -99,97 +99,330 @@
 
 
 /* --------------------------------------------------------------------------
-   2. GLASSMORPHISM STYLE (Refined Frosted Glass - Zero Glowing Blobs)
+   2. GLASSMORPHISM STYLE (Refined Frosted Glass - Ambient Depth & Specular Rims)
    -------------------------------------------------------------------------- */
+html:not(.dark)[data-ui-style="glassmorphism"],
 html:not(.dark)[data-ui-style="glass"] {
-  --bg-page: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.80);
-  --border-color: rgba(226, 232, 240, 0.85);
+  --bg-page: #f6f8fc;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --border-color: rgba(255, 255, 255, 0.85);
+  --color-bg-card: rgba(255, 255, 255, 0.72);
+  --color-border: rgba(226, 232, 240, 0.75);
 }
 
+html:not(.dark)[data-ui-style="glassmorphism"] body,
 html:not(.dark)[data-ui-style="glass"] body {
-  background-color: #f8fafc;
+  background-color: #f6f8fc !important;
+  background-image: 
+    radial-gradient(circle at 12% 14%, rgba(var(--nayra-accent-rgb, 99, 102, 241), 0.12) 0%, transparent 48%),
+    radial-gradient(circle at 88% 16%, rgba(14, 165, 233, 0.10) 0%, transparent 44%),
+    radial-gradient(circle at 76% 82%, rgba(244, 63, 94, 0.08) 0%, transparent 46%),
+    radial-gradient(circle at 16% 85%, rgba(16, 185, 129, 0.07) 0%, transparent 42%) !important;
+  background-attachment: fixed !important;
 }
 
-html:not(.dark)[data-ui-style="glass"] main {
+html[data-ui-style="glassmorphism"] #root,
+html[data-ui-style="glassmorphism"] .flex.h-screen.w-screen,
+html[data-ui-style="glassmorphism"] [class*="min-h-screen"],
+html[data-ui-style="glassmorphism"] main,
+html[data-ui-style="glass"] #root,
+html[data-ui-style="glass"] .flex.h-screen.w-screen,
+html[data-ui-style="glass"] [class*="min-h-screen"],
+html[data-ui-style="glass"] main {
   background: transparent !important;
 }
 
 /* Glass Cards & Containers - Light Mode */
-html:not(.dark)[data-ui-style="glass"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not([class*="w-"]):not([class*="h-"]):not([class*="rounded-full"]):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
+html:not(.dark)[data-ui-style="glassmorphism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
+html:not(.dark)[data-ui-style="glassmorphism"] .glass-panel,
+html:not(.dark)[data-ui-style="glass"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
 html:not(.dark)[data-ui-style="glass"] .glass-panel {
-  background: rgba(255, 255, 255, 0.82) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Glass Card Interactive Hover Sheen */
+html:not(.dark)[data-ui-style="glassmorphism"] .bg-white[class*="hover\:"]:not(button):not(input):not(select):not(textarea):not(.rounded-full):not(span):hover,
+html:not(.dark)[data-ui-style="glassmorphism"] .glass-panel[class*="hover\:"]:hover,
+html:not(.dark)[data-ui-style="glass"] .bg-white[class*="hover\:"]:not(button):not(input):not(select):not(textarea):not(.rounded-full):not(span):hover,
+html:not(.dark)[data-ui-style="glass"] .glass-panel[class*="hover\:"]:hover {
+  background: rgba(255, 255, 255, 0.84) !important;
+  border-color: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 14px 40px 0 rgba(31, 38, 135, 0.12), inset 0 1px 2px 0 rgba(255, 255, 255, 1) !important;
+  transform: translateY(-1px);
+}
+
+/* Glass Sidebar - Light Mode */
+html:not(.dark)[data-ui-style="glassmorphism"] aside,
+html:not(.dark)[data-ui-style="glass"] aside {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 4px 0 24px 0 rgba(31, 38, 135, 0.04) !important;
+}
+
+/* Active Nav Item in Glass Light */
+html:not(.dark)[data-ui-style="glassmorphism"] aside nav button.bg-white,
+html:not(.dark)[data-ui-style="glass"] aside nav button.bg-white {
+  background: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1) !important;
 }
 
-html:not(.dark)[data-ui-style="glass"] aside {
-  background: rgba(255, 255, 255, 0.80) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-right: 1px solid rgba(226, 232, 240, 0.85) !important;
+/* Inactive Nav Item Hover in Glass Light */
+html:not(.dark)[data-ui-style="glassmorphism"] aside nav button:not(.bg-white):hover,
+html:not(.dark)[data-ui-style="glass"] aside nav button:not(.bg-white):hover {
+  background: rgba(255, 255, 255, 0.50) !important;
 }
 
+/* Glass Header - Light Mode */
+html:not(.dark)[data-ui-style="glassmorphism"] header,
 html:not(.dark)[data-ui-style="glass"] header {
-  background: rgba(255, 255, 255, 0.80) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.85) !important;
+  background: rgba(255, 255, 255, 0.68) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.04) !important;
 }
 
-/* Glass Inputs */
-html:not(.dark)[data-ui-style="glass"] input,
+/* Glass Header Quick Search and Action Buttons */
+html:not(.dark)[data-ui-style="glassmorphism"] header button[class*="bg-slate-100"],
+html:not(.dark)[data-ui-style="glass"] header button[class*="bg-slate-100"] {
+  background: rgba(255, 255, 255, 0.60) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(255, 255, 255, 0.80) !important;
+}
+
+/* Glass Sticky Subheaders (e.g. CA Tracker) */
+html:not(.dark)[data-ui-style="glassmorphism"] .sticky.top-0,
+html:not(.dark)[data-ui-style="glass"] .sticky.top-0 {
+  background: rgba(255, 255, 255, 0.70) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.80) !important;
+}
+
+/* Glass Inputs - Light Mode */
+html:not(.dark)[data-ui-style="glassmorphism"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+html:not(.dark)[data-ui-style="glassmorphism"] textarea,
+html:not(.dark)[data-ui-style="glassmorphism"] select,
+html:not(.dark)[data-ui-style="glass"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 html:not(.dark)[data-ui-style="glass"] textarea,
 html:not(.dark)[data-ui-style="glass"] select {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(203, 213, 225, 0.75) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
   color: #0f172a !important;
 }
 
+html:not(.dark)[data-ui-style="glassmorphism"] input:focus,
+html:not(.dark)[data-ui-style="glassmorphism"] textarea:focus,
+html:not(.dark)[data-ui-style="glassmorphism"] select:focus,
+html:not(.dark)[data-ui-style="glass"] input:focus,
+html:not(.dark)[data-ui-style="glass"] textarea:focus,
+html:not(.dark)[data-ui-style="glass"] select:focus {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: var(--nayra-accent, #6366f1) !important;
+  box-shadow: 0 0 0 2.5px var(--nayra-accent-bg), inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Nested Glass Containers - Light Mode */
+html:not(.dark)[data-ui-style="glassmorphism"] div[class*="bg-slate-50"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glassmorphism"] div[class*="bg-slate-100"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glassmorphism"] div[class*="bg-zinc-50"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glassmorphism"] div[class*="bg-zinc-100"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glass"] div[class*="bg-slate-50"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glass"] div[class*="bg-slate-100"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glass"] div[class*="bg-zinc-50"]:not(button):not(input):not(select):not(textarea),
+html:not(.dark)[data-ui-style="glass"] div[class*="bg-zinc-100"]:not(button):not(input):not(select):not(textarea) {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.60) !important;
+}
+
+/* Glass Interactive List Row Hover - Light Mode */
+html:not(.dark)[data-ui-style="glassmorphism"] [class*="hover:bg-slate-50"]:hover,
+html:not(.dark)[data-ui-style="glass"] [class*="hover:bg-slate-50"]:hover {
+  background: rgba(255, 255, 255, 0.40) !important;
+}
+
 /* Glass - Dark Mode */
+html.dark[data-ui-style="glassmorphism"],
 html.dark[data-ui-style="glass"] {
-  --bg-page: #09090b;
-  --bg-card: rgba(18, 18, 22, 0.80);
-  --border-color: rgba(255, 255, 255, 0.08);
+  --bg-page: #09090f;
+  --bg-card: rgba(16, 18, 27, 0.68);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --color-bg-card: rgba(16, 18, 27, 0.68);
+  --color-border: rgba(255, 255, 255, 0.10);
 }
 
+html.dark[data-ui-style="glassmorphism"] body,
 html.dark[data-ui-style="glass"] body {
-  background-color: #09090b !important;
+  background-color: #09090f !important;
+  background-image: 
+    radial-gradient(circle at 14% 15%, rgba(var(--nayra-accent-rgb, 129, 140, 248), 0.15) 0%, transparent 48%),
+    radial-gradient(circle at 86% 18%, rgba(6, 182, 212, 0.11) 0%, transparent 44%),
+    radial-gradient(circle at 72% 82%, rgba(168, 85, 247, 0.11) 0%, transparent 48%),
+    radial-gradient(circle at 22% 88%, rgba(59, 130, 246, 0.09) 0%, transparent 42%) !important;
+  background-attachment: fixed !important;
 }
 
+/* Glass Cards & Containers - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#121215\],
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#121217\],
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-zinc-900:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a),
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#0c0c0e\]:not(aside),
+html.dark[data-ui-style="glassmorphism"] .glass-panel,
 html.dark[data-ui-style="glass"] .dark\:bg-\[\#121215\],
 html.dark[data-ui-style="glass"] .dark\:bg-\[\#121217\],
-html.dark[data-ui-style="glass"] .dark\:bg-zinc-900,
+html.dark[data-ui-style="glass"] .dark\:bg-zinc-900:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a),
+html.dark[data-ui-style="glass"] .dark\:bg-\[\#0c0c0e\]:not(aside),
 html.dark[data-ui-style="glass"] .glass-panel {
-  background: rgba(18, 18, 22, 0.80) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4) !important;
+  background: rgba(16, 18, 27, 0.68) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 40px -4px rgba(0, 0, 0, 0.48), inset 0 1px 1px 0 rgba(255, 255, 255, 0.18) !important;
 }
 
+/* Glass Card Interactive Hover Sheen - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#121215\][class*="hover\:"]:hover,
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#121217\][class*="hover\:"]:hover,
+html.dark[data-ui-style="glassmorphism"] .dark\:bg-zinc-900[class*="hover\:"]:not(button):not(input):not(select):not(textarea):not(.rounded-full):not(span):hover,
+html.dark[data-ui-style="glassmorphism"] .glass-panel[class*="hover\:"]:hover,
+html.dark[data-ui-style="glass"] .dark\:bg-\[\#121215\][class*="hover\:"]:hover,
+html.dark[data-ui-style="glass"] .dark\:bg-\[\#121217\][class*="hover\:"]:hover,
+html.dark[data-ui-style="glass"] .dark\:bg-zinc-900[class*="hover\:"]:not(button):not(input):not(select):not(textarea):not(.rounded-full):not(span):hover,
+html.dark[data-ui-style="glass"] .glass-panel[class*="hover\:"]:hover {
+  background: rgba(22, 25, 38, 0.78) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 16px 44px -4px rgba(0, 0, 0, 0.65), inset 0 1px 2px 0 rgba(255, 255, 255, 0.28) !important;
+  transform: translateY(-1px);
+}
+
+/* Glass Sidebar - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] aside,
 html.dark[data-ui-style="glass"] aside {
-  background: rgba(12, 12, 16, 0.85) !important;
-  backdrop-filter: blur(16px) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: rgba(11, 13, 20, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 4px 0 32px 0 rgba(0, 0, 0, 0.40) !important;
 }
 
+/* Active Nav Item in Glass Dark */
+html.dark[data-ui-style="glassmorphism"] aside nav button.dark\:bg-zinc-800,
+html.dark[data-ui-style="glass"] aside nav button.dark\:bg-zinc-800 {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.20) !important;
+}
+
+/* Inactive Nav Item Hover in Glass Dark */
+html.dark[data-ui-style="glassmorphism"] aside nav button:not(.dark\:bg-zinc-800):hover,
+html.dark[data-ui-style="glass"] aside nav button:not(.dark\:bg-zinc-800):hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Glass Header - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] header,
 html.dark[data-ui-style="glass"] header {
-  background: rgba(12, 12, 16, 0.85) !important;
-  backdrop-filter: blur(16px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: rgba(11, 13, 20, 0.72) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.40) !important;
 }
 
-html.dark[data-ui-style="glass"] input,
+/* Glass Header Quick Search and Action Buttons - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] header button[class*="dark:bg-zinc-900"],
+html.dark[data-ui-style="glass"] header button[class*="dark:bg-zinc-900"] {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* Glass Sticky Subheaders (e.g. CA Tracker) - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] .sticky.top-0,
+html.dark[data-ui-style="glass"] .sticky.top-0 {
+  background: rgba(11, 13, 20, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+/* Glass Inputs - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+html.dark[data-ui-style="glassmorphism"] textarea,
+html.dark[data-ui-style="glassmorphism"] select,
+html.dark[data-ui-style="glass"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 html.dark[data-ui-style="glass"] textarea,
 html.dark[data-ui-style="glass"] select {
-  background: rgba(20, 20, 26, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.30) !important;
   color: #f8fafc !important;
 }
+
+html.dark[data-ui-style="glassmorphism"] input:focus,
+html.dark[data-ui-style="glassmorphism"] textarea:focus,
+html.dark[data-ui-style="glassmorphism"] select:focus,
+html.dark[data-ui-style="glass"] input:focus,
+html.dark[data-ui-style="glass"] textarea:focus,
+html.dark[data-ui-style="glass"] select:focus {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: var(--nayra-accent, #818cf8) !important;
+  box-shadow: 0 0 0 2.5px var(--nayra-accent-bg), inset 0 1px 2px rgba(0, 0, 0, 0.20) !important;
+}
+
+/* Nested Glass Containers - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] div[class*="dark:bg-zinc-900/"]:not(button):not(input):not(select):not(textarea),
+html.dark[data-ui-style="glassmorphism"] div[class*="dark:bg-zinc-800/"]:not(button):not(input):not(select):not(textarea),
+html.dark[data-ui-style="glass"] div[class*="dark:bg-zinc-900/"]:not(button):not(input):not(select):not(textarea),
+html.dark[data-ui-style="glass"] div[class*="dark:bg-zinc-800/"]:not(button):not(input):not(select):not(textarea) {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Glass Interactive List Row Hover - Dark Mode */
+html.dark[data-ui-style="glassmorphism"] [class*="hover:bg-zinc-800"]:hover,
+html.dark[data-ui-style="glass"] [class*="hover:bg-zinc-800"]:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Floating AI Orb - Glass Styling */
+html:not(.dark)[data-ui-style="glassmorphism"] .fixed.bottom-6.right-6 button,
+html:not(.dark)[data-ui-style="glass"] .fixed.bottom-6.right-6 button {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.30) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.40) !important;
+}
+
+html.dark[data-ui-style="glassmorphism"] .fixed.bottom-6.right-6 button,
+html.dark[data-ui-style="glass"] .fixed.bottom-6.right-6 button {
+  background: rgba(20, 24, 38, 0.80) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.60), 0 0 20px rgba(var(--nayra-accent-rgb, 129, 140, 248), 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+}
+
 
 
 /* --------------------------------------------------------------------------
@@ -207,7 +440,7 @@ html:not(.dark)[data-ui-style="neumorphism"] main {
 }
 
 /* Raised Extruded Cards - Light Mode */
-html:not(.dark)[data-ui-style="neumorphism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not([class*="w-"]):not([class*="h-"]):not([class*="rounded-full"]):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
+html:not(.dark)[data-ui-style="neumorphism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
 html:not(.dark)[data-ui-style="neumorphism"] .glass-panel {
   background: #eef2f6 !important;
   border: 1px solid rgba(255, 255, 255, 0.75) !important;
@@ -332,7 +565,7 @@ html:not(.dark)[data-ui-style="claymorphism"] main {
 }
 
 /* Clay Cards - Light Mode */
-html:not(.dark)[data-ui-style="claymorphism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not([class*="w-"]):not([class*="h-"]):not([class*="rounded-full"]):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
+html:not(.dark)[data-ui-style="claymorphism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
 html:not(.dark)[data-ui-style="claymorphism"] .glass-panel {
   background: #ffffff !important;
   border-radius: 18px !important;
@@ -426,7 +659,7 @@ html:not(.dark)[data-ui-style="brutalism"] main {
 }
 
 /* Brutalist Cards - Light Mode */
-html:not(.dark)[data-ui-style="brutalism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not([class*="w-"]):not([class*="h-"]):not([class*="rounded-full"]):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
+html:not(.dark)[data-ui-style="brutalism"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
 html:not(.dark)[data-ui-style="brutalism"] .glass-panel {
   background: #ffffff !important;
   border: 2px solid #0f172a !important;
@@ -547,7 +780,7 @@ html:not(.dark)[data-ui-style="cyberpunk"] main {
 }
 
 /* Tech HUD Cards - Light Mode */
-html:not(.dark)[data-ui-style="cyberpunk"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not([class*="w-"]):not([class*="h-"]):not([class*="rounded-full"]):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
+html:not(.dark)[data-ui-style="cyberpunk"] .bg-white:not(button):not(input):not(select):not(textarea):not(kbd):not(.rounded-full):not(span:not(.glass-panel)):not(img):not(svg):not(a):not([class*="bg-indigo"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-red"]):not([class*="bg-rose"]):not([class*="bg-sky"]):not([class*="bg-blue"]):not([class*="bg-slate-900"]):not([class*="bg-zinc-900"]),
 html:not(.dark)[data-ui-style="cyberpunk"] .glass-panel {
   background: #ffffff !important;
   border: 1px solid rgba(14, 165, 233, 0.3) !important;
@@ -698,20 +931,60 @@ body, aside, header, main, nav, button, input, select, textarea, a {
 /* --------------------------------------------------------------------------
    10. MODAL & DIALOG ARCHITECTURAL OVERRIDES (Zero Glowing Bloom)
    -------------------------------------------------------------------------- */
-html:not(.dark)[data-ui-style="glass"] .fixed > div[class*="max-w-"],
-html:not(.dark)[data-ui-style="glass"] .fixed > div > div[class*="max-w-"] {
-  background: rgba(255, 255, 255, 0.90) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12) !important;
+html[data-ui-style="glassmorphism"] .fixed.inset-0,
+html[data-ui-style="glass"] .fixed.inset-0 {
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
 }
 
+html:not(.dark)[data-ui-style="glassmorphism"] .fixed > div[class*="max-w-"],
+html:not(.dark)[data-ui-style="glassmorphism"] .fixed > div > div[class*="max-w-"],
+html:not(.dark)[data-ui-style="glass"] .fixed > div[class*="max-w-"],
+html:not(.dark)[data-ui-style="glass"] .fixed > div > div[class*="max-w-"] {
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 25px 60px -12px rgba(31, 38, 135, 0.20), inset 0 1px 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+html.dark[data-ui-style="glassmorphism"] .fixed > div[class*="max-w-"],
+html.dark[data-ui-style="glassmorphism"] .fixed > div > div[class*="max-w-"],
 html.dark[data-ui-style="glass"] .fixed > div[class*="max-w-"],
 html.dark[data-ui-style="glass"] .fixed > div > div[class*="max-w-"] {
-  background: rgba(18, 18, 24, 0.90) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
-  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.75) !important;
+  background: rgba(16, 19, 28, 0.84) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 30px 70px -12px rgba(0, 0, 0, 0.85), inset 0 1px 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Frosted Modal Headers & Footers in Glassmorphism */
+html:not(.dark)[data-ui-style="glassmorphism"] .fixed > div[class*="max-w-"] > div[class*="border-b"],
+html:not(.dark)[data-ui-style="glassmorphism"] .fixed > div[class*="max-w-"] > div[class*="border-t"],
+html:not(.dark)[data-ui-style="glass"] .fixed > div[class*="max-w-"] > div[class*="border-b"],
+html:not(.dark)[data-ui-style="glass"] .fixed > div[class*="max-w-"] > div[class*="border-t"] {
+  background: rgba(255, 255, 255, 0.50) !important;
+  border-color: rgba(255, 255, 255, 0.70) !important;
+}
+
+html.dark[data-ui-style="glassmorphism"] .fixed > div[class*="max-w-"] > div[class*="border-b"],
+html.dark[data-ui-style="glassmorphism"] .fixed > div[class*="max-w-"] > div[class*="border-t"],
+html.dark[data-ui-style="glass"] .fixed > div[class*="max-w-"] > div[class*="border-b"],
+html.dark[data-ui-style="glass"] .fixed > div[class*="max-w-"] > div[class*="border-t"] {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Frosted Item Hover inside Modals (e.g. Command Palette) */
+html:not(.dark)[data-ui-style="glassmorphism"] .fixed [class*="hover:bg-zinc-100"]:hover,
+html:not(.dark)[data-ui-style="glass"] .fixed [class*="hover:bg-zinc-100"]:hover {
+  background: rgba(255, 255, 255, 0.60) !important;
+}
+
+html.dark[data-ui-style="glassmorphism"] .fixed [class*="dark:hover:bg-zinc-800"]:hover,
+html.dark[data-ui-style="glass"] .fixed [class*="dark:hover:bg-zinc-800"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 html:not(.dark)[data-ui-style="neumorphism"] .fixed > div[class*="max-w-"],
@@ -788,4 +1061,51 @@ html.dark[data-ui-style="minimal"] .fixed > div > div[class*="max-w-"] {
   background: #121215 !important;
   border: 1px solid #27272a !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* --------------------------------------------------------------------------
+   11. ACCESSIBILITY OVERRIDES (prefers-reduced-transparency)
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-ui-style="glassmorphism"] *,
+  html[data-ui-style="glass"] * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  html:not(.dark)[data-ui-style="glassmorphism"] body,
+  html:not(.dark)[data-ui-style="glass"] body {
+    background-image: none !important;
+    background-color: #f1f5f9 !important;
+  }
+  html.dark[data-ui-style="glassmorphism"] body,
+  html.dark[data-ui-style="glass"] body {
+    background-image: none !important;
+    background-color: #09090b !important;
+  }
+  html:not(.dark)[data-ui-style="glassmorphism"] aside,
+  html:not(.dark)[data-ui-style="glassmorphism"] header,
+  html:not(.dark)[data-ui-style="glassmorphism"] .bg-white,
+  html:not(.dark)[data-ui-style="glassmorphism"] .glass-panel,
+  html:not(.dark)[data-ui-style="glass"] aside,
+  html:not(.dark)[data-ui-style="glass"] header,
+  html:not(.dark)[data-ui-style="glass"] .bg-white,
+  html:not(.dark)[data-ui-style="glass"] .glass-panel {
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  }
+  html.dark[data-ui-style="glassmorphism"] aside,
+  html.dark[data-ui-style="glassmorphism"] header,
+  html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#121215\],
+  html.dark[data-ui-style="glassmorphism"] .dark\:bg-\[\#121217\],
+  html.dark[data-ui-style="glassmorphism"] .dark\:bg-zinc-900,
+  html.dark[data-ui-style="glassmorphism"] .glass-panel,
+  html.dark[data-ui-style="glass"] aside,
+  html.dark[data-ui-style="glass"] header,
+  html.dark[data-ui-style="glass"] .dark\:bg-\[\#121215\],
+  html.dark[data-ui-style="glass"] .dark\:bg-\[\#121217\],
+  html.dark[data-ui-style="glass"] .dark\:bg-zinc-900,
+  html.dark[data-ui-style="glass"] .glass-panel {
+    background: #121215 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+  }
 }
