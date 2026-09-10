@@ -17,6 +17,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'todo');
   const [priority, setPriority] = useState<Priority>(task?.priority || 'medium');
   const [dueDate, setDueDate] = useState(task?.dueDate || new Date().toISOString().split('T')[0]);
+  const [archived, setArchived] = useState<boolean>(task?.archived || task?.status === 'completed' || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,12 +26,15 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
 
     setIsSubmitting(true);
     try {
+      const isCompleted = status === 'completed';
       const payload: Partial<Task> = {
         title: title.trim(),
         notes: notes.trim(),
         status,
         priority,
-        dueDate
+        dueDate,
+        archived: archived || isCompleted,
+        completedAt: isCompleted ? (task?.completedAt || new Date().toISOString()) : undefined
       };
 
       if (task?.id) {
@@ -123,6 +127,19 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSaved }) 
               onChange={e => setDueDate(e.target.value)}
               className="w-full px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none font-mono"
             />
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="checkbox"
+              id="archivedCheckbox"
+              checked={archived}
+              onChange={e => setArchived(e.target.checked)}
+              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-zinc-300 dark:border-zinc-700"
+            />
+            <label htmlFor="archivedCheckbox" className="text-xs text-zinc-600 dark:text-zinc-400 cursor-pointer">
+              Archive this task (hide from active tasks list)
+            </label>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">

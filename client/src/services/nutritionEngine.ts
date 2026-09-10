@@ -41,7 +41,11 @@ const FOOD_DATABASE: NutritionRef[] = [
   { keywords: ['pomegranate', 'anar', 'anaar'], unitCalories: 145, unitProtein: 2.9, unitCarbs: 32.5, unitFat: 1.6, defaultUnit: '1 medium fruit' }
 ];
 
-export function parseAndEstimateMeal(rawText: string, defaultMealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack'): MealEntry {
+export function parseAndEstimateMeal(
+  rawText: string, 
+  defaultMealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack',
+  dateStr?: string
+): MealEntry {
   const textLower = rawText.toLowerCase();
 
   let mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack' = defaultMealType || 'snack';
@@ -58,11 +62,7 @@ export function parseAndEstimateMeal(rawText: string, defaultMealType?: 'breakfa
   const cleaned = textLower
     .replace(/for (breakfast|lunch|dinner|snack|my meal)/g, '')
     .replace(/i (had|ate|consumed|drank|took|got)/g, '')
-    .replace(/today/g, '')
-    .replace(/\b(one|1)\s+and\s+(a\s+)?half\b/gi, '1.5')
-    .replace(/\b(two|2)\s+and\s+(a\s+)?half\b/gi, '2.5')
-    .replace(/\b(three|3)\s+and\s+(a\s+)?half\b/gi, '3.5')
-    .replace(/\bhalf\s+(a\s+|an\s+)?/gi, '0.5 ');
+    .trim();
 
   const clauses = cleaned.split(/,|\band\b|\+|\bwith\b|\n/).map(c => c.trim()).filter(c => c.length > 0);
 
@@ -143,7 +143,7 @@ export function parseAndEstimateMeal(rawText: string, defaultMealType?: 'breakfa
   const mealEntry: MealEntry = {
     id: `meal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     mealType,
-    date: todayStr,
+    date: dateStr || todayStr,
     rawText,
     items,
     totalCalories,

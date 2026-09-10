@@ -621,8 +621,20 @@ export const api = {
     return nayraBackend.getNutritionSummary(targetDate);
   },
 
-  async addMealFromText(text: string, mealType?: string): Promise<{ success: boolean; message: string; meal: MealEntry }> {
-    const res = nayraBackend.addMealFromText(text, mealType);
+  async getNutritionHistory(days: number = 7): Promise<{ history: any[] }> {
+    try {
+      const res = await fetch(`${API_BASE}/calories/history?days=${days}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.history && data.history.length > 0) return data;
+      }
+    } catch (e) {}
+
+    return { history: nayraBackend.getNutritionHistory(days) };
+  },
+
+  async addMealFromText(text: string, mealType?: string, date?: string): Promise<{ success: boolean; message: string; meal: MealEntry }> {
+    const res = nayraBackend.addMealFromText(text, mealType, date);
     try {
       await firestoreClient.saveMealEntry(res.meal);
     } catch (e) {}
@@ -630,7 +642,7 @@ export const api = {
       await fetch(`${API_BASE}/calories/add-meal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, mealType })
+        body: JSON.stringify({ text, mealType, date })
       });
     } catch (e) {}
     return res;

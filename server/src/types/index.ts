@@ -18,6 +18,7 @@ export interface Task {
   googleTaskId?: string;
   googleTaskListId?: string;
   completedAt?: string;
+  archived?: boolean;
   createdAt: string;
   updatedAt: string;
   syncedAt?: string;

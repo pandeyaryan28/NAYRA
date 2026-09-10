@@ -18,6 +18,7 @@ export interface Task {
   googleTaskId?: string;
   googleTaskListId?: string;
   completedAt?: string;
+  archived?: boolean;
   createdAt: string;
   updatedAt: string;
   syncedAt?: string;
@@ -208,4 +209,15 @@ export interface NutritionSummaryResponse {
     };
   };
   meals: MealEntry[];
+}
+
+export interface DailyCalorieHistoryItem {
+  date: string;
+  dayLabel: string;
+  totalCalories: number;
+  targetCalories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  mealCount: number;
 }

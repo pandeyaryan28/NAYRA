@@ -50,7 +50,7 @@ export class NutritionEstimatorService {
    * Parses natural language meal text (e.g. "I had 2 boiled eggs, 2 slices whole wheat toast and black coffee for breakfast")
    * and calculates calories and macros.
    */
-  public parseAndEstimateMeal(rawText: string, defaultMealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack'): MealEntry {
+  public parseAndEstimateMeal(rawText: string, defaultMealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack', dateStr?: string): MealEntry {
     const textLower = rawText.toLowerCase();
 
     // 1. Detect meal type
@@ -153,12 +153,12 @@ export class NutritionEstimatorService {
     const totalCarbs = Number(items.reduce((acc, i) => acc + i.carbs, 0).toFixed(1));
     const totalFat = Number(items.reduce((acc, i) => acc + i.fat, 0).toFixed(1));
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const targetDateStr = dateStr || new Date().toISOString().split('T')[0];
 
     const mealEntry: MealEntry = {
       id: uuidv4(),
       mealType,
-      date: todayStr,
+      date: targetDateStr,
       rawText,
       items,
       totalCalories,
@@ -175,8 +175,8 @@ export class NutritionEstimatorService {
   /**
    * Processes Antigravity input, calculates calories, and saves to database directly!
    */
-  public async logMealFromAntigravity(text: string, mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack'): Promise<MealEntry> {
-    const meal = this.parseAndEstimateMeal(text, mealType);
+  public async logMealFromAntigravity(text: string, mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack', dateStr?: string): Promise<MealEntry> {
+    const meal = this.parseAndEstimateMeal(text, mealType, dateStr);
     await firestoreService.saveMealEntry(meal);
     return meal;
   }

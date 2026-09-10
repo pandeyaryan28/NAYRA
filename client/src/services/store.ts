@@ -326,8 +326,53 @@ export class NayraLocalBackend {
     };
   }
 
-  public addMealFromText(text: string, mealType?: string): { success: boolean; message: string; meal: MealEntry } {
-    const meal = parseAndEstimateMeal(text, mealType as any);
+  public getNutritionHistory(days: number = 7): Array<{
+    date: string;
+    dayLabel: string;
+    totalCalories: number;
+    targetCalories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    mealCount: number;
+  }> {
+    const rawMeals = getStored<MealEntry[]>(STORAGE_KEYS.MEALS, []);
+    const allMeals = rawMeals || [];
+    const target = getStored<DailyNutritionTarget>(STORAGE_KEYS.TARGET, INITIAL_TARGET);
+    const history = [];
+    const now = new Date();
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayMeals = allMeals.filter(m => m.date === dateStr);
+
+      const totalCalories = dayMeals.reduce((acc, m) => acc + (m.totalCalories || 0), 0);
+      const protein = Number(dayMeals.reduce((acc, m) => acc + (m.totalProtein || 0), 0).toFixed(1));
+      const carbs = Number(dayMeals.reduce((acc, m) => acc + (m.totalCarbs || 0), 0).toFixed(1));
+      const fat = Number(dayMeals.reduce((acc, m) => acc + (m.totalFat || 0), 0).toFixed(1));
+
+      let dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+      if (i === 0) dayLabel = 'Today';
+      else if (i === 1) dayLabel = 'Yesterday';
+
+      history.push({
+        date: dateStr,
+        dayLabel,
+        totalCalories,
+        targetCalories: target?.targetCalories || 2200,
+        protein,
+        carbs,
+        fat,
+        mealCount: dayMeals.length
+      });
+    }
+    return history;
+  }
+
+  public addMealFromText(text: string, mealType?: string, date?: string): { success: boolean; message: string; meal: MealEntry } {
+    const meal = parseAndEstimateMeal(text, mealType as any, date);
     const meals = getStored<MealEntry[]>(STORAGE_KEYS.MEALS, INITIAL_MEALS);
     meals.unshift(meal);
     setStored(STORAGE_KEYS.MEALS, meals);

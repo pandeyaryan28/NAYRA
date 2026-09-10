@@ -28,9 +28,10 @@ export const TaskKanban: React.FC<TaskKanbanProps> = ({ tasks, onEditTask }) => 
       await api.updateTask(task.id, {
         ...task,
         status: newStatus,
+        archived: isNowCompleted,
         completedAt: isNowCompleted ? new Date().toISOString() : undefined
       });
-      showToast(isNowCompleted ? 'Completed' : `Moved to ${newStatus}`, 'info');
+      showToast(isNowCompleted ? 'Task completed & archived' : `Moved to ${newStatus}`, 'info');
       await refreshAll();
     } catch (err: any) {
       showToast(err.message, 'error');

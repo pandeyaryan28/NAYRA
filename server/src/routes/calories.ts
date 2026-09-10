@@ -51,16 +51,60 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET multi-day calorie history (including yesterday and past days)
+router.get('/history', async (req, res) => {
+  try {
+    const daysCount = Math.min(30, Math.max(1, parseInt(req.query.days as string) || 7));
+    const allMeals = await firestoreService.getAllMealEntries();
+
+    const history = [];
+    const now = new Date();
+
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+
+      const dayMeals = allMeals.filter(m => m.date === dateStr);
+      const target = await firestoreService.getDailyTarget(dateStr);
+
+      const totalCalories = dayMeals.reduce((acc, m) => acc + (m.totalCalories || 0), 0);
+      const protein = Number(dayMeals.reduce((acc, m) => acc + (m.totalProtein || 0), 0).toFixed(1));
+      const carbs = Number(dayMeals.reduce((acc, m) => acc + (m.totalCarbs || 0), 0).toFixed(1));
+      const fat = Number(dayMeals.reduce((acc, m) => acc + (m.totalFat || 0), 0).toFixed(1));
+
+      let dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+      if (i === 0) dayLabel = 'Today';
+      else if (i === 1) dayLabel = 'Yesterday';
+
+      history.push({
+        date: dateStr,
+        dayLabel,
+        totalCalories,
+        targetCalories: target?.targetCalories || 2200,
+        protein,
+        carbs,
+        fat,
+        mealCount: dayMeals.length
+      });
+    }
+
+    res.json({ history });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ADD MEAL / ANTIGRAVITY AI INGESTION ENDPOINT
 // Parses food text -> calculates calories & macros -> saves entry
 router.post('/add-meal', async (req, res) => {
   try {
-    const { text, mealType } = req.body;
+    const { text, mealType, date } = req.body;
     if (!text || typeof text !== 'string') {
       return res.status(400).json({ error: 'Text description of meal is required.' });
     }
 
-    const meal = await nutritionEstimatorService.logMealFromAntigravity(text, mealType);
+    const meal = await nutritionEstimatorService.logMealFromAntigravity(text, mealType, date);
     res.status(201).json({
       success: true,
       message: `Calculated ${meal.totalCalories} kcal (${meal.totalProtein}g Protein, ${meal.totalCarbs}g Carbs, ${meal.totalFat}g Fat) and recorded to Nayra!`,
