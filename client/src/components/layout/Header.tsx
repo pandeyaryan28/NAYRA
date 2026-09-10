@@ -15,7 +15,6 @@ import {
   Key,
   ShieldCheck,
   Settings,
-  AlertTriangle,
   Palette
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -52,7 +51,6 @@ export const Header: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [manualToken, setManualToken] = useState('');
-  const [manualCode, setManualCode] = useState('');
   const [customClientIdInput, setCustomClientIdInput] = useState(() => getEffectiveClientId());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authTab, setAuthTab] = useState<'oneclick' | 'token' | 'clientid'>('oneclick');
@@ -79,21 +77,7 @@ export const Header: React.FC = () => {
       await connectGoogleManual(manualToken.trim());
       setManualToken('');
       setIsGoogleModalOpen(false);
-    } catch (e) {
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleManualCodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualCode.trim()) return;
-    setIsSubmitting(true);
-    try {
-      await submitManualGoogleCode(manualCode.trim());
-      setManualCode('');
-      setIsGoogleModalOpen(false);
-    } catch (e) {
+    } catch (_e) {
     } finally {
       setIsSubmitting(false);
     }

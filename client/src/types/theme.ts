@@ -29,12 +29,12 @@ export const UI_STYLES: UIStyleInfo[] = [
   {
     id: 'glassmorphism',
     name: 'Glassmorphism',
-    tagline: 'Frosted glass & ethereal ambient depth',
-    description: 'Translucent glass surfaces with backdrop blur, specular crystalline rim borders, and glowing multi-spectrum lighting.',
+    tagline: 'Frosted glass & subtle crystalline depth',
+    description: 'Translucent glass surfaces with refined backdrop blur, hairline rim borders, and clean neutral depth.',
     badge: 'Trending',
     iconName: 'Sparkles',
-    previewClass: 'from-blue-500/20 via-purple-500/20 to-pink-500/20',
-    features: ['Backdrop Blur (16px)', 'Specular Rim Borders', 'Ambient Color Glows', 'Deep Floating Layers']
+    previewClass: 'from-slate-200/50 via-indigo-100/30 to-slate-200/50 dark:from-zinc-800/50 dark:to-zinc-900/50',
+    features: ['Backdrop Blur (12px)', 'Hairline Rim Borders', 'Subtle Frosted Depth', 'Floating Layer Architecture']
   },
   {
     id: 'neumorphism',
@@ -50,31 +50,31 @@ export const UI_STYLES: UIStyleInfo[] = [
     id: 'claymorphism',
     name: 'Claymorphism',
     tagline: 'Puffy 3D volumes & pillowy friendly cards',
-    description: 'Playful sculpted clay geometry with heavy rounded corners, double-layer soft diffusion shadows, and inner bevel highlights.',
+    description: 'Sculpted modern clay geometry with gentle rounded corners, soft diffusion shadows, and clean inner highlights.',
     badge: 'Playful',
     iconName: 'Smile',
-    previewClass: 'from-amber-100 to-rose-100 dark:from-zinc-800 dark:to-purple-950',
-    features: ['Puffy Rounded Geometry (20px)', 'Dual Inset Bevel Highlights', 'Soft Diffuse Drop Shadows', 'Bouncy Micro-Interactions']
+    previewClass: 'from-amber-50 to-slate-100 dark:from-zinc-800 dark:to-zinc-900',
+    features: ['Puffy Rounded Geometry (18px)', 'Dual Inset Bevel Highlights', 'Soft Diffuse Shadows', 'Tactile Micro-Interactions']
   },
   {
     id: 'brutalism',
     name: 'Neo-Brutalism',
     tagline: 'High-contrast retro graphics & solid drop shadows',
-    description: 'Punchy graphic style featuring bold 2.5px solid outlines, zero-blur solid offset drop shadows, and high-impact sticker tags.',
+    description: 'Punchy graphic style featuring bold 2px solid outlines, zero-blur solid offset drop shadows, and high-impact badges.',
     badge: 'Retro Bold',
     iconName: 'Square',
-    previewClass: 'from-yellow-200 to-emerald-200 dark:from-zinc-900 dark:to-indigo-950',
-    features: ['2.5px Solid Borders', 'Hard 4px Offset Shadows', 'Tactile Press Animation', 'Maximum Contrast Legibility']
+    previewClass: 'from-amber-100 to-slate-100 dark:from-zinc-900 dark:to-zinc-950',
+    features: ['2px Solid Borders', 'Zero-Blur 3px Shadows', 'Crisp Press Animation', 'Maximum Contrast Legibility']
   },
   {
     id: 'cyberpunk',
-    name: 'Cyberpunk Neon',
-    tagline: 'Sci-fi command HUD & glowing terminal lines',
-    description: 'Futuristic command console with glowing neon cyan/magenta border halos, dark obsidian panels, and telemetry coordinates.',
+    name: 'Cyberpunk Tech HUD',
+    tagline: 'Precision telemetry HUD & sharp command lines',
+    description: 'Futuristic command console with precision telemetry borders, dark obsidian panels, and clean monospace coordinates.',
     badge: 'Sci-Fi HUD',
     iconName: 'Zap',
-    previewClass: 'from-cyan-500/20 to-fuchsia-500/20',
-    features: ['Neon Halo Border Glows', 'Dark Obsidian Canvas', 'Cyber Telemetry Accents', 'Electric Neon Highlights']
+    previewClass: 'from-cyan-950/20 to-slate-900/20 dark:from-cyan-950/40 dark:to-zinc-900',
+    features: ['Precision Hairline Borders', 'Obsidian & Slate Canvas', 'Cyber Telemetry Accents', 'High-Contrast Monospace']
   },
   {
     id: 'minimal',

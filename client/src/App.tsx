@@ -21,9 +21,9 @@ const MainContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center space-y-3 bg-[#0a0a0d] text-zinc-400">
+      <div className="h-screen w-screen flex flex-col items-center justify-center space-y-3 bg-slate-50 dark:bg-[#09090b] text-slate-500 dark:text-zinc-400">
         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs font-mono tracking-widest text-zinc-400">INITIALIZING NAYRA COMMAND CENTER...</p>
+        <p className="text-xs font-mono tracking-widest text-slate-600 dark:text-zinc-400">INITIALIZING NAYRA COMMAND CENTER...</p>
       </div>
     );
   }

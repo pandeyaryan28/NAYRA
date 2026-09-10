@@ -47,7 +47,7 @@ export const SettingsView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
-          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/60 dark:bg-zinc-850 border border-zinc-200/60 dark:border-zinc-800">
+          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/60 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800">
             <Laptop className="w-4 h-4 text-zinc-500" />
             <div>
               <p className="font-semibold text-zinc-900 dark:text-zinc-100">Project Backend</p>
@@ -55,7 +55,7 @@ export const SettingsView: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/60 dark:bg-zinc-850 border border-zinc-200/60 dark:border-zinc-800">
+          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/60 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800">
             <Smartphone className="w-4 h-4 text-zinc-500" />
             <div>
               <p className="font-semibold text-zinc-900 dark:text-zinc-100">Last Synchronized</p>

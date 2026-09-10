@@ -8,10 +8,7 @@ import {
   Activity,
   ArrowRight, 
   Check, 
-  Clock, 
-  Send,
-  Sparkles,
-  Trophy
+  Send
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 

@@ -1,10 +1,8 @@
 import React from 'react';
 import type { Task, TaskStatus } from '../../types/index.js';
 import { 
-  Clock, 
   Trash2, 
-  Edit3, 
-  Play
+  Edit3 
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 import { useApp } from '../../context/AppContext.js';
@@ -22,7 +20,7 @@ const COLUMNS: { id: TaskStatus; label: string }[] = [
 ];
 
 export const TaskKanban: React.FC<TaskKanbanProps> = ({ tasks, onEditTask }) => {
-  const { refreshAll, showToast, setActiveTab } = useApp();
+  const { refreshAll, showToast } = useApp();
 
   const handleStatusChange = async (task: Task, newStatus: TaskStatus) => {
     try {

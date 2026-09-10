@@ -11,7 +11,6 @@ import {
   StickyNote, 
   Bot, 
   RefreshCw,
-  Sparkles,
   GraduationCap
 } from 'lucide-react';
 
@@ -69,7 +68,7 @@ export const Sidebar: React.FC = () => {
             </span>
           </div>
           <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-            v1.1
+            v2.4
           </span>
         </div>
 
@@ -132,7 +131,7 @@ export const Sidebar: React.FC = () => {
             <span className={`w-1.5 h-1.5 rounded-full ${authStatus?.googleConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
             <span>{authStatus?.googleConnected ? 'Google Cloud Active' : 'Standalone'}</span>
           </span>
-          <span>v1.2</span>
+          <span>v2.4</span>
         </div>
       </div>
     </aside>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext.js';
 import { HabitModal } from './HabitModal.js';
-import type { Habit, HabitCategory } from '../../types/index.js';
+import type { Habit } from '../../types/index.js';
 import { 
   Plus, 
   Flame, 
@@ -14,12 +14,12 @@ import {
   BookOpen, 
   Target, 
   Heart, 
-  Smile,
-  MoreVertical,
-  Trash2,
-  Edit2
+  Smile, 
+  MoreVertical, 
+  Trash2, 
+  Edit2 
 } from 'lucide-react';
-import { format, subDays, addDays, isSameDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
 const CATEGORIES: { id: string; label: string }[] = [
   { id: 'all', label: 'All Habits' },
@@ -47,7 +47,7 @@ const getHabitIcon = (iconName?: string) => {
 };
 
 export const HabitsView: React.FC = () => {
-  const { habits, toggleHabit, createHabit, updateHabit, deleteHabit, refreshAll } = useApp();
+  const { habits, toggleHabit, createHabit, updateHabit, deleteHabit } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);

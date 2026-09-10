@@ -19,6 +19,7 @@ interface AppContextType {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   theme: 'dark' | 'light';
+  setTheme: (theme: 'dark' | 'light') => void;
   toggleTheme: () => void;
   uiStyle: UIStyle;
   setUiStyle: (style: UIStyle) => void;
@@ -59,14 +60,14 @@ interface AppContextType {
   showToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('nayra_theme');
     if (saved === 'dark' || saved === 'light') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
   const [uiStyle, setUiStyle] = useState<UIStyle>(() => {
@@ -132,6 +133,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     document.documentElement.setAttribute('data-accent', accentColor);
     localStorage.setItem('nayra_accent_color', accentColor);
   }, [accentColor]);
+
+  const updateTheme = (newTheme: 'dark' | 'light') => {
+    setTheme(newTheme);
+    api.saveUserSettings({ theme: newTheme }).catch(() => {});
+  };
 
   const toggleTheme = () => {
     setTheme(prev => {
@@ -450,6 +456,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         activeTab,
         setActiveTab,
         theme,
+        setTheme: updateTheme,
         toggleTheme,
         uiStyle,
         setUiStyle: updateUiStyle,

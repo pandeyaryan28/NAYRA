@@ -3,18 +3,16 @@ import { useApp } from '../../context/AppContext.js';
 import { 
   Search, 
   CheckSquare, 
-  Calendar, 
   Timer, 
+  Activity,
   Flame, 
   StickyNote, 
   Bot, 
   RefreshCw, 
-  Plus, 
   X,
   ArrowRight,
   Palette,
   Sun,
-  Moon,
   GraduationCap
 } from 'lucide-react';
 
@@ -125,7 +123,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <Timer className="w-3.5 h-3.5 text-zinc-400" />
+                  <Activity className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Habits & Disciplines</span>
                 </div>
                 <ArrowRight className="w-3 h-3 text-zinc-400" />
@@ -226,7 +224,7 @@ export const QuickCommandPalette: React.FC = () => {
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                  <span>Style: Cyberpunk Neon</span>
+                  <span>Style: Cyberpunk Tech HUD</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Sci-Fi HUD</span>
               </button>
@@ -269,6 +267,26 @@ export const QuickCommandPalette: React.FC = () => {
                   >
                     <span className="truncate">{t.title}</span>
                     <span className="text-[10px] text-zinc-400 font-mono">{t.status}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {filteredNotes.length > 0 && (
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-2 py-1">
+                Notes
+              </div>
+              <div className="space-y-0.5">
+                {filteredNotes.map(n => (
+                  <button
+                    key={n.id}
+                    onClick={() => handleSelect(() => setActiveTab('keep'))}
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  >
+                    <span className="truncate">{n.title || n.content.slice(0, 30)}</span>
+                    <StickyNote className="w-3 h-3 text-zinc-400" />
                   </button>
                 ))}
               </div>

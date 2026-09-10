@@ -91,18 +91,14 @@ export const api = {
   },
 
   async manualGoogleConnect(code: string): Promise<{ success: boolean; message: string; user?: any }> {
-    try {
-      const res = await fetch(`${API_BASE}/auth/google/manual-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      });
-      if (res.ok) return await res.json();
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to exchange authorization code');
-    } catch (e: any) {
-      throw e;
-    }
+    const res = await fetch(`${API_BASE}/auth/google/manual-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    if (res.ok) return await res.json();
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to exchange authorization code');
   },
 
   async logoutGoogle() {

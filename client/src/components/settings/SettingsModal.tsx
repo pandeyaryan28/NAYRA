@@ -4,7 +4,6 @@ import {
   UI_STYLES, 
   ACCENT_COLORS 
 } from '../../types/theme.js';
-import type { UIStyle, AccentColor } from '../../types/theme.js';
 import { 
   X, 
   Check, 
@@ -16,13 +15,11 @@ import {
   Sliders, 
   Sun, 
   Moon, 
-  Laptop, 
   Palette, 
   ShieldCheck, 
   Eye, 
   CheckCircle2,
   Flame,
-  ArrowRight,
   RotateCcw
 } from 'lucide-react';
 
@@ -248,15 +245,15 @@ export const SettingsModal: React.FC = () => {
                       {/* Mini Preview Box */}
                       <div className={`h-14 rounded-lg p-2.5 my-2.5 border overflow-hidden flex items-center justify-between text-xs transition-all ${
                         style.id === 'glassmorphism'
-                          ? 'bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border-white/60 dark:border-white/10 backdrop-blur-md shadow-xs'
+                          ? 'bg-slate-100/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/60 backdrop-blur-sm shadow-2xs'
                           : style.id === 'neumorphism'
-                          ? 'bg-slate-200/80 dark:bg-zinc-800 border-white/50 dark:border-zinc-700/50 shadow-[3px_3px_6px_#cbd5e1,-3px_-3px_6px_#ffffff] dark:shadow-[3px_3px_6px_#09090b,-3px_-3px_6px_#27272a]'
+                          ? 'bg-slate-200/70 dark:bg-zinc-800 border-white/50 dark:border-zinc-700/50 shadow-[2px_2px_5px_#cbd5e1,-2px_-2px_5px_#ffffff] dark:shadow-[2px_2px_5px_#09090b,-2px_-2px_5px_#27272a]'
                           : style.id === 'claymorphism'
-                          ? 'bg-white dark:bg-zinc-800 border-white dark:border-zinc-700 rounded-xl shadow-[0_6px_12px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,0.8)]'
+                          ? 'bg-white dark:bg-zinc-800 border-white dark:border-zinc-700 rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,0.8)]'
                           : style.id === 'brutalism'
-                          ? 'bg-amber-50 dark:bg-zinc-900 border-2 border-slate-900 dark:border-white shadow-[3px_3px_0px_#0f172a] dark:shadow-[3px_3px_0px_#818cf8]'
+                          ? 'bg-amber-50/50 dark:bg-zinc-900 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_#0f172a] dark:shadow-[2px_2px_0px_#818cf8]'
                           : style.id === 'cyberpunk'
-                          ? 'bg-cyan-950/20 dark:bg-zinc-950 border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.25)] text-cyan-500'
+                          ? 'bg-slate-50 dark:bg-zinc-950 border border-cyan-500/40 text-cyan-600 dark:text-cyan-400 font-mono shadow-2xs'
                           : 'bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-2xs'
                       }`}>
                         <span className="font-medium text-[11px] truncate">{style.tagline.split('&')[0]}</span>

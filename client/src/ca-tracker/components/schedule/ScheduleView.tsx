@@ -226,39 +226,35 @@ export const ScheduleView: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in max-w-7xl mx-auto pb-16">
       {/* 1. Top Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900 text-zinc-50 dark:bg-zinc-900/90 dark:text-zinc-100 p-6 rounded-3xl border border-zinc-800 shadow-xl relative overflow-hidden">
-        {/* Subtle decorative glow */}
-        <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute -left-12 -bottom-12 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
-
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white text-slate-900 dark:bg-zinc-900 dark:text-zinc-100 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-2xs relative overflow-hidden">
         <div className="space-y-1 relative z-10">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
               Active Syllabus Schedule
             </span>
-            <span className="text-xs text-zinc-400 font-mono">
+            <span className="text-xs text-slate-500 dark:text-zinc-400 font-mono">
               9 Sept – 20 Sept 2026
             </span>
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Daily Study Schedule & Roadmap
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-xl">
             Strictly synchronized with your preparation notes. Track daily milestones, review upcoming revision intervals, and stay on top of the ICAI curriculum.
           </p>
         </div>
 
         {/* View Switcher & Quick Actions */}
         <div className="flex flex-wrap items-center gap-2.5 relative z-10">
-          <div className="flex items-center p-1 bg-zinc-800/80 rounded-2xl border border-zinc-700/80">
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-zinc-800/80 rounded-xl border border-slate-200 dark:border-zinc-700/80">
             <button
               type="button"
               onClick={() => setViewMode('calendar')}
               className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all touch-target',
+                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all touch-target cursor-pointer',
                 viewMode === 'calendar'
-                  ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 shadow-2xs border border-slate-200 dark:border-zinc-700'
+                  : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
               )}
             >
               <CalendarIcon className="w-3.5 h-3.5" />
@@ -268,10 +264,10 @@ export const ScheduleView: React.FC = () => {
               type="button"
               onClick={() => setViewMode('agenda')}
               className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all touch-target',
+                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all touch-target cursor-pointer',
                 viewMode === 'agenda'
-                  ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 shadow-2xs border border-slate-200 dark:border-zinc-700'
+                  : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
               )}
             >
               <CalendarDays className="w-3.5 h-3.5" />
@@ -285,7 +281,7 @@ export const ScheduleView: React.FC = () => {
               setNewDate(selectedDate || today);
               setShowAddModal(true);
             }}
-            className="flex items-center gap-1.5 bg-white text-zinc-950 hover:bg-zinc-200 font-semibold"
+            className="flex items-center gap-1.5 bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:opacity-90 font-semibold shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             <span>Add Task</span>
