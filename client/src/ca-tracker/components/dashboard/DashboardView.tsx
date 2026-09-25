@@ -9,7 +9,7 @@ import {
   Flame,
   Award,
   Calendar,
-  Sparkles,
+  Gauge,
   ChevronRight,
   RefreshCw,
   FileText,
@@ -206,7 +206,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                   Edit Exam Date ({settings.examDate})
                 </button>
                 {syncNotice && (
-                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-full animate-fade-in">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-md font-mono animate-fade-in">
                     ✓ Synced to Cloud
                   </span>
                 )}
@@ -268,7 +268,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <div className="space-y-1 col-span-2 sm:col-span-1">
               <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">Pace Required</span>
               <div className="text-xl sm:text-2xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums flex items-center gap-1.5">
-                <Sparkles className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                <Gauge className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                 {requiredDailyStudyHours}h
               </div>
               <span className="text-[11px] text-slate-400 dark:text-zinc-500 block">per day to finish syllabus</span>
@@ -384,7 +384,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
         {actionPlan.length === 0 ? (
           <Card className="text-center py-10 space-y-2">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">

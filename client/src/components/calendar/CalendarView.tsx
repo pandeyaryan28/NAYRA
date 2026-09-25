@@ -131,7 +131,7 @@ export const CalendarView: React.FC = () => {
                   {format(day, 'd')}
                 </span>
                 {hasEvents && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-zinc-900' : 'bg-slate-400 dark:bg-zinc-500'}`}></span>
+                  <span className={`w-1 h-1 rounded-xs ${isSelected ? 'bg-white dark:bg-zinc-900' : 'bg-slate-400 dark:bg-zinc-500'}`}></span>
                 )}
               </button>
             );

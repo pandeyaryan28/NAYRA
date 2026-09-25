@@ -184,7 +184,7 @@ export const TaskManager: React.FC = () => {
           >
             <Inbox className="w-3.5 h-3.5" />
             <span>Active Tasks</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
               activeTab === 'active'
                 ? 'bg-slate-800 text-slate-200 dark:bg-zinc-200 dark:text-zinc-800'
                 : 'bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'
@@ -203,7 +203,7 @@ export const TaskManager: React.FC = () => {
           >
             <Archive className="w-3.5 h-3.5" />
             <span>Archived</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
               activeTab === 'archived'
                 ? 'bg-slate-800 text-slate-200 dark:bg-zinc-200 dark:text-zinc-800'
                 : 'bg-slate-200/70 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'
@@ -338,7 +338,7 @@ export const TaskManager: React.FC = () => {
                     </span>
                   )}
 
-                  <span className={`w-2 h-2 rounded-full ${
+                  <span className={`w-2 h-2 rounded-xs ${
                     task.priority === 'urgent' ? 'bg-red-500' :
                     task.priority === 'high' ? 'bg-amber-500' :
                     task.priority === 'low' ? 'bg-emerald-500' :

@@ -101,7 +101,7 @@ export const TaskKanban: React.FC<TaskKanbanProps> = ({ tasks, onEditTask }) => 
 
                   <div className="flex items-center justify-between pt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${
+                      <span className={`w-1.5 h-1.5 rounded-xs ${
                         task.priority === 'urgent' ? 'bg-red-500' :
                         task.priority === 'high' ? 'bg-amber-500' :
                         'bg-zinc-300 dark:bg-zinc-700'

@@ -229,7 +229,7 @@ export const ScheduleView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white text-slate-900 dark:bg-zinc-900 dark:text-zinc-100 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-2xs relative overflow-hidden">
         <div className="space-y-1 relative z-10">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
               Active Syllabus Schedule
             </span>
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-mono">
@@ -318,7 +318,7 @@ export const ScheduleView: React.FC = () => {
         <Card className="p-5 space-y-3 bg-gradient-to-br from-amber-500/5 to-transparent border-amber-500/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-sm bg-amber-500" />
               <span className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
                 Today's Target ({formatCompactDate(today)})
               </span>
@@ -418,7 +418,7 @@ export const ScheduleView: React.FC = () => {
               : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
           )}
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="w-2 h-2 rounded-xs bg-emerald-500" />
           <span>Accounts (ACC)</span>
         </button>
         <button
@@ -431,7 +431,7 @@ export const ScheduleView: React.FC = () => {
               : 'bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border border-violet-200 dark:border-violet-800'
           )}
         >
-          <span className="w-2 h-2 rounded-full bg-violet-500" />
+          <span className="w-2 h-2 rounded-xs bg-violet-500" />
           <span>Business Laws (BLAW)</span>
         </button>
         <button
@@ -444,7 +444,7 @@ export const ScheduleView: React.FC = () => {
               : 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800'
           )}
         >
-          <span className="w-2 h-2 rounded-full bg-cyan-500" />
+          <span className="w-2 h-2 rounded-xs bg-cyan-500" />
           <span>Quantitative Aptitude (QA)</span>
         </button>
         <button
@@ -457,7 +457,7 @@ export const ScheduleView: React.FC = () => {
               : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
           )}
         >
-          <span className="w-2 h-2 rounded-full bg-rose-500" />
+          <span className="w-2 h-2 rounded-xs bg-rose-500" />
           <span>Revision Days</span>
         </button>
       </div>
@@ -548,7 +548,7 @@ export const ScheduleView: React.FC = () => {
                       <span
                         className={cn(
                           'text-xs font-bold leading-none',
-                          isToday && 'w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center -m-0.5'
+                          isToday && 'w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center -m-0.5'
                         )}
                       >
                         {day.dayNumber}
@@ -584,7 +584,7 @@ export const ScheduleView: React.FC = () => {
                             )}
                             title={item.title}
                           >
-                            <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotColor)} />
+                            <span className={cn('w-1.5 h-1.5 rounded-xs shrink-0', dotColor)} />
                             <span className="truncate">{item.title}</span>
                           </div>
                         );
@@ -792,12 +792,12 @@ export const ScheduleView: React.FC = () => {
                             {formatDate(dateStr)}
                           </h4>
                           {isToday && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500 text-white shadow-xs">
+                            <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold uppercase bg-amber-500 text-white shadow-xs">
                               Today
                             </span>
                           )}
                           {hasRevision && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                            <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold uppercase bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30">
                               Revision Block
                             </span>
                           )}

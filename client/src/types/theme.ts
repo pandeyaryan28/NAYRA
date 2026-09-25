@@ -31,8 +31,8 @@ export const UI_STYLES: UIStyleInfo[] = [
     name: 'Glassmorphism',
     tagline: 'Frosted glass & ethereal ambient depth',
     description: 'Translucent glass surfaces with refined backdrop blur, specular crystalline rim borders, and clean chromatic depth.',
-    badge: 'Trending',
-    iconName: 'Sparkles',
+    badge: 'Precision',
+    iconName: 'Palette',
     previewClass: 'from-blue-500/20 via-indigo-500/10 to-cyan-500/20 dark:from-indigo-950/40 dark:via-zinc-900 dark:to-cyan-950/40',
     features: ['Backdrop Blur (20px)', 'Specular Rim Borders', 'Ambient Canvas Mesh', 'Floating Layer Architecture']
   },

@@ -8,7 +8,7 @@ import {
   ChevronRight,
   Plus,
   Calendar,
-  Sparkles,
+  PlusCircle,
   BookOpen,
   FileText,
   ExternalLink,
@@ -340,7 +340,7 @@ export const ChecklistView: React.FC = () => {
       <div className="space-y-6">
         {totalMatchingTopics === 0 ? (
           <Card className="text-center py-12 space-y-3">
-            <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center mx-auto">
               <Search className="w-6 h-6" />
             </div>
             <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
@@ -650,7 +650,7 @@ export const ChecklistView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <Card className="w-full max-w-md p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-emerald-500" />
+              <PlusCircle className="w-5 h-5 text-emerald-500" />
               <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                 Add Custom Topic or Module
               </h3>

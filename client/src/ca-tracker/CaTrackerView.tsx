@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -37,13 +38,24 @@ const SUB_NAV_ITEMS: { id: NavigationTab; label: string; icon: React.FC<{ classN
 ];
 
 const CaTrackerContent: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<NavigationTab>('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
   const { metrics, isSyncing, isCloudConnected, syncWithCloud } = useData();
+
+  // Extract sub-route: /ca-tracker, /ca-tracker/, /ca-tracker/:tab
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const subRoute = pathSegments[1] as NavigationTab | undefined;
+  const validTabs: NavigationTab[] = ['dashboard', 'schedule', 'checklist', 'lectures', 'tests', 'revisions', 'ingestion', 'settings'];
+  const activeSubTab: NavigationTab = (subRoute && validTabs.includes(subRoute)) ? subRoute : 'dashboard';
+
+  const handleNavigate = (tab: NavigationTab) => {
+    navigate(tab === 'dashboard' ? '/ca-tracker' : `/ca-tracker/${tab}`);
+  };
 
   const renderActiveView = () => {
     switch (activeSubTab) {
       case 'dashboard':
-        return <DashboardView onNavigate={setActiveSubTab} />;
+        return <DashboardView onNavigate={handleNavigate} />;
       case 'schedule':
         return <ScheduleView />;
       case 'checklist':
@@ -59,7 +71,7 @@ const CaTrackerContent: React.FC = () => {
       case 'settings':
         return <SettingsView />;
       default:
-        return <DashboardView onNavigate={setActiveSubTab} />;
+        return <DashboardView onNavigate={handleNavigate} />;
     }
   };
 
@@ -68,7 +80,7 @@ const CaTrackerContent: React.FC = () => {
       {/* Top Secondary Navigation Header */}
       <div className="sticky top-0 z-20 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-slate-200/80 dark:border-zinc-800/80 px-4 sm:px-6 py-2.5 transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Sub-tab Pill Navigation */}
+          {/* Sub-tab Navigation */}
           <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
             <div className="flex items-center gap-1.5 mr-2 pr-2 border-r border-slate-200 dark:border-zinc-800 text-xs font-semibold text-slate-900 dark:text-zinc-100 shrink-0">
               <div className="w-5 h-5 rounded-md bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center text-white text-[10px] font-bold shadow-xs">
@@ -79,21 +91,23 @@ const CaTrackerContent: React.FC = () => {
 
             {SUB_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isActive = activeSubTab === item.id;
+              const toPath = item.id === 'dashboard' ? '/ca-tracker' : `/ca-tracker/${item.id}`;
+              const isItemActive = activeSubTab === item.id;
               return (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => setActiveSubTab(item.id)}
+                  to={toPath}
+                  end={item.id === 'dashboard'}
                   className={cn(
                     'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 shrink-0 cursor-pointer',
-                    isActive
+                    isItemActive
                       ? 'bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs font-semibold'
                       : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/60'
                   )}
                 >
-                  <Icon className={cn('w-3.5 h-3.5', isActive ? 'text-white dark:text-zinc-900' : 'text-slate-400 dark:text-zinc-500')} />
+                  <Icon className={cn('w-3.5 h-3.5', isItemActive ? 'text-white dark:text-zinc-900' : 'text-slate-400 dark:text-zinc-500')} />
                   <span>{item.label}</span>
-                </button>
+                </NavLink>
               );
             })}
           </div>
@@ -121,7 +135,7 @@ const CaTrackerContent: React.FC = () => {
               {isSyncing ? (
                 <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
               ) : (
-                <span className={cn('w-1.5 h-1.5 rounded-full', isCloudConnected ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-400')} />
+                <span className={cn('w-1.5 h-1.5 rounded-sm', isCloudConnected ? 'bg-emerald-500' : 'bg-zinc-400')} />
               )}
               <span className="text-[11px] font-mono">
                 {isSyncing ? 'Syncing...' : isCloudConnected ? 'Cloud Synced' : 'Local'}

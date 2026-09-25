@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { 
   Task, 
   CalendarEvent, 
@@ -15,6 +16,22 @@ import { googleClientSync } from '../services/googleClientSync.js';
 
 export type TabType = 'overview' | 'tasks' | 'calendar' | 'habits' | 'pomodoro' | 'nutrition' | 'keep' | 'assistant' | 'ca-tracker' | 'scint-engine';
 
+export type FocusSessionType = 'focus' | 'deep_focus' | 'short_break' | 'long_break';
+
+export interface FocusTimerState {
+  timeLeft: number;
+  isRunning: boolean;
+  sessionType: FocusSessionType;
+  selectedTaskId: string;
+  startTimer: () => void;
+  pauseTimer: () => void;
+  toggleTimer: () => void;
+  resetTimer: () => void;
+  setSessionType: (type: FocusSessionType) => void;
+  setSelectedTaskId: (id: string) => void;
+  completeTimer: () => Promise<void>;
+}
+
 interface AppContextType {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
@@ -27,6 +44,13 @@ interface AppContextType {
   setAccentColor: (color: AccentColor) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
+  isSidebarCollapsed: boolean;
+  setIsSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleSidebar: () => void;
+  isAssistantOpen: boolean;
+  setIsAssistantOpen: (open: boolean) => void;
+  toggleAssistant: () => void;
+  focusTimer: FocusTimerState;
   tasks: Task[];
   calendarEvents: CalendarEvent[];
   notes: KeepNote[];
@@ -63,7 +87,45 @@ interface AppContextType {
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getTabFromPath = (pathname: string): TabType => {
+    if (pathname === '/') return 'overview';
+    if (pathname.startsWith('/tasks')) return 'tasks';
+    if (pathname.startsWith('/calendar')) return 'calendar';
+    if (pathname.startsWith('/habits')) return 'habits';
+    if (pathname.startsWith('/focus')) return 'pomodoro';
+    if (pathname.startsWith('/nutrition')) return 'nutrition';
+    if (pathname.startsWith('/notes')) return 'keep';
+    if (pathname.startsWith('/ca-tracker')) return 'ca-tracker';
+    if (pathname.startsWith('/chipchain')) return 'scint-engine';
+    return 'overview';
+  };
+
+  const activeTab = getTabFromPath(location.pathname);
+
+  const tabToRoute: Record<TabType, string> = {
+    overview: '/',
+    tasks: '/tasks',
+    calendar: '/calendar',
+    habits: '/habits',
+    pomodoro: '/focus',
+    nutrition: '/nutrition',
+    keep: '/notes',
+    assistant: '/',
+    'ca-tracker': '/ca-tracker',
+    'scint-engine': '/chipchain'
+  };
+
+  const handleSetActiveTab = (tab: TabType) => {
+    if (tab === 'assistant') {
+      setIsAssistantOpen(true);
+    } else if (tabToRoute[tab]) {
+      navigate(tabToRoute[tab]);
+    }
+  };
+
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('nayra_theme');
     if (saved === 'dark' || saved === 'light') return saved;
@@ -110,7 +172,283 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [notification, setNotification] = useState<{ message: string; type: 'info' | 'success' | 'warning' | 'error' } | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
-  const [isNayraChatOpen, setIsNayraChatOpen] = useState<boolean>(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('nayra_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('nayra_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
+
+  const toggleAssistant = () => {
+    setIsAssistantOpen(prev => !prev);
+  };
+
+  const showToast = useCallback((message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3800);
+  }, []);
+
+  const refreshAll = useCallback(async () => {
+    try {
+      const [tasksRes, calRes, notesRes, logsRes, habitsRes, nutRes, statsRes, authRes] = await Promise.all([
+        api.getTasks().catch(() => ({ tasks: [] })),
+        api.getCalendarEvents().catch(() => ({ events: [] })),
+        api.getNotes().catch(() => ({ notes: [] })),
+        api.getTimeLogs().catch(() => ({ logs: [] })),
+        api.getHabits().catch(() => ({ habits: [] })),
+        api.getNutritionSummary().catch(() => null),
+        api.getOverviewStats().catch(() => null),
+        api.getAuthStatus().catch(() => null)
+      ]);
+
+      if (tasksRes?.tasks) setTasks(tasksRes.tasks);
+      if (calRes?.events) setCalendarEvents(calRes.events);
+      if (notesRes?.notes) setNotes(notesRes.notes);
+      if (logsRes?.logs) setTimeLogs(logsRes.logs);
+      if (habitsRes?.habits) setHabits(habitsRes.habits);
+      if (nutRes) setNutritionData(nutRes);
+      if (statsRes) setStats(statsRes);
+      if (authRes) setAuthStatus(authRes);
+    } catch (e) {
+      console.error('Error refreshing app state:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // --- Ambient Wall-Clock Focus Timer State (Drift-Free & Persisted) ---
+  const focusPresets: Record<FocusSessionType, number> = {
+    focus: 25 * 60,
+    deep_focus: 50 * 60,
+    short_break: 5 * 60,
+    long_break: 15 * 60,
+  };
+
+  const [sessionType, setSessionType] = useState<FocusSessionType>(() => {
+    try {
+      const saved = localStorage.getItem('nayra_focus_session') as FocusSessionType;
+      if (saved && focusPresets[saved]) return saved;
+    } catch {}
+    return 'focus';
+  });
+
+  const [selectedTimerTaskId, setSelectedTimerTaskId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('nayra_focus_task') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const [targetEndTime, setTargetEndTime] = useState<number | null>(() => {
+    try {
+      const saved = localStorage.getItem('nayra_focus_target_end');
+      if (saved) {
+        const end = Number(saved);
+        if (!isNaN(end) && end > Date.now()) return end;
+      }
+    } catch {}
+    return null;
+  });
+
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    try {
+      const savedEnd = localStorage.getItem('nayra_focus_target_end');
+      if (savedEnd) {
+        const end = Number(savedEnd);
+        if (!isNaN(end) && end > Date.now()) {
+          return Math.max(0, Math.ceil((end - Date.now()) / 1000));
+        }
+      }
+      const savedLeft = localStorage.getItem('nayra_focus_time_left');
+      if (savedLeft) {
+        const val = Number(savedLeft);
+        if (!isNaN(val) && val > 0) return val;
+      }
+    } catch {}
+    return 25 * 60;
+  });
+
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(() => {
+    try {
+      const savedEnd = localStorage.getItem('nayra_focus_target_end');
+      if (savedEnd) {
+        const end = Number(savedEnd);
+        return !isNaN(end) && end > Date.now();
+      }
+    } catch {}
+    return false;
+  });
+
+  // Keep refs for callbacks to avoid closure staleness
+  const timerStateRef = useRef({
+    sessionType,
+    timeLeft,
+    isTimerRunning,
+    targetEndTime,
+    selectedTimerTaskId,
+    tasks
+  });
+  timerStateRef.current = {
+    sessionType,
+    timeLeft,
+    isTimerRunning,
+    targetEndTime,
+    selectedTimerTaskId,
+    tasks
+  };
+
+  const handleSetSessionType = (type: FocusSessionType) => {
+    setSessionType(type);
+    setIsTimerRunning(false);
+    setTargetEndTime(null);
+    const newSeconds = focusPresets[type];
+    setTimeLeft(newSeconds);
+    try {
+      localStorage.setItem('nayra_focus_session', type);
+      localStorage.setItem('nayra_focus_time_left', String(newSeconds));
+      localStorage.removeItem('nayra_focus_target_end');
+    } catch {}
+  };
+
+  const handleSetSelectedTaskId = (id: string) => {
+    setSelectedTimerTaskId(id);
+    try {
+      localStorage.setItem('nayra_focus_task', id);
+    } catch {}
+  };
+
+  const handleResetTimer = () => {
+    setIsTimerRunning(false);
+    setTargetEndTime(null);
+    const newSeconds = focusPresets[sessionType];
+    setTimeLeft(newSeconds);
+    try {
+      localStorage.setItem('nayra_focus_time_left', String(newSeconds));
+      localStorage.removeItem('nayra_focus_target_end');
+    } catch {}
+  };
+
+  const handleStartTimer = () => {
+    const end = Date.now() + timeLeft * 1000;
+    setTargetEndTime(end);
+    setIsTimerRunning(true);
+    try {
+      localStorage.setItem('nayra_focus_target_end', String(end));
+    } catch {}
+  };
+
+  const handlePauseTimer = () => {
+    setIsTimerRunning(false);
+    setTargetEndTime(null);
+    try {
+      localStorage.removeItem('nayra_focus_target_end');
+      localStorage.setItem('nayra_focus_time_left', String(timeLeft));
+    } catch {}
+  };
+
+  const handleToggleTimer = () => {
+    if (isTimerRunning) {
+      handlePauseTimer();
+    } else {
+      handleStartTimer();
+    }
+  };
+
+  const handleCompleteTimer = useCallback(async () => {
+    const { sessionType: currSession, timeLeft: currLeft, selectedTimerTaskId: currTaskId, tasks: currTasks } = timerStateRef.current;
+    setIsTimerRunning(false);
+    setTargetEndTime(null);
+    try {
+      localStorage.removeItem('nayra_focus_target_end');
+    } catch {}
+
+    const totalSeconds = focusPresets[currSession];
+    const durationMinutes = Math.max(1, Math.round((totalSeconds - currLeft) / 60)) || Math.round(totalSeconds / 60);
+    const selectedTask = currTasks.find(t => t.id === currTaskId);
+
+    try {
+      await api.logTime({
+        taskId: currTaskId || undefined,
+        taskTitle: selectedTask?.title || `${currSession.replace('_', ' ').toUpperCase()} Session`,
+        durationMinutes,
+        sessionType: currSession.includes('break') ? 'short_break' : 'pomodoro',
+        timestamp: new Date().toISOString()
+      });
+      showToast(`Completed ${durationMinutes}m focus session`, 'success');
+      await refreshAll();
+    } catch (e: any) {
+      showToast(e.message, 'error');
+    } finally {
+      const resetSeconds = focusPresets[currSession];
+      setTimeLeft(resetSeconds);
+      try {
+        localStorage.setItem('nayra_focus_time_left', String(resetSeconds));
+      } catch {}
+    }
+  }, [refreshAll, showToast]);
+
+  // Wall-clock countdown sync (interval + visibility/focus listeners)
+  useEffect(() => {
+    if (!isTimerRunning || !targetEndTime) return;
+
+    const checkTime = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((targetEndTime - now) / 1000));
+      setTimeLeft(remaining);
+      try {
+        localStorage.setItem('nayra_focus_time_left', String(remaining));
+      } catch {}
+      if (remaining <= 0) {
+        handleCompleteTimer();
+      }
+    };
+
+    checkTime();
+    const interval = setInterval(checkTime, 500);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkTime();
+      }
+    };
+    const onFocus = () => checkTime();
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [isTimerRunning, targetEndTime, handleCompleteTimer]);
+
+  const focusTimer: FocusTimerState = {
+    timeLeft,
+    isRunning: isTimerRunning,
+    sessionType,
+    selectedTaskId: selectedTimerTaskId,
+    startTimer: handleStartTimer,
+    pauseTimer: handlePauseTimer,
+    toggleTimer: handleToggleTimer,
+    resetTimer: handleResetTimer,
+    setSessionType: handleSetSessionType,
+    setSelectedTaskId: handleSetSelectedTaskId,
+    completeTimer: handleCompleteTimer,
+  };
 
   const isAuthenticated = Boolean(
     authStatus?.googleConnected || 
@@ -159,41 +497,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const updateAccentColor = (color: AccentColor) => {
     setAccentColor(color);
     api.saveUserSettings({ accentColor: color }).catch(() => {});
-  };
-
-  const showToast = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
-    setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 3800);
-  };
-
-  const refreshAll = async () => {
-    try {
-      const [tasksRes, calRes, notesRes, logsRes, habitsRes, nutRes, statsRes, authRes] = await Promise.all([
-        api.getTasks().catch(() => ({ tasks: [] })),
-        api.getCalendarEvents().catch(() => ({ events: [] })),
-        api.getNotes().catch(() => ({ notes: [] })),
-        api.getTimeLogs().catch(() => ({ logs: [] })),
-        api.getHabits().catch(() => ({ habits: [] })),
-        api.getNutritionSummary().catch(() => null),
-        api.getOverviewStats().catch(() => null),
-        api.getAuthStatus().catch(() => null)
-      ]);
-
-      if (tasksRes?.tasks) setTasks(tasksRes.tasks);
-      if (calRes?.events) setCalendarEvents(calRes.events);
-      if (notesRes?.notes) setNotes(notesRes.notes);
-      if (logsRes?.logs) setTimeLogs(logsRes.logs);
-      if (habitsRes?.habits) setHabits(habitsRes.habits);
-      if (nutRes) setNutritionData(nutRes);
-      if (statsRes) setStats(statsRes);
-      if (authRes) setAuthStatus(authRes);
-    } catch (e) {
-      console.error('Error refreshing app state:', e);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const syncGoogleTasks = async () => {
@@ -440,6 +743,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         e.preventDefault();
         setIsSettingsOpen(prev => !prev);
       }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        toggleAssistant();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
 
@@ -459,7 +770,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     <AppContext.Provider
       value={{
         activeTab,
-        setActiveTab,
+        setActiveTab: handleSetActiveTab,
         theme,
         setTheme: updateTheme,
         toggleTheme,
@@ -469,6 +780,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setAccentColor: updateAccentColor,
         isSettingsOpen,
         setIsSettingsOpen,
+        isSidebarCollapsed,
+        setIsSidebarCollapsed,
+        toggleSidebar,
+        isAssistantOpen,
+        setIsAssistantOpen,
+        toggleAssistant,
+        focusTimer,
         tasks,
         calendarEvents,
         notes,
@@ -484,8 +802,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         notification,
         isCommandPaletteOpen,
         setIsCommandPaletteOpen,
-        isNayraChatOpen,
-        setIsNayraChatOpen,
+        isNayraChatOpen: isAssistantOpen,
+        setIsNayraChatOpen: setIsAssistantOpen,
         refreshAll,
         syncGoogleTasks,
         syncGoogleCalendar,

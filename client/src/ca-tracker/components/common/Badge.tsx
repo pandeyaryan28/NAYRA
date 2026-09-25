@@ -40,7 +40,7 @@ export const Badge: React.FC<BadgeProps> = ({
   }
 
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-full transition-colors select-none';
+    'inline-flex items-center justify-center font-medium font-mono rounded-md transition-colors select-none';
 
   const sizes = {
     sm: 'text-[11px] px-2 py-0.5 leading-tight',

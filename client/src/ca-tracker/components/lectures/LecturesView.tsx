@@ -10,7 +10,7 @@ import {
   Film,
   Calendar,
   Layers,
-  Sparkles,
+  TrendingUp,
 } from 'lucide-react';
 import { useData } from '../../context/CaDataContext';
 import { Card } from '../common/Card';
@@ -76,8 +76,8 @@ export const LecturesView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="paper1" size="sm">Paper 1: Accounting</Badge>
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+              <span className="w-1.5 h-1.5 rounded-sm bg-emerald-500" />
               Cloud Synced (Firestore)
             </span>
           </div>
@@ -137,7 +137,7 @@ export const LecturesView: React.FC = () => {
         <Card className="p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Watch Completion</span>
-            <Sparkles className="w-4 h-4 text-amber-500" />
+            <TrendingUp className="w-4 h-4 text-amber-500" />
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{watchPercentage}%</span>

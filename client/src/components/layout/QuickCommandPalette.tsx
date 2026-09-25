@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext.js';
 import { 
   Search, 
@@ -18,15 +19,14 @@ import {
 } from 'lucide-react';
 
 export const QuickCommandPalette: React.FC = () => {
+  const navigate = useNavigate();
   const { 
     isCommandPaletteOpen, 
     setIsCommandPaletteOpen, 
-    setActiveTab, 
     syncGoogleTasks, 
     syncGoogleCalendar,
-    setIsNayraChatOpen,
+    setIsAssistantOpen,
     setUiStyle,
-    setIsSettingsOpen,
     toggleTheme,
     showToast,
     tasks,
@@ -36,11 +36,14 @@ export const QuickCommandPalette: React.FC = () => {
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const handleClose = () => {
+    setIsCommandPaletteOpen(false);
+    setQuery('');
+  };
+
   useEffect(() => {
     if (isCommandPaletteOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      setQuery('');
     }
   }, [isCommandPaletteOpen]);
 
@@ -51,11 +54,14 @@ export const QuickCommandPalette: React.FC = () => {
 
   const handleSelect = (action: () => void) => {
     action();
-    setIsCommandPaletteOpen(false);
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-start justify-center pt-24 p-4">
+    <div 
+      className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-start justify-center pt-24 p-4"
+      onClick={handleClose}
+    >
       <div 
         className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
@@ -72,7 +78,7 @@ export const QuickCommandPalette: React.FC = () => {
             className="w-full bg-transparent text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none"
           />
           <button 
-            onClick={() => setIsCommandPaletteOpen(false)}
+            onClick={handleClose}
             className="p-1 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -87,7 +93,7 @@ export const QuickCommandPalette: React.FC = () => {
             </div>
             <div className="space-y-0.5">
               <button
-                onClick={() => handleSelect(() => setActiveTab('ca-tracker'))}
+                onClick={() => handleSelect(() => navigate('/ca-tracker'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -98,7 +104,7 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleSelect(() => setActiveTab('scint-engine'))}
+                onClick={() => handleSelect(() => navigate('/chipchain'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -109,7 +115,7 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleSelect(() => setActiveTab('tasks'))}
+                onClick={() => handleSelect(() => navigate('/tasks'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -120,7 +126,7 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleSelect(() => setActiveTab('pomodoro'))}
+                onClick={() => handleSelect(() => navigate('/focus'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -131,7 +137,7 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleSelect(() => setActiveTab('habits'))}
+                onClick={() => handleSelect(() => navigate('/habits'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -142,7 +148,7 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleSelect(() => setActiveTab('nutrition'))}
+                onClick={() => handleSelect(() => navigate('/nutrition'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -164,7 +170,7 @@ export const QuickCommandPalette: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleSelect(() => setIsNayraChatOpen(true))}
+                onClick={() => handleSelect(() => setIsAssistantOpen(true))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
@@ -176,12 +182,12 @@ export const QuickCommandPalette: React.FC = () => {
 
               {/* Appearance & Themes */}
               <button
-                onClick={() => handleSelect(() => setIsSettingsOpen(true))}
+                onClick={() => handleSelect(() => navigate('/settings'))}
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <Palette className="w-3.5 h-3.5" />
-                  <span className="font-medium">Appearance & UI Style Studio (Cmd+,)</span>
+                  <span className="font-medium">Settings & UI Style Studio (Cmd+,)</span>
                 </div>
                 <ArrowRight className="w-3 h-3" />
               </button>
@@ -191,7 +197,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span className="w-2 h-2 rounded-sm bg-blue-500" />
                   <span>Style: Glassmorphism</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Frosted Glass</span>
@@ -202,7 +208,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-slate-400" />
+                  <span className="w-2 h-2 rounded-sm bg-slate-400" />
                   <span>Style: Neumorphism</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Soft Extrusions</span>
@@ -213,7 +219,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span className="w-2 h-2 rounded-sm bg-amber-400" />
                   <span>Style: Claymorphism</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Puffy 3D Clay</span>
@@ -224,7 +230,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  <span className="w-2 h-2 rounded-sm bg-red-500" />
                   <span>Style: Neo-Brutalism</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Bold Retro</span>
@@ -235,7 +241,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                  <span className="w-2 h-2 rounded-sm bg-cyan-400" />
                   <span>Style: Cyberpunk Tech HUD</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Sci-Fi HUD</span>
@@ -246,7 +252,7 @@ export const QuickCommandPalette: React.FC = () => {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-zinc-400" />
+                  <span className="w-2 h-2 rounded-sm bg-zinc-400" />
                   <span>Style: Modern Minimal</span>
                 </div>
                 <span className="text-[10px] text-zinc-400 font-mono">Precision</span>
@@ -274,7 +280,7 @@ export const QuickCommandPalette: React.FC = () => {
                 {filteredTasks.map(t => (
                   <button
                     key={t.id}
-                    onClick={() => handleSelect(() => setActiveTab('tasks'))}
+                    onClick={() => handleSelect(() => navigate('/tasks'))}
                     className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
                     <span className="truncate">{t.title}</span>
@@ -294,7 +300,7 @@ export const QuickCommandPalette: React.FC = () => {
                 {filteredNotes.map(n => (
                   <button
                     key={n.id}
-                    onClick={() => handleSelect(() => setActiveTab('keep'))}
+                    onClick={() => handleSelect(() => navigate('/notes'))}
                     className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
                     <span className="truncate">{n.title || n.content.slice(0, 30)}</span>

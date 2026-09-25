@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext.js';
-import type { DailyCalorieHistoryItem, MealEntry, NutritionSummaryResponse } from '../../types/index.js';
+import type { DailyCalorieHistoryItem, NutritionSummaryResponse } from '../../types/index.js';
 import { 
   Flame, 
-  Trash2,
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-  RotateCcw,
-  Clock,
-  Droplets,
-  Plus
+  Trash2, 
+  Calendar as CalendarIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  RotateCcw, 
+  Clock, 
+  Droplets, 
+  Plus,
+  PieChart
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 
@@ -30,18 +31,14 @@ export const CalorieTracker: React.FC = () => {
   const [mealText, setMealText] = useState('');
   const [mealType, setMealType] = useState<string>('breakfast');
   const [isEstimating, setIsEstimating] = useState(false);
-  const [isLoadingDay, setIsLoadingDay] = useState(false);
 
   // Load summary for the selected date
   const loadDateData = async (date: string) => {
-    setIsLoadingDay(true);
     try {
       const data = await api.getNutritionSummary(date);
       setDayData(data);
     } catch (e) {
       console.error('Error loading nutrition for date:', e);
-    } finally {
-      setIsLoadingDay(false);
     }
   };
 
@@ -78,6 +75,15 @@ export const CalorieTracker: React.FC = () => {
 
   const meals = dayData?.meals || [];
   const caloriePercent = Math.min(100, Math.round((summary.consumedCalories / summary.targetCalories) * 100));
+
+  // Macro ratio calculation
+  const proteinKcal = (summary.consumedProtein || 0) * 4;
+  const carbsKcal = (summary.consumedCarbs || 0) * 4;
+  const fatKcal = (summary.consumedFat || 0) * 9;
+  const totalMacroKcal = proteinKcal + carbsKcal + fatKcal || 1;
+  const proteinRatio = summary.consumedProtein > 0 ? Math.round((proteinKcal / totalMacroKcal) * 100) : 30;
+  const carbsRatio = summary.consumedCarbs > 0 ? Math.round((carbsKcal / totalMacroKcal) * 100) : 50;
+  const fatRatio = summary.consumedFat > 0 ? Math.max(0, 100 - proteinRatio - carbsRatio) : 20;
 
   const isToday = selectedDate === todayStr;
   const isYesterday = selectedDate === yesterdayStr;
@@ -142,21 +148,28 @@ export const CalorieTracker: React.FC = () => {
   return (
     <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-6 transition-colors duration-150">
       {/* Header & Date Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">Nutrition & Calories</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
+              Nutrition & Macros
+            </h2>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 font-medium">
+              Calorie Engine
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-            Track daily calorie intake, macronutrients, and view your historical progress
+            Calorie intake, macronutrient distribution (Protein, Carbs, Fat), and historical metrics.
           </p>
         </div>
 
         {/* Date Selector Controls */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Quick Date Buttons */}
-          <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+          <div className="flex items-center p-0.5 rounded-md bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
             <button
               onClick={() => setSelectedDate(yesterdayStr)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors cursor-pointer ${
                 isYesterday
                   ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -166,7 +179,7 @@ export const CalorieTracker: React.FC = () => {
             </button>
             <button
               onClick={() => setSelectedDate(todayStr)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-sm text-xs font-medium transition-colors cursor-pointer ${
                 isToday
                   ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -177,7 +190,7 @@ export const CalorieTracker: React.FC = () => {
           </div>
 
           {/* Stepper + Date Picker */}
-          <div className="flex items-center gap-1 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-lg px-2 py-1 shadow-2xs">
+          <div className="flex items-center gap-1 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-md px-2 py-1 shadow-2xs">
             <button
               onClick={() => handleStepDay(-1)}
               className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-zinc-100 cursor-pointer"
@@ -208,12 +221,12 @@ export const CalorieTracker: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-orange-500" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300 font-mono">
-              Calorie History (Last 7 Days)
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300 font-mono">
+              7-Day Calorie Log
             </h3>
           </div>
-          <span className="text-[11px] text-slate-400 dark:text-zinc-500">
-            Click any day to view details
+          <span className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono">
+            Click day to inspect
           </span>
         </div>
 
@@ -244,7 +257,7 @@ export const CalorieTracker: React.FC = () => {
                 </div>
 
                 <div>
-                  <div className="text-sm font-bold font-mono text-slate-900 dark:text-zinc-100">
+                  <div className="text-sm font-bold font-mono text-slate-900 dark:text-zinc-100 tabular-nums">
                     {item.totalCalories} <span className="text-[10px] font-normal text-slate-400">kcal</span>
                   </div>
                   <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
@@ -253,9 +266,9 @@ export const CalorieTracker: React.FC = () => {
                 </div>
 
                 {/* Mini progress bar */}
-                <div className="w-full bg-slate-200 dark:bg-zinc-800 rounded-full h-1 overflow-hidden">
+                <div className="w-full bg-slate-200 dark:bg-zinc-800 rounded-xs h-1 overflow-hidden">
                   <div 
-                    className={`h-full rounded-full transition-all ${
+                    className={`h-full rounded-xs transition-all ${
                       hasMeals ? (pct > 105 ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-transparent'
                     }`}
                     style={{ width: `${pct}%` }}
@@ -276,13 +289,49 @@ export const CalorieTracker: React.FC = () => {
           </div>
           <button
             onClick={() => setSelectedDate(todayStr)}
-            className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 cursor-pointer"
+            className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 cursor-pointer font-mono"
           >
             <span>Jump to Today</span>
             <RotateCcw className="w-3 h-3" />
           </button>
         </div>
       )}
+
+      {/* Macro Distribution Ratio Bar */}
+      <div className="p-4 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <PieChart className="w-4 h-4 text-indigo-500" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-zinc-200 font-mono">
+              Macro Caloric Split:
+            </span>
+          </div>
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <span className="text-indigo-600 dark:text-indigo-400">Protein: {proteinRatio}%</span>
+            <span className="text-sky-600 dark:text-sky-400">Carbs: {carbsRatio}%</span>
+            <span className="text-amber-600 dark:text-amber-400">Fat: {fatRatio}%</span>
+          </div>
+        </div>
+
+        {/* Stacked Ratio Bar */}
+        <div className="w-full h-3 bg-slate-100 dark:bg-zinc-800 rounded-sm overflow-hidden flex">
+          <div 
+            style={{ width: `${proteinRatio}%` }} 
+            className="bg-indigo-500 transition-all duration-300" 
+            title={`Protein: ${proteinRatio}%`} 
+          />
+          <div 
+            style={{ width: `${carbsRatio}%` }} 
+            className="bg-sky-500 transition-all duration-300" 
+            title={`Carbohydrates: ${carbsRatio}%`} 
+          />
+          <div 
+            style={{ width: `${fatRatio}%` }} 
+            className="bg-amber-500 transition-all duration-300" 
+            title={`Fats: ${fatRatio}%`} 
+          />
+        </div>
+      </div>
 
       {/* Energy & Macros Cards for Selected Day */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -292,11 +341,11 @@ export const CalorieTracker: React.FC = () => {
             <span>{getDayDisplayLabel(selectedDate)}'s Calories</span>
             <Flame className="w-4 h-4 text-orange-500" />
           </div>
-          <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
+          <div className="text-2xl font-bold text-slate-900 dark:text-zinc-100 font-mono tabular-nums">
             {summary.consumedCalories} <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">/ {summary.targetCalories} kcal</span>
           </div>
-          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div className="bg-slate-900 dark:bg-zinc-200 h-full rounded-full transition-all duration-300" style={{ width: `${caloriePercent}%` }}></div>
+          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-xs h-1.5 overflow-hidden">
+            <div className="bg-slate-900 dark:bg-zinc-200 h-full rounded-xs transition-all duration-300" style={{ width: `${caloriePercent}%` }}></div>
           </div>
           <div className="text-[11px] font-mono text-slate-400 dark:text-zinc-500">
             {summary.remainingCalories} kcal remaining
@@ -307,13 +356,13 @@ export const CalorieTracker: React.FC = () => {
         <div className="p-5 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span>Protein</span>
-            <span className="font-mono text-slate-400 dark:text-zinc-500 text-[11px]">{Math.round((summary.consumedProtein / (summary.targetProtein || 140)) * 100)}%</span>
+            <span className="font-mono text-indigo-600 dark:text-indigo-400 text-[11px] font-semibold">{Math.round((summary.consumedProtein / (summary.targetProtein || 140)) * 100)}%</span>
           </div>
-          <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
+          <div className="text-2xl font-bold text-slate-900 dark:text-zinc-100 font-mono tabular-nums">
             {summary.consumedProtein}g <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">/ {summary.targetProtein}g</span>
           </div>
-          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div className="bg-slate-900 dark:bg-zinc-200 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (summary.consumedProtein / (summary.targetProtein || 140)) * 100)}%` }}></div>
+          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-xs h-1.5 overflow-hidden">
+            <div className="bg-indigo-500 h-full rounded-xs transition-all duration-300" style={{ width: `${Math.min(100, (summary.consumedProtein / (summary.targetProtein || 140)) * 100)}%` }}></div>
           </div>
         </div>
 
@@ -321,13 +370,13 @@ export const CalorieTracker: React.FC = () => {
         <div className="p-5 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span>Carbohydrates</span>
-            <span className="font-mono text-slate-400 dark:text-zinc-500 text-[11px]">{Math.round((summary.consumedCarbs / (summary.targetCarbs || 220)) * 100)}%</span>
+            <span className="font-mono text-sky-600 dark:text-sky-400 text-[11px] font-semibold">{Math.round((summary.consumedCarbs / (summary.targetCarbs || 220)) * 100)}%</span>
           </div>
-          <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
+          <div className="text-2xl font-bold text-slate-900 dark:text-zinc-100 font-mono tabular-nums">
             {summary.consumedCarbs}g <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">/ {summary.targetCarbs}g</span>
           </div>
-          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div className="bg-slate-900 dark:bg-zinc-200 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (summary.consumedCarbs / (summary.targetCarbs || 220)) * 100)}%` }}></div>
+          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-xs h-1.5 overflow-hidden">
+            <div className="bg-sky-500 h-full rounded-xs transition-all duration-300" style={{ width: `${Math.min(100, (summary.consumedCarbs / (summary.targetCarbs || 220)) * 100)}%` }}></div>
           </div>
         </div>
 
@@ -335,27 +384,27 @@ export const CalorieTracker: React.FC = () => {
         <div className="p-5 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
             <span>Fats</span>
-            <span className="font-mono text-slate-400 dark:text-zinc-500 text-[11px]">{Math.round((summary.consumedFat / (summary.targetFat || 65)) * 100)}%</span>
+            <span className="font-mono text-amber-600 dark:text-amber-400 text-[11px] font-semibold">{Math.round((summary.consumedFat / (summary.targetFat || 65)) * 100)}%</span>
           </div>
-          <div className="text-2xl font-semibold text-slate-900 dark:text-zinc-100 font-mono">
+          <div className="text-2xl font-bold text-slate-900 dark:text-zinc-100 font-mono tabular-nums">
             {summary.consumedFat}g <span className="text-xs font-normal text-slate-400 dark:text-zinc-500">/ {summary.targetFat}g</span>
           </div>
-          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div className="bg-slate-900 dark:bg-zinc-200 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (summary.consumedFat / (summary.targetFat || 65)) * 100)}%` }}></div>
+          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-xs h-1.5 overflow-hidden">
+            <div className="bg-amber-500 h-full rounded-xs transition-all duration-300" style={{ width: `${Math.min(100, (summary.consumedFat / (summary.targetFat || 65)) * 100)}%` }}></div>
           </div>
         </div>
       </div>
 
-      {/* Log Meal Form for Selected Date */}
-      <form onSubmit={handleIngestMeal} className="p-4 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-3">
-        <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
-          Log meal for <span className="font-semibold text-slate-900 dark:text-zinc-100">{getDayDisplayLabel(selectedDate)}</span>:
+      {/* Streamlined Log Meal Form for Selected Date */}
+      <form onSubmit={handleIngestMeal} className="p-4 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-2.5">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300 font-mono">
+          Log meal for <span className="text-slate-900 dark:text-zinc-100">{getDayDisplayLabel(selectedDate)}</span>:
         </label>
         <div className="flex flex-col sm:flex-row items-center gap-2">
           <select
             value={mealType}
             onChange={e => setMealType(e.target.value)}
-            className="w-full sm:w-32 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none capitalize cursor-pointer"
+            className="w-full sm:w-32 px-3 py-2 rounded-md bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-800 dark:text-zinc-200 focus:outline-none capitalize cursor-pointer font-sans"
           >
             <option value="breakfast">Breakfast</option>
             <option value="lunch">Lunch</option>
@@ -369,13 +418,13 @@ export const CalorieTracker: React.FC = () => {
             placeholder="e.g. 2 boiled eggs, whole wheat toast with butter, and black coffee"
             value={mealText}
             onChange={e => setMealText(e.target.value)}
-            className="w-full px-3.5 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
+            className="w-full px-3.5 py-2 rounded-md bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
           />
 
           <button
             type="submit"
             disabled={isEstimating || !mealText.trim()}
-            className="w-full sm:w-auto px-4 py-1.5 rounded-lg bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-medium hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer shrink-0 shadow-2xs"
+            className="w-full sm:w-auto px-4 py-2 rounded-md bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-xs font-semibold hover:opacity-90 disabled:opacity-40 transition-opacity cursor-pointer shrink-0 shadow-2xs"
           >
             {isEstimating ? 'Calculating...' : 'Log Meal'}
           </button>
@@ -387,7 +436,7 @@ export const CalorieTracker: React.FC = () => {
         {/* Meals on Selected Date */}
         <div className="lg:col-span-2 p-6 rounded-xl bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 shadow-2xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-zinc-100 font-mono">
               Meals on {getDayDisplayLabel(selectedDate)}
             </h3>
             <span className="text-xs font-mono text-slate-400 dark:text-zinc-500">{meals.length} logged</span>
@@ -410,12 +459,12 @@ export const CalorieTracker: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold font-mono text-slate-900 dark:text-zinc-100">
+                    <span className="text-xs font-bold font-mono text-slate-900 dark:text-zinc-100 tabular-nums">
                       {meal.totalCalories} kcal
                     </span>
                     <button
                       onClick={() => handleDeleteMeal(meal.id)}
-                      className="p-1 text-slate-400 hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      className="p-1 text-slate-400 hover:text-red-500 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
                       title="Delete meal"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -453,32 +502,32 @@ export const CalorieTracker: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Droplets className="w-4 h-4 text-cyan-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Water Intake</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-zinc-100 font-mono">Water Intake</h3>
             </div>
-            <span className="text-xs font-mono font-semibold text-slate-900 dark:text-zinc-100">{summary.waterIntakeMl || 0} ml</span>
+            <span className="text-xs font-mono font-semibold text-slate-900 dark:text-zinc-100 tabular-nums">{summary.waterIntakeMl || 0} ml</span>
           </div>
 
-          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-100 dark:bg-zinc-800 rounded-xs h-2 overflow-hidden">
             <div
-              className="bg-cyan-500 h-full rounded-full transition-all duration-300"
+              className="bg-cyan-500 h-full rounded-xs transition-all duration-300"
               style={{ width: `${Math.min(100, ((summary.waterIntakeMl || 0) / 3000) * 100)}%` }}
-            ></div>
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleAddWater(250)}
-              className="py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1"
+              className="py-2 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1"
             >
               <Plus className="w-3 h-3" />
-              <span>250ml Glass</span>
+              <span>250ml</span>
             </button>
             <button
               onClick={() => handleAddWater(500)}
-              className="py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1"
+              className="py-2 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer shadow-2xs flex items-center justify-center gap-1"
             >
               <Plus className="w-3 h-3" />
-              <span>500ml Bottle</span>
+              <span>500ml</span>
             </button>
           </div>
         </div>
@@ -486,3 +535,5 @@ export const CalorieTracker: React.FC = () => {
     </div>
   );
 };
+
+export default CalorieTracker;

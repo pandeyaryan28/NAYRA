@@ -355,7 +355,7 @@ export const TestsView: React.FC = () => {
       {/* Test Log List */}
       {tests.length === 0 ? (
         <Card className="text-center py-12 space-y-3">
-          <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center mx-auto">
             <FileSpreadsheet className="w-6 h-6" />
           </div>
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">

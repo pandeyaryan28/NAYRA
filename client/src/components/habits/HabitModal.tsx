@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Flame, Droplets, Activity, BookOpen, Target, Heart, Smile } from 'lucide-react';
+import { X, Award, Flame, Droplets, Activity, BookOpen, Target, Heart, Smile } from 'lucide-react';
 import type { Habit, HabitCategory, HabitFrequency } from '../../types/index.js';
 
 interface HabitModalProps {
@@ -21,8 +21,8 @@ const COLOR_PRESETS = [
 ];
 
 const ICONS = [
-  { id: 'sparkles', label: 'Sparkles', icon: Sparkles },
-  { id: 'flame', label: 'Flame', icon: Flame },
+  { id: 'award', label: 'Discipline', icon: Award },
+  { id: 'flame', label: 'Streak', icon: Flame },
   { id: 'droplets', label: 'Hydration', icon: Droplets },
   { id: 'activity', label: 'Fitness', icon: Activity },
   { id: 'book-open', label: 'Learning', icon: BookOpen },
@@ -92,7 +92,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+            <span className="w-2.5 h-2.5 rounded-xs" style={{ backgroundColor: color }} />
             <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
               {initialHabit ? 'Edit Habit' : 'Create New Habit'}
             </h2>
@@ -184,8 +184,8 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
-                    color === c ? 'scale-125 ring-2 ring-slate-900 dark:ring-white ring-offset-2 dark:ring-offset-zinc-900' : 'hover:scale-110'
+                  className={`w-6 h-6 rounded-md transition-transform cursor-pointer ${
+                    color === c ? 'scale-110 ring-2 ring-slate-900 dark:ring-white ring-offset-2 dark:ring-offset-zinc-900' : 'hover:scale-105'
                   }`}
                   style={{ backgroundColor: c }}
                 />

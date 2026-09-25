@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { ScintDataProvider, useScintData } from './context/ScintDataContext';
 import { BlueprintsView } from './components/blueprints/BlueprintsView';
 import { SupplyChainExplorerView } from './components/explorer/SupplyChainExplorerView';
@@ -14,8 +15,7 @@ import {
   Building2, 
   BarChart3, 
   Printer, 
-  Download,
-  ShieldCheck
+  Download
 } from 'lucide-react';
 
 const SUB_NAV_ITEMS: { id: NavigationSubTab; label: string; icon: React.FC<{ className?: string }> }[] = [
@@ -27,12 +27,19 @@ const SUB_NAV_ITEMS: { id: NavigationSubTab; label: string; icon: React.FC<{ cla
 ];
 
 const ScintEngineContent: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<NavigationSubTab>('blueprints');
-  const { exportFullDatasetJson, selectBlueprint, backendStatus } = useScintData();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { exportFullDatasetJson, selectBlueprint } = useScintData();
+
+  // Extract sub-route: /chipchain, /chipchain/, /chipchain/:tab
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const subRoute = pathSegments[1] as NavigationSubTab | undefined;
+  const validTabs: NavigationSubTab[] = ['blueprints', 'explorer', 'calculator', 'hubs', 'intelligence'];
+  const activeSubTab: NavigationSubTab = (subRoute && validTabs.includes(subRoute)) ? subRoute : 'blueprints';
 
   const handleNavigateToBlueprint = (nodeId: string) => {
     selectBlueprint(nodeId);
-    setActiveSubTab('blueprints');
+    navigate('/chipchain');
   };
 
   return (
@@ -52,20 +59,22 @@ const ScintEngineContent: React.FC = () => {
 
             {SUB_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const isActive = activeSubTab === item.id;
+              const toPath = item.id === 'blueprints' ? '/chipchain' : `/chipchain/${item.id}`;
+              const isItemActive = activeSubTab === item.id;
               return (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => setActiveSubTab(item.id)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                    isActive
+                  to={toPath}
+                  end={item.id === 'blueprints'}
+                  className={() => `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                    isItemActive
                       ? 'bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs font-semibold'
                       : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/60'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white dark:text-zinc-900' : 'text-slate-400 dark:text-zinc-500'}`} />
+                  <Icon className={`w-3.5 h-3.5 ${isItemActive ? 'text-white dark:text-zinc-900' : 'text-slate-400 dark:text-zinc-500'}`} />
                   <span>{item.label}</span>
-                </button>
+                </NavLink>
               );
             })}
           </div>

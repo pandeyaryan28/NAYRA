@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext.js';
 import { 
   Search, 
@@ -6,7 +7,7 @@ import {
   Sun, 
   Moon, 
   RefreshCw, 
-  Sparkles,
+  Bot,
   Link as LinkIcon,
   CheckCircle2,
   X,
@@ -15,7 +16,10 @@ import {
   Key,
   ShieldCheck,
   Settings,
-  Palette
+  Palette,
+  Play,
+  Pause,
+  ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -26,11 +30,13 @@ import {
 } from '../../services/googleClientSync.js';
 
 export const Header: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const { 
     theme, 
     toggleTheme, 
     uiStyle,
-    setIsSettingsOpen,
     authStatus, 
     isGuestMode,
     logout,
@@ -41,11 +47,11 @@ export const Header: React.FC = () => {
     disconnectGoogle,
     syncGoogleTasks,
     syncGoogleCalendar,
-    submitManualGoogleCode,
     setIsCommandPaletteOpen, 
-    setIsNayraChatOpen,
+    toggleAssistant,
     notification,
-    showToast
+    showToast,
+    focusTimer
   } = useApp();
 
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -102,36 +108,123 @@ export const Header: React.FC = () => {
     }
   };
 
+  // Dynamic Breadcrumb Trail Resolution
+  const getBreadcrumbs = () => {
+    const path = location.pathname;
+    if (path === '/') return [{ label: 'Command' }, { label: 'Overview' }];
+    if (path.startsWith('/tasks')) return [{ label: 'Work' }, { label: 'Tasks & Kanban' }];
+    if (path.startsWith('/calendar')) return [{ label: 'Work' }, { label: 'Calendar Agenda' }];
+    if (path.startsWith('/notes')) return [{ label: 'Work' }, { label: 'Keep Notes' }];
+    if (path.startsWith('/focus')) return [{ label: 'Performance' }, { label: 'Focus & Pomodoro' }];
+    if (path.startsWith('/habits')) return [{ label: 'Performance' }, { label: 'Daily Habits' }];
+    if (path.startsWith('/nutrition')) return [{ label: 'Performance' }, { label: 'Nutrition & Macros' }];
+    if (path.startsWith('/ca-tracker')) {
+      const sub = path.replace('/ca-tracker', '').replace('/', '');
+      const subMap: Record<string, string> = {
+        schedule: 'Schedule',
+        checklist: 'Checklist',
+        lectures: 'Lectures',
+        tests: 'Test Series',
+        revisions: 'Revisions',
+        ingestion: 'Ingestion Hub',
+        settings: 'Settings'
+      };
+      if (sub && subMap[sub]) {
+        return [{ label: 'Dedicated Intel' }, { label: 'CA Foundation' }, { label: subMap[sub] }];
+      }
+      return [{ label: 'Dedicated Intel' }, { label: 'CA Foundation' }];
+    }
+    if (path.startsWith('/chipchain')) {
+      const sub = path.replace('/chipchain', '').replace('/', '');
+      const subMap: Record<string, string> = {
+        blueprints: 'Venture Blueprints',
+        explorer: 'Supply Chain Matrix',
+        calculator: 'Subsidy Calculator',
+        hubs: 'Semicon Hubs',
+        intelligence: 'Market Intel'
+      };
+      if (sub && subMap[sub]) {
+        return [{ label: 'Dedicated Intel' }, { label: 'ChipChain 360' }, { label: subMap[sub] }];
+      }
+      return [{ label: 'Dedicated Intel' }, { label: 'ChipChain 360' }];
+    }
+    if (path.startsWith('/settings')) return [{ label: 'System' }, { label: 'Settings & Integrations' }];
+    return [{ label: 'Workspace' }, { label: path.replace('/', '').toUpperCase() }];
+  };
+
+  const breadcrumbs = getBreadcrumbs();
+
+  // Focus Timer Countdown formatting
+  const timerMins = Math.floor(focusTimer.timeLeft / 60).toString().padStart(2, '0');
+  const timerSecs = (focusTimer.timeLeft % 60).toString().padStart(2, '0');
+
   return (
     <>
-      <header className="h-14 border-b border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121215] px-6 flex items-center justify-between z-10 transition-colors duration-150">
-        {/* Left: Quick Search / Command Trigger */}
-        <div className="flex items-center gap-4">
+      <header className="h-14 border-b border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#121215] px-4 sm:px-6 flex items-center justify-between z-10 transition-colors duration-150 shrink-0">
+        {/* Left: Dynamic Breadcrumb Hierarchy + Quick Command */}
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Breadcrumb Trail */}
+          <nav className="hidden md:flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400 font-medium">
+            {breadcrumbs.map((crumb, idx) => (
+              <React.Fragment key={crumb.label}>
+                {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-600" />}
+                <span className={idx === breadcrumbs.length - 1 ? 'font-semibold text-slate-900 dark:text-zinc-100' : ''}>
+                  {crumb.label}
+                </span>
+              </React.Fragment>
+            ))}
+          </nav>
+
+          {/* Quick Search / Command Trigger */}
           <button
             onClick={() => setIsCommandPaletteOpen(true)}
-            className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 text-xs transition-all w-64 md:w-80 group cursor-pointer shadow-2xs"
+            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 text-xs transition-all w-48 sm:w-56 lg:w-64 group cursor-pointer shadow-2xs"
           >
             <Search className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-200" />
-            <span className="flex-1 text-left font-normal">Search or run command...</span>
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded text-slate-500 dark:text-zinc-400 shadow-2xs">
+            <span className="flex-1 text-left font-normal truncate">Command search...</span>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-md text-slate-500 dark:text-zinc-400 shadow-2xs">
               <Command className="w-2.5 h-2.5" /> K
             </kbd>
           </button>
         </div>
 
-        {/* Center: Live HUD Date/Time */}
-        <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-zinc-400">
-          <span>{format(currentTime, 'EEE, MMM d')}</span>
-          <span>•</span>
-          <span className="font-semibold text-slate-800 dark:text-zinc-200">{format(currentTime, 'HH:mm:ss')}</span>
+        {/* Center: Ambient Focus Timer or Date HUD */}
+        <div className="flex items-center gap-2">
+          {focusTimer.isRunning || focusTimer.timeLeft < 25 * 60 ? (
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800/60 shadow-2xs">
+              <button
+                onClick={() => navigate('/focus')}
+                className="flex items-center gap-1.5 text-xs font-mono font-semibold text-violet-700 dark:text-violet-300 hover:underline cursor-pointer"
+                title="Open Focus Station"
+              >
+                <span className="w-1.5 h-1.5 rounded-xs bg-violet-500" />
+                <span className="capitalize">{focusTimer.sessionType.replace('_', ' ')}:</span>
+                <span>{timerMins}:{timerSecs}</span>
+              </button>
+
+              <button
+                onClick={focusTimer.toggleTimer}
+                className="p-1 rounded-sm text-violet-700 dark:text-violet-300 hover:bg-violet-200/60 dark:hover:bg-violet-900/60 transition-colors cursor-pointer"
+                title={focusTimer.isRunning ? 'Pause Timer' : 'Resume Timer'}
+              >
+                {focusTimer.isRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+              </button>
+            </div>
+          ) : (
+            <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-zinc-400">
+              <span>{format(currentTime, 'EEE, MMM d')}</span>
+              <span>•</span>
+              <span className="font-semibold text-slate-800 dark:text-zinc-200">{format(currentTime, 'HH:mm:ss')}</span>
+            </div>
+          )}
         </div>
 
         {/* Right: Actions, Theme Toggle & Account */}
         <div className="flex items-center gap-2">
           {/* Toast Notification */}
           {notification && (
-            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800 animate-in fade-in">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800">
+              <span className="w-1.5 h-1.5 rounded-xs bg-emerald-500"></span>
               <span className="text-[11px] font-medium">{notification.message}</span>
             </div>
           )}
@@ -139,7 +232,7 @@ export const Header: React.FC = () => {
           {/* Google Ecosystem Status Button */}
           <button
             onClick={() => setIsGoogleModalOpen(true)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer shadow-2xs ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer shadow-2xs ${
               authStatus?.googleConnected
                 ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
                 : 'bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 hover:bg-slate-200/80 dark:hover:bg-zinc-800'
@@ -147,13 +240,13 @@ export const Header: React.FC = () => {
           >
             {authStatus?.googleConnected ? (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Google Linked</span>
+                <span className="w-1.5 h-1.5 rounded-xs bg-emerald-500" />
+                <span className="hidden sm:inline font-mono text-[11px]">Google Linked</span>
               </>
             ) : (
               <>
                 <LinkIcon className="w-3 h-3 text-slate-400" />
-                <span>Connect Google</span>
+                <span className="hidden sm:inline">Connect Google</span>
               </>
             )}
           </button>
@@ -161,27 +254,27 @@ export const Header: React.FC = () => {
           {/* Sync / Refresh */}
           <button
             onClick={refreshAll}
-            title="Refresh Data"
-            className="p-2 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
+            title="Refresh All State"
+            className="p-1.5 rounded-md text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-slate-800 dark:text-zinc-200' : ''}`} />
           </button>
 
-          {/* Appearance & UI Style Studio */}
+          {/* Appearance Studio */}
           <button
-            onClick={() => setIsSettingsOpen(true)}
-            title="Appearance Studio - Switch UI Style (Glass, Neumorph, Clay, etc.) (Cmd+,)"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-zinc-800 bg-slate-100/80 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-200/80 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-2xs"
+            onClick={() => navigate('/settings')}
+            title="Appearance Studio (Cmd+,)"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-slate-200 dark:border-zinc-800 bg-slate-100/80 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-200/80 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-2xs"
           >
             <Palette className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="capitalize font-mono text-[11px] hidden sm:inline">{uiStyle}</span>
+            <span className="capitalize font-mono text-[11px] hidden md:inline">{uiStyle}</span>
           </button>
 
           {/* Dark / Light Theme Toggle */}
           <button
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-            className="p-2 rounded-lg text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
+            className="p-1.5 rounded-md text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
           >
             {theme === 'dark' ? (
               <Sun className="w-4 h-4 text-amber-400" />
@@ -190,33 +283,34 @@ export const Header: React.FC = () => {
             )}
           </button>
 
-          {/* Ask Nayra AI Trigger */}
+          {/* Slide-Over Assistant AI Trigger */}
           <button
-            onClick={() => setIsNayraChatOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity cursor-pointer shadow-2xs"
+            onClick={toggleAssistant}
+            title="Toggle Nayra Assistant Drawer (Cmd+J)"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity cursor-pointer shadow-2xs"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Ask Nayra</span>
+            <Bot className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline font-mono text-[11px]">Assistant</span>
           </button>
 
-          {/* User Pill & Lock/Signout */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-zinc-800">
+          {/* User Profile & Lock / Signout */}
+          <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-200 dark:border-zinc-800">
             <button
               onClick={() => setIsGoogleModalOpen(true)}
               title={authStatus?.user?.email || (isGuestMode ? 'Guest / Offline' : 'Commander Aryan')}
-              className="flex items-center gap-1.5 p-0.5 rounded-full hover:ring-2 hover:ring-indigo-500/30 transition-all cursor-pointer"
+              className="flex items-center p-0.5 rounded-md hover:ring-2 hover:ring-indigo-500/30 transition-all cursor-pointer"
             >
               <img
                 src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=NayraCommander'}
                 alt="Commander"
-                className="w-7 h-7 rounded-full bg-slate-200 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 object-cover"
+                className="w-7 h-7 rounded-md bg-slate-200 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 object-cover"
               />
             </button>
 
             <button
               onClick={logout}
               title="Lock Command Center / Sign Out"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-md text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -250,7 +344,7 @@ export const Header: React.FC = () => {
                     <img
                       src={authStatus?.user?.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=AryanPandey'}
                       alt="Google User"
-                      className="w-10 h-10 rounded-full border border-emerald-300 dark:border-emerald-700 mt-0.5"
+                      className="w-10 h-10 rounded-md border border-emerald-300 dark:border-emerald-700 mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">

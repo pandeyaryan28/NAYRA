@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Moon, Bell, Sparkles, Cloud, RefreshCw, CheckCircle2, Laptop, Smartphone, BookOpen, ExternalLink } from 'lucide-react';
+import { Moon, Bell, Award, Cloud, RefreshCw, CheckCircle2, Laptop, Smartphone, BookOpen, ExternalLink } from 'lucide-react';
 import { useData } from '../../context/CaDataContext';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
@@ -40,8 +40,8 @@ export const SettingsView: React.FC = () => {
               Your syllabus progress, test marks, and spaced revisions are synchronized in real-time across all your devices without requiring a login.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 select-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 select-none">
+            <span className="w-1.5 h-1.5 rounded-sm bg-emerald-500" />
             {isCloudConnected ? 'Connected & Active' : 'Connecting...'}
           </span>
         </div>
@@ -170,7 +170,7 @@ export const SettingsView: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
+              <Award className="w-4 h-4 text-amber-500" />
               <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                 Celebration Confetti
               </span>
