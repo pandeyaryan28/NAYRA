@@ -11,7 +11,8 @@ import {
   StickyNote, 
   Bot, 
   RefreshCw,
-  GraduationCap
+  GraduationCap,
+  Cpu
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -40,6 +41,7 @@ export const Sidebar: React.FC = () => {
   const navItems: { id: TabType; label: string; icon: any; badge?: string | number }[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'ca-tracker', label: 'CA Tracker', icon: GraduationCap, badge: 'Live' },
+    { id: 'scint-engine', label: 'ChipChain 360', icon: Cpu, badge: '34 Nodes' },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : undefined },
     { id: 'calendar', label: 'Calendar', icon: CalendarIcon, badge: todayEventsCount > 0 ? todayEventsCount : undefined },
     { id: 'habits', label: 'Habits & Routine', icon: Activity, badge: uncompletedHabitsToday > 0 ? `${uncompletedHabitsToday} due` : (habits.length > 0 ? '✓' : undefined) },

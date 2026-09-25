@@ -16,6 +16,8 @@ import { SettingsModal } from './components/settings/SettingsModal.js';
 import { LoginPage } from './components/auth/LoginPage.js';
 import { CaTrackerView } from './ca-tracker/CaTrackerView.js';
 
+const ScintEngineView = React.lazy(() => import('./scint-engine/ScintEngineView.js'));
+
 const MainContent: React.FC = () => {
   const { activeTab, isLoading, isAuthenticated } = useApp();
 
@@ -40,6 +42,15 @@ const MainContent: React.FC = () => {
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[#09090b]">
           {activeTab === 'overview' && <OverviewDashboard />}
           {activeTab === 'ca-tracker' && <CaTrackerView />}
+          {activeTab === 'scint-engine' && (
+            <React.Suspense fallback={
+              <div className="h-full flex items-center justify-center p-8 text-xs font-mono text-slate-500 dark:text-zinc-400">
+                LOADING CHIPCHAIN 360 INTEL...
+              </div>
+            }>
+              <ScintEngineView />
+            </React.Suspense>
+          )}
           {activeTab === 'tasks' && <TaskManager />}
           {activeTab === 'calendar' && <CalendarView />}
           {activeTab === 'habits' && <HabitsView />}

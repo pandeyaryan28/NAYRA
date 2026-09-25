@@ -11,6 +11,7 @@ import assistantRouter from './routes/assistant.js';
 import statsRouter from './routes/stats.js';
 import habitsRouter from './routes/habits.js';
 import caTrackerRouter from './routes/caTracker.js';
+import scintEngineRouter from './routes/scintEngine.js';
 
 dotenv.config();
 
@@ -34,12 +35,13 @@ app.use('/api/assistant', assistantRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/habits', habitsRouter);
 app.use('/api/ca-tracker', caTrackerRouter);
+app.use('/api/scint-engine', scintEngineRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     system: 'Nayra Command Core',
-    version: '1.0.0',
+    version: '1.2.0',
     timestamp: new Date().toISOString()
   });
 });
