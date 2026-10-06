@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Check,
   Plus,
@@ -19,6 +19,7 @@ import {
   ListTodo,
   AlertCircle,
   Layers,
+  Star,
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { useFocus } from '@/context/FocusContext';
@@ -28,7 +29,7 @@ import { Input } from '@/components/common/Input';
 import { Select } from '@/components/common/Select';
 import { Badge } from '@/components/common/Badge';
 import { TaskItem, TaskPriority, TaskList } from '@/types';
-import { formatSecondsToHoursMinutes, safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
+import { formatSecondsToHoursMinutes, formatGoogleTasksDue, safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
 import { isToday, isPast, isTomorrow, isThisWeek, parseISO } from 'date-fns';
 
 export const TasksView: React.FC = () => {
@@ -59,7 +60,28 @@ export const TasksView: React.FC = () => {
   } = useData();
 
   const { selectTask, startTimer } = useFocus();
+  const location = useLocation();
+  const quickInputRef = useRef<HTMLInputElement>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
+
+  useEffect(() => {
+    const handleFocusEvent = () => {
+      quickInputRef.current?.focus();
+    };
+    window.addEventListener('nayra-focus-task-input', handleFocusEvent);
+    if (location.search.includes('create=true')) {
+      setTimeout(() => {
+        quickInputRef.current?.focus();
+      }, 100);
+    }
+    return () => {
+      window.removeEventListener('nayra-focus-task-input', handleFocusEvent);
+    };
+  }, [location.search]);
+
+  const toggleStar = (task: TaskItem) => {
+    updateTask(task.id, { starred: !task.starred });
+  };
 
   const handleSyncOrReconnect = async () => {
     if (isGoogleTokenExpired) {
@@ -86,6 +108,15 @@ export const TasksView: React.FC = () => {
   const handleSetGroupBy = (val: 'due' | 'priority' | 'none') => {
     setGroupBy(val);
     safeLocalStorageSet('nayra_tasks_group_by', val);
+  };
+
+  const [densityMode, setDensityMode] = useState<'compact' | 'comfortable' | 'board'>(() => {
+    return safeLocalStorageGet<'compact' | 'comfortable' | 'board'>('nayra_tasks_density_mode', 'compact');
+  });
+
+  const handleSetDensityMode = (mode: 'compact' | 'comfortable' | 'board') => {
+    setDensityMode(mode);
+    safeLocalStorageSet('nayra_tasks_density_mode', mode);
   };
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,6 +152,7 @@ export const TasksView: React.FC = () => {
   const [editNotes, setEditNotes] = useState('');
   const [editDue, setEditDue] = useState('');
   const [editPriority, setEditPriority] = useState<TaskPriority>('medium');
+  const [editStarred, setEditStarred] = useState(false);
 
   const currentEditingTask = useMemo(() => {
     return editingTask ? tasks.find((t) => t.id === editingTask.id) || editingTask : null;
@@ -152,14 +184,22 @@ export const TasksView: React.FC = () => {
 
   // Active list lookup
   const activeList = useMemo(() => {
-    if (activeTaskListId === 'all' || activeTaskListId === 'archived_view') return null;
+    if (activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred') return null;
     return uniqueTaskLists.find((l) => l.id === activeTaskListId) || uniqueTaskLists[0];
   }, [uniqueTaskLists, activeTaskListId]);
+
+  // Total count of starred active tasks
+  const totalStarredCount = useMemo(() => {
+    return tasks.filter((t) => !t.archived && t.status !== 'completed' && Boolean(t.starred)).length;
+  }, [tasks]);
 
   // Tasks belonging to active scope (with resilient matching for Google Tasks)
   const scopedTasks = useMemo(() => {
     if (activeTaskListId === 'all' || activeTaskListId === 'archived_view') {
       return tasks;
+    }
+    if (activeTaskListId === 'starred') {
+      return tasks.filter((t) => Boolean(t.starred));
     }
     const targetList = activeList || uniqueTaskLists[0];
     return tasks.filter((t) => {
@@ -281,9 +321,9 @@ export const TasksView: React.FC = () => {
       const groups: TaskGroup[] = [
         {
           id: 'overdue',
-          title: 'Overdue',
+          title: 'Past',
           icon: <AlertCircle className="h-4 w-4 text-rose-500" />,
-          accentClass: 'text-rose-700 dark:text-rose-400 bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60',
+          accentClass: 'text-rose-600 dark:text-rose-400 bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60',
           tasks: sortByPriorityThenTitle(overdue),
         },
         {
@@ -432,6 +472,7 @@ export const TasksView: React.FC = () => {
     setEditNotes(task.notes || '');
     setEditDue(task.due || '');
     setEditPriority(task.priority);
+    setEditStarred(Boolean(task.starred));
     setModalNewSubtask('');
   };
 
@@ -444,6 +485,7 @@ export const TasksView: React.FC = () => {
       notes: editNotes.trim(),
       due: editDue || undefined,
       priority: editPriority,
+      starred: editStarred,
     });
 
     setEditingTask(null);
@@ -475,28 +517,261 @@ export const TasksView: React.FC = () => {
     const isArchived = Boolean(t.archived);
     const isOverdue = t.due && isPast(parseISO(t.due)) && !isToday(parseISO(t.due)) && !isCompleted;
     const isDueToday = t.due && isToday(parseISO(t.due)) && !isCompleted;
+    const isExpanded = expandedTaskIds.has(t.id);
 
+    // Compact mode: sleek Google Tasks style row with circular checkbox & clean relative date chip
+    if (densityMode === 'compact' || densityMode === 'board') {
+      return (
+        <div
+          key={t.id}
+          className={`group rounded-xl transition-all duration-150 task-item-enter ${
+            isArchived || isCompleted
+              ? 'opacity-70 border-b border-zinc-100 dark:border-zinc-800/60'
+              : 'hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800/60 last:border-b-0'
+          }`}
+        >
+          <div className="flex items-center justify-between py-2 px-3 min-h-[42px] gap-2">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {/* Circular Checkbox (Google Tasks Style) */}
+              <button
+                onClick={() => toggleTaskComplete(t.id)}
+                className={`h-5 w-5 rounded-[999px] border-2 flex items-center justify-center transition-all duration-150 active:scale-90 shrink-0 cursor-pointer group/chk ${
+                  isCompleted
+                    ? 'bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900'
+                    : 'border-zinc-400 dark:border-zinc-500 hover:border-zinc-800 dark:hover:border-zinc-200 bg-transparent'
+                }`}
+                aria-label="Toggle complete"
+              >
+                {isCompleted ? (
+                  <Check className="h-3 w-3 stroke-[3] task-checkbox-pop" />
+                ) : (
+                  <Check className="h-3 w-3 stroke-[2.5] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover/chk:opacity-100 transition-opacity" />
+                )}
+              </button>
+
+              {/* Task Title & Inline Tags */}
+              <div
+                className="min-w-0 flex-1 cursor-pointer flex flex-col justify-center"
+                onClick={() => openEditModal(t)}
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className={`text-[14px] md:text-[15px] font-normal md:font-medium leading-snug transition-colors duration-150 ${
+                      isCompleted
+                        ? 'line-through text-zinc-400 dark:text-zinc-500'
+                        : 'text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    {t.title}
+                  </span>
+
+                  {/* Scope list badge when viewing all or archive */}
+                  {(activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred') && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
+                      {uniqueTaskLists.find((l) => l.id === t.taskListId)?.title || 'My Tasks'}
+                    </span>
+                  )}
+
+                  {t.priority === 'high' && (
+                    <Badge variant="danger" className="text-[10px] py-0 px-1.5">High</Badge>
+                  )}
+
+                  {isArchived && (
+                    <Badge variant="outline" className="text-[9px] py-0 px-1 text-zinc-400">
+                      Archived
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Subtitle / Google Tasks Metadata Chips (Due Date, Subtasks, Focus) */}
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {t.due && (
+                    <span
+                      className={`text-[11px] font-medium px-2 py-0.2 rounded-md inline-flex items-center gap-1 ${
+                        isOverdue
+                          ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900/40 font-semibold'
+                          : isDueToday
+                          ? 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900/40 font-semibold'
+                          : 'text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60'
+                      }`}
+                    >
+                      <Clock className="h-3 w-3 shrink-0" />
+                      <span>{formatGoogleTasksDue(t.due)}</span>
+                    </span>
+                  )}
+
+                  {t.totalFocusSeconds > 0 && (
+                    <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.2 rounded-md">
+                      <Clock className="h-2.5 w-2.5" />
+                      {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
+                    </span>
+                  )}
+
+                  {/* Subtasks summary toggle */}
+                  {t.subtasks && t.subtasks.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTaskExpanded(t.id);
+                      }}
+                      className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer border border-zinc-200/60 dark:border-zinc-700/60"
+                    >
+                      <CheckSquare className="h-2.5 w-2.5 text-zinc-400" />
+                      <span>
+                        {t.subtasks.filter((s) => s.completed).length}/{t.subtasks.length} subtasks
+                      </span>
+                      <ChevronDown
+                        className={`h-2.5 w-2.5 transition-transform duration-200 ${
+                          isExpanded ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Actions: Star, Start Focus, Archive/Unarchive, Delete */}
+            <div className="flex items-center gap-1 shrink-0 ml-2">
+              {/* Star toggle button (Google Tasks feature) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleStar(t);
+                }}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  t.starred
+                    ? 'text-sky-500 dark:text-sky-400'
+                    : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 opacity-0 group-hover:opacity-100'
+                }`}
+                title={t.starred ? 'Starred task' : 'Star task'}
+              >
+                <Star className={`h-4 w-4 ${t.starred ? 'fill-sky-500 dark:fill-sky-400' : ''}`} />
+              </button>
+
+              {!isCompleted && !isArchived && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleStartFocus(t)}
+                  className="h-6 text-[10px] px-1.5 gap-1 text-zinc-700 dark:text-zinc-300 rounded-md"
+                  title="Start Focus on this task"
+                >
+                  <Clock className="h-2.5 w-2.5" />
+                  <span>Focus</span>
+                </Button>
+              )}
+
+              {isArchived || isCompleted ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => unarchiveTask(t.id)}
+                  className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  title="Restore / Unarchive task"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => archiveTask(t.id)}
+                  className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Archive task"
+                >
+                  <Archive className="h-3 w-3" />
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => deleteTask(t.id)}
+                className="h-6 w-6 text-zinc-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Delete task"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Expanded Subtasks in Compact mode */}
+          {isExpanded && (
+            <div
+              className="px-3 pb-2 pt-1 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1.5 animate-slide-down bg-zinc-50/50 dark:bg-zinc-900/40"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {(t.subtasks || []).map((st) => (
+                <div key={st.id} className="flex items-center justify-between text-xs py-0.5 group/st">
+                  <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={st.completed}
+                      onChange={() => toggleSubtask(t.id, st.id)}
+                      className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700"
+                    />
+                    <span className={`truncate ${st.completed ? 'line-through text-zinc-400' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                      {st.title}
+                    </span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => deleteSubtask(t.id, st.id)}
+                    className="text-zinc-400 hover:text-rose-500 p-0.5 opacity-0 group/st:opacity-100 transition-opacity cursor-pointer"
+                    title="Delete subtask"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+
+              <form onSubmit={(e) => handleInlineAddSubtask(t.id, e)} className="flex items-center gap-1.5 pt-1">
+                <input
+                  type="text"
+                  placeholder="Add subtask..."
+                  value={inlineSubtaskInput[t.id] || ''}
+                  onChange={(e) => setInlineSubtaskInput((prev) => ({ ...prev, [t.id]: e.target.value }))}
+                  className="text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-2 py-1 flex-1 focus:outline-none"
+                />
+                <Button type="submit" variant="outline" size="sm" className="h-6 text-[10px] px-2">
+                  Add
+                </Button>
+              </form>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Comfortable mode: spacious clay cards with notes preview
     return (
       <div
         key={t.id}
-        className={`group flex items-start justify-between p-3.5 rounded-lg border transition-all duration-200 task-item-enter ${
+        className={`group flex items-start justify-between p-3.5 rounded-2xl border transition-all duration-200 task-item-enter ${
           isArchived || isCompleted
             ? 'border-zinc-200/60 dark:border-zinc-800/40 bg-zinc-50/50 dark:bg-zinc-900/30 opacity-75'
-            : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-xs'
+            : 'border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-[0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] hover:-translate-y-0.5'
         }`}
       >
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          {/* Checkbox with Pop Animation */}
+          {/* Circular Checkbox (Google Tasks Style) */}
           <button
             onClick={() => toggleTaskComplete(t.id)}
-            className={`mt-0.5 h-4 w-4 rounded-sm border flex items-center justify-center transition-all duration-150 active:scale-90 shrink-0 ${
+            className={`mt-0.5 h-5 w-5 rounded-[999px] border-2 flex items-center justify-center transition-all duration-150 active:scale-90 shrink-0 cursor-pointer group/chk ${
               isCompleted
                 ? 'bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900'
-                : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-900 dark:hover:border-zinc-300'
+                : 'border-zinc-400 dark:border-zinc-500 hover:border-zinc-800 dark:hover:border-zinc-200 bg-transparent'
             }`}
             aria-label="Toggle complete"
           >
-            {isCompleted && <Check className="h-3 w-3 stroke-[3] task-checkbox-pop" />}
+            {isCompleted ? (
+              <Check className="h-3 w-3 stroke-[3] task-checkbox-pop" />
+            ) : (
+              <Check className="h-3 w-3 stroke-[2.5] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover/chk:opacity-100 transition-opacity" />
+            )}
           </button>
 
           {/* Task Title & Details */}
@@ -505,10 +780,10 @@ export const TasksView: React.FC = () => {
             onClick={() => openEditModal(t)}
           >
             <span
-              className={`text-sm font-medium block truncate transition-colors duration-150 ${
+              className={`text-[15px] font-medium block truncate transition-colors duration-150 ${
                 isCompleted
                   ? 'line-through text-zinc-400 dark:text-zinc-500'
-                  : 'text-zinc-900 dark:text-zinc-100'
+                  : 'text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-300'
               }`}
             >
               {t.title}
@@ -521,29 +796,29 @@ export const TasksView: React.FC = () => {
 
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {/* Scope list badge when viewing all or archive */}
-              {(activeTaskListId === 'all' || activeTaskListId === 'archived_view') && (
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+              {(activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred') && (
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
                   {uniqueTaskLists.find((l) => l.id === t.taskListId)?.title || 'My Tasks'}
                 </span>
               )}
 
               {t.due && (
                 <span
-                  className={`text-[11px] font-mono flex items-center gap-1 ${
+                  className={`text-xs font-medium px-2 py-0.5 rounded-md flex items-center gap-1.5 ${
                     isOverdue
-                      ? 'text-rose-500 font-semibold'
+                      ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900/40 font-semibold'
                       : isDueToday
-                      ? 'text-amber-500 font-semibold'
-                      : 'text-zinc-400'
+                      ? 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900/40 font-semibold'
+                      : 'text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60'
                   }`}
                 >
-                  <CalendarIcon className="h-3 w-3" />
-                  {isDueToday ? 'Today' : t.due}
+                  <Clock className="h-3 w-3 shrink-0" />
+                  <span>{formatGoogleTasksDue(t.due)}</span>
                 </span>
               )}
 
               {t.totalFocusSeconds > 0 && (
-                <span className="text-[11px] font-mono text-zinc-500 flex items-center gap-1">
+                <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded-md">
                   <Clock className="h-3 w-3" />
                   {formatSecondsToHoursMinutes(t.totalFocusSeconds)} ({t.pomodoroCount} pomodoros)
                 </span>
@@ -567,7 +842,7 @@ export const TasksView: React.FC = () => {
                     e.stopPropagation();
                     toggleTaskExpanded(t.id);
                   }}
-                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.5 rounded-sm bg-zinc-100 dark:bg-zinc-800 transition-colors"
+                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer border border-zinc-200/60 dark:border-zinc-700/60"
                 >
                   <CheckSquare className="h-3 w-3 text-zinc-400" />
                   <span>
@@ -575,7 +850,7 @@ export const TasksView: React.FC = () => {
                   </span>
                   <ChevronDown
                     className={`h-3 w-3 transition-transform duration-200 ${
-                      expandedTaskIds.has(t.id) ? 'rotate-180' : ''
+                      isExpanded ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
@@ -583,7 +858,7 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Expanded Subtasks View */}
-            {expandedTaskIds.has(t.id) && (
+            {isExpanded && (
               <div
                 className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1.5 animate-slide-down"
                 onClick={(e) => e.stopPropagation()}
@@ -604,7 +879,7 @@ export const TasksView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => deleteSubtask(t.id, st.id)}
-                      className="text-zinc-400 hover:text-rose-500 p-0.5 opacity-0 group-hover/st:opacity-100 transition-opacity"
+                      className="text-zinc-400 hover:text-rose-500 p-0.5 opacity-0 group/st:opacity-100 transition-opacity cursor-pointer"
                       title="Delete subtask"
                     >
                       <X className="h-3 w-3" />
@@ -629,8 +904,25 @@ export const TasksView: React.FC = () => {
           </div>
         </div>
 
-        {/* Actions: Start Focus, Archive/Unarchive, Delete */}
+        {/* Actions */}
         <div className="flex items-center gap-1 shrink-0 ml-3">
+          {/* Star toggle button (Google Tasks feature) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleStar(t);
+            }}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              t.starred
+                ? 'text-sky-500 dark:text-sky-400'
+                : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 opacity-0 group-hover:opacity-100'
+            }`}
+            title={t.starred ? 'Starred task' : 'Star task'}
+          >
+            <Star className={`h-4 w-4 ${t.starred ? 'fill-sky-500 dark:fill-sky-400' : ''}`} />
+          </button>
+
           {!isCompleted && !isArchived && (
             <Button
               variant="outline"
@@ -644,7 +936,6 @@ export const TasksView: React.FC = () => {
             </Button>
           )}
 
-          {/* Archive / Unarchive Button */}
           {isArchived || isCompleted ? (
             <Button
               variant="ghost"
@@ -667,7 +958,6 @@ export const TasksView: React.FC = () => {
             </Button>
           )}
 
-          {/* Delete Task */}
           <Button
             variant="ghost"
             size="icon"
@@ -685,27 +975,28 @@ export const TasksView: React.FC = () => {
   return (
     <div className="flex h-full bg-white dark:bg-zinc-950 overflow-hidden select-none view-enter">
       {/* Left List Selector Sidebar */}
-      <div className="w-64 border-r border-zinc-200 dark:border-zinc-800 p-4 flex flex-col space-y-4 bg-zinc-50/40 dark:bg-zinc-900/20 shrink-0">
-        {/* All Tasks Item */}
+      {/* Left List Selector Sidebar */}
+      <div className="w-64 border-r border-zinc-200 dark:border-zinc-800 p-3.5 flex flex-col space-y-3 bg-zinc-50/50 dark:bg-zinc-900/30 shrink-0">
+        {/* All Tasks & Starred Navigation Items */}
         <div className="space-y-1">
           <button
             onClick={() => {
               setActiveTaskListId('all');
               setFilterMode('active');
             }}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all duration-150 ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
               activeTaskListId === 'all'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
                 : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}
           >
-            <div className="flex items-center gap-2 truncate">
-              <ListTodo className="h-4 w-4 shrink-0 text-zinc-500" />
-              <span className="truncate">All Tasks</span>
+            <div className="flex items-center gap-2.5 truncate">
+              <ListTodo className="h-4.5 w-4.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
+              <span className="truncate">All tasks</span>
             </div>
             {totalActiveTasksCount > 0 && (
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.2 rounded-sm ${
+                className={`text-xs font-mono px-2 py-0.5 rounded-md ${
                   activeTaskListId === 'all'
                     ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
                     : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
@@ -715,18 +1006,47 @@ export const TasksView: React.FC = () => {
               </span>
             )}
           </button>
+
+          {/* Starred Tasks Item (Google Tasks) */}
+          <button
+            onClick={() => {
+              setActiveTaskListId('starred');
+              setFilterMode('active');
+            }}
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+              activeTaskListId === 'starred'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
+                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            }`}
+          >
+            <div className="flex items-center gap-2.5 truncate">
+              <Star className="h-4.5 w-4.5 shrink-0 text-amber-500 fill-amber-500" />
+              <span className="truncate">Starred</span>
+            </div>
+            {totalStarredCount > 0 && (
+              <span
+                className={`text-xs font-mono px-2 py-0.5 rounded-md ${
+                  activeTaskListId === 'starred'
+                    ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
+                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                }`}
+              >
+                {totalStarredCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Task Lists Section */}
-        <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800/80">
-          <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-            Task Lists
+        <div className="flex items-center justify-between pt-3 border-t border-zinc-200 dark:border-zinc-800/80 px-1">
+          <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+            Lists
           </span>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsNewListModalOpen(true)}
-            className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+            className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg"
             title="Create new list"
           >
             <ListPlus className="h-4 w-4" />
@@ -752,16 +1072,19 @@ export const TasksView: React.FC = () => {
                   setActiveTaskListId(list.id);
                   if (activeTaskListId === 'archived_view') setFilterMode('active');
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all duration-150 ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
                   isSelected
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
                     : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
               >
-                <span className="truncate">{list.title}</span>
+                <div className="flex items-center gap-2.5 truncate">
+                  <CheckSquare className="h-4 w-4 shrink-0 text-zinc-400" />
+                  <span className="truncate">{list.title}</span>
+                </div>
                 {count > 0 && (
                   <span
-                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded-sm ${
+                    className={`text-xs font-mono px-2 py-0.5 rounded-md ${
                       isSelected
                         ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
                         : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
@@ -773,28 +1096,38 @@ export const TasksView: React.FC = () => {
               </button>
             );
           })}
+
+          {/* Google Tasks style "+ Create new list" CTA */}
+          <button
+            type="button"
+            onClick={() => setIsNewListModalOpen(true)}
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 rounded-xl transition-all cursor-pointer mt-1"
+          >
+            <Plus className="h-4 w-4 shrink-0 text-zinc-500" />
+            <span>Create new list</span>
+          </button>
         </div>
 
         {/* Archived Section In Sidebar */}
-        <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800/80 space-y-1">
+        <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800/80 space-y-1">
           <button
             onClick={() => {
               setActiveTaskListId('archived_view');
               setFilterMode('archived');
             }}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all duration-150 ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
               activeTaskListId === 'archived_view'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
                 : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}
           >
-            <div className="flex items-center gap-2 truncate">
-              <Archive className="h-4 w-4 shrink-0 text-zinc-500" />
+            <div className="flex items-center gap-2.5 truncate">
+              <Archive className="h-4.5 w-4.5 shrink-0 text-zinc-500" />
               <span className="truncate">Archived Tasks</span>
             </div>
             {totalArchivedTasksCount > 0 && (
               <span
-                className={`text-[10px] font-mono px-1.5 py-0.2 rounded-sm ${
+                className={`text-xs font-mono px-2 py-0.5 rounded-md ${
                   activeTaskListId === 'archived_view'
                     ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
                     : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
@@ -807,8 +1140,8 @@ export const TasksView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Task List Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto p-6 md:p-8 max-w-4xl mx-auto space-y-6">
+      {/* Main Task List Area with Scoped Zoom-Out & Expanded Canvas Width */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto p-4 md:p-6 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-full mx-auto space-y-4 tasks-zoomout-container">
         {/* List Header & Top Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800 gap-3">
           <div>
@@ -816,6 +1149,8 @@ export const TasksView: React.FC = () => {
               <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
                 {activeTaskListId === 'all'
                   ? 'All Tasks'
+                  : activeTaskListId === 'starred'
+                  ? 'Starred Tasks'
                   : activeTaskListId === 'archived_view'
                   ? 'Archived Tasks'
                   : activeList?.title || 'My Tasks'}
@@ -901,6 +1236,25 @@ export const TasksView: React.FC = () => {
                 <span>Clear All Archived</span>
               </Button>
             )}
+
+            {/* Density Selector: Compact | Comfortable | Board */}
+            <div className="flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
+              {(['compact', 'comfortable', 'board'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => handleSetDensityMode(mode)}
+                  className={`px-2 py-1 text-xs font-medium rounded-sm capitalize transition-all duration-150 ${
+                    densityMode === mode
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
+                  }`}
+                  title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} density mode`}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </button>
+              ))}
+            </div>
 
             {/* Group By Selector */}
             <div className="flex items-center gap-1 text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded-md px-2 py-1 bg-zinc-50 dark:bg-zinc-900">
@@ -989,7 +1343,7 @@ export const TasksView: React.FC = () => {
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-8 pl-8 pr-8 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 transition-all duration-150"
+                className="w-full h-8 pl-8 pr-8 rounded-lg border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 transition-all duration-150"
               />
               {searchQuery && (
                 <button
@@ -1004,15 +1358,18 @@ export const TasksView: React.FC = () => {
             {/* Inline Quick Add Task (Google Tasks Style) */}
             <form
               onSubmit={handleQuickAdd}
-              className="flex items-center gap-2 p-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xs focus-within:ring-1 focus-within:ring-zinc-400 transition-all duration-150"
+              className="flex items-center gap-2.5 p-2 rounded-xl border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-900 shadow-sm focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500 transition-all duration-150"
             >
-              <Plus className="h-4 w-4 text-zinc-400 ml-2 shrink-0" />
+              <div className="flex items-center justify-center h-6 w-6 rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 ml-1 shrink-0">
+                <Plus className="h-4 w-4 stroke-[2.5]" />
+              </div>
               <input
+                ref={quickInputRef}
                 type="text"
                 placeholder="Add a task (press Enter to save)..."
                 value={quickTaskTitle}
                 onChange={(e) => setQuickTaskTitle(e.target.value)}
-                className="flex-1 bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none px-2"
+                className="flex-1 bg-transparent text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none px-1"
               />
               <input
                 type="date"
@@ -1020,25 +1377,55 @@ export const TasksView: React.FC = () => {
                 onChange={(e) => setQuickDueDate(e.target.value)}
                 className="text-xs font-mono text-zinc-500 bg-transparent border-0 focus:outline-none pr-2 cursor-pointer"
               />
-              <Button type="submit" variant="primary" size="sm" className="h-8 px-3">
+              <Button type="submit" variant="primary" size="sm" className="h-7 px-3.5 text-xs font-semibold rounded-lg">
                 Add
               </Button>
             </form>
           </div>
         )}
 
-        {/* Task Items List */}
-        <div className="space-y-4">
+        {/* Task Items List (Google Tasks Central Sheet) */}
+        <div className={`space-y-4 ${densityMode !== 'board' ? 'bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-4 md:p-6 shadow-sm' : ''}`}>
           {displayedTasks.length === 0 ? (
             <div className="py-16 text-center text-xs text-zinc-400 animate-fade-in">
               {searchQuery
                 ? 'No tasks match your search filter.'
+                : activeTaskListId === 'starred'
+                ? 'No starred tasks found. Star tasks to highlight your top priorities.'
                 : activeTaskListId === 'archived_view'
                 ? 'No archived tasks yet. Completed tasks will appear here.'
                 : filterMode === 'archived'
                 ? 'No archived tasks in this list.'
                 : 'No active tasks found. Enjoy your clear schedule!'}
             </div>
+          ) : densityMode === 'board' ? (
+            taskGroups.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-start animate-fade-in">
+                {taskGroups.map((group) => (
+                  <div
+                    key={group.id}
+                    className="clay-surface p-3.5 rounded-2xl flex flex-col gap-2 min-w-0"
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
+                      <div className="flex items-center gap-1.5 min-w-0 font-semibold text-xs text-zinc-800 dark:text-zinc-200">
+                        {group.icon}
+                        <span className="truncate">{group.title}</span>
+                      </div>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
+                        {group.tasks.length}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 mt-1 overflow-y-auto max-h-[70vh]">
+                      {group.tasks.map(renderTaskItem)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start animate-fade-in">
+                {displayedTasks.map(renderTaskItem)}
+              </div>
+            )
           ) : taskGroups.length > 0 ? (
             <div className="space-y-6">
               {taskGroups.map((group) => {
@@ -1052,7 +1439,11 @@ export const TasksView: React.FC = () => {
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         {group.icon}
-                        <span className="truncate">{group.title}</span>
+                        <span className={`truncate ${
+                          group.id === 'overdue' ? 'text-rose-500 dark:text-rose-400 font-bold' :
+                          group.id === 'today' ? 'text-sky-500 dark:text-sky-400 font-bold' :
+                          group.id === 'tomorrow' ? 'text-indigo-500 dark:text-indigo-400 font-bold' : ''
+                        }`}>{group.title}</span>
                       </div>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
                         {group.tasks.length}
@@ -1066,7 +1457,7 @@ export const TasksView: React.FC = () => {
                     </button>
 
                     {!isCollapsed && (
-                      <div className="space-y-2 animate-slide-down">
+                      <div className={`animate-slide-down ${densityMode === 'compact' ? 'space-y-0' : 'space-y-2'}`}>
                         {group.tasks.map(renderTaskItem)}
                       </div>
                     )}
@@ -1075,7 +1466,7 @@ export const TasksView: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className={densityMode === 'compact' ? 'space-y-0' : 'space-y-2'}>
               {displayedTasks.map(renderTaskItem)}
             </div>
           )}
@@ -1196,7 +1587,7 @@ export const TasksView: React.FC = () => {
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
               placeholder="Add details, background context, or links..."
-              className="w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 p-2.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400 transition-all duration-150"
+              className="w-full rounded-md border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-950 p-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 dark:focus:ring-zinc-600/30 transition-all duration-150"
             />
           </div>
 
@@ -1276,6 +1667,21 @@ export const TasksView: React.FC = () => {
                 { value: 'high', label: 'High' },
               ]}
             />
+          </div>
+
+          <div className="pt-1">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-700 dark:text-zinc-300">
+              <input
+                type="checkbox"
+                checked={editStarred}
+                onChange={(e) => setEditStarred(e.target.checked)}
+                className="h-4 w-4 rounded-sm border-zinc-300 dark:border-zinc-700 text-sky-600 focus:ring-sky-500"
+              />
+              <span className="flex items-center gap-1.5">
+                <Star className={`h-3.5 w-3.5 ${editStarred ? 'text-amber-500 fill-amber-500' : 'text-zinc-400'}`} />
+                <span>Mark as Starred (highlight in Starred view)</span>
+              </span>
+            </label>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">

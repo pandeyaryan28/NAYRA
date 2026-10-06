@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { format, parseISO, isToday, isTomorrow, isYesterday } from 'date-fns';
+import { format, parseISO, isToday, isTomorrow, isYesterday, isPast, differenceInCalendarDays } from 'date-fns';
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -41,6 +41,29 @@ export function formatFriendlyDate(dateStr: string): string {
     if (isTomorrow(d)) return 'Tomorrow';
     if (isYesterday(d)) return 'Yesterday';
     return format(d, 'EEE, MMM d');
+  } catch {
+    return dateStr;
+  }
+}
+
+export function formatGoogleTasksDue(dateStr: string): string {
+  try {
+    const d = parseISO(dateStr);
+    if (isToday(d)) return 'Today';
+    if (isTomorrow(d)) return 'Tomorrow';
+    if (isYesterday(d)) return 'Yesterday';
+    
+    if (isPast(d)) {
+      const diffDays = Math.max(1, differenceInCalendarDays(new Date(), d));
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      const diffWeeks = Math.floor(diffDays / 7);
+      if (diffWeeks === 1) return '1 week ago';
+      if (diffWeeks < 5) return `${diffWeeks} weeks ago`;
+      return format(d, 'MMM d');
+    }
+    
+    return format(d, 'MMM d');
   } catch {
     return dateStr;
   }

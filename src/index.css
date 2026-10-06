@@ -60,18 +60,116 @@
 .stagger-5 { animation-delay: 200ms; }
 .stagger-6 { animation-delay: 240ms; }
 
+/* Claymorphic Surface & Interactive Tokens */
+.clay-surface {
+  background-color: #ffffff;
+  border: 1px solid rgba(228, 228, 231, 0.85);
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 0 rgba(0, 0, 0, 0.03);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.dark .clay-surface {
+  background-color: #18181b;
+  border: 1px solid rgba(39, 39, 42, 0.9);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 2px 8px -1px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 0 rgba(0, 0, 0, 0.5);
+}
+
+.clay-surface-interactive {
+  background-color: #ffffff;
+  border: 1px solid rgba(228, 228, 231, 0.85);
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px -3px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.clay-surface-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -4px rgba(0, 0, 0, 0.09), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+  border-color: rgba(212, 212, 216, 1);
+}
+
+.clay-surface-interactive:active {
+  transform: translateY(0.5px) scale(0.995);
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+}
+
+.dark .clay-surface-interactive {
+  background-color: #18181b;
+  border: 1px solid rgba(39, 39, 42, 0.85);
+  box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.dark .clay-surface-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.75), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  border-color: rgba(63, 63, 70, 1);
+}
+
+.dark .clay-surface-interactive:active {
+  transform: translateY(0.5px) scale(0.995);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Sunken depression for inputs, search, and active wells */
+.clay-sunken {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06), inset 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.dark .clay-sunken {
+  box-shadow: inset 0 2px 5px 0 rgba(0, 0, 0, 0.5), inset 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Tactile button cushion */
+.clay-btn-cushion {
+  box-shadow: 0 3px 8px -1px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 0 rgba(0, 0, 0, 0.15);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-btn-cushion:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px -1px rgba(0, 0, 0, 0.16), inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
+}
+
+.clay-btn-cushion:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* High-density container for Tasks view (clean 100% native scale without CSS zoom blur) */
+.tasks-zoomout-container {
+  /* Native 100% scale for razor-sharp typography and layout fidelity */
+}
+
 /* Interactive tactile feedback on cards and surfaces */
 .interactive-card {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 0 rgba(0, 0, 0, 0.04);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
 .interactive-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px -3px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.09), 0 4px 10px -2px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+}
+
+.interactive-card:active {
+  transform: translateY(0.5px) scale(0.995);
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+}
+
+.dark .interactive-card {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 2px 8px -1px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 0 rgba(0, 0, 0, 0.5);
 }
 
 .dark .interactive-card:hover {
-  box-shadow: 0 6px 16px -3px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.75), 0 4px 12px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+.dark .interactive-card:active {
+  transform: translateY(0.5px) scale(0.995);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Smooth animated bars */

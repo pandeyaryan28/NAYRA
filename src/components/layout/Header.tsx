@@ -62,7 +62,7 @@ export const Header: React.FC = () => {
   const todayStr = formatDateString(new Date(), 'EEEE, MMMM d');
 
   return (
-    <header className="h-14 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md px-6 flex items-center justify-between z-20">
+    <header className="h-14 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/85 dark:bg-zinc-950/85 backdrop-blur-md px-6 flex items-center justify-between z-20 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.03),inset_0_-1px_0_0_rgba(0,0,0,0.03)] dark:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.4),inset_0_-1px_0_0_rgba(255,255,255,0.04)]">
       {/* Left: Breadcrumbs & Date */}
       <div className="flex items-center gap-3">
         <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">

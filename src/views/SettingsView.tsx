@@ -192,7 +192,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Google Account & Authorization Status */}
-      <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-4 card-enter stagger-1">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-1">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-sky-500" />
@@ -350,7 +350,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Appearance & Theme Mode */}
-      <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-4 card-enter stagger-2">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-2">
         <div className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Appearance & Visual Theme
@@ -378,7 +378,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Pomodoro Focus Lab Configuration */}
-      <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-4 card-enter stagger-3">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-3">
         <div className="flex items-center gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <Clock className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -519,7 +519,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Nutrition & Daily Targets */}
-      <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-4 card-enter stagger-4">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-4">
         <div className="flex items-center gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <UtensilsCrossed className="h-4 w-4 text-emerald-500" />
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -573,7 +573,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Data Export & Backup */}
-      <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs flex items-center justify-between card-enter stagger-5">
+      <div className="clay-surface rounded-2xl p-5 flex items-center justify-between card-enter stagger-5">
         <div>
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Export Personal Data Backup
@@ -595,7 +595,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Reset to Clean Slate */}
-      <div className="p-5 rounded-lg border border-red-200 dark:border-red-950 bg-red-50/20 dark:bg-red-950/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-enter stagger-6">
+      <div className="p-5 rounded-2xl border border-rose-200/90 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/10 shadow-[0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-enter stagger-6">
         <div>
           <h3 className="text-sm font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5">
             <Trash2 className="h-4 w-4" />

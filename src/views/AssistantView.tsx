@@ -225,7 +225,7 @@ export const AssistantView: React.FC = () => {
           <button
             key={prompt}
             onClick={() => executeCommand(prompt)}
-            className="text-xs px-2.5 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all hover:-translate-y-0.5 active:translate-y-0 shrink-0 shadow-2xs"
+            className="text-xs px-2.5 py-1 rounded-md border border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all hover:-translate-y-0.5 active:translate-y-0 shrink-0 shadow-[0_2px_5px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_2px_5px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.08)]"
           >
             {prompt}
           </button>
@@ -242,16 +242,16 @@ export const AssistantView: React.FC = () => {
               className={`flex items-start gap-3 card-enter ${isUser ? 'justify-end' : 'justify-start'}`}
             >
               {!isUser && (
-                <div className="h-7 w-7 rounded-sm bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="h-7 w-7 rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-bold shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.15)]">
                   N
                 </div>
               )}
 
               <div
-                className={`max-w-xl p-4 rounded-lg text-xs leading-relaxed space-y-2 ${
+                className={`max-w-xl p-4 rounded-2xl text-xs leading-relaxed space-y-2 ${
                   isUser
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-xs'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_4px_12px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]'
+                    : 'clay-surface'
                 }`}
               >
                 <p className="whitespace-pre-line">{msg.text}</p>
@@ -265,7 +265,7 @@ export const AssistantView: React.FC = () => {
               </div>
 
               {isUser && (
-                <div className="h-7 w-7 rounded-sm bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center text-xs font-semibold shrink-0">
+                <div className="h-7 w-7 rounded-md bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center text-xs font-semibold shrink-0">
                   You
                 </div>
               )}
@@ -281,7 +281,7 @@ export const AssistantView: React.FC = () => {
           placeholder="Ask NAYRA to schedule, create tasks, or query metrics..."
           value={inputPrompt}
           onChange={(e) => setInputPrompt(e.target.value)}
-          className="flex-1 h-10 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3.5 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+          className="flex-1 h-10 rounded-md border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-950 px-3.5 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 dark:focus:ring-zinc-600/30 transition-all duration-150"
         />
         <Button type="submit" variant="primary" size="md" className="gap-1.5 px-4">
           <Send className="h-3.5 w-3.5" />

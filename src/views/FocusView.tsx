@@ -227,7 +227,7 @@ export const FocusView: React.FC = () => {
         </div>
 
         {/* Associated Task Card */}
-        <div className="mt-8 w-full max-w-md p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs flex items-center justify-between interactive-card">
+        <div className="mt-8 w-full max-w-md p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between interactive-card">
           <div className="min-w-0 pr-3">
             <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block">
               Associated Task
@@ -255,28 +255,28 @@ export const FocusView: React.FC = () => {
 
       {/* Focus Productivity Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-1">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-1">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block">Today Focus</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {formatSecondsToHoursMinutes(focusStats.todayFocusSeconds)}
           </span>
         </div>
 
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-2">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-2">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block">Pomodoros Today</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {focusStats.todayPomodoroCount}
           </span>
         </div>
 
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-3">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-3">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block">Weekly Focus</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {formatSecondsToHoursMinutes(focusStats.weekFocusSeconds)}
           </span>
         </div>
 
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-4">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-4">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block">Focus Streak</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {focusStats.streakDays} days
@@ -285,7 +285,7 @@ export const FocusView: React.FC = () => {
       </div>
 
       {/* Recent Session History */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs space-y-4 interactive-card card-enter stagger-2">
+      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 interactive-card card-enter stagger-2">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Recent Focus Sessions

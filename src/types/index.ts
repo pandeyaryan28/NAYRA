@@ -98,6 +98,7 @@ export interface TaskItem {
   subtasks?: Array<{ id: string; title: string; completed: boolean }>;
   totalFocusSeconds: number;
   pomodoroCount: number;
+  starred?: boolean;
   createdAt: string;
   updatedAt: string;
 }

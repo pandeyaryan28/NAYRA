@@ -160,9 +160,9 @@ export const CATrackerView: React.FC = () => {
             <div
               key={sub.id}
               onClick={() => setActiveSubjectId(sub.id)}
-              className={`p-4 rounded-lg border card-enter interactive-card ${staggerClass} cursor-pointer ${
+              className={`p-4 rounded-2xl border card-enter interactive-card ${staggerClass} cursor-pointer ${
                 isSelected
-                  ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-sm'
+                  ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900'
                   : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 hover:border-zinc-400'
               }`}
             >
@@ -225,7 +225,7 @@ export const CATrackerView: React.FC = () => {
           chapters.map((chap) => (
             <div
               key={chap.chapterName}
-              className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-xs card-enter"
+              className="clay-surface rounded-2xl overflow-hidden card-enter"
             >
               <div className="bg-zinc-50 dark:bg-zinc-900/80 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 tracking-wide uppercase">
@@ -324,7 +324,7 @@ export const CATrackerView: React.FC = () => {
       </div>
 
       {/* Test Series History & ICAI Rule Evaluation */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs space-y-4 card-enter">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">

@@ -56,11 +56,11 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal Surface */}
       <div
         className={cn(
-          'relative w-full z-10 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl overflow-hidden animate-scale-in',
+          'relative w-full z-10 bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18),0_8px_16px_-4px_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,0.95)] dark:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.85),0_8px_20px_-4px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.12)] overflow-hidden animate-scale-in-spring',
           maxWidthClasses[maxWidth]
         )}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50">
           <div>
             <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
               {title}

@@ -148,7 +148,7 @@ export const SCIntView: React.FC = () => {
               <div
                 key={node.id}
                 onClick={() => setSelectedBlueprint(node)}
-                className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 card-enter interactive-card cursor-pointer flex flex-col justify-between shadow-xs space-y-4"
+                className="p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 card-enter interactive-card cursor-pointer flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">

@@ -190,7 +190,7 @@ export const HabitsView: React.FC = () => {
       </div>
 
       {/* Habit Matrix Table */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs overflow-hidden">
+      <div className="clay-surface rounded-2xl overflow-hidden">
         {/* Table Header */}
         <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_120px] border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
           <div>Habit & Category</div>
@@ -282,7 +282,7 @@ export const HabitsView: React.FC = () => {
                           }`}
                           aria-label={`Toggle habit on ${dateStr}`}
                         >
-                          {isDone && <Check className="h-4 w-4 stroke-[3]" />}
+                          {isDone && <Check className="h-4 w-4 stroke-[3] task-checkbox-pop" />}
                         </button>
                       </div>
                     );

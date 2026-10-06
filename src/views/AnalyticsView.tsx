@@ -69,7 +69,7 @@ export const AnalyticsView: React.FC = () => {
       {/* Primary KPI Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Focus Time */}
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-1 interactive-card card-enter stagger-1">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400">Total Focus Time</span>
             <Clock className="h-4 w-4 text-zinc-400" />
@@ -83,7 +83,7 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Task Completion Velocity */}
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-1 interactive-card card-enter stagger-2">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400">Task Velocity</span>
             <CheckSquare className="h-4 w-4 text-zinc-400" />
@@ -97,7 +97,7 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Habit Consistency */}
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-1 interactive-card card-enter stagger-3">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400">Habit Adherence</span>
             <Flame className="h-4 w-4 text-zinc-400" />
@@ -111,7 +111,7 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Pomodoros Completed */}
-        <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs space-y-1 interactive-card card-enter stagger-4">
+        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-4">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400">Pomodoros Done</span>
             <Award className="h-4 w-4 text-zinc-400" />
@@ -126,7 +126,7 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* 7-Day Focus Distribution Chart */}
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs space-y-4 card-enter stagger-2 interactive-card">
+      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-2 interactive-card">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -179,7 +179,7 @@ export const AnalyticsView: React.FC = () => {
       {/* Task & Domain Focus Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Most Focused Tasks */}
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs space-y-4 card-enter stagger-3 interactive-card">
+        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-3 interactive-card">
           <div className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Highest Focus Allocation Tasks
@@ -218,7 +218,7 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Multi-System Balance */}
-        <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-xs space-y-4 card-enter stagger-4 interactive-card">
+        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-4 interactive-card">
           <div className="pb-2 border-b border-zinc-100 dark:border-zinc-800">
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Personal Operating System Balance
