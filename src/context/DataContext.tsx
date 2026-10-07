@@ -1373,12 +1373,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCaTopics((prev) =>
       prev.map((t) => {
         if (t.id === topicId) {
-          return {
+          const updated = {
             ...t,
             status,
             startedAt: status === 'in_progress' && !t.startedAt ? now : t.startedAt,
             completedAt: status === 'completed' ? now : t.completedAt,
           };
+          if (user && !user.isGuest) {
+            setDoc(doc(getUserCATopicsCollection(user.uid), topicId), sanitizeForFirestore(updated), { merge: true }).catch(console.warn);
+          }
+          return updated;
         }
         return t;
       })
