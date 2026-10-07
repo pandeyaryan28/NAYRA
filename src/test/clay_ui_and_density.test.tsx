@@ -16,8 +16,8 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
     window.history.pushState({}, '', '/');
   });
 
-  it('verifies package.json version is incremented to 1.6.2', () => {
-    expect(pkg.version).toBe('1.6.2');
+  it('verifies package.json version is incremented to 1.7.0', () => {
+    expect(pkg.version).toBe('1.7.0');
   });
 
   it('renders Button with tactile clay styling, active spring compression, and dual shadows', () => {

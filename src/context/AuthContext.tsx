@@ -3,6 +3,8 @@ import {
   auth,
   googleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   reauthenticateWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -101,6 +103,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }).catch(console.warn);
     }
   }, [user?.uid]);
+
+  // Handle redirect result on boot (crucial for mobile/tablet browsers)
+  useEffect(() => {
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+      return;
+    }
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result) {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential?.accessToken || null;
+          if (token) {
+            setTokenWithTimestamp(token);
+          }
+          const fbUser = result.user;
+          const profile: UserProfile = {
+            uid: fbUser.uid,
+            email: fbUser.email,
+            displayName: fbUser.displayName || 'NAYRA Operator',
+            photoURL: fbUser.photoURL,
+            isGuest: false,
+            hasGoogleCalendarScope: Boolean(token),
+            hasGoogleTasksScope: Boolean(token),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          setUser(profile);
+          try {
+            await setDoc(getUserDoc(fbUser.uid), sanitizeForFirestore(profile), { merge: true });
+          } catch (e) {
+            console.warn('Could not sync redirect profile to Firestore:', e);
+          }
+        }
+      })
+      .catch((err: any) => {
+        console.warn('getRedirectResult warning:', err);
+      });
+  }, []);
 
   const setTokenWithTimestamp = (token: string | null) => {
     setGoogleAccessToken(token);
@@ -232,7 +272,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setError(null);
     try {
-      const result = await signInWithPopup(auth, googleAuthProvider);
+      let result;
+      try {
+        result = await signInWithPopup(auth, googleAuthProvider);
+      } catch (popupErr: any) {
+        // If popup was blocked or dismissed on mobile/tablet browsers, fall back to redirect flow
+        if (
+          popupErr?.code === 'auth/popup-blocked' ||
+          popupErr?.code === 'auth/popup-closed-by-user' ||
+          popupErr?.code === 'auth/cancelled-popup-request'
+        ) {
+          console.info('[NAYRA Auth] Popup blocked or closed on device. Initiating redirect authentication...');
+          await signInWithRedirect(auth, googleAuthProvider);
+          return;
+        }
+        throw popupErr;
+      }
+
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential?.accessToken || null;
 
@@ -261,7 +317,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err: any) {
       console.error('Google Sign In Error:', err);
-      const msg = err?.message || 'Google Sign-in failed. Please check popup blockers or continue as guest.';
+      let msg = err?.message || 'Google Sign-in failed. Please check popup blockers or continue as guest.';
+      if (err?.code === 'auth/unauthorized-domain') {
+        msg = 'This domain is not authorized in Firebase Authentication settings. Please verify authorized domains in Firebase Console.';
+      }
       setError(msg);
       throw new Error(msg);
     } finally {

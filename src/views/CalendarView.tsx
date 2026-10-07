@@ -12,6 +12,7 @@ import {
   CheckSquare,
   RefreshCw,
   AlertCircle,
+  X,
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { Button } from '@/components/common/Button';
@@ -103,6 +104,8 @@ export const CalendarView: React.FC = () => {
   const [taskListId, setTaskListId] = useState(activeTaskListId || 'list_default');
   const [taskPriority, setTaskPriority] = useState<TaskPriority>('medium');
   const [taskNotes, setTaskNotes] = useState('');
+  const [taskTags, setTaskTags] = useState<string[]>([]);
+  const [taskNewTag, setTaskNewTag] = useState('');
 
   // Filtered events based on calendar selection and search query
   const visibleCalendarIds = useMemo(
@@ -184,6 +187,8 @@ export const CalendarView: React.FC = () => {
     setTaskListId(activeTaskListId || taskLists[0]?.id || 'list_default');
     setTaskPriority('medium');
     setTaskNotes('');
+    setTaskTags([]);
+    setTaskNewTag('');
 
     setIsModalOpen(true);
   };
@@ -217,6 +222,8 @@ export const CalendarView: React.FC = () => {
     setTaskListId(task.taskListId || activeTaskListId || 'list_default');
     setTaskPriority(task.priority || 'medium');
     setTaskNotes(task.notes || '');
+    setTaskTags(task.tags ? [...task.tags] : []);
+    setTaskNewTag('');
     setIsModalOpen(true);
   };
 
@@ -260,6 +267,7 @@ export const CalendarView: React.FC = () => {
           taskListId,
           priority: taskPriority,
           notes: taskNotes,
+          tags: taskTags,
         });
       } else {
         await createTask({
@@ -268,6 +276,7 @@ export const CalendarView: React.FC = () => {
           taskListId,
           priority: taskPriority,
           notes: taskNotes,
+          tags: taskTags,
         });
       }
     }
@@ -1170,6 +1179,18 @@ export const CalendarView: React.FC = () => {
                                   {t.notes}
                                 </p>
                               )}
+                              {t.tags && t.tags.length > 0 && (
+                                <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                                  {t.tags.map((tg) => (
+                                    <span
+                                      key={tg}
+                                      className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                                    >
+                                      #{tg}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -1403,6 +1424,69 @@ export const CalendarView: React.FC = () => {
                   placeholder="Add details, checklists, or references..."
                   className="w-full rounded-md border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-950 p-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 dark:focus:ring-zinc-600/30 transition-all duration-150"
                 />
+              </div>
+
+              {/* Tags Section */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  Tags ({taskTags.length})
+                </label>
+                <div className="space-y-2 border border-zinc-200 dark:border-zinc-800 rounded-md p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <div className="flex flex-wrap gap-1.5 min-h-[22px]">
+                    {taskTags.map((tg) => (
+                      <span
+                        key={tg}
+                        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                      >
+                        <span>#{tg}</span>
+                        <button
+                          type="button"
+                          onClick={() => setTaskTags(taskTags.filter((t) => t !== tg))}
+                          className="text-zinc-400 hover:text-rose-500 p-0.5 cursor-pointer"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                    {taskTags.length === 0 && (
+                      <span className="text-[11px] text-zinc-400 py-0.5">No tags added yet.</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 pt-1 border-t border-zinc-200 dark:border-zinc-800">
+                    <input
+                      type="text"
+                      placeholder="Add tag (e.g. deadline, taxes)..."
+                      value={taskNewTag}
+                      onChange={(e) => setTaskNewTag(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const clean = taskNewTag.trim().replace(/^#/, '').toLowerCase();
+                          if (clean && !taskTags.includes(clean)) {
+                            setTaskTags([...taskTags, clean]);
+                          }
+                          setTaskNewTag('');
+                        }
+                      }}
+                      className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-sm px-2 py-1 flex-1 focus:outline-none"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const clean = taskNewTag.trim().replace(/^#/, '').toLowerCase();
+                        if (clean && !taskTags.includes(clean)) {
+                          setTaskTags([...taskTags, clean]);
+                        }
+                        setTaskNewTag('');
+                      }}
+                      className="h-7 text-xs px-2"
+                    >
+                      Add Tag
+                    </Button>
+                  </div>
+                </div>
               </div>
             </>
           )}

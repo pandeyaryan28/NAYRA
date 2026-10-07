@@ -44,18 +44,38 @@ exports.health = onRequest({ cors: true }, (request, response) => {
   });
 });
 
+const ALLOWED_ADMINS = (process.env.ADMIN_EMAIL || "aaryanpandey28@gmail.com")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 /**
  * Callable Function: Securely stores the project's Google OAuth Client ID & Secret
  * in Firestore system_config/google_oauth. Inaccessible to client SDKs.
+ * Restriced to authorized administrators only.
  */
 exports.setGoogleOAuthCredentials = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be signed in to configure OAuth.");
   }
 
+  const callerEmail = (request.auth.token.email || "").toLowerCase();
+  const isAdmin = request.auth.token.admin === true || ALLOWED_ADMINS.includes(callerEmail);
+
+  if (!isAdmin) {
+    logger.warn(`Unauthorized attempt to configure OAuth credentials by UID: ${request.auth.uid}, email: ${callerEmail}`);
+    throw new HttpsError(
+      "permission-denied",
+      "Access denied: only authorized administrators may configure system OAuth credentials."
+    );
+  }
+
   const { clientId, clientSecret } = request.data || {};
-  if (!clientId || !clientSecret) {
-    throw new HttpsError("invalid-argument", "Missing Google Client ID or Client Secret.");
+  if (!clientId || typeof clientId !== "string" || clientId.trim().length === 0 || clientId.length > 512) {
+    throw new HttpsError("invalid-argument", "Valid Google Client ID is required (max 512 characters).");
+  }
+  if (!clientSecret || typeof clientSecret !== "string" || clientSecret.trim().length === 0 || clientSecret.length > 512) {
+    throw new HttpsError("invalid-argument", "Valid Google Client Secret is required (max 512 characters).");
   }
 
   await db.collection("system_config").doc("google_oauth").set({
@@ -65,7 +85,7 @@ exports.setGoogleOAuthCredentials = onCall({ cors: true }, async (request) => {
     updatedAt: new Date().toISOString(),
   });
 
-  logger.info(`Google OAuth server credentials configured by ${request.auth.uid}`);
+  logger.info(`Google OAuth server credentials configured by admin ${request.auth.uid}`);
   return { success: true };
 });
 
@@ -74,10 +94,13 @@ exports.setGoogleOAuthCredentials = onCall({ cors: true }, async (request) => {
  */
 exports.getGoogleOAuthStatus = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
-    return { isConfigured: false, hasUserLinkedOffline: false, clientId: null };
+    return { isConfigured: false, hasUserLinkedOffline: false, clientId: null, isAdmin: false };
   }
 
   const uid = request.auth.uid;
+  const callerEmail = (request.auth.token.email || "").toLowerCase();
+  const isAdmin = request.auth.token.admin === true || ALLOWED_ADMINS.includes(callerEmail);
+
   let clientId = process.env.GOOGLE_CLIENT_ID || null;
   let isConfigured = Boolean(clientId && process.env.GOOGLE_CLIENT_SECRET);
 
@@ -104,7 +127,7 @@ exports.getGoogleOAuthStatus = onCall({ cors: true }, async (request) => {
     logger.warn("Error reading user credentials:", e);
   }
 
-  return { isConfigured, hasUserLinkedOffline, clientId };
+  return { isConfigured, hasUserLinkedOffline, clientId, isAdmin };
 });
 
 /**
@@ -118,8 +141,8 @@ exports.storeGoogleOfflineCode = onCall({ cors: true }, async (request) => {
   }
 
   const { code } = request.data || {};
-  if (!code) {
-    throw new HttpsError("invalid-argument", "Missing Google authorization code.");
+  if (!code || typeof code !== "string" || code.trim().length === 0 || code.length > 2048) {
+    throw new HttpsError("invalid-argument", "Missing or invalid Google authorization code.");
   }
 
   const uid = request.auth.uid;

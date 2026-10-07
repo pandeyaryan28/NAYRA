@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Activity,
   Clock,
@@ -8,14 +8,20 @@ import {
   TrendingUp,
   Award,
   Calendar,
+  Tag,
+  ArrowUpDown,
+  Layers,
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
 import { Badge } from '@/components/common/Badge';
+import { TagAnalyticsItem } from '@/types';
 import { formatSecondsToHoursMinutes, getTodayDateString } from '@/lib/utils';
 import { subDays, format, parseISO, isSameDay } from 'date-fns';
 
 export const AnalyticsView: React.FC = () => {
   const { tasks, focusSessions, habits, calorieEntries, settings, focusStats } = useData();
+
+  const [tagSortBy, setTagSortBy] = useState<'focus' | 'tasks' | 'completion' | 'name'>('focus');
 
   // Task Velocity Metrics
   const totalTasksCount = tasks.length;
@@ -29,6 +35,94 @@ export const AnalyticsView: React.FC = () => {
     0
   );
   const averageHabitStreak = habits.length > 0 ? Math.round(habits.reduce((sum, h) => sum + h.currentStreak, 0) / habits.length) : 0;
+
+  // Tag Performance & Attribution Metrics
+  const tagAnalytics = useMemo<TagAnalyticsItem[]>(() => {
+    const tagMap = new Map<string, {
+      totalTasks: number;
+      completedTasks: number;
+      pendingTasks: number;
+      totalFocusSeconds: number;
+      pomodoroCount: number;
+    }>();
+
+    tasks.forEach((t) => {
+      if (t.tags && t.tags.length > 0) {
+        const uniqueTaskTags = Array.from(
+          new Set(t.tags.map((tg) => tg.trim().toLowerCase()).filter(Boolean))
+        );
+        uniqueTaskTags.forEach((tag) => {
+          const current = tagMap.get(tag) || {
+            totalTasks: 0,
+            completedTasks: 0,
+            pendingTasks: 0,
+            totalFocusSeconds: 0,
+            pomodoroCount: 0,
+          };
+
+          current.totalTasks += 1;
+          if (t.status === 'completed' || t.archived) {
+            current.completedTasks += 1;
+          } else {
+            current.pendingTasks += 1;
+          }
+          current.totalFocusSeconds += t.totalFocusSeconds || 0;
+          current.pomodoroCount += t.pomodoroCount || 0;
+
+          tagMap.set(tag, current);
+        });
+      }
+    });
+
+    return Array.from(tagMap.entries()).map(([tag, data]) => ({
+      tag,
+      totalTasks: data.totalTasks,
+      completedTasks: data.completedTasks,
+      pendingTasks: data.pendingTasks,
+      completionRate: data.totalTasks > 0 ? Math.round((data.completedTasks / data.totalTasks) * 100) : 0,
+      totalFocusSeconds: data.totalFocusSeconds,
+      pomodoroCount: data.pomodoroCount,
+    }));
+  }, [tasks]);
+
+  const sortedTagAnalytics = useMemo(() => {
+    return [...tagAnalytics].sort((a, b) => {
+      if (tagSortBy === 'focus') {
+        const diff = b.totalFocusSeconds - a.totalFocusSeconds;
+        return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
+      }
+      if (tagSortBy === 'tasks') {
+        const diff = b.totalTasks - a.totalTasks;
+        return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
+      }
+      if (tagSortBy === 'completion') {
+        const diff = b.completionRate - a.completionRate;
+        return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
+      }
+      return a.tag.localeCompare(b.tag);
+    });
+  }, [tagAnalytics, tagSortBy]);
+
+  const mostFocusedTag = useMemo(() => {
+    if (tagAnalytics.length === 0) return null;
+    return [...tagAnalytics].sort((a, b) => {
+      const diff = b.totalFocusSeconds - a.totalFocusSeconds;
+      return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
+    })[0];
+  }, [tagAnalytics]);
+
+  const highestVelocityTag = useMemo(() => {
+    if (tagAnalytics.length === 0) return null;
+    return [...tagAnalytics].sort((a, b) => {
+      const diff = b.completionRate - a.completionRate;
+      return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
+    })[0];
+  }, [tagAnalytics]);
+
+  const totalTaggedFocusSeconds = useMemo(() => {
+    const taggedTasks = tasks.filter((t) => t.tags && t.tags.some((tg) => tg.trim().length > 0));
+    return taggedTasks.reduce((sum, item) => sum + (item.totalFocusSeconds || 0), 0);
+  }, [tasks]);
 
   // 7-day focus distribution (SVG bars)
   const past7DaysFocus = useMemo(() => {
@@ -62,7 +156,7 @@ export const AnalyticsView: React.FC = () => {
           <span>Productivity & Execution Analytics</span>
         </h2>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Unified telemetry combining deep work duration, task completion velocity, and habit consistency.
+          Unified telemetry combining deep work duration, tag-based time attribution, task completion velocity, and habit consistency.
         </p>
       </div>
 
@@ -174,6 +268,136 @@ export const AnalyticsView: React.FC = () => {
             );
           })}
         </div>
+      </div>
+
+      {/* Tag Performance & Time Allocation Section */}
+      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-5 card-enter stagger-3 interactive-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800 gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+              <Tag className="h-4 w-4 text-sky-500" />
+              <span>Tag Performance & Time Allocation</span>
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Task distribution, completion velocity, and deep work time mapped by Pomodoro session tracking.
+            </p>
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded-md px-2.5 py-1 bg-zinc-50 dark:bg-zinc-900 self-start sm:self-auto">
+            <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
+            <select
+              value={tagSortBy}
+              onChange={(e) => setTagSortBy(e.target.value as any)}
+              className="bg-transparent text-xs font-medium text-zinc-700 dark:text-zinc-300 border-0 focus:outline-none cursor-pointer"
+            >
+              <option value="focus">Sort: Focus Time</option>
+              <option value="tasks">Sort: Total Tasks</option>
+              <option value="completion">Sort: Completion Rate</option>
+              <option value="name">Sort: Tag Name</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Tag Summary Mini-Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-0.5">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 block">Total Distinct Tags</span>
+            <span className="text-lg font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
+              {tagAnalytics.length}
+            </span>
+          </div>
+
+          <div className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-0.5">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 block">Top Focused Tag</span>
+            <span className="text-sm font-semibold truncate text-zinc-900 dark:text-zinc-100 block">
+              {mostFocusedTag ? `#${mostFocusedTag.tag}` : 'None'}
+            </span>
+            {mostFocusedTag && (
+              <span className="text-[10px] font-mono text-zinc-500 block">
+                {formatSecondsToHoursMinutes(mostFocusedTag.totalFocusSeconds)}
+              </span>
+            )}
+          </div>
+
+          <div className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-0.5">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 block">Highest Completion</span>
+            <span className="text-sm font-semibold truncate text-zinc-900 dark:text-zinc-100 block">
+              {highestVelocityTag ? `#${highestVelocityTag.tag}` : 'None'}
+            </span>
+            {highestVelocityTag && (
+              <span className="text-[10px] font-mono text-zinc-500 block">
+                {highestVelocityTag.completionRate}% complete
+              </span>
+            )}
+          </div>
+
+          <div className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-0.5">
+            <span className="text-[10px] font-mono uppercase text-zinc-400 block">Tagged Deep Work</span>
+            <span className="text-lg font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
+              {totalTaggedFocusSeconds > 0 ? formatSecondsToHoursMinutes(totalTaggedFocusSeconds) : '0 min'}
+            </span>
+          </div>
+        </div>
+
+        {/* Tag Analytics Breakdown Table / List */}
+        {tagAnalytics.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+            <Tag className="h-6 w-6 mx-auto mb-2 text-zinc-300 dark:text-zinc-600" />
+            <p className="font-medium text-zinc-600 dark:text-zinc-300">No task tags tracked yet.</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">
+              Assign tags like #work, #study, or #project in Tasks to see tag-based velocity and Pomodoro focus attribution.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {sortedTagAnalytics.map((item) => (
+              <div
+                key={item.tag}
+                className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/40 dark:bg-zinc-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors"
+              >
+                {/* Tag Badge & Task Counts */}
+                <div className="space-y-1 min-w-0 sm:w-1/3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border border-zinc-800 dark:border-zinc-200">
+                      #{item.tag}
+                    </span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400">
+                      {item.completedTasks} of {item.totalTasks} completed
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-zinc-400 block">
+                    {item.pendingTasks} pending tasks
+                  </span>
+                </div>
+
+                {/* Completion Velocity Bar */}
+                <div className="space-y-1 sm:w-1/3">
+                  <div className="flex justify-between text-[11px] font-mono text-zinc-500">
+                    <span>Completion Rate</span>
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200">{item.completionRate}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-zinc-200/70 dark:bg-zinc-800 rounded-sm overflow-hidden">
+                    <div
+                      className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300"
+                      style={{ width: `${item.completionRate}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Focus Time & Pomodoro Count */}
+                <div className="text-left sm:text-right sm:w-1/3">
+                  <span className="text-sm font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
+                    {formatSecondsToHoursMinutes(item.totalFocusSeconds)}
+                  </span>
+                  <span className="text-[10px] text-zinc-400 font-mono block">
+                    {item.pomodoroCount} {item.pomodoroCount === 1 ? 'pomodoro' : 'pomodoros'} logged
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Task & Domain Focus Breakdown */}

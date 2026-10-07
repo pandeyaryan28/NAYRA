@@ -115,16 +115,17 @@ export async function getGoogleOAuthStatusFromCloud(): Promise<{
   isConfigured: boolean;
   hasUserLinkedOffline: boolean;
   clientId: string | null;
+  isAdmin?: boolean;
 }> {
   try {
     const fn = httpsCallable<
       {},
-      { isConfigured: boolean; hasUserLinkedOffline: boolean; clientId: string | null }
+      { isConfigured: boolean; hasUserLinkedOffline: boolean; clientId: string | null; isAdmin?: boolean }
     >(functions, 'getGoogleOAuthStatus');
     const res = await fn();
-    return res.data || { isConfigured: false, hasUserLinkedOffline: false, clientId: null };
+    return res.data || { isConfigured: false, hasUserLinkedOffline: false, clientId: null, isAdmin: false };
   } catch (err) {
-    return { isConfigured: false, hasUserLinkedOffline: false, clientId: null };
+    return { isConfigured: false, hasUserLinkedOffline: false, clientId: null, isAdmin: false };
   }
 }
 

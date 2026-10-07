@@ -96,6 +96,7 @@ export interface TaskItem {
   priority: TaskPriority;
   order?: number;
   subtasks?: Array<{ id: string; title: string; completed: boolean }>;
+  tags?: string[];
   totalFocusSeconds: number;
   pomodoroCount: number;
   starred?: boolean;
@@ -113,6 +114,10 @@ export interface FocusSession {
   id: string;
   taskId: string | null;
   taskTitle: string | null;
+  taskIds?: string[];
+  taskTitles?: string[];
+  taskTimeAllocations?: Record<string, number>;
+  tags?: string[];
   mode: PomodoroMode;
   durationSeconds: number;
   startedAt: string;
@@ -127,6 +132,16 @@ export interface FocusStats {
   monthFocusSeconds: number;
   streakDays: number;
   totalSessionsCount: number;
+}
+
+export interface TagAnalyticsItem {
+  tag: string;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  completionRate: number;
+  totalFocusSeconds: number;
+  pomodoroCount: number;
 }
 
 // ------------------------------------------

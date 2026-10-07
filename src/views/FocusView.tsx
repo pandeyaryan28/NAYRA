@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Play,
   Pause,
@@ -10,13 +10,14 @@ import {
   Calendar,
   Flame,
   Award,
+  X,
+  Plus,
 } from 'lucide-react';
 import { useFocus } from '@/context/FocusContext';
 import { useData } from '@/context/DataContext';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
-import { Select } from '@/components/common/Select';
 import {
   formatSecondsToTimer,
   formatSecondsToHoursMinutes,
@@ -33,7 +34,14 @@ export const FocusView: React.FC = () => {
     progressPercentage,
     currentCycle,
     selectedTask,
+    selectedTasks,
+    activeTaskIds,
+    taskTimeAllocations,
     selectTask,
+    selectTasks,
+    addSessionTask,
+    removeSessionTask,
+    getTaskLiveSeconds,
     startTimer,
     pauseTimer,
     resumeTimer,
@@ -44,8 +52,60 @@ export const FocusView: React.FC = () => {
 
   const { tasks, focusSessions, focusStats, settings } = useData();
   const [isTaskPickerOpen, setIsTaskPickerOpen] = useState(false);
+  const [pickerSelectedIds, setPickerSelectedIds] = useState<Set<string>>(new Set());
+  const [pickerSearch, setPickerSearch] = useState('');
 
-  const pendingTasks = tasks.filter((t) => t.status === 'needsAction');
+  const handleOpenPicker = () => {
+    setPickerSelectedIds(new Set(activeTaskIds));
+    setPickerSearch('');
+    setIsTaskPickerOpen(true);
+  };
+
+  const handleTogglePickerTask = (taskId: string) => {
+    setPickerSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return next;
+    });
+  };
+
+  const handleApplyPicker = () => {
+    const currentSet = new Set(activeTaskIds);
+    // Remove tasks no longer in selection
+    activeTaskIds.forEach((id) => {
+      if (!pickerSelectedIds.has(id)) {
+        removeSessionTask(id);
+      }
+    });
+    // Add newly selected tasks
+    tasks.forEach((t) => {
+      if (pickerSelectedIds.has(t.id) && !currentSet.has(t.id)) {
+        addSessionTask(t);
+      }
+    });
+    setIsTaskPickerOpen(false);
+  };
+
+  const handleClearAllTasks = () => {
+    selectTask(null);
+    setPickerSelectedIds(new Set());
+    setIsTaskPickerOpen(false);
+  };
+
+  const filteredPickerTasks = useMemo(() => {
+    const q = pickerSearch.trim().toLowerCase();
+    const candidateTasks = tasks.filter((t) => !t.archived && t.status !== 'completed');
+    if (!q) return candidateTasks;
+    return candidateTasks.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.tags && t.tags.some((tg) => tg.toLowerCase().includes(q)))
+    );
+  }, [tasks, pickerSearch]);
 
   const strokeDashoffset = 283 - (283 * progressPercentage) / 100;
 
@@ -58,7 +118,7 @@ export const FocusView: React.FC = () => {
             Focus Lab
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Focus To-Do inspired deep work engine with task association and synthesized chimes.
+            Focus To-Do inspired deep work engine with multi-task association and precision per-task time tracking.
           </p>
         </div>
 
@@ -226,30 +286,92 @@ export const FocusView: React.FC = () => {
           )}
         </div>
 
-        {/* Associated Task Card */}
-        <div className="mt-8 w-full max-w-md p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between interactive-card">
-          <div className="min-w-0 pr-3">
-            <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block">
-              Associated Task
-            </span>
-            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate block">
-              {selectedTask ? selectedTask.title : 'No Task Linked'}
-            </span>
-            {selectedTask?.totalFocusSeconds ? (
-              <span className="text-xs text-zinc-500 font-mono block">
-                Total Focus: {formatSecondsToHoursMinutes(selectedTask.totalFocusSeconds)} ({selectedTask.pomodoroCount} pomodoros)
+        {/* Dynamic Multi-Task Pomodoro Panel */}
+        <div className="mt-8 w-full max-w-lg p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3.5 interactive-card">
+          <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800">
+            <div>
+              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block">
+                Associated Task
               </span>
-            ) : null}
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                Session Linked Tasks ({selectedTasks.length}) • {timerState === 'running'
+                  ? 'Real-time focus attribution per active task'
+                  : 'Tasks associated with this deep work block'}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenPicker}
+              className="text-xs shrink-0 gap-1.5"
+            >
+              <ListTodo className="h-3.5 w-3.5" />
+              <span>{selectedTasks.length === 0 ? 'Link Tasks' : 'Manage Tasks'}</span>
+            </Button>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsTaskPickerOpen(true)}
-            className="text-xs shrink-0 transition-transform active:scale-95"
-          >
-            {selectedTask ? 'Change Task' : 'Link Task'}
-          </Button>
+          {selectedTasks.length === 0 ? (
+            <div className="py-4 text-center">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 block font-medium">
+                Autonomous Focus (No Tasks Linked)
+              </span>
+              <span className="text-[11px] text-zinc-400 block mt-0.5">
+                Link tasks to dynamically track per-task deep work duration and velocity.
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+              {selectedTasks.map((t) => {
+                const liveSec = getTaskLiveSeconds(t.id);
+                return (
+                  <div
+                    key={t.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60 text-xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                  >
+                    <div className="min-w-0 flex-1 pr-2">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate block">
+                        {t.title}
+                      </span>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 inline-flex items-center gap-1 bg-zinc-200/60 dark:bg-zinc-800 px-1.5 py-0.2 rounded-md">
+                          <Clock className="h-2.5 w-2.5" />
+                          {formatSecondsToTimer(liveSec)} in session
+                        </span>
+
+                        {t.totalFocusSeconds > 0 && (
+                          <span className="text-[10px] font-mono text-zinc-400">
+                            Total: {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
+                          </span>
+                        )}
+
+                        {t.tags && t.tags.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {t.tags.map((tg) => (
+                              <span
+                                key={tg}
+                                className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-200/50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-300/40 dark:border-zinc-700/40"
+                              >
+                                #{tg}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeSessionTask(t.id)}
+                      className="p-1 text-zinc-400 hover:text-rose-500 rounded-md transition-colors cursor-pointer shrink-0"
+                      title="Remove from session (preserves accumulated time)"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -306,11 +428,18 @@ export const FocusView: React.FC = () => {
               >
                 <div className="space-y-0.5 truncate mr-3">
                   <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate block">
-                    {s.taskTitle || 'Autonomous Focus Block'}
+                    {s.taskTitles && s.taskTitles.length > 0
+                      ? s.taskTitles.join(', ')
+                      : s.taskTitle || 'Autonomous Focus Block'}
                   </span>
-                  <span className="text-[10px] text-zinc-400 font-mono">
-                    {formatDateString(s.completedAt, 'MMM d, h:mm a')} • {s.mode}
-                  </span>
+                  <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono flex-wrap">
+                    <span>{formatDateString(s.completedAt, 'MMM d, h:mm a')} • {s.mode}</span>
+                    {s.tags && s.tags.length > 0 && (
+                      <span className="text-zinc-500">
+                        {s.tags.map((tg) => `#${tg}`).join(' ')}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <Badge variant="default" className="font-mono shrink-0">
                   {Math.round(s.durationSeconds / 60)} min
@@ -320,49 +449,111 @@ export const FocusView: React.FC = () => {
         </div>
       </div>
 
-      {/* Task Picker Modal */}
+      {/* Dynamic Multi-Task Picker Modal */}
       <Modal
         isOpen={isTaskPickerOpen}
         onClose={() => setIsTaskPickerOpen(false)}
-        title="Select Task for Focus Session"
-        description="Link this session to update task metrics and analytics."
+        title="Manage Session Linked Tasks"
+        description="Select multiple tasks to track focus time simultaneously. Mid-session modifications calculate exact elapsed time."
       >
-        <div className="space-y-2 max-h-80 overflow-y-auto">
-          <button
-            onClick={() => {
-              selectTask(null);
-              setIsTaskPickerOpen(false);
-            }}
-            className="w-full text-left p-3 rounded-md border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs transition-colors"
-          >
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">
-              None (Unlinked General Focus)
-            </span>
-          </button>
-          {pendingTasks.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => {
-                selectTask(t);
-                setIsTaskPickerOpen(false);
-              }}
-              className="w-full text-left p-3 rounded-md border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs transition-colors flex items-center justify-between"
-            >
-              <div className="truncate mr-2">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100 block truncate">
-                  {t.title}
-                </span>
-                {t.due && (
-                  <span className="text-[10px] text-zinc-400 font-mono">Due: {t.due}</span>
-                )}
+        <div className="space-y-3">
+          {/* Search bar inside modal */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search tasks by title or tag..."
+              value={pickerSearch}
+              onChange={(e) => setPickerSearch(e.target.value)}
+              className="w-full text-xs bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md p-2 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+            />
+          </div>
+
+          <div className="space-y-1.5 max-h-72 overflow-y-auto">
+            {filteredPickerTasks.length === 0 ? (
+              <div className="py-6 text-center text-xs text-zinc-400">
+                No active tasks found matching search.
               </div>
-              {t.totalFocusSeconds > 0 && (
-                <span className="text-[10px] font-mono text-zinc-500 shrink-0">
-                  {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
-                </span>
-              )}
-            </button>
-          ))}
+            ) : (
+              filteredPickerTasks.map((t) => {
+                const isChecked = pickerSelectedIds.has(t.id);
+                return (
+                  <label
+                    key={t.id}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                      isChecked
+                        ? 'border-zinc-900 bg-zinc-100/80 dark:border-zinc-200 dark:bg-zinc-800/80'
+                        : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleTogglePickerTask(t.id)}
+                        className="h-4 w-4 rounded-sm border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-0 cursor-pointer"
+                      />
+                      <div className="truncate">
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-100 block truncate">
+                          {t.title}
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {t.due && (
+                            <span className="text-[10px] text-zinc-400 font-mono">
+                              Due: {t.due}
+                            </span>
+                          )}
+                          {t.tags && t.tags.length > 0 && (
+                            <span className="text-[10px] text-zinc-500 font-mono">
+                              {t.tags.map((tg) => `#${tg}`).join(' ')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {t.totalFocusSeconds > 0 && (
+                      <span className="text-[10px] font-mono text-zinc-500 shrink-0">
+                        {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
+                      </span>
+                    )}
+                  </label>
+                );
+              })
+            )}
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center justify-between pt-3 border-t border-zinc-200 dark:border-zinc-800 gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAllTasks}
+              className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+            >
+              Clear All (Autonomous)
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsTaskPickerOpen(false)}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={handleApplyPicker}
+                className="text-xs"
+              >
+                Apply ({pickerSelectedIds.size} Selected)
+              </Button>
+            </div>
+          </div>
         </div>
       </Modal>
     </div>

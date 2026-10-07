@@ -69,7 +69,7 @@ import {
 import { generateId, safeLocalStorageGet, safeLocalStorageSet, getTodayDateString } from '@/lib/utils';
 import { subDays, isSameWeek, isSameMonth, parseISO, format } from 'date-fns';
 
-interface DataContextValue {
+export interface DataContextValue {
   settings: UserSettings;
   updateSettings: (partial: Partial<UserSettings>) => void;
 
@@ -782,6 +782,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         ...rt,
                         id: existing.id,
                         taskListId: list.id,
+                        tags: existing.tags || (rt as any).tags || [],
                         subtasks: existing.subtasks?.length ? existing.subtasks : rt.subtasks,
                         totalFocusSeconds: existing.totalFocusSeconds || 0,
                         pomodoroCount: existing.pomodoroCount || 0,
@@ -792,6 +793,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     } else {
                       map.set(rt.googleTaskId!, {
                         ...rt,
+                        tags: (rt as any).tags || [],
                         taskListId: list.id,
                       });
                     }
@@ -1057,6 +1059,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       due: taskData.due || undefined,
       priority: taskData.priority || 'medium',
       subtasks: taskData.subtasks || [],
+      tags: taskData.tags || [],
       totalFocusSeconds: 0,
       pomodoroCount: 0,
       createdAt: now,
@@ -1093,8 +1096,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const now = new Date().toISOString();
-    setTasks((prev) =>
-      prev.map((t) => {
+    setTasks((prev) => {
+      const nextTasks = prev.map((t) => {
         if (t.id === id) {
           const updated = { ...t, ...partial, updatedAt: now };
           if (user && !user.isGuest) {
@@ -1103,8 +1106,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return updated;
         }
         return t;
-      })
-    );
+      });
+      tasksRef.current = nextTasks;
+      return nextTasks;
+    });
   };
 
   const toggleTaskComplete = async (id: string) => {
@@ -1427,8 +1432,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setFocusSessions((prev) => [newSession, ...prev]);
 
-    // If associated with a task, increment task focus time and count
-    if (sessionData.taskId) {
+    // If multi-task allocations are provided, update each credited task
+    if (sessionData.taskTimeAllocations && Object.keys(sessionData.taskTimeAllocations).length > 0) {
+      for (const [taskId, allocatedSeconds] of Object.entries(sessionData.taskTimeAllocations)) {
+        if (allocatedSeconds > 0) {
+          const currentTask = tasksRef.current.find((t) => t.id === taskId) || tasks.find((t) => t.id === taskId);
+          if (currentTask) {
+            updateTask(taskId, {
+              totalFocusSeconds: (currentTask.totalFocusSeconds || 0) + allocatedSeconds,
+              pomodoroCount: (currentTask.pomodoroCount || 0) + 1,
+            });
+          }
+        }
+      }
+    } else if (sessionData.taskId) {
       const currentTask = tasksRef.current.find((t) => t.id === sessionData.taskId) || tasks.find((t) => t.id === sessionData.taskId);
       if (currentTask) {
         updateTask(sessionData.taskId, {

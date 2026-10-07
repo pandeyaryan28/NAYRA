@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { PomodoroMode, TimerState, TaskItem } from '@/types';
 import { useData } from './DataContext';
 import { playSessionCompleteSound, playBreakCompleteSound } from '@/lib/audio';
 import { safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
 
-interface FocusContextValue {
+export interface FocusContextValue {
   mode: PomodoroMode;
   timerState: TimerState;
   remainingSeconds: number;
@@ -12,7 +12,14 @@ interface FocusContextValue {
   progressPercentage: number;
   currentCycle: number;
   selectedTask: TaskItem | null;
+  selectedTasks: TaskItem[];
+  activeTaskIds: string[];
+  taskTimeAllocations: Record<string, number>;
   selectTask: (task: TaskItem | null) => void;
+  selectTasks: (tasks: TaskItem[]) => void;
+  addSessionTask: (task: TaskItem) => void;
+  removeSessionTask: (taskId: string) => void;
+  getTaskLiveSeconds: (taskId: string) => number;
   startTimer: () => void;
   pauseTimer: () => void;
   resumeTimer: () => void;
@@ -34,6 +41,9 @@ interface StoredFocusState {
   targetEndTime: number | null;
   currentCycle: number;
   selectedTaskId: string | null;
+  activeTaskIds?: string[];
+  taskTimeAllocations?: Record<string, number>;
+  lastSliceTime?: number | null;
 }
 
 export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -85,16 +95,67 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentCycle, setCurrentCycle] = useState<number>(initialStored?.currentCycle || 1);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(initialStored?.selectedTaskId || null);
 
+  // Dynamic multi-task tracking
+  const [activeTaskIds, setActiveTaskIds] = useState<string[]>(() => {
+    if (initialStored?.activeTaskIds && Array.isArray(initialStored.activeTaskIds)) {
+      return initialStored.activeTaskIds;
+    }
+    return initialStored?.selectedTaskId ? [initialStored.selectedTaskId] : [];
+  });
+
+  const [taskTimeAllocations, setTaskTimeAllocations] = useState<Record<string, number>>(
+    initialStored?.taskTimeAllocations || {}
+  );
+
+  const activeTaskIdsRef = useRef<string[]>(activeTaskIds);
+  activeTaskIdsRef.current = activeTaskIds;
+
+  const taskAllocationsRef = useRef<Record<string, number>>(taskTimeAllocations);
+  taskAllocationsRef.current = taskTimeAllocations;
+
+  const lastSliceTimeRef = useRef<number | null>(
+    initialStored?.timerState === 'running' && initialStored?.targetEndTime && Date.now() < initialStored.targetEndTime
+      ? initialStored.lastSliceTime || Date.now()
+      : null
+  );
+
   const totalDurationSeconds = getDurationForMode(mode);
   const progressPercentage = Math.min(
     100,
     Math.max(0, Math.round(((totalDurationSeconds - remainingSeconds) / totalDurationSeconds) * 100))
   );
 
-  const selectedTask = tasks.find((t) => t.id === selectedTaskId) || null;
+  const selectedTasks = useMemo(() => {
+    return tasks.filter((t) => activeTaskIds.includes(t.id));
+  }, [tasks, activeTaskIds]);
+
+  const selectedTask = useMemo(() => {
+    if (selectedTaskId) {
+      const found = tasks.find((t) => t.id === selectedTaskId);
+      if (found) return found;
+    }
+    return selectedTasks[0] || null;
+  }, [selectedTaskId, tasks, selectedTasks]);
 
   const isExpiringRef = useRef<boolean>(false);
   const hasProcessedMountRef = useRef<boolean>(false);
+
+  // Synchronously flushes elapsed interval since last slice and attributes it to current active tasks
+  const flushSliceSync = useCallback((now: number = Date.now()): Record<string, number> => {
+    if (lastSliceTimeRef.current && lastSliceTimeRef.current < now) {
+      const elapsedSec = Math.max(0, Math.round((now - lastSliceTimeRef.current) / 1000));
+      if (elapsedSec > 0 && activeTaskIdsRef.current.length > 0) {
+        const next: Record<string, number> = { ...taskAllocationsRef.current };
+        for (const tid of activeTaskIdsRef.current) {
+          next[tid] = (next[tid] || 0) + elapsedSec;
+        }
+        taskAllocationsRef.current = next;
+        setTaskTimeAllocations(next);
+      }
+      lastSliceTimeRef.current = now;
+    }
+    return taskAllocationsRef.current;
+  }, []);
 
   // Sync to localStorage
   useEffect(() => {
@@ -105,47 +166,12 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       targetEndTime,
       currentCycle,
       selectedTaskId,
+      activeTaskIds,
+      taskTimeAllocations,
+      lastSliceTime: lastSliceTimeRef.current,
     };
     safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
-  }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId]);
-
-  // High-accuracy drift-proof ticker
-  useEffect(() => {
-    if (timerState !== 'running' || !targetEndTime) return;
-
-    const checkAndTick = () => {
-      if (isExpiringRef.current) return;
-
-      const now = Date.now();
-      const diffMs = targetEndTime - now;
-      const secLeft = Math.max(0, Math.round(diffMs / 1000));
-
-      setRemainingSeconds(secLeft);
-
-      if (diffMs <= 0) {
-        isExpiringRef.current = true;
-        handleTimerExpiry();
-      }
-    };
-
-    const interval = setInterval(checkAndTick, 250);
-
-    // Immediate check on tab visibility change or window focus
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && !isExpiringRef.current) {
-        checkAndTick();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('focus', handleVisibility);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('focus', handleVisibility);
-    };
-  }, [timerState, targetEndTime, mode, currentCycle, selectedTask, settings]);
+  }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId, activeTaskIds, taskTimeAllocations]);
 
   // Clean up any stale/expired timer state from an abandoned session on initial mount
   useEffect(() => {
@@ -154,10 +180,11 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     if (initialStored?.timerState === 'running' && initialStored.targetEndTime) {
       if (Date.now() >= initialStored.targetEndTime) {
-        // Timer expired while the browser tab was closed or asleep.
-        // We cleanly reset to idle without injecting unverified focus time into analytics.
         setTargetEndTime(null);
         setTimerState('idle');
+        lastSliceTimeRef.current = null;
+        taskAllocationsRef.current = {};
+        setTaskTimeAllocations({});
         const defaultDur = getDurationForMode(initialStored.mode || 'focus');
         setRemainingSeconds(defaultDur);
         safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, {
@@ -165,12 +192,14 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           timerState: 'idle',
           targetEndTime: null,
           remainingSeconds: defaultDur,
+          taskTimeAllocations: {},
+          lastSliceTime: null,
         });
       }
     }
   }, [initialStored, getDurationForMode]);
 
-  const handleTimerExpiry = () => {
+  const handleTimerExpiry = useCallback(() => {
     // 1. Play synthesized Web Audio chime
     if (settings.soundEnabled) {
       if (mode === 'focus') {
@@ -197,15 +226,54 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (mode === 'focus') {
       const duration = getDurationForMode('focus');
       const nowIso = new Date().toISOString();
+
+      // Flush final slice
+      const flushedAllocations = flushSliceSync();
+      lastSliceTimeRef.current = null;
+
+      // Consolidate allocations
+      const allLinkedIds = Array.from(
+        new Set([...Object.keys(flushedAllocations), ...activeTaskIdsRef.current])
+      );
+      const linkedTasks = tasks.filter((t) => allLinkedIds.includes(t.id));
+
+      const finalAllocations: Record<string, number> = { ...flushedAllocations };
+      // Active tasks receive recorded credit; if no time was recorded across the entire session, fallback to duration
+      for (const tid of activeTaskIdsRef.current) {
+        if (finalAllocations[tid] === undefined) {
+          if (Object.keys(flushedAllocations).length === 0) {
+            finalAllocations[tid] = duration;
+          } else {
+            finalAllocations[tid] = 0;
+          }
+        } else {
+          finalAllocations[tid] = Math.min(duration, finalAllocations[tid]);
+        }
+      }
+
+      const allSessionTags = Array.from(
+        new Set(linkedTasks.flatMap((t) => t.tags || []))
+      );
+
+      const primary = linkedTasks[0] || null;
+
       logFocusSession({
-        taskId: selectedTask?.id || null,
-        taskTitle: selectedTask?.title || null,
+        taskId: primary?.id || null,
+        taskTitle: primary?.title || null,
+        taskIds: allLinkedIds,
+        taskTitles: linkedTasks.map((t) => t.title),
+        tags: allSessionTags,
+        taskTimeAllocations: finalAllocations,
         mode: 'focus',
         durationSeconds: duration,
         startedAt: new Date(Date.now() - duration * 1000).toISOString(),
         completedAt: nowIso,
         interrupted: false,
       });
+
+      // Reset allocations for subsequent session
+      taskAllocationsRef.current = {};
+      setTaskTimeAllocations({});
     }
 
     // 4. Cycle progression respecting auto-start settings
@@ -218,6 +286,7 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (settings.autoStartBreaks) {
         isExpiringRef.current = false;
+        lastSliceTimeRef.current = Date.now();
         setTargetEndTime(Date.now() + nextDuration * 1000);
         setTimerState('running');
       } else {
@@ -233,6 +302,7 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (settings.autoStartPomodoros) {
         isExpiringRef.current = false;
+        lastSliceTimeRef.current = Date.now();
         setTargetEndTime(Date.now() + nextDuration * 1000);
         setTimerState('running');
       } else {
@@ -240,40 +310,84 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setTimerState('idle');
       }
     }
-  };
+  }, [mode, currentCycle, flushSliceSync, getDurationForMode, logFocusSession, settings, tasks]);
 
-  const startTimer = () => {
+  // High-accuracy drift-proof ticker
+  useEffect(() => {
+    if (timerState !== 'running' || !targetEndTime) return;
+
+    const checkAndTick = () => {
+      if (isExpiringRef.current) return;
+
+      const now = Date.now();
+      const diffMs = targetEndTime - now;
+      const secLeft = Math.max(0, Math.round(diffMs / 1000));
+
+      setRemainingSeconds(secLeft);
+
+      if (diffMs <= 0) {
+        isExpiringRef.current = true;
+        handleTimerExpiry();
+      }
+    };
+
+    const interval = setInterval(checkAndTick, 250);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && !isExpiringRef.current) {
+        checkAndTick();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
+  }, [timerState, targetEndTime, handleTimerExpiry]);
+
+  const startTimer = useCallback(() => {
     isExpiringRef.current = false;
+    lastSliceTimeRef.current = Date.now();
     const target = Date.now() + remainingSeconds * 1000;
     setTargetEndTime(target);
     setTimerState('running');
-  };
+  }, [remainingSeconds]);
 
-  const pauseTimer = () => {
+  const pauseTimer = useCallback(() => {
     isExpiringRef.current = false;
+    flushSliceSync();
+    lastSliceTimeRef.current = null;
     if (targetEndTime) {
       const secLeft = Math.max(0, Math.round((targetEndTime - Date.now()) / 1000));
       setRemainingSeconds(secLeft);
     }
     setTargetEndTime(null);
     setTimerState('paused');
-  };
+  }, [flushSliceSync, targetEndTime]);
 
-  const resumeTimer = () => {
+  const resumeTimer = useCallback(() => {
     isExpiringRef.current = false;
+    lastSliceTimeRef.current = Date.now();
     const target = Date.now() + remainingSeconds * 1000;
     setTargetEndTime(target);
     setTimerState('running');
-  };
+  }, [remainingSeconds]);
 
-  const stopTimer = () => {
+  const stopTimer = useCallback(() => {
     isExpiringRef.current = false;
+    lastSliceTimeRef.current = null;
     setTimerState('idle');
     setTargetEndTime(null);
     setRemainingSeconds(getDurationForMode(mode));
-  };
+    taskAllocationsRef.current = {};
+    setTaskTimeAllocations({});
+  }, [getDurationForMode, mode]);
 
-  const skipSession = () => {
+  const skipSession = useCallback(() => {
     isExpiringRef.current = false;
     stopTimer();
     if (mode === 'focus') {
@@ -286,18 +400,70 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setCurrentCycle((prev) => prev + 1);
       setRemainingSeconds(getDurationForMode('focus'));
     }
-  };
+  }, [currentCycle, getDurationForMode, mode, settings.longBreakInterval, stopTimer]);
 
-  const setMode = (newMode: PomodoroMode) => {
+  const setMode = useCallback((newMode: PomodoroMode) => {
     isExpiringRef.current = false;
     stopTimer();
     setModeState(newMode);
     setRemainingSeconds(getDurationForMode(newMode));
-  };
+  }, [getDurationForMode, stopTimer]);
 
-  const selectTask = (task: TaskItem | null) => {
-    setSelectedTaskId(task ? task.id : null);
-  };
+  const selectTask = useCallback((task: TaskItem | null) => {
+    if (timerState === 'running') {
+      flushSliceSync();
+    }
+    if (task) {
+      activeTaskIdsRef.current = [task.id];
+      setActiveTaskIds([task.id]);
+      setSelectedTaskId(task.id);
+    } else {
+      activeTaskIdsRef.current = [];
+      setActiveTaskIds([]);
+      setSelectedTaskId(null);
+    }
+  }, [flushSliceSync, timerState]);
+
+  const selectTasks = useCallback((taskList: TaskItem[]) => {
+    if (timerState === 'running') {
+      flushSliceSync();
+    }
+    const ids = Array.from(new Set(taskList.map((t) => t.id)));
+    activeTaskIdsRef.current = ids;
+    setActiveTaskIds(ids);
+    setSelectedTaskId(ids[0] || null);
+  }, [flushSliceSync, timerState]);
+
+  const addSessionTask = useCallback((task: TaskItem) => {
+    if (timerState === 'running') {
+      flushSliceSync();
+    }
+    const next = activeTaskIdsRef.current.includes(task.id)
+      ? activeTaskIdsRef.current
+      : [...activeTaskIdsRef.current, task.id];
+    activeTaskIdsRef.current = next;
+    setActiveTaskIds(next);
+    setSelectedTaskId((prev) => prev || task.id);
+  }, [flushSliceSync, timerState]);
+
+  const removeSessionTask = useCallback((taskId: string) => {
+    if (timerState === 'running') {
+      flushSliceSync();
+    }
+    const filtered = activeTaskIdsRef.current.filter((id) => id !== taskId);
+    activeTaskIdsRef.current = filtered;
+    setActiveTaskIds(filtered);
+    setSelectedTaskId((prev) => (prev === taskId ? null : prev));
+  }, [flushSliceSync, timerState]);
+
+  const getTaskLiveSeconds = useCallback((taskId: string): number => {
+    const base = taskTimeAllocations[taskId] || 0;
+    if (timerState === 'running' && activeTaskIds.includes(taskId) && lastSliceTimeRef.current) {
+      const runningSlice = Math.max(0, Math.round((Date.now() - lastSliceTimeRef.current) / 1000));
+      return base + runningSlice;
+    }
+    return base;
+  }, [activeTaskIds, taskTimeAllocations, timerState]);
 
   return (
     <FocusContext.Provider
@@ -309,7 +475,14 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         progressPercentage,
         currentCycle,
         selectedTask,
+        selectedTasks,
+        activeTaskIds,
+        taskTimeAllocations,
         selectTask,
+        selectTasks,
+        addSessionTask,
+        removeSessionTask,
+        getTaskLiveSeconds,
         startTimer,
         pauseTimer,
         resumeTimer,

@@ -52,6 +52,7 @@ export const SettingsView: React.FC = () => {
     isConfigured: boolean;
     hasUserLinkedOffline: boolean;
     clientId: string | null;
+    isAdmin?: boolean;
   } | null>(null);
   const [isSavingServerCreds, setIsSavingServerCreds] = useState(false);
   const [saveCredsStatus, setSaveCredsStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -285,66 +286,73 @@ export const SettingsView: React.FC = () => {
             )}
 
             {/* Server OAuth Credentials Configuration */}
-            <div className="mt-3 p-3.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 space-y-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                <KeyRound className="h-3.5 w-3.5 text-zinc-500" />
-                <span>Cloud Functions OAuth Configuration</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
-                  label="OAuth 2.0 Web Client ID"
-                  placeholder="e.g. 413144887088-xxx.apps.googleusercontent.com"
-                  value={offlineClientId}
-                  onChange={(e) => {
-                    setOfflineClientId(e.target.value);
-                    if (typeof localStorage !== 'undefined') {
-                      localStorage.setItem('nayra_google_client_id', e.target.value.trim());
-                    }
-                  }}
-                />
-                <Input
-                  label="OAuth 2.0 Client Secret"
-                  type="password"
-                  placeholder="e.g. GOCSPX-xxxxxxxxxxxxxxxx"
-                  value={offlineClientSecret}
-                  onChange={(e) => setOfflineClientSecret(e.target.value)}
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                  Stored securely in Firestore backend (<code className="font-mono text-[10px]">system_config/google_oauth</code>), inaccessible to client browsers.
-                </p>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSaveServerCredentials}
-                  disabled={isSavingServerCreds || !offlineClientId.trim() || !offlineClientSecret.trim()}
-                  className="shrink-0"
-                >
-                  {isSavingServerCreds ? 'Saving...' : 'Save to Cloud Functions'}
-                </Button>
-              </div>
-
-              {saveCredsMessage && (
-                <div
-                  className={`p-2 rounded-md text-xs flex items-center gap-2 ${
-                    saveCredsStatus === 'success'
-                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800/60'
-                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800/60'
-                  }`}
-                >
-                  {saveCredsStatus === 'success' ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  ) : (
-                    <AlertCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
-                  )}
-                  <span>{saveCredsMessage}</span>
+            {serverOAuthStatus?.isAdmin ? (
+              <div className="mt-3 p-3.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 space-y-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                  <KeyRound className="h-3.5 w-3.5 text-zinc-500" />
+                  <span>Cloud Functions OAuth Configuration (Administrator Only)</span>
                 </div>
-              )}
-            </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    label="OAuth 2.0 Web Client ID"
+                    placeholder="e.g. 413144887088-xxx.apps.googleusercontent.com"
+                    value={offlineClientId}
+                    onChange={(e) => {
+                      setOfflineClientId(e.target.value);
+                      if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('nayra_google_client_id', e.target.value.trim());
+                      }
+                    }}
+                  />
+                  <Input
+                    label="OAuth 2.0 Client Secret"
+                    type="password"
+                    placeholder="e.g. GOCSPX-xxxxxxxxxxxxxxxx"
+                    value={offlineClientSecret}
+                    onChange={(e) => setOfflineClientSecret(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                    Stored securely in Firestore backend (<code className="font-mono text-[10px]">system_config/google_oauth</code>), inaccessible to client browsers.
+                  </p>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSaveServerCredentials}
+                    disabled={isSavingServerCreds || !offlineClientId.trim() || !offlineClientSecret.trim()}
+                    className="shrink-0"
+                  >
+                    {isSavingServerCreds ? 'Saving...' : 'Save to Cloud Functions'}
+                  </Button>
+                </div>
+
+                {saveCredsMessage && (
+                  <div
+                    className={`p-2 rounded-md text-xs flex items-center gap-2 ${
+                      saveCredsStatus === 'success'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800/60'
+                        : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800/60'
+                    }`}
+                  >
+                    {saveCredsStatus === 'success' ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                    )}
+                    <span>{saveCredsMessage}</span>
+                  </div>
+                )}
+              </div>
+            ) : serverOAuthStatus?.isConfigured ? (
+              <div className="mt-3 p-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/30 text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+                <span>Global OAuth background credentials are configured and managed by your system administrator.</span>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

@@ -23,6 +23,8 @@ import {
   GoogleAuthProvider,
   reauthenticateWithPopup,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -40,6 +42,10 @@ export const firebaseConfig = {
   messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || '413144887088',
   appId: import.meta.env?.VITE_FIREBASE_APP_ID || '1:413144887088:web:bd35b4bdd1bfb682bc22f5',
 };
+
+if (!firebaseConfig.apiKey && import.meta.env?.DEV) {
+  console.warn('[NAYRA Security] VITE_FIREBASE_API_KEY is not defined in environment. Ensure .env is loaded.');
+}
 
 // Singleton Firebase App Initialization
 export const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
@@ -96,6 +102,8 @@ export const getUserCARevisionsCollection = (userId: string) => collection(db, '
 export {
   reauthenticateWithPopup,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
