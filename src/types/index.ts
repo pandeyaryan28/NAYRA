@@ -226,6 +226,9 @@ export interface CATopic {
   notes?: string;
 }
 
+// Re-export full CA Foundation suite types
+export * from './ca';
+
 // ------------------------------------------
 // SCInt-Engine Domain Types (Semiconductor)
 // ------------------------------------------

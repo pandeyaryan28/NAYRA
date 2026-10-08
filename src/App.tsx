@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { DataProvider } from '@/context/DataContext';
 import { FocusProvider } from '@/context/FocusContext';
+import { CATrackerProvider } from '@/context/CATrackerContext';
 
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
@@ -25,7 +26,8 @@ export const App: React.FC = () => {
     <ThemeProvider>
       <AuthProvider>
         <DataProvider>
-          <FocusProvider>
+          <CATrackerProvider>
+            <FocusProvider>
             <BrowserRouter>
               <Routes>
                 {/* Public Authentication Route */}
@@ -53,7 +55,8 @@ export const App: React.FC = () => {
               </Routes>
             </BrowserRouter>
           </FocusProvider>
-        </DataProvider>
+        </CATrackerProvider>
+      </DataProvider>
       </AuthProvider>
     </ThemeProvider>
   );
