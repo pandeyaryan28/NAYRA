@@ -11,6 +11,7 @@ import {
   setDoc,
   deleteDoc,
   getDocs,
+  onSnapshot,
   writeBatch,
   query,
   where,
@@ -99,6 +100,127 @@ export const getUserCATopicsCollection = (userId: string) => collection(db, 'use
 export const getUserCATestsCollection = (userId: string) => collection(db, 'users', userId, 'caTests');
 export const getUserCARevisionsCollection = (userId: string) => collection(db, 'users', userId, 'caRevisions');
 
+export const OPERATOR_UID = 'yApeiNzo23bPTvpEXHgNIgiTX0y1';
+
+export interface ActiveTasksCloudDoc {
+  tasks: any[];
+  updatedAt: string;
+  source: 'googleTasks' | 'webApp' | 'tab' | 'extension';
+}
+
+export const getUserActiveTasksDoc = (userId: string) => doc(db, 'users', userId, 'config', 'activeTasks');
+
+/**
+ * Persists the clean active task list to users/{uid}/config/activeTasks in Firestore.
+ */
+export async function syncActiveTasksToFirestore(
+  uid: string = OPERATOR_UID,
+  tasks: any[],
+  source: 'googleTasks' | 'webApp' | 'tab' | 'extension' = 'webApp'
+): Promise<void> {
+  try {
+    const ref = getUserActiveTasksDoc(uid);
+    const activeOnly = (Array.isArray(tasks) ? tasks : [])
+      .filter((t) => !t.archived && t.status !== 'completed' && !t.completed)
+      .map((t) => sanitizeForFirestore(t));
+    await setDoc(ref, {
+      tasks: activeOnly,
+      updatedAt: new Date().toISOString(),
+      source,
+    });
+  } catch (err) {
+    console.warn('[Firebase] Could not sync active tasks to Firestore:', err);
+  }
+}
+
+/**
+ * Real-time subscription to users/{uid}/config/activeTasks
+ */
+export function subscribeActiveTasksFromFirestore(
+  uid: string = OPERATOR_UID,
+  onUpdate: (doc: ActiveTasksCloudDoc) => void
+): () => void {
+  try {
+    const ref = getUserActiveTasksDoc(uid);
+    return onSnapshot(
+      ref,
+      (snap) => {
+        if (snap.exists()) {
+          onUpdate(snap.data() as ActiveTasksCloudDoc);
+        }
+      },
+      (err) => {
+        console.warn('[Firebase] ActiveTasks realtime subscription error:', err);
+      }
+    );
+  } catch (err) {
+    console.warn('[Firebase] Failed to setup active tasks subscription:', err);
+    return () => {};
+  }
+}
+
+/**
+ * Fetches active tasks from users/{uid}/config/activeTasks
+ */
+export async function fetchActiveTasksFromFirestore(
+  uid: string = OPERATOR_UID
+): Promise<any[]> {
+  try {
+    const ref = getUserActiveTasksDoc(uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data() as ActiveTasksCloudDoc;
+      if (Array.isArray(data.tasks)) {
+        return data.tasks.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+      }
+    }
+  } catch (err) {
+    console.warn('[Firebase] Could not fetch active tasks from Firestore:', err);
+  }
+  return [];
+}
+
+/**
+ * Sync active timer state across extension, tab, and web app via users/{uid}/config/activeTimer
+ */
+export async function syncActiveTimerToFirestore(
+  uid: string = OPERATOR_UID,
+  state: any
+): Promise<void> {
+  try {
+    const ref = doc(db, 'users', uid, 'config', 'activeTimer');
+    await setDoc(ref, state, { merge: true });
+  } catch (err) {
+    console.warn('[Firebase] Could not sync active timer to Firestore:', err);
+  }
+}
+
+/**
+ * Real-time subscription to activeTimer document
+ */
+export function subscribeActiveTimerFromFirestore(
+  uid: string = OPERATOR_UID,
+  onUpdate: (state: any) => void
+): () => void {
+  try {
+    const ref = doc(db, 'users', uid, 'config', 'activeTimer');
+    return onSnapshot(
+      ref,
+      (snap) => {
+        if (snap.exists()) {
+          onUpdate(snap.data());
+        }
+      },
+      (err) => {
+        console.warn('[Firebase] ActiveTimer realtime subscription error:', err);
+      }
+    );
+  } catch (err) {
+    console.warn('[Firebase] Failed to setup active timer subscription:', err);
+    return () => {};
+  }
+}
+
 export {
   reauthenticateWithPopup,
   signInWithPopup,
@@ -115,6 +237,7 @@ export {
   setDoc,
   deleteDoc,
   getDocs,
+  onSnapshot,
   writeBatch,
   query,
   where,

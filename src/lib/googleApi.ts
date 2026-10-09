@@ -366,6 +366,9 @@ export async function fetchGoogleTasks(
     }
   });
 
+  const matchingList = taskLists?.find((l) => l.id === resolvedLocalId || l.googleTaskListId === gtlId);
+  const resolvedTaskListName = matchingList?.title;
+
   return activeItems.map((t) => {
     const isCompleted = t.status === 'completed';
     const subtasks = (childItemsByParent.get(t.id) || []).map((sub) => ({
@@ -379,6 +382,7 @@ export async function fetchGoogleTasks(
       googleTaskId: t.id,
       parentTaskId: t.parent,
       taskListId: resolvedLocalId,
+      taskListName: resolvedTaskListName,
       title: t.title || 'Untitled Task',
       notes: t.notes || '',
       status: isCompleted ? 'completed' : 'needsAction',

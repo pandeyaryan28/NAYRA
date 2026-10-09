@@ -3,6 +3,7 @@ import { PomodoroMode, TimerState, TaskItem } from '@/types';
 import { useData } from './DataContext';
 import { playSessionCompleteSound, playBreakCompleteSound } from '@/lib/audio';
 import { safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
+import { syncActiveTimerToFirestore, subscribeActiveTimerFromFirestore, OPERATOR_UID } from '@/lib/firebase';
 
 export interface FocusContextValue {
   mode: PomodoroMode;
@@ -157,7 +158,7 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return taskAllocationsRef.current;
   }, []);
 
-  // Sync to localStorage
+  // Sync to localStorage and broadcast to nayra-tab / nayra-extension
   useEffect(() => {
     const payload: StoredFocusState = {
       mode,
@@ -171,6 +172,40 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       lastSliceTime: lastSliceTimeRef.current,
     };
     safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const ch = new BroadcastChannel('nayra_focus_sync');
+        ch.postMessage({
+          type: 'STATE_CHANGE',
+          mode,
+          timerState,
+          remainingSeconds,
+          targetEndTime,
+          currentCycle,
+          selectedTaskId,
+          activeTaskIds,
+          timestamp: Date.now(),
+          source: 'web',
+        });
+        ch.close();
+      } catch {
+        // ignore
+      }
+    }
+
+    // Sync to Firestore activeTimer for cross-app synchronization
+    syncActiveTimerToFirestore(OPERATOR_UID, {
+      mode,
+      timerState,
+      remainingSeconds,
+      targetEndTime,
+      currentCycle,
+      activeTaskIds: activeTaskIds || [],
+      selectedTaskId,
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'web',
+    });
   }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId, activeTaskIds, taskTimeAllocations]);
 
   // Clean up any stale/expired timer state from an abandoned session on initial mount
@@ -198,6 +233,88 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
   }, [initialStored, getDurationForMode]);
+
+  const tasksRef = useRef(tasks);
+  useEffect(() => {
+    tasksRef.current = tasks;
+  }, [tasks]);
+
+  // Broadcast tasks updates to nayra-tab extension
+  useEffect(() => {
+    if (typeof BroadcastChannel !== 'undefined' && tasks && tasks.length > 0) {
+      try {
+        const ch = new BroadcastChannel('nayra_focus_sync');
+        ch.postMessage({ type: 'TASKS_UPDATE', tasks });
+        ch.close();
+      } catch {
+        // ignore
+      }
+    }
+  }, [tasks]);
+
+  // Listen for cross-tab Pomodoro synchronization from nayra-tab or other tabs
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let channel: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        channel = new BroadcastChannel('nayra_focus_sync');
+        channel.onmessage = (event) => {
+          const data = event.data;
+          if (!data || data.source === 'web') return;
+          if (data.type === 'REQUEST_TASKS_SYNC') {
+            channel?.postMessage({
+              type: 'TASKS_UPDATE',
+              tasks: tasksRef.current,
+            });
+            return;
+          }
+          if (data.mode) setModeState(data.mode);
+          if (data.currentCycle) setCurrentCycle(data.currentCycle);
+          if (data.remainingSeconds !== undefined) setRemainingSeconds(data.remainingSeconds);
+          if (data.timerState) setTimerState(data.timerState);
+          if (data.targetEndTime !== undefined) setTargetEndTime(data.targetEndTime);
+          if (data.selectedTaskId !== undefined) {
+            setSelectedTaskId(data.selectedTaskId);
+            if (data.selectedTaskId) {
+              setActiveTaskIds([data.selectedTaskId]);
+            }
+          }
+        };
+      } catch {
+        // ignore
+      }
+    }
+
+    return () => {
+      if (channel) channel.close();
+    };
+  }, []);
+
+  // Listen for real-time Cloud Firestore activeTimer updates from nayra-extension or nayra-tab
+  useEffect(() => {
+    const unsubTimer = subscribeActiveTimerFromFirestore(OPERATOR_UID, (cloudState) => {
+      if (!cloudState || cloudState.updatedBy === 'web') return;
+      if (cloudState.mode) setModeState(cloudState.mode);
+      if (cloudState.currentCycle) setCurrentCycle(cloudState.currentCycle);
+      if (cloudState.remainingSeconds !== undefined) setRemainingSeconds(cloudState.remainingSeconds);
+      if (cloudState.timerState) setTimerState(cloudState.timerState);
+      if (cloudState.targetEndTime !== undefined) setTargetEndTime(cloudState.targetEndTime);
+      if (cloudState.activeTaskIds && Array.isArray(cloudState.activeTaskIds)) {
+        setActiveTaskIds(cloudState.activeTaskIds);
+      } else if (cloudState.selectedTaskId !== undefined) {
+        setSelectedTaskId(cloudState.selectedTaskId);
+        if (cloudState.selectedTaskId) {
+          setActiveTaskIds([cloudState.selectedTaskId]);
+        }
+      }
+    });
+
+    return () => {
+      unsubTimer();
+    };
+  }, []);
 
   const handleTimerExpiry = useCallback(() => {
     // 1. Play synthesized Web Audio chime

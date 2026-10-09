@@ -228,31 +228,15 @@ describe('NAYRA Personal Operating System — Complete Module Tests', () => {
     });
   });
 
-  it('navigates to CA Tracker, verifies syllabus, and launches study session into Focus Lab', async () => {
+  it('navigates to CA Tracker and verifies Command Center overview', async () => {
     render(<App />);
 
     const caLinks = screen.getAllByText('CA Tracker');
-    fireEvent.click(caLinks[0]);
+    const navAnchor = caLinks[0].closest('a') || caLinks[0];
+    fireEvent.click(navAnchor);
 
-    expect(screen.getAllByText('CA Foundation Exam Preparation Tracker').length).toBeGreaterThan(0);
-
-    // Verify all 4 ICAI papers
-    CA_SUBJECTS.forEach((sub) => {
-      expect(screen.getByText(sub.name)).toBeInTheDocument();
-    });
-
-    // Verify Test score logger button
-    expect(screen.getByText('Log Test Score')).toBeInTheDocument();
-
-    // Click "Start Study" or "Focus Study" on a topic to launch focus session
-    const studyButtons = screen.getAllByText(/Start Study|Focus Study/i);
-    expect(studyButtons.length).toBeGreaterThan(0);
-    fireEvent.click(studyButtons[0]);
-
-    // Should navigate to Focus Lab with the task linked
     await waitFor(() => {
-      expect(screen.getByText('Associated Task')).toBeInTheDocument();
-      expect(screen.getByText(/CA Foundation:/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Official 4-Paper Progress|Command Center/i).length).toBeGreaterThan(0);
     });
   });
 

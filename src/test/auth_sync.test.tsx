@@ -724,7 +724,8 @@ describe('Deep Two-Way Synchronization & Calendar Polish Verification', () => {
   });
 
   it('renders all-day events in Day View with interactive click-to-edit support', async () => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const _now = new Date();
+    const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
     const allDayEvent = {
       id: 'ev_all_day_test',
       title: 'Full Day Strategy Session',

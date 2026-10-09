@@ -60,11 +60,15 @@ import {
   getUserCATestsCollection,
   getDoc,
   getDocs,
+  onSnapshot,
   setDoc,
   deleteDoc,
   doc,
   sanitizeForFirestore,
   GUEST_USER_ID,
+  syncActiveTasksToFirestore,
+  subscribeActiveTasksFromFirestore,
+  fetchActiveTasksFromFirestore,
 } from '@/lib/firebase';
 import { generateId, safeLocalStorageGet, safeLocalStorageSet, getTodayDateString } from '@/lib/utils';
 import { subDays, isSameWeek, isSameMonth, parseISO, format } from 'date-fns';
@@ -407,6 +411,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     calendarsRef.current = calendars;
   }, [calendars]);
 
+  const persistActiveTasks = useCallback(
+    (taskList: TaskItem[], source: 'googleTasks' | 'webApp' = 'webApp') => {
+      if (user && !user.isGuest) {
+        const activeOnly = (taskList || []).filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+        syncActiveTasksToFirestore(user.uid, activeOnly, source).catch(console.warn);
+      }
+    },
+    [user]
+  );
+
   const prevUserIdRef = useRef<string | null>(null);
 
   // Per-User Firestore & LocalStorage Loading Effect
@@ -498,6 +512,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If authenticated user with dedicated Firestore account
     if (user && !user.isGuest && uid) {
       let active = true;
+      const unsubs: Array<() => void> = [];
+
       const loadFromFirestore = async () => {
         try {
           // 1. Settings
@@ -514,10 +530,169 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setEvents(evsSnap.docs.map((d) => d.data() as CalendarEvent));
           }
 
-          // 3. Tasks
-          const tSnap = await getDocs(getUserTasksCollection(uid));
-          if (!tSnap.empty && active) {
-            setTasks(tSnap.docs.map((d) => d.data() as TaskItem));
+          // 3. Tasks (Real-time snapshot listener with merge)
+          try {
+            const unsubTasks = onSnapshot(
+              getUserTasksCollection(uid),
+              (tSnap) => {
+                if (active) {
+                  const fTasks = tSnap.docs.map((d) => ({ id: d.id, ...d.data() } as TaskItem));
+                  setTasks((prev) => {
+                    const localMetrics = new Map(
+                      prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
+                    );
+                    const merged = fTasks.map((item) => {
+                      const local = localMetrics.get(item.id);
+                      if (local && local.totalFocusSeconds > (item.totalFocusSeconds || 0)) {
+                        return {
+                          ...item,
+                          totalFocusSeconds: local.totalFocusSeconds,
+                          pomodoroCount: Math.max(local.pomodoroCount, item.pomodoroCount || 0),
+                        };
+                      }
+                      return item;
+                    });
+                    tasksRef.current = merged;
+                    const activeOnly = merged.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+                    syncActiveTasksToFirestore(uid, activeOnly, 'webApp').catch(console.warn);
+
+                    // Forward any task completed in Firestore to Google Tasks if Google token is available
+                    if (googleAccessToken) {
+                      merged.forEach((item) => {
+                        if (item.googleTaskId && (item.status === 'completed' || item.completed || item.archived)) {
+                          const prevItem = prev.find((p) => p.id === item.id);
+                          if (prevItem && prevItem.status !== 'completed' && !prevItem.completed && !prevItem.archived) {
+                            const gtlId = resolveGoogleTaskListId(item.taskListId || '@default', taskListsRef.current);
+                            updateGoogleTaskStatus(googleAccessToken, gtlId, item.googleTaskId, 'completed', taskListsRef.current).catch(console.warn);
+                          }
+                        }
+                      });
+                    }
+
+                    return merged;
+                  });
+                }
+              },
+              (err) => console.warn('Tasks realtime sync warning:', err)
+            );
+            unsubs.push(unsubTasks);
+
+            const unsubActiveTasks = subscribeActiveTasksFromFirestore(uid, (activeDoc) => {
+              if (!active || !activeDoc || !Array.isArray(activeDoc.tasks)) return;
+              if (activeDoc.source === 'extension' || activeDoc.source === 'tab') {
+                const incomingActive = activeDoc.tasks;
+                const incomingIds = new Set(incomingActive.map((t) => t.id));
+                setTasks((prev) => {
+                  const prevMap = new Map(prev.map((t) => [t.id, t]));
+                  let changed = false;
+                  const newTasksForGoogle: TaskItem[] = [];
+
+                  // Check if any previously active tasks were completed or removed in extension/tab
+                  prev.forEach((existing) => {
+                    if (!existing.archived && existing.status !== 'completed' && !existing.completed) {
+                      if (!incomingIds.has(existing.id)) {
+                        changed = true;
+                        const now = new Date().toISOString();
+                        prevMap.set(existing.id, {
+                          ...existing,
+                          status: 'completed',
+                          completed: true,
+                          completedAt: now,
+                          archived: true,
+                          archivedAt: now,
+                          updatedAt: now,
+                        });
+
+                        // Forward completion to Google Tasks API
+                        if (googleAccessToken && existing.googleTaskId) {
+                          const gtlId = resolveGoogleTaskListId(existing.taskListId || '@default', taskListsRef.current);
+                          updateGoogleTaskStatus(googleAccessToken, gtlId, existing.googleTaskId, 'completed', taskListsRef.current).catch(console.warn);
+                        }
+                      }
+                    }
+                  });
+
+                  incomingActive.forEach((inc) => {
+                    const existing = prevMap.get(inc.id);
+                    if (!existing) {
+                      prevMap.set(inc.id, inc);
+                      changed = true;
+                      if (!inc.googleTaskId) {
+                        newTasksForGoogle.push(inc);
+                      }
+                    } else {
+                      const rf = inc.totalFocusSeconds || 0;
+                      const rc = inc.pomodoroCount || 0;
+                      const lf = existing.totalFocusSeconds || 0;
+                      const lc = existing.pomodoroCount || 0;
+                      if (rf > lf || rc > lc || inc.title !== existing.title || inc.status !== existing.status) {
+                        prevMap.set(inc.id, {
+                          ...existing,
+                          ...inc,
+                          totalFocusSeconds: Math.max(lf, rf),
+                          pomodoroCount: Math.max(lc, rc),
+                        });
+                        changed = true;
+                      }
+                    }
+                  });
+
+                  if (changed) {
+                    const next = Array.from(prevMap.values());
+                    tasksRef.current = next;
+
+                    // If user is connected to Google Tasks, sync new tasks directly
+                    if (googleAccessToken && newTasksForGoogle.length > 0) {
+                      newTasksForGoogle.forEach(async (t) => {
+                        try {
+                          const gtlId = resolveGoogleTaskListId(t.taskListId || '@default', taskListsRef.current);
+                          const created = await createGoogleTask(googleAccessToken, gtlId, t, taskListsRef.current);
+                          if (created?.id) {
+                            setTasks((p) => {
+                              const updated = p.map((item) => (item.id === t.id ? { ...item, googleTaskId: created.id } : item));
+                              tasksRef.current = updated;
+                              const activeOnly = updated.filter((item) => !item.archived && item.status !== 'completed' && !item.completed);
+                              syncActiveTasksToFirestore(uid, activeOnly, 'webApp').catch(console.warn);
+                              return updated;
+                            });
+                            setDoc(doc(getUserTasksCollection(uid), t.id), { googleTaskId: created.id }, { merge: true }).catch(console.warn);
+                          }
+                        } catch (err) {
+                          console.warn('[DataContext] Syncing incoming task to Google failed:', err);
+                        }
+                      });
+                    }
+
+                    return next;
+                  }
+                  return prev;
+                });
+              }
+            });
+            unsubs.push(unsubActiveTasks);
+          } catch (tErr) {
+            const tSnap = await getDocs(getUserTasksCollection(uid));
+            if (!tSnap.empty && active) {
+              const fTasks = tSnap.docs.map((d) => ({ id: d.id, ...d.data() } as TaskItem));
+              setTasks((prev) => {
+                const localMetrics = new Map(
+                  prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
+                );
+                const merged = fTasks.map((item) => {
+                  const local = localMetrics.get(item.id);
+                  if (local && local.totalFocusSeconds > (item.totalFocusSeconds || 0)) {
+                    return {
+                      ...item,
+                      totalFocusSeconds: local.totalFocusSeconds,
+                      pomodoroCount: Math.max(local.pomodoroCount, item.pomodoroCount || 0),
+                    };
+                  }
+                  return item;
+                });
+                tasksRef.current = merged;
+                return merged;
+              });
+            }
           }
 
           // 4. Task Lists
@@ -546,10 +721,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setCalorieEntries(cSnap.docs.map((d) => d.data() as CalorieEntry));
           }
 
-          // 8. Focus Sessions
-          const fSnap = await getDocs(getUserFocusSessionsCollection(uid));
-          if (!fSnap.empty && active) {
-            setFocusSessions(deduplicateFocusSessions(fSnap.docs.map((d) => d.data() as FocusSession)));
+          // 8. Focus Sessions (Real-time snapshot listener)
+          try {
+            const unsubFocus = onSnapshot(
+              getUserFocusSessionsCollection(uid),
+              (fSnap) => {
+                if (!fSnap.empty && active) {
+                  setFocusSessions(deduplicateFocusSessions(fSnap.docs.map((d) => d.data() as FocusSession)));
+                }
+              },
+              (err) => console.warn('Focus sessions realtime sync warning:', err)
+            );
+            unsubs.push(unsubFocus);
+          } catch (fErr) {
+            const fSnap = await getDocs(getUserFocusSessionsCollection(uid));
+            if (!fSnap.empty && active) {
+              setFocusSessions(deduplicateFocusSessions(fSnap.docs.map((d) => d.data() as FocusSession)));
+            }
           }
 
           // 9. CA Topics
@@ -571,6 +759,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loadFromFirestore();
       return () => {
         active = false;
+        unsubs.forEach((unsub) => {
+          try {
+            unsub();
+          } catch {
+            // ignore
+          }
+        });
       };
     }
   }, [user?.uid, user?.isGuest]);
@@ -740,68 +935,105 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: new Date().toISOString() }
           ];
 
-          let resolvedLocalLists: TaskList[] = [];
-          setTaskLists((prev) => {
-            const combined = [...prev, ...listsToProcess];
-            const { cleanLists, idRemap } = deduplicateTaskLists(combined);
-            taskListsRef.current = cleanLists;
-            resolvedLocalLists = cleanLists;
+          const combined = [...taskListsRef.current, ...listsToProcess];
+          const { cleanLists, idRemap } = deduplicateTaskLists(combined);
+          taskListsRef.current = cleanLists;
+          setTaskLists(cleanLists);
 
-            if (idRemap.size > 0) {
-              setTasks((prevTasks) => {
-                let changed = false;
-                const updated = prevTasks.map((t) => {
-                  const mappedId = idRemap.get(t.taskListId);
-                  if (mappedId && mappedId !== t.taskListId) {
-                    changed = true;
-                    return { ...t, taskListId: mappedId };
-                  }
-                  return t;
-                });
-                return changed ? updated : prevTasks;
+          if (user && !user.isGuest) {
+            cleanLists.forEach((l) => {
+              setDoc(doc(getUserTaskListsCollection(user.uid), l.id), sanitizeForFirestore(l), { merge: true }).catch(console.warn);
+            });
+          }
+
+          if (idRemap.size > 0) {
+            setTasks((prevTasks) => {
+              let changed = false;
+              const updated = prevTasks.map((t) => {
+                const mappedId = idRemap.get(t.taskListId);
+                if (mappedId && mappedId !== t.taskListId) {
+                  changed = true;
+                  return { ...t, taskListId: mappedId };
+                }
+                return t;
               });
-              setActiveTaskListId((prevId) => idRemap.get(prevId) || prevId);
-            }
+              if (changed) {
+                tasksRef.current = updated;
+              }
+              return changed ? updated : prevTasks;
+            });
+            setActiveTaskListId((prevId) => idRemap.get(prevId) || prevId);
+          }
 
-            return cleanLists;
-          });
+          const activeLists = cleanLists;
+          const isMatchingList = (t: TaskItem, targetList: TaskList) => {
+            if (t.taskListId === targetList.id) return true;
+            if (targetList.googleTaskListId && t.taskListId === targetList.googleTaskListId) return true;
+            if (targetList.id.startsWith('gtl_') && t.taskListId === targetList.id.replace('gtl_', '')) return true;
+            if (targetList.isDefault && (t.taskListId === 'list_default' || t.taskListId === '@default')) return true;
+            return false;
+          };
 
-          const activeLists = resolvedLocalLists.length > 0 ? resolvedLocalLists : taskListsRef.current;
           for (const list of activeLists) {
             const gtlId = list.googleTaskListId || (list.id.startsWith('gtl_') ? list.id.replace('gtl_', '') : '@default');
             try {
-              const remoteTasks = await fetchGoogleTasks(token, gtlId, list.id, taskListsRef.current);
-              if (remoteTasks.length > 0) {
-                setTasks((prev) => {
-                  const map = new Map(prev.map((t) => [t.googleTaskId || t.id, t]));
-                  remoteTasks.forEach((rt) => {
-                    const existing = map.get(rt.googleTaskId!);
-                    if (existing) {
-                      map.set(rt.googleTaskId!, {
-                        ...existing,
-                        ...rt,
-                        id: existing.id,
-                        taskListId: list.id,
-                        tags: existing.tags || (rt as any).tags || [],
-                        subtasks: existing.subtasks?.length ? existing.subtasks : rt.subtasks,
-                        totalFocusSeconds: existing.totalFocusSeconds || 0,
-                        pomodoroCount: existing.pomodoroCount || 0,
-                        priority: existing.priority || 'medium',
-                        archived: rt.archived ?? existing.archived,
-                        archivedAt: rt.archivedAt ?? existing.archivedAt,
-                      });
-                    } else {
-                      map.set(rt.googleTaskId!, {
-                        ...rt,
-                        tags: (rt as any).tags || [],
-                        taskListId: list.id,
-                      });
-                    }
-                  });
-                  const newArr = Array.from(map.values());
-                  tasksRef.current = newArr;
-                  return newArr;
+              const remoteTasks = await fetchGoogleTasks(token, gtlId, list.id, cleanLists);
+              const remoteGoogleTaskIds = new Set(remoteTasks.map((rt) => rt.googleTaskId).filter(Boolean));
+              const currentTasks = tasksRef.current;
+
+              // Identify tasks in currentTasks belonging to list.id that had a googleTaskId but are absent from Google Tasks (deleted)
+              const deletedTaskIds: string[] = [];
+              currentTasks.forEach((t) => {
+                if (t.googleTaskId && isMatchingList(t, list) && !remoteGoogleTaskIds.has(t.googleTaskId)) {
+                  deletedTaskIds.push(t.id);
+                }
+              });
+
+              if (user && !user.isGuest && deletedTaskIds.length > 0) {
+                deletedTaskIds.forEach((delId) => {
+                  deleteDoc(doc(getUserTasksCollection(user.uid), delId)).catch(console.warn);
                 });
+              }
+
+              const remainingTasks = currentTasks.filter((t) => !deletedTaskIds.includes(t.id));
+              const map = new Map(remainingTasks.map((t) => [t.googleTaskId || t.id, t]));
+
+              remoteTasks.forEach((rt) => {
+                const existing = map.get(rt.googleTaskId!);
+                if (existing) {
+                  map.set(rt.googleTaskId!, {
+                    ...existing,
+                    ...rt,
+                    id: existing.id,
+                    taskListId: list.id,
+                    taskListName: list.title,
+                    tags: existing.tags || (rt as any).tags || [],
+                    subtasks: existing.subtasks?.length ? existing.subtasks : rt.subtasks,
+                    totalFocusSeconds: Math.max(existing.totalFocusSeconds || 0, rt.totalFocusSeconds || 0),
+                    pomodoroCount: Math.max(existing.pomodoroCount || 0, rt.pomodoroCount || 0),
+                    priority: existing.priority || 'medium',
+                    archived: rt.archived ?? existing.archived,
+                    archivedAt: rt.archivedAt ?? existing.archivedAt,
+                  });
+                } else {
+                  map.set(rt.googleTaskId!, {
+                    ...rt,
+                    tags: (rt as any).tags || [],
+                    taskListId: list.id,
+                    taskListName: list.title,
+                  });
+                }
+              });
+              const newArr = Array.from(map.values());
+              tasksRef.current = newArr;
+              setTasks(newArr);
+
+              if (user && !user.isGuest) {
+                newArr.forEach((taskItem) => {
+                  setDoc(doc(getUserTasksCollection(user.uid), taskItem.id), sanitizeForFirestore(taskItem), { merge: true }).catch(console.warn);
+                });
+                const activeOnly = newArr.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+                syncActiveTasksToFirestore(user.uid, activeOnly, 'googleTasks').catch(console.warn);
               }
             } catch (listErr: any) {
               if (
@@ -816,21 +1048,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
 
+          if (user && !user.isGuest) {
+            const activeOnly = tasksRef.current.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+            syncActiveTasksToFirestore(user.uid, activeOnly, 'googleTasks').catch(console.warn);
+          }
+
           // Two-way sync: Push local tasks that are missing Google Task IDs
           const currentTasks = [...tasksRef.current];
           const currentLists = taskListsRef.current;
+          let anyPushed = false;
           for (const t of currentTasks) {
             if (!t.googleTaskId) {
               try {
                 const gtlId = resolveGoogleTaskListId(t.taskListId || '@default', currentLists);
                 const created = await createGoogleTask(token, gtlId, t, currentLists);
                 if (created?.id) {
+                  anyPushed = true;
+                  const resolvedName = currentLists.find((l) => l.id === t.taskListId)?.title || t.taskListName;
                   setTasks((prev) =>
-                    prev.map((item) => (item.id === t.id ? { ...item, googleTaskId: created.id } : item))
+                    prev.map((item) => (item.id === t.id ? { ...item, googleTaskId: created.id, taskListName: resolvedName } : item))
                   );
-                  tasksRef.current = tasksRef.current.map((item) => (item.id === t.id ? { ...item, googleTaskId: created.id } : item));
+                  tasksRef.current = tasksRef.current.map((item) => (item.id === t.id ? { ...item, googleTaskId: created.id, taskListName: resolvedName } : item));
                   if (user && !user.isGuest) {
-                    setDoc(doc(getUserTasksCollection(user.uid), t.id), { googleTaskId: created.id }, { merge: true }).catch(console.warn);
+                    setDoc(doc(getUserTasksCollection(user.uid), t.id), { googleTaskId: created.id, taskListName: resolvedName }, { merge: true }).catch(console.warn);
                   }
                 }
               } catch (err: any) {
@@ -845,6 +1085,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.warn('Could not sync local task to Google Tasks:', err);
               }
             }
+          }
+          if (anyPushed && user && !user.isGuest) {
+            persistActiveTasks(tasksRef.current, 'googleTasks');
           }
         } catch (taskErr: any) {
           if (
@@ -1023,7 +1266,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setTaskLists((prev) => prev.filter((l) => l.id !== listId));
-    setTasks((prev) => prev.filter((t) => t.taskListId !== listId));
+    setTasks((prev) => {
+      const remainingTasks = prev.filter((t) => t.taskListId !== listId);
+      tasksRef.current = remainingTasks;
+      persistActiveTasks(remainingTasks, 'webApp');
+      return remainingTasks;
+    });
     if (activeTaskListId === listId) {
       const remaining = taskLists.filter((l) => l.id !== listId);
       if (remaining.length > 0) setActiveTaskListId(remaining[0].id);
@@ -1036,6 +1284,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let googleTaskId: string | undefined = undefined;
 
     const targetListId = taskData.taskListId || activeTaskListId;
+    const targetList = taskListsRef.current.find((l) => l.id === targetListId);
 
     if (googleAccessToken && targetListId) {
       try {
@@ -1051,6 +1300,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: newId,
       googleTaskId,
       taskListId: targetListId,
+      taskListName: targetList?.title,
       title: taskData.title || 'New Task',
       notes: taskData.notes || '',
       status: taskData.status || 'needsAction',
@@ -1066,7 +1316,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: now,
     };
 
-    setTasks((prev) => [newTask, ...prev]);
+    setTasks((prev) => {
+      const next = [newTask, ...prev];
+      tasksRef.current = next;
+      persistActiveTasks(next, 'webApp');
+      return next;
+    });
 
     if (user && !user.isGuest) {
       setDoc(doc(getUserTasksCollection(user.uid), newId), sanitizeForFirestore(newTask)).catch(console.warn);
@@ -1086,6 +1341,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .then((created) => {
             if (created?.id) {
               setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, googleTaskId: created.id } : t)));
+              tasksRef.current = tasksRef.current.map((t) => (t.id === id ? { ...t, googleTaskId: created.id } : t));
+              persistActiveTasks(tasksRef.current, 'webApp');
               if (user && !user.isGuest) {
                 setDoc(doc(getUserTasksCollection(user.uid), id), { googleTaskId: created.id }, { merge: true }).catch(console.warn);
               }
@@ -1099,7 +1356,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTasks((prev) => {
       const nextTasks = prev.map((t) => {
         if (t.id === id) {
-          const updated = { ...t, ...partial, updatedAt: now };
+          const targetListId = partial.taskListId || t.taskListId;
+          const targetList = taskListsRef.current.find((l) => l.id === targetListId);
+          const taskListName = partial.taskListName || (partial.taskListId ? targetList?.title : t.taskListName || targetList?.title);
+          const updated = { ...t, ...partial, taskListName, updatedAt: now };
           if (user && !user.isGuest) {
             setDoc(doc(getUserTasksCollection(user.uid), id), sanitizeForFirestore(updated), { merge: true }).catch(console.warn);
           }
@@ -1108,6 +1368,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return t;
       });
       tasksRef.current = nextTasks;
+      persistActiveTasks(nextTasks, 'webApp');
       return nextTasks;
     });
   };
@@ -1117,11 +1378,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!existing) return;
     const isCompleted = existing.status === 'completed';
     const nextStatus = isCompleted ? 'needsAction' : 'completed';
-    const completedAt = nextStatus === 'completed' ? new Date().toISOString() : undefined;
+    const completedAt = nextStatus === 'completed' ? new Date().toISOString() : null;
     const archived = nextStatus === 'completed';
-    const archivedAt = nextStatus === 'completed' ? completedAt : undefined;
+    const archivedAt = nextStatus === 'completed' ? completedAt : null;
 
-    await updateTask(id, { status: nextStatus, completedAt, archived, archivedAt });
+    await updateTask(id, { status: nextStatus, completedAt: completedAt as any, archived, archivedAt: archivedAt as any });
   };
 
   const archiveTask = async (id: string) => {
@@ -1139,9 +1400,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const unarchiveTask = async (id: string) => {
     await updateTask(id, {
       archived: false,
-      archivedAt: undefined,
+      archivedAt: null as any,
       status: 'needsAction',
-      completedAt: undefined,
+      completedAt: null as any,
     });
   };
 
@@ -1195,7 +1456,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       deleteGoogleTask(googleAccessToken, gtlId, existing.googleTaskId, taskListsRef.current).catch(console.warn);
     }
 
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setTasks((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      tasksRef.current = next;
+      persistActiveTasks(next, 'webApp');
+      return next;
+    });
     if (user && !user.isGuest) {
       deleteDoc(doc(getUserTasksCollection(user.uid), id)).catch(console.warn);
     }
@@ -1209,8 +1475,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       title: title.trim(),
       completed: false,
     };
-    setTasks((prev) =>
-      prev.map((t) => {
+    setTasks((prev) => {
+      const next = prev.map((t) => {
         if (t.id === taskId) {
           const subtasks = [...(t.subtasks || []), subtask];
           const updated = { ...t, subtasks, updatedAt: new Date().toISOString() };
@@ -1220,13 +1486,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return updated;
         }
         return t;
-      })
-    );
+      });
+      tasksRef.current = next;
+      persistActiveTasks(next, 'webApp');
+      return next;
+    });
   };
 
   const toggleSubtask = (taskId: string, subtaskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) => {
+    setTasks((prev) => {
+      const next = prev.map((t) => {
         if (t.id === taskId) {
           const subtasks = (t.subtasks || []).map((s) =>
             s.id === subtaskId ? { ...s, completed: !s.completed } : s
@@ -1238,13 +1507,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return updated;
         }
         return t;
-      })
-    );
+      });
+      tasksRef.current = next;
+      persistActiveTasks(next, 'webApp');
+      return next;
+    });
   };
 
   const deleteSubtask = (taskId: string, subtaskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) => {
+    setTasks((prev) => {
+      const next = prev.map((t) => {
         if (t.id === taskId) {
           const subtasks = (t.subtasks || []).filter((s) => s.id !== subtaskId);
           const updated = { ...t, subtasks, updatedAt: new Date().toISOString() };
@@ -1254,8 +1526,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return updated;
         }
         return t;
-      })
-    );
+      });
+      tasksRef.current = next;
+      persistActiveTasks(next, 'webApp');
+      return next;
+    });
   };
 
   // Habit Actions
@@ -1511,6 +1786,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetAllDataToCleanSlate = useCallback(async () => {
     setEvents([]);
     setTasks([]);
+    tasksRef.current = [];
+    persistActiveTasks([], 'webApp');
     setHabits([]);
     setCalorieEntries([]);
     setFocusSessions([]);

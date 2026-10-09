@@ -86,9 +86,11 @@ export interface TaskItem {
   googleTaskId?: string;
   parentTaskId?: string;
   taskListId: string;
+  taskListName?: string;
   title: string;
   notes?: string;
   status: TaskStatus;
+  completed?: boolean;
   archived?: boolean;
   archivedAt?: string;
   due?: string; // ISO 8601 or YYYY-MM-DD
@@ -273,4 +275,16 @@ export interface AssistantMessage {
   text: string;
   timestamp: string;
   actionReceipt?: AssistantActionReceipt;
+}
+
+export interface ActiveTimerCloudState {
+  mode: PomodoroMode;
+  timerState: TimerState;
+  remainingSeconds: number;
+  targetEndTime: number | null;
+  currentCycle: number;
+  activeTaskIds: string[];
+  selectedTaskId: string | null;
+  updatedAt: string;
+  updatedBy: 'extension' | 'tab' | 'web';
 }
