@@ -1902,210 +1902,368 @@ export const TasksView: React.FC = () => {
         onClose={() => setEditingTask(null)}
         title="Edit Task Details"
         description="Update task notes, schedule, or priority."
+        headerActions={
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setEditStarred(!editStarred)}
+              className={`p-1.5 rounded-lg transition-all duration-150 swiftui-press cursor-pointer ${
+                editStarred
+                  ? 'text-[#FF9F0A] bg-amber-50 dark:bg-amber-950/40'
+                  : 'text-zinc-400 hover:text-[#FF9F0A] hover:bg-zinc-100 dark:hover:bg-white/10'
+              }`}
+              title={editStarred ? 'Starred task' : 'Star task'}
+            >
+              <Star className={`h-4 w-4 ${editStarred ? 'fill-[#FF9F0A] text-[#FF9F0A] apple-star-pop' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (editingTask) deleteTask(editingTask.id);
+                setEditingTask(null);
+              }}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors swiftui-press cursor-pointer"
+              title="Delete task"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        }
       >
         <form onSubmit={handleSaveEdit} className="space-y-4">
-          <Input
-            label="Task Title"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            required
-            autoFocus
-          />
-
+          {/* Title row with Google Tasks circular checkbox */}
           <div>
-            <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label htmlFor="edit-task-title-input" className="sr-only">
+              Task Title
+            </label>
+            <div className="flex items-start gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (editingTask) toggleTaskComplete(editingTask.id);
+                }}
+                className={`apple-checkbox mt-0.5 rounded-[999px] ${
+                  currentEditingTask?.status === 'completed' ? 'checked' : ''
+                }`}
+                aria-label="Toggle complete"
+              >
+                {currentEditingTask?.status === 'completed' && (
+                  <Check className="h-2.5 w-2.5 stroke-[3.5] text-white apple-check-spring" />
+                )}
+              </button>
+              <input
+                id="edit-task-title-input"
+                aria-label="Task Title"
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Task title"
+                required
+                autoFocus
+                className={`flex-1 text-base sm:text-lg font-semibold tracking-tight bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 border-0 focus:outline-none focus:ring-0 p-0 transition-colors ${
+                  currentEditingTask?.status === 'completed' ? 'line-through text-zinc-400 dark:text-zinc-500' : ''
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Notes area */}
+          <div>
+            <label htmlFor="edit-task-notes-input" className="sr-only">
               Notes
             </label>
             <textarea
+              id="edit-task-notes-input"
               rows={3}
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
               placeholder="Add details, background context, or links..."
-              className="w-full rounded-xl border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-950 p-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 transition-all duration-150"
+              className="w-full rounded-xl border border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-white/[0.03] p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:bg-white dark:focus:bg-zinc-900 transition-all resize-none"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              Subtasks ({currentEditingTask?.subtasks?.length || 0})
-            </label>
-            <div className="space-y-1.5 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
-              {currentEditingTask?.subtasks && currentEditingTask.subtasks.length > 0 ? (
-                currentEditingTask.subtasks.map((st) => (
-                  <div key={st.id} className="flex items-center justify-between text-xs py-0.5">
-                    <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                      <input
-                        type="checkbox"
-                        checked={st.completed}
-                        onChange={() => currentEditingTask && toggleSubtask(currentEditingTask.id, st.id)}
-                        className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700"
-                      />
-                      <span className={st.completed ? 'line-through text-zinc-400' : 'text-zinc-800 dark:text-zinc-200'}>
+          {/* Minimal Google Tasks / Apple Reminders Quick Metadata Bar */}
+          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+            {/* Due Date Chip */}
+            <div className="relative flex items-center">
+              <label
+                htmlFor="edit-task-due-picker"
+                className={`flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium cursor-pointer transition-all swiftui-press ${
+                  editDue
+                    ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#007AFF] dark:text-[#0A84FF]'
+                    : 'bg-zinc-100 dark:bg-white/[0.06] border-zinc-200/70 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                }`}
+              >
+                <CalendarIcon className="h-3 w-3 shrink-0" />
+                <span>{editDue ? formatGoogleTasksDue(editDue) : 'Add date/time'}</span>
+                {editDue && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setEditDue('');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEditDue('');
+                      }
+                    }}
+                    className="ml-1 p-0.5 hover:text-rose-500 rounded-sm cursor-pointer"
+                    title="Clear due date"
+                  >
+                    <X className="h-3 w-3" />
+                  </span>
+                )}
+              </label>
+              <input
+                id="edit-task-due-picker"
+                type="date"
+                value={editDue}
+                onChange={(e) => setEditDue(e.target.value)}
+                className="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto w-full h-full"
+              />
+            </div>
+
+            {/* Priority Segmented Chip Selector */}
+            <div className="flex items-center rounded-lg p-0.5 bg-zinc-100 dark:bg-white/[0.06] border border-zinc-200/70 dark:border-white/[0.08]">
+              {(['low', 'medium', 'high'] as const).map((p) => {
+                const isSelected = editPriority === p;
+                const badgeColor =
+                  p === 'high'
+                    ? isSelected
+                      ? 'bg-rose-500 text-white shadow-xs'
+                      : 'text-rose-600 dark:text-rose-400'
+                    : p === 'medium'
+                    ? isSelected
+                      ? 'bg-[#FF9500] text-white shadow-xs'
+                      : 'text-amber-600 dark:text-amber-400'
+                    : isSelected
+                    ? 'bg-zinc-700 text-white shadow-xs'
+                    : 'text-zinc-500 dark:text-zinc-400';
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setEditPriority(p)}
+                    className={`px-2 py-0.5 text-xs font-semibold rounded-md capitalize transition-all duration-150 swiftui-press cursor-pointer ${
+                      isSelected
+                        ? badgeColor
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Star Toggle Pill */}
+            <button
+              type="button"
+              onClick={() => setEditStarred(!editStarred)}
+              className={`flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium cursor-pointer transition-all swiftui-press ${
+                editStarred
+                  ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 font-semibold'
+                  : 'bg-zinc-100 dark:bg-white/[0.06] border-zinc-200/70 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+              }`}
+            >
+              <Star className={`h-3 w-3 ${editStarred ? 'text-[#FF9F0A] fill-[#FF9F0A]' : 'text-zinc-400'}`} />
+              <span>{editStarred ? 'Starred' : 'Star'}</span>
+            </button>
+          </div>
+
+          {/* Subtasks Section (Minimal Google Tasks Checklist) */}
+          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <ListTodo className="h-3.5 w-3.5 text-zinc-400" />
+                <span>Subtasks ({currentEditingTask?.subtasks?.length || 0})</span>
+              </span>
+            </div>
+
+            {currentEditingTask?.subtasks && currentEditingTask.subtasks.length > 0 && (
+              <div className="space-y-1 pl-0.5">
+                {currentEditingTask.subtasks.map((st) => (
+                  <div
+                    key={st.id}
+                    className="group/st flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-zinc-100/70 dark:hover:bg-white/[0.04] transition-colors"
+                  >
+                    <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => currentEditingTask && toggleSubtask(currentEditingTask.id, st.id)}
+                        className={`apple-checkbox h-4 w-4 rounded-[999px] ${st.completed ? 'checked' : ''}`}
+                        aria-label="Toggle subtask complete"
+                      >
+                        {st.completed && <Check className="h-2 w-2 stroke-[3.5] text-white apple-check-spring" />}
+                      </button>
+                      <span
+                        className={`truncate text-xs ${
+                          st.completed ? 'line-through text-zinc-400' : 'text-zinc-800 dark:text-zinc-200'
+                        }`}
+                      >
                         {st.title}
                       </span>
                     </label>
                     <button
                       type="button"
                       onClick={() => currentEditingTask && deleteSubtask(currentEditingTask.id, st.id)}
-                      className="text-zinc-400 hover:text-rose-500 p-0.5"
+                      className="text-zinc-400 hover:text-rose-500 p-1 opacity-0 group-hover/st:opacity-100 transition-opacity rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800"
+                      title="Delete subtask"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="h-3 w-3" />
                     </button>
                   </div>
-                ))
-              ) : (
-                <div className="text-[11px] text-zinc-400 py-1">No subtasks added yet.</div>
-              )}
-
-              <div className="flex items-center gap-1.5 pt-1 border-t border-zinc-200 dark:border-zinc-800">
-                <input
-                  type="text"
-                  placeholder="New subtask title..."
-                  value={modalNewSubtask}
-                  onChange={(e) => setModalNewSubtask(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleModalAddSubtask();
-                    }
-                  }}
-                  className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-md px-2 py-1 flex-1 focus:outline-none"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleModalAddSubtask}
-                  className="h-7 text-xs px-2 rounded-md swiftui-press"
-                >
-                  Add Subtask
-                </Button>
+                ))}
               </div>
+            )}
+
+            {/* Minimal Inline Add Subtask Input (Google Tasks Style) */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 focus-within:border-[#007AFF] focus-within:bg-blue-50/15 dark:focus-within:bg-blue-950/20 transition-all">
+              <Plus className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+              <input
+                type="text"
+                placeholder="New subtask title..."
+                value={modalNewSubtask}
+                onChange={(e) => setModalNewSubtask(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleModalAddSubtask();
+                  }
+                }}
+                className="text-xs bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 flex-1 focus:outline-none"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleModalAddSubtask}
+                className="h-6 text-[11px] px-2 text-[#007AFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md swiftui-press"
+              >
+                Add Subtask
+              </Button>
             </div>
           </div>
 
-          {/* Tags Management */}
-          <div>
-            <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              Tags ({editTags.length})
-            </label>
-            <div className="space-y-2 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
+          {/* Tags Section (Minimal Apple Reminders Style) */}
+          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-zinc-400" />
+                <span>Tags ({editTags.length})</span>
+              </span>
+            </div>
+
+            {editTags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 min-h-[24px]">
                 {editTags.map((tg) => (
                   <span
                     key={tg}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/[0.08] text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-white/[0.08] animate-scale-in"
                   >
                     <span>#{tg}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveEditTag(tg)}
-                      className="text-zinc-400 hover:text-rose-500 p-0.5 cursor-pointer"
+                      className="text-zinc-400 hover:text-rose-500 p-0.5 cursor-pointer rounded-xs"
+                      aria-label={`Remove tag ${tg}`}
                     >
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 ))}
-                {editTags.length === 0 && (
-                  <span className="text-[11px] text-zinc-400 py-0.5">No tags assigned yet.</span>
-                )}
               </div>
+            )}
 
-              <div className="flex items-center gap-1.5 pt-1 border-t border-zinc-200 dark:border-zinc-800">
-                <input
-                  type="text"
-                  placeholder="New tag (e.g. backend, deepwork)..."
-                  value={newTagInput}
-                  onChange={(e) => setNewTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddEditTag();
-                    }
-                  }}
-                  className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-md px-2 py-1 flex-1 focus:outline-none"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleAddEditTag()}
-                  className="h-7 text-xs px-2 rounded-md swiftui-press"
-                >
-                  Add Tag
-                </Button>
-              </div>
-
-              {allUniqueTags.filter(([t]) => !editTags.includes(t)).length > 0 && (
-                <div className="pt-1 border-t border-zinc-200/60 dark:border-zinc-800/60">
-                  <span className="text-[10px] text-zinc-400 block mb-1">Suggested from existing tasks:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {allUniqueTags
-                      .filter(([t]) => !editTags.includes(t))
-                      .slice(0, 8)
-                      .map(([t]) => (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => handleAddEditTag(t)}
-                          className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-200/60 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-                        >
-                          + #{t}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Due Date"
-              type="date"
-              value={editDue}
-              onChange={(e) => setEditDue(e.target.value)}
-            />
-            <Select
-              label="Priority"
-              value={editPriority}
-              onChange={(e) => setEditPriority(e.target.value as TaskPriority)}
-              options={[
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-              ]}
-            />
-          </div>
-
-          <div className="pt-1">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-700 dark:text-zinc-300">
+            {/* Minimal Inline Add Tag Input */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 focus-within:border-[#007AFF] focus-within:bg-blue-50/15 dark:focus-within:bg-blue-950/20 transition-all">
+              <Hash className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
               <input
-                type="checkbox"
-                checked={editStarred}
-                onChange={(e) => setEditStarred(e.target.checked)}
-                className="h-4 w-4 rounded-sm border-zinc-300 dark:border-zinc-700 text-[#FF9F0A] focus:ring-[#FF9F0A]"
+                type="text"
+                placeholder="New tag (e.g. backend, deepwork)..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddEditTag();
+                  }
+                }}
+                className="text-xs bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 flex-1 focus:outline-none"
               />
-              <span className="flex items-center gap-1.5">
-                <Star className={`h-3.5 w-3.5 ${editStarred ? 'text-[#FF9F0A] fill-[#FF9F0A]' : 'text-zinc-400'}`} />
-                <span>Mark as Starred (highlight in Starred view)</span>
-              </span>
-            </label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleAddEditTag()}
+                className="h-6 text-[11px] px-2 text-[#007AFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md swiftui-press"
+              >
+                Add Tag
+              </Button>
+            </div>
+
+            {/* Suggested Tags (Clean, Compact) */}
+            {allUniqueTags.filter(([t]) => !editTags.includes(t)).length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                <span className="text-[10px] text-zinc-400">Suggestions:</span>
+                {allUniqueTags
+                  .filter(([t]) => !editTags.includes(t))
+                  .slice(0, 6)
+                  .map(([t]) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => handleAddEditTag(t)}
+                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/[0.05] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white transition-all cursor-pointer swiftui-press"
+                    >
+                      + #{t}
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-white/[0.08]">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => setEditingTask(null)}
-              className="rounded-xl swiftui-press"
+              onClick={() => {
+                if (editingTask) deleteTask(editingTask.id);
+                setEditingTask(null);
+              }}
+              className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1 rounded-xl swiftui-press"
+              title="Delete task"
             >
-              Cancel
+              <Trash2 className="h-3.5 w-3.5" />
+              <span>Delete</span>
             </Button>
-            <Button type="submit" variant="primary" size="sm" className="rounded-xl bg-[#007AFF] text-white hover:bg-[#0062cc] swiftui-press">
-              Save Changes
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingTask(null)}
+                className="rounded-xl swiftui-press"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="rounded-xl bg-[#007AFF] hover:bg-[#0062cc] text-white font-medium shadow-xs swiftui-press"
+              >
+                Save Changes
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>
