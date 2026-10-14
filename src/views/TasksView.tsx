@@ -1897,11 +1897,11 @@ export const TasksView: React.FC = () => {
       </div>
 
       {/* Edit Task Modal */}
+      {/* Edit Task Modal (Streamlined Google Tasks & SwiftUI Experience) */}
       <Modal
         isOpen={Boolean(editingTask)}
         onClose={() => setEditingTask(null)}
         title="Edit Task Details"
-        description="Update task notes, schedule, or priority."
         headerActions={
           <div className="flex items-center gap-1">
             <button
@@ -1909,10 +1909,11 @@ export const TasksView: React.FC = () => {
               onClick={() => setEditStarred(!editStarred)}
               className={`p-1.5 rounded-lg transition-all duration-150 swiftui-press cursor-pointer ${
                 editStarred
-                  ? 'text-[#FF9F0A] bg-amber-50 dark:bg-amber-950/40'
+                  ? 'text-[#FF9F0A] bg-amber-500/10'
                   : 'text-zinc-400 hover:text-[#FF9F0A] hover:bg-zinc-100 dark:hover:bg-white/10'
               }`}
               title={editStarred ? 'Starred task' : 'Star task'}
+              aria-label={editStarred ? 'Starred task' : 'Star task'}
             >
               <Star className={`h-4 w-4 ${editStarred ? 'fill-[#FF9F0A] text-[#FF9F0A] apple-star-pop' : ''}`} />
             </button>
@@ -1922,8 +1923,9 @@ export const TasksView: React.FC = () => {
                 if (editingTask) deleteTask(editingTask.id);
                 setEditingTask(null);
               }}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors swiftui-press cursor-pointer"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors swiftui-press cursor-pointer"
               title="Delete task"
+              aria-label="Delete task"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -1991,7 +1993,7 @@ export const TasksView: React.FC = () => {
                 className={`flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium cursor-pointer transition-all swiftui-press ${
                   editDue
                     ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#007AFF] dark:text-[#0A84FF]'
-                    : 'bg-zinc-100 dark:bg-white/[0.06] border-zinc-200/70 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                    : 'bg-zinc-100/80 dark:bg-white/[0.06] border-zinc-200/70 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }`}
               >
                 <CalendarIcon className="h-3 w-3 shrink-0" />
@@ -2029,7 +2031,7 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Priority Segmented Chip Selector */}
-            <div className="flex items-center rounded-lg p-0.5 bg-zinc-100 dark:bg-white/[0.06] border border-zinc-200/70 dark:border-white/[0.08]">
+            <div className="flex items-center rounded-lg p-0.5 bg-zinc-100/80 dark:bg-white/[0.06] border border-zinc-200/70 dark:border-white/[0.08]">
               {(['low', 'medium', 'high'] as const).map((p) => {
                 const isSelected = editPriority === p;
                 const badgeColor =
@@ -2049,7 +2051,7 @@ export const TasksView: React.FC = () => {
                     key={p}
                     type="button"
                     onClick={() => setEditPriority(p)}
-                    className={`px-2 py-0.5 text-xs font-semibold rounded-md capitalize transition-all duration-150 swiftui-press cursor-pointer ${
+                    className={`px-2.5 py-0.5 text-xs font-semibold rounded-md capitalize transition-all duration-150 swiftui-press cursor-pointer ${
                       isSelected
                         ? badgeColor
                         : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
@@ -2060,24 +2062,10 @@ export const TasksView: React.FC = () => {
                 );
               })}
             </div>
-
-            {/* Star Toggle Pill */}
-            <button
-              type="button"
-              onClick={() => setEditStarred(!editStarred)}
-              className={`flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium cursor-pointer transition-all swiftui-press ${
-                editStarred
-                  ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 font-semibold'
-                  : 'bg-zinc-100 dark:bg-white/[0.06] border-zinc-200/70 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-              }`}
-            >
-              <Star className={`h-3 w-3 ${editStarred ? 'text-[#FF9F0A] fill-[#FF9F0A]' : 'text-zinc-400'}`} />
-              <span>{editStarred ? 'Starred' : 'Star'}</span>
-            </button>
           </div>
 
           {/* Subtasks Section (Minimal Google Tasks Checklist) */}
-          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-2">
+          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                 <ListTodo className="h-3.5 w-3.5 text-zinc-400" />
@@ -2112,7 +2100,7 @@ export const TasksView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => currentEditingTask && deleteSubtask(currentEditingTask.id, st.id)}
-                      className="text-zinc-400 hover:text-rose-500 p-1 opacity-0 group-hover/st:opacity-100 transition-opacity rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800"
+                      className="text-zinc-400 hover:text-rose-500 p-1 opacity-0 group-hover/st:opacity-100 transition-opacity rounded-md hover:bg-zinc-200/50 dark:hover:bg-zinc-800 cursor-pointer"
                       title="Delete subtask"
                     >
                       <X className="h-3 w-3" />
@@ -2122,8 +2110,8 @@ export const TasksView: React.FC = () => {
               </div>
             )}
 
-            {/* Minimal Inline Add Subtask Input (Google Tasks Style) */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 focus-within:border-[#007AFF] focus-within:bg-blue-50/15 dark:focus-within:bg-blue-950/20 transition-all">
+            {/* Seamless Inline Add Subtask Input (Google Tasks Style) */}
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-100/60 dark:bg-white/[0.04] border border-zinc-200/60 dark:border-white/[0.06] focus-within:border-[#007AFF]/60 focus-within:bg-blue-50/10 dark:focus-within:bg-blue-950/20 transition-all">
               <Plus className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
               <input
                 type="text"
@@ -2143,7 +2131,7 @@ export const TasksView: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={handleModalAddSubtask}
-                className="h-6 text-[11px] px-2 text-[#007AFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md swiftui-press"
+                className="h-5 text-[11px] px-2 text-[#007AFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md swiftui-press"
               >
                 Add Subtask
               </Button>
@@ -2151,7 +2139,7 @@ export const TasksView: React.FC = () => {
           </div>
 
           {/* Tags Section (Minimal Apple Reminders Style) */}
-          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-2">
+          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-zinc-400" />
@@ -2180,8 +2168,8 @@ export const TasksView: React.FC = () => {
               </div>
             )}
 
-            {/* Minimal Inline Add Tag Input */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 focus-within:border-[#007AFF] focus-within:bg-blue-50/15 dark:focus-within:bg-blue-950/20 transition-all">
+            {/* Seamless Inline Add Tag Input */}
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-100/60 dark:bg-white/[0.04] border border-zinc-200/60 dark:border-white/[0.06] focus-within:border-[#007AFF]/60 focus-within:bg-blue-50/10 dark:focus-within:bg-blue-950/20 transition-all">
               <Hash className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
               <input
                 type="text"
@@ -2201,69 +2189,32 @@ export const TasksView: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleAddEditTag()}
-                className="h-6 text-[11px] px-2 text-[#007AFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md swiftui-press"
+                className="h-5 text-[11px] px-2 text-[#007AFF] hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md swiftui-press"
               >
                 Add Tag
               </Button>
             </div>
-
-            {/* Suggested Tags (Clean, Compact) */}
-            {allUniqueTags.filter(([t]) => !editTags.includes(t)).length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                <span className="text-[10px] text-zinc-400">Suggestions:</span>
-                {allUniqueTags
-                  .filter(([t]) => !editTags.includes(t))
-                  .slice(0, 6)
-                  .map(([t]) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => handleAddEditTag(t)}
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/[0.05] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white transition-all cursor-pointer swiftui-press"
-                    >
-                      + #{t}
-                    </button>
-                  ))}
-              </div>
-            )}
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-white/[0.08]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-white/[0.08]">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              onClick={() => {
-                if (editingTask) deleteTask(editingTask.id);
-                setEditingTask(null);
-              }}
-              className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1 rounded-xl swiftui-press"
-              title="Delete task"
+              onClick={() => setEditingTask(null)}
+              className="rounded-xl swiftui-press"
             >
-              <Trash2 className="h-3.5 w-3.5" />
-              <span>Delete</span>
+              Cancel
             </Button>
-
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setEditingTask(null)}
-                className="rounded-xl swiftui-press"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                className="rounded-xl bg-[#007AFF] hover:bg-[#0062cc] text-white font-medium shadow-xs swiftui-press"
-              >
-                Save Changes
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              className="rounded-xl bg-[#007AFF] hover:bg-[#0062cc] text-white font-medium shadow-xs swiftui-press"
+            >
+              Save Changes
+            </Button>
           </div>
         </form>
       </Modal>
