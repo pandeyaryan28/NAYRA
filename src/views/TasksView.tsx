@@ -1185,7 +1185,12 @@ export const TasksView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-full min-w-0 bg-gradient-to-br from-[#f8f9fc] via-[#f1f2f6] to-[#e8eaf0] dark:from-[#111113] dark:via-[#161619] dark:to-[#0f0f11]">
+    <div className="relative flex flex-col md:flex-row h-full min-w-0 overflow-hidden bg-gradient-to-br from-[#f8f9fc] via-[#f1f2f6] to-[#e8eaf0] dark:from-[#111113] dark:via-[#161619] dark:to-[#0f0f11]">
+      {/* Ambient SwiftUI glass luminescence backdrops (static, non-interactive) */}
+      <div className="pointer-events-none absolute -top-24 -left-20 w-96 h-96 rounded-[999px] bg-blue-500/10 dark:bg-blue-600/15 blur-[100px]" />
+      <div className="pointer-events-none absolute top-1/3 -right-24 w-96 h-96 rounded-[999px] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[110px]" />
+      <div className="pointer-events-none absolute -bottom-20 left-1/3 w-80 h-80 rounded-[999px] bg-sky-400/10 dark:bg-sky-500/10 blur-[90px]" />
+
       {/* Apple Reminders Sidebar */}
       <div className="w-full md:w-64 lg:w-72 p-4 flex flex-col gap-4 shrink-0 border-r border-black/[0.06] dark:border-white/[0.06] bg-white/55 dark:bg-[#1a1a1d]/60 backdrop-blur-3xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)]">
         {/* Search Bar in Sidebar (Apple Reminders Location) */}
@@ -1219,7 +1224,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'today'
-                ? 'ring-2 ring-[#007AFF] bg-blue-50/80 dark:bg-[#007AFF]/25 border-[#007AFF]/40 dark:border-[#007AFF]/50 shadow-[0_4px_16px_rgba(0,122,255,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
+                ? 'ring-2 ring-[#007AFF] bg-blue-50/80 dark:bg-[#007AFF]/25 border-[#007AFF]/40 dark:border-[#007AFF]/50 shadow-[0_4px_16px_rgba(0,122,255,0.18),inset_0_1px_1px_rgba(255,255,255,0.95)] dark:shadow-[0_4px_16px_rgba(0,122,255,0.25),inset_0_1px_1px_rgba(255,255,255,0.25)]'
                 : ''
             }`}
           >
@@ -1245,7 +1250,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'upcoming'
-                ? 'ring-2 ring-[#FF9500] bg-amber-50/80 dark:bg-[#FF9500]/25 border-[#FF9500]/40 dark:border-[#FF9500]/50 shadow-[0_4px_16px_rgba(255,149,0,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
+                ? 'ring-2 ring-[#FF9500] bg-amber-50/80 dark:bg-[#FF9500]/25 border-[#FF9500]/40 dark:border-[#FF9500]/50 shadow-[0_4px_16px_rgba(255,149,0,0.18),inset_0_1px_1px_rgba(255,255,255,0.95)] dark:shadow-[0_4px_16px_rgba(255,149,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.25)]'
                 : ''
             }`}
           >
@@ -1271,7 +1276,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'all'
-                ? 'ring-2 ring-[#5856D6] bg-indigo-50/80 dark:bg-[#5856D6]/25 border-[#5856D6]/40 dark:border-[#5856D6]/50 shadow-[0_4px_16px_rgba(88,86,214,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
+                ? 'ring-2 ring-[#5856D6] bg-indigo-50/80 dark:bg-[#5856D6]/25 border-[#5856D6]/40 dark:border-[#5856D6]/50 shadow-[0_4px_16px_rgba(88,86,214,0.18),inset_0_1px_1px_rgba(255,255,255,0.95)] dark:shadow-[0_4px_16px_rgba(88,86,214,0.25),inset_0_1px_1px_rgba(255,255,255,0.25)]'
                 : ''
             }`}
           >
@@ -1297,7 +1302,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'starred'
-                ? 'ring-2 ring-[#FF9F0A] bg-amber-50/80 dark:bg-[#FF9F0A]/25 border-[#FF9F0A]/40 dark:border-[#FF9F0A]/50 shadow-[0_4px_16px_rgba(255,159,10,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
+                ? 'ring-2 ring-[#FF9F0A] bg-amber-50/80 dark:bg-[#FF9F0A]/25 border-[#FF9F0A]/40 dark:border-[#FF9F0A]/50 shadow-[0_4px_16px_rgba(255,159,10,0.18),inset_0_1px_1px_rgba(255,255,255,0.95)] dark:shadow-[0_4px_16px_rgba(255,159,10,0.25),inset_0_1px_1px_rgba(255,255,255,0.25)]'
                 : ''
             }`}
           >
@@ -1406,8 +1411,8 @@ export const TasksView: React.FC = () => {
                     title={`Filter by tag #${tag}`}
                     className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer swiftui-press ${
                       isSelected
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-white/[0.05]'
+                        ? 'bg-white/80 dark:bg-white/[0.14] text-zinc-950 dark:text-white font-semibold backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] border border-black/[0.04] dark:border-white/[0.08]'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-white/40 dark:hover:bg-white/[0.05]'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 truncate">
@@ -1433,8 +1438,8 @@ export const TasksView: React.FC = () => {
             }}
             className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer swiftui-press ${
               activeTaskListId === 'archived_view'
-                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold'
-                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-white/[0.05]'
+                ? 'bg-white/80 dark:bg-white/[0.14] text-zinc-950 dark:text-white font-semibold backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] border border-black/[0.04] dark:border-white/[0.08]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:bg-white/40 dark:hover:bg-white/[0.05]'
             }`}
           >
             <div className="flex items-center gap-2 truncate">
@@ -1701,7 +1706,7 @@ export const TasksView: React.FC = () => {
                   type="submit"
                   variant="primary"
                   size="sm"
-                  className="h-6 px-3 text-[11px] font-semibold rounded-lg bg-[#007AFF] text-white hover:bg-[#0062cc] swiftui-press"
+                  className="h-6 px-3 text-[11px] font-semibold rounded-lg bg-[#007AFF] text-white hover:bg-[#0062cc] shadow-[0_2px_8px_rgba(0,122,255,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] swiftui-press"
                 >
                   Add
                 </Button>
@@ -2037,14 +2042,14 @@ export const TasksView: React.FC = () => {
                 const badgeColor =
                   p === 'high'
                     ? isSelected
-                    ? 'bg-rose-500 text-white shadow-xs'
+                    ? 'bg-rose-500 text-white shadow-[0_1px_4px_rgba(244,63,94,0.35),inset_0_1px_0_rgba(255,255,255,0.25)]'
                     : 'text-rose-600 dark:text-rose-400'
                   : p === 'medium'
                   ? isSelected
-                    ? 'bg-[#FF9500] text-white shadow-xs'
+                    ? 'bg-[#FF9500] text-white shadow-[0_1px_4px_rgba(255,149,0,0.35),inset_0_1px_0_rgba(255,255,255,0.25)]'
                     : 'text-amber-600 dark:text-amber-400'
                   : isSelected
-                  ? 'bg-zinc-700 text-white shadow-xs'
+                  ? 'bg-zinc-700 dark:bg-zinc-600 text-white shadow-[0_1px_3px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.25)]'
                   : 'text-zinc-500 dark:text-zinc-400';
                 return (
                   <button

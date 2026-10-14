@@ -215,6 +215,7 @@
 /* Frosted glass vibrancy container */
 .swiftui-glass {
   background: rgba(255, 255, 255, 0.72);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.4) 0px, transparent 50%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.85);
@@ -223,6 +224,7 @@
 
 .dark .swiftui-glass {
   background: rgba(28, 28, 32, 0.7);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.08) 0px, transparent 50%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -349,13 +351,19 @@
 }
 
 .swiftui-modal-surface {
+  background-image: radial-gradient(at 50% 0%, rgba(255, 255, 255, 0.35) 0px, transparent 60%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
   backdrop-filter: blur(36px) saturate(200%);
   -webkit-backdrop-filter: blur(36px) saturate(200%);
+}
+
+.dark .swiftui-modal-surface {
+  background-image: radial-gradient(at 50% 0%, rgba(255, 255, 255, 0.08) 0px, transparent 60%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
 /* Apple macOS Reminders & SwiftUI Frosted Glass Card */
 .apple-card-surface {
   background: rgba(255, 255, 255, 0.75);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.4) 0px, transparent 50%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.85);
@@ -366,6 +374,7 @@
 
 .dark .apple-card-surface {
   background: rgba(28, 28, 32, 0.7);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.08) 0px, transparent 50%), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -375,6 +384,7 @@
 /* Individual SwiftUI frosted glass task card (Comfortable & Board modes) */
 .swiftui-glass-card {
   background: rgba(255, 255, 255, 0.7);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.35) 0px, transparent 50%);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.8);
@@ -384,6 +394,7 @@
 
 .dark .swiftui-glass-card {
   background: rgba(38, 38, 44, 0.55);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.08) 0px, transparent 50%);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -391,13 +402,13 @@
 }
 
 .swiftui-glass-card:hover {
-  background: rgba(255, 255, 255, 0.92);
+  background-color: rgba(255, 255, 255, 0.92);
   border-color: rgba(255, 255, 255, 1);
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 1);
 }
 
 .dark .swiftui-glass-card:hover {
-  background: rgba(48, 48, 56, 0.72);
+  background-color: rgba(48, 48, 56, 0.72);
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.55), inset 0 1px 1px 0 rgba(255, 255, 255, 0.18);
 }
@@ -409,6 +420,7 @@
 /* Apple Category Tile: Authentic macOS Reminders Frosted Glass */
 .apple-reminders-tile {
   background: rgba(255, 255, 255, 0.7);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.45) 0px, transparent 60%);
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.85);
@@ -420,6 +432,7 @@
 
 .dark .apple-reminders-tile {
   background: rgba(40, 40, 46, 0.65);
+  background-image: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.1) 0px, transparent 60%);
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.11);
@@ -428,19 +441,70 @@
 
 .apple-reminders-tile:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.88);
+  background-color: rgba(255, 255, 255, 0.88);
   border-color: rgba(255, 255, 255, 1);
   box-shadow: 0 8px 24px -3px rgba(0, 0, 0, 0.08), 0 2px 8px -1px rgba(0, 0, 0, 0.04), inset 0 1px 1px 0 rgba(255, 255, 255, 1);
 }
 
 .dark .apple-reminders-tile:hover {
-  background: rgba(52, 52, 60, 0.78);
+  background-color: rgba(52, 52, 60, 0.78);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 28px -3px rgba(0, 0, 0, 0.65), 0 3px 8px -1px rgba(0, 0, 0, 0.4), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .apple-reminders-tile:active {
   transform: scale(0.97);
+}
+
+/* Reduced transparency accessibility & non-backdrop-filter fallback */
+@media (prefers-reduced-transparency: reduce) {
+  .swiftui-modal-surface {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: #ffffff !important;
+  }
+  .dark .swiftui-modal-surface {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: #1c1c1e !important;
+  }
+  .swiftui-glass,
+  .apple-card-surface,
+  .swiftui-glass-card,
+  .apple-reminders-tile {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: #ffffff !important;
+  }
+  .dark .swiftui-glass,
+  .dark .apple-card-surface,
+  .dark .swiftui-glass-card,
+  .dark .apple-reminders-tile {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: #1c1c1e !important;
+  }
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .swiftui-modal-surface {
+    background-color: #ffffff !important;
+  }
+  .dark .swiftui-modal-surface {
+    background-color: #1c1c1e !important;
+  }
+  .swiftui-glass,
+  .apple-card-surface,
+  .swiftui-glass-card,
+  .apple-reminders-tile {
+    background-color: #ffffff !important;
+  }
+  .dark .swiftui-glass,
+  .dark .apple-card-surface,
+  .dark .swiftui-glass-card,
+  .dark .apple-reminders-tile {
+    background-color: #1c1c1e !important;
+  }
 }
 
 /* Apple Circular Checkbox with Spring Check */
