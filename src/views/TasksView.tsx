@@ -927,8 +927,8 @@ export const TasksView: React.FC = () => {
         key={t.id}
         className={`group flex items-start justify-between p-3.5 rounded-2xl border transition-all duration-200 task-item-enter swiftui-press ${
           isArchived || isCompleted
-            ? 'border-zinc-200/50 dark:border-white/[0.04] bg-zinc-50/50 dark:bg-zinc-900/30 opacity-70'
-            : 'border-zinc-200/70 dark:border-white/[0.07] bg-white dark:bg-[#1e1e22] hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-xs'
+            ? 'border-black/[0.05] dark:border-white/[0.04] bg-white/40 dark:bg-white/[0.02] opacity-70 backdrop-blur-sm'
+            : 'swiftui-glass-card'
         }`}
       >
         <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -1185,9 +1185,9 @@ export const TasksView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-full min-w-0 bg-[#f4f4f7] dark:bg-[#161618]">
+    <div className="flex flex-col md:flex-row h-full min-w-0 bg-gradient-to-br from-[#f8f9fc] via-[#f1f2f6] to-[#e8eaf0] dark:from-[#111113] dark:via-[#161619] dark:to-[#0f0f11]">
       {/* Apple Reminders Sidebar */}
-      <div className="w-full md:w-64 lg:w-72 p-4 flex flex-col gap-4 shrink-0 border-r border-zinc-200/80 dark:border-white/[0.06] bg-white/60 dark:bg-[#1c1c1e]/70 backdrop-blur-2xl">
+      <div className="w-full md:w-64 lg:w-72 p-4 flex flex-col gap-4 shrink-0 border-r border-black/[0.06] dark:border-white/[0.06] bg-white/55 dark:bg-[#1a1a1d]/60 backdrop-blur-3xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)]">
         {/* Search Bar in Sidebar (Apple Reminders Location) */}
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-400" />
@@ -1196,7 +1196,7 @@ export const TasksView: React.FC = () => {
             placeholder="Search tasks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-8 pl-8 pr-7 rounded-xl bg-zinc-200/60 dark:bg-zinc-800/70 border border-transparent focus:border-zinc-300 dark:focus:border-zinc-700 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none transition-all"
+            className="w-full h-8 pl-8 pr-7 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-md border border-black/[0.05] dark:border-white/[0.08] text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-[#007AFF]/60 focus:bg-white/80 dark:focus:bg-white/[0.1] transition-all"
           />
           {searchQuery && (
             <button
@@ -1219,7 +1219,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'today'
-                ? 'ring-2 ring-[#007AFF] bg-blue-50/50 dark:bg-[#007AFF]/15'
+                ? 'ring-2 ring-[#007AFF] bg-blue-50/80 dark:bg-[#007AFF]/25 border-[#007AFF]/40 dark:border-[#007AFF]/50 shadow-[0_4px_16px_rgba(0,122,255,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
                 : ''
             }`}
           >
@@ -1245,7 +1245,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'upcoming'
-                ? 'ring-2 ring-[#FF9500] bg-amber-50/50 dark:bg-[#FF9500]/15'
+                ? 'ring-2 ring-[#FF9500] bg-amber-50/80 dark:bg-[#FF9500]/25 border-[#FF9500]/40 dark:border-[#FF9500]/50 shadow-[0_4px_16px_rgba(255,149,0,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
                 : ''
             }`}
           >
@@ -1271,7 +1271,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'all'
-                ? 'ring-2 ring-zinc-800 dark:ring-white bg-zinc-100 dark:bg-white/10'
+                ? 'ring-2 ring-[#5856D6] bg-indigo-50/80 dark:bg-[#5856D6]/25 border-[#5856D6]/40 dark:border-[#5856D6]/50 shadow-[0_4px_16px_rgba(88,86,214,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
                 : ''
             }`}
           >
@@ -1297,7 +1297,7 @@ export const TasksView: React.FC = () => {
             }}
             className={`apple-reminders-tile flex flex-col justify-between text-left cursor-pointer ${
               activeTaskListId === 'starred'
-                ? 'ring-2 ring-[#FF9F0A] bg-amber-50/50 dark:bg-[#FF9F0A]/15'
+                ? 'ring-2 ring-[#FF9F0A] bg-amber-50/80 dark:bg-[#FF9F0A]/25 border-[#FF9F0A]/40 dark:border-[#FF9F0A]/50 shadow-[0_4px_16px_rgba(255,159,10,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)]'
                 : ''
             }`}
           >
@@ -1352,8 +1352,8 @@ export const TasksView: React.FC = () => {
                   }}
                   className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer swiftui-press ${
                     isSelected
-                      ? 'bg-zinc-200/80 dark:bg-white/10 text-zinc-950 dark:text-white font-semibold shadow-xs'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-white/[0.05]'
+                      ? 'bg-white/80 dark:bg-white/[0.14] text-zinc-950 dark:text-white font-semibold backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] border border-black/[0.04] dark:border-white/[0.08]'
+                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-white/40 dark:hover:bg-white/[0.05]'
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate">
@@ -1373,7 +1373,7 @@ export const TasksView: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsNewListModalOpen(true)}
-              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/40 dark:hover:bg-white/[0.04] rounded-xl transition-all cursor-pointer swiftui-press mt-1"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-white/50 dark:hover:bg-white/[0.06] rounded-xl transition-all cursor-pointer swiftui-press mt-1"
             >
               <Plus className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
               <span>Create new list</span>
@@ -1538,7 +1538,7 @@ export const TasksView: React.FC = () => {
             )}
 
             {/* Apple Segmented Density Selector */}
-            <div className="flex items-center rounded-xl p-0.5 bg-zinc-200/70 dark:bg-white/[0.08]">
+            <div className="flex items-center rounded-xl p-0.5 bg-black/[0.05] dark:bg-white/[0.06] backdrop-blur-xl border border-black/[0.05] dark:border-white/[0.08] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]">
               {(['compact', 'comfortable', 'board'] as const).map((mode) => (
                 <button
                   key={mode}
@@ -1546,7 +1546,7 @@ export const TasksView: React.FC = () => {
                   onClick={() => handleSetDensityMode(mode)}
                   className={`px-3 py-1 text-xs font-semibold rounded-lg capitalize transition-all duration-150 swiftui-press cursor-pointer ${
                     densityMode === mode
-                      ? 'bg-white dark:bg-[#2c2c2e] text-zinc-900 dark:text-white shadow-xs'
+                      ? 'bg-white/90 dark:bg-white/[0.18] text-zinc-900 dark:text-white backdrop-blur-md shadow-[0_1px_4px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] dark:shadow-[0_1px_4px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.18)]'
                       : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                   }`}
                   title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} density mode`}
@@ -1557,7 +1557,7 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Filter/Group/Sort Toolbar Dropdowns */}
-            <div className="flex items-center rounded-xl p-0.5 bg-zinc-200/70 dark:bg-white/[0.08]">
+            <div className="flex items-center rounded-xl p-0.5 bg-black/[0.05] dark:bg-white/[0.06] backdrop-blur-xl border border-black/[0.05] dark:border-white/[0.08] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]">
               <select
                 value={groupBy}
                 onChange={(e) => handleSetGroupBy(e.target.value as any)}
@@ -1677,7 +1677,7 @@ export const TasksView: React.FC = () => {
           {activeTaskListId !== 'archived_view' && (
             <form
               onSubmit={handleQuickAdd}
-              className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-white/[0.06] group focus-within:border-[#007AFF]/60 transition-colors"
+              className="flex items-center gap-3 pb-3 border-b border-black/[0.05] dark:border-white/[0.06] group focus-within:border-[#007AFF]/60 transition-colors"
             >
               <div className="h-5 w-5 rounded-[999px] border-2 border-dashed border-zinc-300 dark:border-zinc-600 flex items-center justify-center text-zinc-400 group-focus-within:border-[#007AFF] group-focus-within:text-[#007AFF] transition-colors shrink-0">
                 <Plus className="h-3 w-3 stroke-[3]" />
@@ -1980,7 +1980,7 @@ export const TasksView: React.FC = () => {
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
               placeholder="Add details, background context, or links..."
-              className="w-full rounded-xl border border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50/70 dark:bg-white/[0.03] p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:bg-white dark:focus:bg-zinc-900 transition-all resize-none"
+              className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white/50 dark:bg-white/[0.03] backdrop-blur-md p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:bg-white/80 dark:focus:bg-[#202024]/80 transition-all resize-none"
             />
           </div>
 
@@ -1992,8 +1992,8 @@ export const TasksView: React.FC = () => {
                 htmlFor="edit-task-due-picker"
                 className={`flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs font-medium cursor-pointer transition-all swiftui-press ${
                   editDue
-                    ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#007AFF] dark:text-[#0A84FF]'
-                    : 'bg-zinc-100/80 dark:bg-white/[0.06] border-zinc-200/70 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                    ? 'bg-blue-500/15 dark:bg-blue-500/20 border-[#007AFF]/40 dark:border-[#0A84FF]/40 text-[#007AFF] dark:text-[#0A84FF] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]'
+                    : 'bg-white/50 dark:bg-white/[0.05] backdrop-blur-md border-black/[0.06] dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white/80 dark:hover:bg-white/10'
                 }`}
               >
                 <CalendarIcon className="h-3 w-3 shrink-0" />
@@ -2031,21 +2031,21 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Priority Segmented Chip Selector */}
-            <div className="flex items-center rounded-lg p-0.5 bg-zinc-100/80 dark:bg-white/[0.06] border border-zinc-200/70 dark:border-white/[0.08]">
+            <div className="flex items-center rounded-lg p-0.5 bg-white/50 dark:bg-white/[0.05] backdrop-blur-md border border-black/[0.06] dark:border-white/[0.08]">
               {(['low', 'medium', 'high'] as const).map((p) => {
                 const isSelected = editPriority === p;
                 const badgeColor =
                   p === 'high'
                     ? isSelected
-                      ? 'bg-rose-500 text-white shadow-xs'
-                      : 'text-rose-600 dark:text-rose-400'
-                    : p === 'medium'
-                    ? isSelected
-                      ? 'bg-[#FF9500] text-white shadow-xs'
-                      : 'text-amber-600 dark:text-amber-400'
-                    : isSelected
-                    ? 'bg-zinc-700 text-white shadow-xs'
-                    : 'text-zinc-500 dark:text-zinc-400';
+                    ? 'bg-rose-500 text-white shadow-xs'
+                    : 'text-rose-600 dark:text-rose-400'
+                  : p === 'medium'
+                  ? isSelected
+                    ? 'bg-[#FF9500] text-white shadow-xs'
+                    : 'text-amber-600 dark:text-amber-400'
+                  : isSelected
+                  ? 'bg-zinc-700 text-white shadow-xs'
+                  : 'text-zinc-500 dark:text-zinc-400';
                 return (
                   <button
                     key={p}
@@ -2065,7 +2065,7 @@ export const TasksView: React.FC = () => {
           </div>
 
           {/* Subtasks Section (Minimal Google Tasks Checklist) */}
-          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-1.5">
+          <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                 <ListTodo className="h-3.5 w-3.5 text-zinc-400" />
@@ -2078,7 +2078,7 @@ export const TasksView: React.FC = () => {
                 {currentEditingTask.subtasks.map((st) => (
                   <div
                     key={st.id}
-                    className="group/st flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-zinc-100/70 dark:hover:bg-white/[0.04] transition-colors"
+                    className="group/st flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/[0.04] backdrop-blur-xs transition-colors"
                   >
                     <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
                       <button
@@ -2111,7 +2111,7 @@ export const TasksView: React.FC = () => {
             )}
 
             {/* Seamless Inline Add Subtask Input (Google Tasks Style) */}
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-100/60 dark:bg-white/[0.04] border border-zinc-200/60 dark:border-white/[0.06] focus-within:border-[#007AFF]/60 focus-within:bg-blue-50/10 dark:focus-within:bg-blue-950/20 transition-all">
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/50 dark:bg-white/[0.04] backdrop-blur-md border border-black/[0.06] dark:border-white/[0.08] focus-within:border-[#007AFF]/60 focus-within:bg-blue-50/15 dark:focus-within:bg-blue-950/20 transition-all">
               <Plus className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
               <input
                 type="text"
@@ -2139,7 +2139,7 @@ export const TasksView: React.FC = () => {
           </div>
 
           {/* Tags Section (Minimal Apple Reminders Style) */}
-          <div className="pt-2 border-t border-zinc-100 dark:border-white/[0.06] space-y-1.5">
+          <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-zinc-400" />
@@ -2152,7 +2152,7 @@ export const TasksView: React.FC = () => {
                 {editTags.map((tg) => (
                   <span
                     key={tg}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/[0.08] text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-white/[0.08] animate-scale-in"
+                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-white/60 dark:bg-white/[0.06] backdrop-blur-md text-zinc-800 dark:text-zinc-200 border border-black/[0.06] dark:border-white/[0.08] animate-scale-in"
                   >
                     <span>#{tg}</span>
                     <button
@@ -2169,7 +2169,7 @@ export const TasksView: React.FC = () => {
             )}
 
             {/* Seamless Inline Add Tag Input */}
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-100/60 dark:bg-white/[0.04] border border-zinc-200/60 dark:border-white/[0.06] focus-within:border-[#007AFF]/60 focus-within:bg-blue-50/10 dark:focus-within:bg-blue-950/20 transition-all">
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/50 dark:bg-white/[0.04] backdrop-blur-md border border-black/[0.06] dark:border-white/[0.08] focus-within:border-[#007AFF]/60 focus-within:bg-blue-50/15 dark:focus-within:bg-blue-950/20 transition-all">
               <Hash className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
               <input
                 type="text"
@@ -2197,13 +2197,13 @@ export const TasksView: React.FC = () => {
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-white/[0.08]">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setEditingTask(null)}
-              className="rounded-xl swiftui-press"
+              className="rounded-xl swiftui-press bg-white/50 dark:bg-white/[0.06] backdrop-blur-md border border-zinc-200/80 dark:border-white/[0.08] hover:bg-white/80 dark:hover:bg-white/10"
             >
               Cancel
             </Button>
@@ -2211,7 +2211,7 @@ export const TasksView: React.FC = () => {
               type="submit"
               variant="primary"
               size="sm"
-              className="rounded-xl bg-[#007AFF] hover:bg-[#0062cc] text-white font-medium shadow-xs swiftui-press"
+              className="rounded-xl bg-[#007AFF] hover:bg-[#0062cc] text-white font-medium shadow-[0_2px_8px_rgba(0,122,255,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] swiftui-press"
             >
               Save Changes
             </Button>
@@ -2232,20 +2232,26 @@ export const TasksView: React.FC = () => {
             placeholder="e.g., Engineering Objectives"
             value={newListTitle}
             onChange={(e) => setNewListTitle(e.target.value)}
+            className="rounded-xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-md border-black/[0.08] dark:border-white/[0.1]"
             required
             autoFocus
           />
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex justify-end gap-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsNewListModalOpen(false)}
-              className="rounded-xl swiftui-press"
+              className="rounded-xl swiftui-press bg-white/50 dark:bg-white/[0.06] backdrop-blur-md border border-zinc-200/80 dark:border-white/[0.08] hover:bg-white/80 dark:hover:bg-white/10"
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="sm" className="rounded-xl bg-[#007AFF] text-white hover:bg-[#0062cc] swiftui-press">
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              className="rounded-xl bg-[#007AFF] text-white hover:bg-[#0062cc] shadow-[0_2px_8px_rgba(0,122,255,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] swiftui-press"
+            >
               Create List
             </Button>
           </div>
