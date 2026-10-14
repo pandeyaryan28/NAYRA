@@ -229,7 +229,14 @@ export const TasksView: React.FC = () => {
 
   // Active list lookup
   const activeList = useMemo(() => {
-    if (activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred') return null;
+    if (
+      activeTaskListId === 'all' ||
+      activeTaskListId === 'archived_view' ||
+      activeTaskListId === 'starred' ||
+      activeTaskListId === 'today' ||
+      activeTaskListId === 'upcoming'
+    )
+      return null;
     return uniqueTaskLists.find((l) => l.id === activeTaskListId) || uniqueTaskLists[0];
   }, [uniqueTaskLists, activeTaskListId]);
 
@@ -238,13 +245,59 @@ export const TasksView: React.FC = () => {
     return tasks.filter((t) => !t.archived && t.status !== 'completed' && Boolean(t.starred)).length;
   }, [tasks]);
 
-  // Tasks belonging to active scope (with resilient matching for Google Tasks)
+  // Count of active tasks due today
+  const todayTasksCount = useMemo(() => {
+    return tasks.filter((t) => {
+      if (t.archived || t.status === 'completed' || !t.due) return false;
+      try {
+        return isToday(parseISO(t.due));
+      } catch {
+        return false;
+      }
+    }).length;
+  }, [tasks]);
+
+  // Count of active tasks due in future
+  const upcomingTasksCount = useMemo(() => {
+    return tasks.filter((t) => {
+      if (t.archived || t.status === 'completed' || !t.due) return false;
+      try {
+        const parsed = parseISO(t.due);
+        return !isPast(parsed) && !isToday(parsed);
+      } catch {
+        return false;
+      }
+    }).length;
+  }, [tasks]);
+
+  // Tasks belonging to active scope
   const scopedTasks = useMemo(() => {
     if (activeTaskListId === 'all' || activeTaskListId === 'archived_view') {
       return tasks;
     }
     if (activeTaskListId === 'starred') {
       return tasks.filter((t) => Boolean(t.starred));
+    }
+    if (activeTaskListId === 'today') {
+      return tasks.filter((t) => {
+        if (!t.due) return false;
+        try {
+          return isToday(parseISO(t.due));
+        } catch {
+          return false;
+        }
+      });
+    }
+    if (activeTaskListId === 'upcoming') {
+      return tasks.filter((t) => {
+        if (!t.due) return false;
+        try {
+          const parsed = parseISO(t.due);
+          return !isPast(parsed) && !isToday(parsed);
+        } catch {
+          return false;
+        }
+      });
     }
     const targetList = activeList || uniqueTaskLists[0];
     return tasks.filter((t) => {
@@ -272,6 +325,16 @@ export const TasksView: React.FC = () => {
   const completedUnarchivedCount = useMemo(() => {
     return scopedTasks.filter((t) => t.status === 'completed' && !t.archived).length;
   }, [scopedTasks]);
+
+  // Helper to get total unarchived tasks across all lists
+  const totalActiveTasksCount = useMemo(() => {
+    return tasks.filter((t) => !t.archived && t.status !== 'completed').length;
+  }, [tasks]);
+
+  // Helper to get total archived tasks across all lists
+  const totalArchivedTasksCount = useMemo(() => {
+    return tasks.filter((t) => t.archived || t.status === 'completed').length;
+  }, [tasks]);
 
   // Filter & sort tasks for main list display
   const displayedTasks = useMemo(() => {
@@ -373,42 +436,42 @@ export const TasksView: React.FC = () => {
         {
           id: 'overdue',
           title: 'Past',
-          icon: <AlertCircle className="h-4 w-4 text-rose-500" />,
+          icon: <AlertCircle className="h-3.5 w-3.5 text-rose-500" />,
           accentClass: 'text-rose-600 dark:text-rose-400 bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60',
           tasks: sortByPriorityThenTitle(overdue),
         },
         {
           id: 'today',
           title: 'Today',
-          icon: <CalendarIcon className="h-4 w-4 text-amber-500" />,
-          accentClass: 'text-amber-700 dark:text-amber-400 bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60',
+          icon: <CalendarIcon className="h-3.5 w-3.5 text-sky-500" />,
+          accentClass: 'text-sky-700 dark:text-sky-400 bg-sky-50/70 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900/60',
           tasks: sortByPriorityThenTitle(today),
         },
         {
           id: 'tomorrow',
           title: 'Tomorrow',
-          icon: <Clock className="h-4 w-4 text-sky-500" />,
-          accentClass: 'text-sky-700 dark:text-sky-400 bg-sky-50/70 dark:bg-sky-950/30 border-sky-200 dark:border-sky-900/60',
+          icon: <Clock className="h-3.5 w-3.5 text-indigo-500" />,
+          accentClass: 'text-indigo-700 dark:text-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-900/60',
           tasks: sortByPriorityThenTitle(tomorrow),
         },
         {
           id: 'this_week',
           title: 'Upcoming This Week',
-          icon: <CalendarIcon className="h-4 w-4 text-indigo-500" />,
-          accentClass: 'text-indigo-700 dark:text-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-900/60',
+          icon: <CalendarIcon className="h-3.5 w-3.5 text-amber-500" />,
+          accentClass: 'text-amber-700 dark:text-amber-400 bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60',
           tasks: sortByPriorityThenTitle(thisWeek),
         },
         {
           id: 'later',
           title: 'Later',
-          icon: <CalendarIcon className="h-4 w-4 text-zinc-500" />,
+          icon: <CalendarIcon className="h-3.5 w-3.5 text-zinc-500" />,
           accentClass: 'text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800',
           tasks: sortByPriorityThenTitle(later),
         },
         {
           id: 'no_due',
           title: 'No Due Date',
-          icon: <ListTodo className="h-4 w-4 text-zinc-400" />,
+          icon: <ListTodo className="h-3.5 w-3.5 text-zinc-400" />,
           accentClass: 'text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800',
           tasks: sortByPriorityThenTitle(noDue),
         },
@@ -438,22 +501,22 @@ export const TasksView: React.FC = () => {
       const groups: TaskGroup[] = [
         {
           id: 'priority_high',
-          title: 'High Priority & Critical',
-          icon: <AlertCircle className="h-4 w-4 text-rose-500" />,
+          title: 'High Priority',
+          icon: <AlertCircle className="h-3.5 w-3.5 text-rose-500" />,
           accentClass: 'text-rose-700 dark:text-rose-400 bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900/60',
           tasks: sortByDueDate(high),
         },
         {
           id: 'priority_medium',
           title: 'Medium Priority',
-          icon: <Clock className="h-4 w-4 text-amber-500" />,
+          icon: <Clock className="h-3.5 w-3.5 text-amber-500" />,
           accentClass: 'text-amber-700 dark:text-amber-400 bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60',
           tasks: sortByDueDate(medium),
         },
         {
           id: 'priority_low',
           title: 'Low Priority',
-          icon: <Check className="h-4 w-4 text-zinc-400" />,
+          icon: <Check className="h-3.5 w-3.5 text-zinc-400" />,
           accentClass: 'text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800',
           tasks: sortByDueDate(low),
         },
@@ -502,7 +565,11 @@ export const TasksView: React.FC = () => {
     if (!cleanTitle && !quickTaskTitle.trim()) return;
 
     const targetListId =
-      activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred'
+      activeTaskListId === 'all' ||
+      activeTaskListId === 'archived_view' ||
+      activeTaskListId === 'starred' ||
+      activeTaskListId === 'today' ||
+      activeTaskListId === 'upcoming'
         ? taskLists[0]?.id || 'list_default'
         : activeTaskListId;
 
@@ -515,7 +582,7 @@ export const TasksView: React.FC = () => {
 
     await createTask({
       title: (cleanTitle || quickTaskTitle).trim(),
-      due: quickDueDate || undefined,
+      due: quickDueDate || (activeTaskListId === 'today' ? new Date().toISOString().split('T')[0] : undefined),
       taskListId: targetListId,
       priority: 'medium',
       tags: initialTags,
@@ -584,16 +651,17 @@ export const TasksView: React.FC = () => {
     }
   };
 
-  // Helper to get total unarchived tasks across all lists
-  const totalActiveTasksCount = useMemo(() => {
-    return tasks.filter((t) => !t.archived && t.status !== 'completed').length;
-  }, [tasks]);
+  // Header Title
+  const headerTitle = useMemo(() => {
+    if (activeTaskListId === 'all') return 'All Tasks';
+    if (activeTaskListId === 'starred') return 'Starred Tasks';
+    if (activeTaskListId === 'today') return 'Today';
+    if (activeTaskListId === 'upcoming') return 'Upcoming';
+    if (activeTaskListId === 'archived_view') return 'Archived Tasks';
+    return activeList?.title || 'My Tasks';
+  }, [activeTaskListId, activeList]);
 
-  // Helper to get total archived tasks across all lists
-  const totalArchivedTasksCount = useMemo(() => {
-    return tasks.filter((t) => t.archived || t.status === 'completed').length;
-  }, [tasks]);
-
+  // Render a task item across density modes
   const renderTaskItem = (t: TaskItem) => {
     const isCompleted = t.status === 'completed';
     const isArchived = Boolean(t.archived);
@@ -601,95 +669,74 @@ export const TasksView: React.FC = () => {
     const isDueToday = t.due && isToday(parseISO(t.due)) && !isCompleted;
     const isExpanded = expandedTaskIds.has(t.id);
 
-    // Compact mode: sleek Google Tasks style row with circular checkbox & clean relative date chip
-    if (densityMode === 'compact' || densityMode === 'board') {
+    // Compact Mode: Google Tasks pure line with SwiftUI spring interactions
+    if (densityMode === 'compact') {
       return (
         <div
           key={t.id}
-          className={`group rounded-xl transition-all duration-150 task-item-enter ${
-            isArchived || isCompleted
-              ? 'opacity-70 border-b border-zinc-100 dark:border-zinc-800/60'
-              : 'hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800/60 last:border-b-0'
+          className={`group py-2.5 px-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 transition-colors duration-150 task-item-enter swiftui-row ${
+            isArchived || isCompleted ? 'opacity-65' : ''
           }`}
         >
-          <div className="flex items-center justify-between py-2 px-3 min-h-[42px] gap-2">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              {/* Circular Checkbox (Google Tasks Style) */}
+              {/* Apple / Google circular spring checkbox */}
               <button
                 onClick={() => toggleTaskComplete(t.id)}
-                className={`h-5 w-5 rounded-[999px] border-2 flex items-center justify-center transition-all duration-150 active:scale-90 shrink-0 cursor-pointer group/chk ${
+                className={`h-5 w-5 rounded-[999px] border-2 flex items-center justify-center swiftui-checkbox swiftui-press shrink-0 cursor-pointer ${
                   isCompleted
                     ? 'bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900'
-                    : 'border-zinc-400 dark:border-zinc-500 hover:border-zinc-800 dark:hover:border-zinc-200 bg-transparent'
+                    : 'border-zinc-300 dark:border-zinc-600 hover:border-sky-500 dark:hover:border-sky-400 bg-transparent'
                 }`}
                 aria-label="Toggle complete"
               >
                 {isCompleted ? (
                   <Check className="h-3 w-3 stroke-[3] task-checkbox-pop" />
                 ) : (
-                  <Check className="h-3 w-3 stroke-[2.5] text-zinc-400 dark:text-zinc-500 opacity-0 group-hover/chk:opacity-100 transition-opacity" />
+                  <Check className="h-2.5 w-2.5 stroke-[2.5] text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 )}
               </button>
 
-              {/* Task Title & Inline Tags */}
+              {/* Title & Metadata */}
               <div
-                className="min-w-0 flex-1 cursor-pointer flex flex-col justify-center"
+                className="min-w-0 flex-1 cursor-pointer"
                 onClick={() => openEditModal(t)}
               >
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`text-[14px] md:text-[15px] font-normal md:font-medium leading-snug transition-colors duration-150 ${
+                    className={`text-sm font-medium transition-colors ${
                       isCompleted
                         ? 'line-through text-zinc-400 dark:text-zinc-500'
-                        : 'text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-300'
+                        : 'text-zinc-900 dark:text-zinc-100 hover:text-sky-600 dark:hover:text-sky-400'
                     }`}
                   >
                     {t.title}
                   </span>
 
-                  {/* Scope list badge when viewing all or archive */}
-                  {(activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred') && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
-                      {uniqueTaskLists.find((l) => l.id === t.taskListId)?.title || 'My Tasks'}
-                    </span>
-                  )}
-
-                  {t.priority === 'high' && (
-                    <Badge variant="danger" className="text-[10px] py-0 px-1.5">High</Badge>
-                  )}
-
-                  {isArchived && (
-                    <Badge variant="outline" className="text-[9px] py-0 px-1 text-zinc-400">
-                      Archived
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Subtitle / Google Tasks Metadata Chips (Due Date, Subtasks, Focus) */}
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {/* Due Date Badge */}
                   {t.due && (
                     <span
-                      className={`text-[11px] font-medium px-2 py-0.2 rounded-md inline-flex items-center gap-1 ${
+                      className={`text-[11px] font-medium px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0 ${
                         isOverdue
                           ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900/40 font-semibold'
                           : isDueToday
                           ? 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900/40 font-semibold'
-                          : 'text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60'
+                          : 'text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60'
                       }`}
                     >
-                      <Clock className="h-3 w-3 shrink-0" />
+                      <Clock className="h-2.5 w-2.5 shrink-0" />
                       <span>{formatGoogleTasksDue(t.due)}</span>
                     </span>
                   )}
 
-                  {t.totalFocusSeconds > 0 && (
-                    <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 inline-flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.2 rounded-md">
-                      <Clock className="h-2.5 w-2.5" />
-                      {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
-                    </span>
+                  {/* Priority Tag */}
+                  {t.priority === 'high' && (
+                    <Badge variant="danger" className="text-[10px] py-0 px-1.5">
+                      High
+                    </Badge>
                   )}
 
-                  {/* Subtasks summary toggle */}
+                  {/* Subtasks summary */}
                   {t.subtasks && t.subtasks.length > 0 && (
                     <button
                       type="button"
@@ -697,7 +744,7 @@ export const TasksView: React.FC = () => {
                         e.stopPropagation();
                         toggleTaskExpanded(t.id);
                       }}
-                      className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer border border-zinc-200/60 dark:border-zinc-700/60"
+                      className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer border border-zinc-200/60 dark:border-zinc-700/60 swiftui-press"
                     >
                       <CheckSquare className="h-2.5 w-2.5 text-zinc-400" />
                       <span>
@@ -711,53 +758,48 @@ export const TasksView: React.FC = () => {
                     </button>
                   )}
 
-                  {/* Task Tags */}
-                  {t.tags && t.tags.length > 0 && (
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {t.tags.map((tg) => (
-                        <span
-                          key={tg}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedTag(selectedTag === tg.toLowerCase() ? null : tg.toLowerCase());
-                          }}
-                          className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md border transition-colors cursor-pointer ${
-                            selectedTag === tg.toLowerCase()
-                              ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 font-semibold'
-                              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700/80 hover:border-zinc-400'
-                          }`}
-                          title={`Filter by tag #${tg}`}
-                        >
-                          #{tg}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {/* Tags */}
+                  {t.tags?.map((tg) => (
+                    <span
+                      key={tg}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTag(selectedTag === tg.toLowerCase() ? null : tg.toLowerCase());
+                      }}
+                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md border transition-colors cursor-pointer ${
+                        selectedTag === tg.toLowerCase()
+                          ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 font-semibold'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200/60 dark:border-zinc-700/60 hover:border-zinc-400'
+                      }`}
+                    >
+                      #{tg}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Actions: Star, Start Focus, Archive/Unarchive, Delete */}
-            <div className="flex items-center gap-1 shrink-0 ml-2">
-              {/* Star toggle button (Google Tasks feature) */}
+            {/* Quick Actions */}
+            <div className="flex items-center gap-1 shrink-0">
+              {/* Star toggle button */}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleStar(t);
                 }}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                className={`p-1 rounded-lg transition-all duration-150 swiftui-press cursor-pointer ${
                   t.starred
-                    ? 'text-sky-500 dark:text-sky-400'
-                    : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 opacity-0 group-hover:opacity-100'
+                    ? 'text-amber-500 dark:text-amber-400'
+                    : 'text-zinc-400 hover:text-amber-500 opacity-0 group-hover:opacity-100'
                 }`}
                 title={t.starred ? 'Starred task' : 'Star task'}
               >
-                <Star className={`h-4 w-4 ${t.starred ? 'fill-sky-500 dark:fill-sky-400' : ''}`} />
+                <Star className={`h-4 w-4 ${t.starred ? 'fill-amber-400 text-amber-500' : ''}`} />
               </button>
 
               {!isCompleted && !isArchived && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <input
                     type="checkbox"
                     checked={focusSelection.has(t.id)}
@@ -772,10 +814,10 @@ export const TasksView: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleStartFocus(t)}
-                    className="h-6 text-[10px] px-1.5 gap-1 text-zinc-700 dark:text-zinc-300 rounded-md"
+                    className="h-6 text-[10px] px-1.5 gap-1 text-zinc-700 dark:text-zinc-300 swiftui-press rounded-md"
                     title="Start Focus on this task"
                   >
-                    <Clock className="h-2.5 w-2.5" />
+                    <Clock className="h-2.5 w-2.5 text-sky-500" />
                     <span>Focus</span>
                   </Button>
                 </div>
@@ -786,7 +828,7 @@ export const TasksView: React.FC = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => unarchiveTask(t.id)}
-                  className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors swiftui-press"
                   title="Restore / Unarchive task"
                 >
                   <RotateCcw className="h-3 w-3" />
@@ -796,7 +838,7 @@ export const TasksView: React.FC = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => archiveTask(t.id)}
-                  className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-6 w-6 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity swiftui-press"
                   title="Archive task"
                 >
                   <Archive className="h-3 w-3" />
@@ -807,7 +849,7 @@ export const TasksView: React.FC = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => deleteTask(t.id)}
-                className="h-6 w-6 text-zinc-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 text-zinc-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity swiftui-press"
                 title="Delete task"
               >
                 <Trash2 className="h-3 w-3" />
@@ -815,10 +857,10 @@ export const TasksView: React.FC = () => {
             </div>
           </div>
 
-          {/* Expanded Subtasks in Compact mode */}
+          {/* Expanded Subtasks Tree (SwiftUI spring) */}
           {isExpanded && (
             <div
-              className="px-3 pb-2 pt-1 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1.5 animate-slide-down bg-zinc-50/50 dark:bg-zinc-900/40"
+              className="mt-2 ml-8 pl-3 border-l-2 border-zinc-200/80 dark:border-zinc-800 space-y-1.5 animate-slide-down"
               onClick={(e) => e.stopPropagation()}
             >
               {(t.subtasks || []).map((st) => (
@@ -828,9 +870,13 @@ export const TasksView: React.FC = () => {
                       type="checkbox"
                       checked={st.completed}
                       onChange={() => toggleSubtask(t.id, st.id)}
-                      className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700"
+                      className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-0 cursor-pointer"
                     />
-                    <span className={`truncate ${st.completed ? 'line-through text-zinc-400' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                    <span
+                      className={`truncate text-xs ${
+                        st.completed ? 'line-through text-zinc-400' : 'text-zinc-700 dark:text-zinc-300'
+                      }`}
+                    >
                       {st.title}
                     </span>
                   </label>
@@ -851,9 +897,9 @@ export const TasksView: React.FC = () => {
                   placeholder="Add subtask..."
                   value={inlineSubtaskInput[t.id] || ''}
                   onChange={(e) => setInlineSubtaskInput((prev) => ({ ...prev, [t.id]: e.target.value }))}
-                  className="text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-2 py-1 flex-1 focus:outline-none"
+                  className="text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 rounded-md px-2 py-0.5 flex-1 focus:outline-none focus:ring-1 focus:ring-sky-500/50"
                 />
-                <Button type="submit" variant="outline" size="sm" className="h-6 text-[10px] px-2">
+                <Button type="submit" variant="outline" size="sm" className="h-5 text-[10px] px-2 rounded-md swiftui-press">
                   Add
                 </Button>
               </form>
@@ -863,21 +909,21 @@ export const TasksView: React.FC = () => {
       );
     }
 
-    // Comfortable mode: spacious clay cards with notes preview
+    // Comfortable Mode: Apple Inset Cards with subtle specular highlights
     return (
       <div
         key={t.id}
-        className={`group flex items-start justify-between p-3.5 rounded-2xl border transition-all duration-200 task-item-enter ${
+        className={`group flex items-start justify-between p-3.5 rounded-2xl border transition-all duration-200 task-item-enter swiftui-press ${
           isArchived || isCompleted
             ? 'border-zinc-200/60 dark:border-zinc-800/40 bg-zinc-50/50 dark:bg-zinc-900/30 opacity-75'
-            : 'border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-[0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] hover:-translate-y-0.5'
+            : 'border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs hover:-translate-y-0.5'
         }`}
       >
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          {/* Circular Checkbox (Google Tasks Style) */}
+          {/* Circular Checkbox (Apple / Google style) */}
           <button
             onClick={() => toggleTaskComplete(t.id)}
-            className={`mt-0.5 h-5 w-5 rounded-[999px] border-2 flex items-center justify-center transition-all duration-150 active:scale-90 shrink-0 cursor-pointer group/chk ${
+            className={`mt-0.5 h-5 w-5 rounded-[999px] border-2 flex items-center justify-center swiftui-checkbox swiftui-press shrink-0 cursor-pointer group/chk ${
               isCompleted
                 ? 'bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900'
                 : 'border-zinc-400 dark:border-zinc-500 hover:border-zinc-800 dark:hover:border-zinc-200 bg-transparent'
@@ -900,7 +946,7 @@ export const TasksView: React.FC = () => {
               className={`text-[15px] font-medium block truncate transition-colors duration-150 ${
                 isCompleted
                   ? 'line-through text-zinc-400 dark:text-zinc-500'
-                  : 'text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-300'
+                  : 'text-zinc-900 dark:text-zinc-100 hover:text-sky-600 dark:hover:text-sky-400'
               }`}
             >
               {t.title}
@@ -912,8 +958,11 @@ export const TasksView: React.FC = () => {
             )}
 
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              {/* Scope list badge when viewing all or archive */}
-              {(activeTaskListId === 'all' || activeTaskListId === 'archived_view' || activeTaskListId === 'starred') && (
+              {(activeTaskListId === 'all' ||
+                activeTaskListId === 'archived_view' ||
+                activeTaskListId === 'starred' ||
+                activeTaskListId === 'today' ||
+                activeTaskListId === 'upcoming') && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
                   {uniqueTaskLists.find((l) => l.id === t.taskListId)?.title || 'My Tasks'}
                 </span>
@@ -959,7 +1008,7 @@ export const TasksView: React.FC = () => {
                     e.stopPropagation();
                     toggleTaskExpanded(t.id);
                   }}
-                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer border border-zinc-200/60 dark:border-zinc-700/60"
+                  className="flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 transition-colors cursor-pointer border border-zinc-200/60 dark:border-zinc-700/60 swiftui-press"
                 >
                   <CheckSquare className="h-3 w-3 text-zinc-400" />
                   <span>
@@ -1000,7 +1049,7 @@ export const TasksView: React.FC = () => {
             {/* Expanded Subtasks View */}
             {isExpanded && (
               <div
-                className="mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1.5 animate-slide-down"
+                className="mt-3 ml-2 pl-3 border-l-2 border-zinc-200/80 dark:border-zinc-800 space-y-1.5 animate-slide-down"
                 onClick={(e) => e.stopPropagation()}
               >
                 {(t.subtasks || []).map((st) => (
@@ -1035,7 +1084,7 @@ export const TasksView: React.FC = () => {
                     onChange={(e) => setInlineSubtaskInput((prev) => ({ ...prev, [t.id]: e.target.value }))}
                     className="text-xs bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-sm px-2 py-1 flex-1 focus:outline-none"
                   />
-                  <Button type="submit" variant="outline" size="sm" className="h-6 text-[10px] px-2">
+                  <Button type="submit" variant="outline" size="sm" className="h-6 text-[10px] px-2 rounded-md swiftui-press">
                     Add
                   </Button>
                 </form>
@@ -1046,21 +1095,21 @@ export const TasksView: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0 ml-3">
-          {/* Star toggle button (Google Tasks feature) */}
+          {/* Star toggle button */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleStar(t);
             }}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer swiftui-press ${
               t.starred
-                ? 'text-sky-500 dark:text-sky-400'
+                ? 'text-amber-500 dark:text-amber-400'
                 : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 opacity-0 group-hover:opacity-100'
             }`}
             title={t.starred ? 'Starred task' : 'Star task'}
           >
-            <Star className={`h-4 w-4 ${t.starred ? 'fill-sky-500 dark:fill-sky-400' : ''}`} />
+            <Star className={`h-4 w-4 ${t.starred ? 'fill-amber-400 text-amber-500' : ''}`} />
           </button>
 
           {!isCompleted && !isArchived && (
@@ -1079,10 +1128,10 @@ export const TasksView: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => handleStartFocus(t)}
-                className="h-7 text-xs px-2 gap-1 text-zinc-700 dark:text-zinc-300"
+                className="h-7 text-xs px-2 gap-1 text-zinc-700 dark:text-zinc-300 rounded-lg swiftui-press"
                 title="Start Focus on this task"
               >
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3 w-3 text-sky-500" />
                 <span>Focus</span>
               </Button>
             </div>
@@ -1093,7 +1142,7 @@ export const TasksView: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => unarchiveTask(t.id)}
-              className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors swiftui-press"
               title="Restore / Unarchive task"
             >
               <RotateCcw className="h-3.5 w-3.5" />
@@ -1103,7 +1152,7 @@ export const TasksView: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => archiveTask(t.id)}
-              className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity swiftui-press"
               title="Archive task"
             >
               <Archive className="h-3.5 w-3.5" />
@@ -1114,7 +1163,7 @@ export const TasksView: React.FC = () => {
             variant="ghost"
             size="icon"
             onClick={() => deleteTask(t.id)}
-            className="h-7 w-7 text-zinc-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="h-7 w-7 text-zinc-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity swiftui-press"
             title="Delete task"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -1125,83 +1174,185 @@ export const TasksView: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full bg-white dark:bg-zinc-950 overflow-hidden select-none view-enter">
-      {/* Left List Selector Sidebar */}
-      {/* Left List Selector Sidebar */}
-      <div className="w-64 border-r border-zinc-200 dark:border-zinc-800 p-3.5 flex flex-col space-y-3 bg-zinc-50/50 dark:bg-zinc-900/30 shrink-0">
-        {/* All Tasks & Starred Navigation Items */}
-        <div className="space-y-1">
+    <div className="flex flex-col md:flex-row h-full min-w-0 bg-zinc-50/70 dark:bg-zinc-950">
+      {/* SwiftUI Navigation Sidebar */}
+      <div className="w-full md:w-64 lg:w-72 border-r border-zinc-200/80 dark:border-zinc-800/80 p-3.5 flex flex-col gap-3 shrink-0 bg-white/70 dark:bg-zinc-900/60 backdrop-blur-md">
+        {/* Top 4 Apple Reminders Category Tiles (2x2 Grid) */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Today Tile */}
           <button
+            type="button"
             onClick={() => {
-              setActiveTaskListId('all');
-              setFilterMode('active');
+              setActiveTaskListId('today');
+              if (filterMode === 'archived') setFilterMode('active');
             }}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
-              activeTaskListId === 'all'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
-                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            className={`p-2.5 rounded-xl flex flex-col justify-between text-left swiftui-tile cursor-pointer ${
+              activeTaskListId === 'today'
+                ? 'bg-sky-500 text-white shadow-xs'
+                : 'bg-white dark:bg-zinc-800/80 border border-zinc-200/70 dark:border-zinc-700/70 text-zinc-800 dark:text-zinc-200'
             }`}
           >
-            <div className="flex items-center gap-2.5 truncate">
-              <ListTodo className="h-4.5 w-4.5 shrink-0 text-zinc-500 dark:text-zinc-400" />
-              <span className="truncate">All tasks</span>
-            </div>
-            {totalActiveTasksCount > 0 && (
+            <div className="flex items-center justify-between w-full">
+              <div
+                className={`h-6 w-6 rounded-lg flex items-center justify-center ${
+                  activeTaskListId === 'today'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400'
+                }`}
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+              </div>
               <span
-                className={`text-xs font-mono px-2 py-0.5 rounded-md ${
+                className={`text-sm font-bold ${
+                  activeTaskListId === 'today' ? 'text-white' : 'text-zinc-900 dark:text-zinc-100'
+                }`}
+              >
+                {todayTasksCount}
+              </span>
+            </div>
+            <span
+              className={`text-xs font-semibold mt-1.5 ${
+                activeTaskListId === 'today' ? 'text-white/90' : 'text-zinc-600 dark:text-zinc-400'
+              }`}
+            >
+              Today
+            </span>
+          </button>
+
+          {/* Scheduled / Upcoming Tile */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTaskListId('upcoming');
+              if (filterMode === 'archived') setFilterMode('active');
+            }}
+            className={`p-2.5 rounded-xl flex flex-col justify-between text-left swiftui-tile cursor-pointer ${
+              activeTaskListId === 'upcoming'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-white dark:bg-zinc-800/80 border border-zinc-200/70 dark:border-zinc-700/70 text-zinc-800 dark:text-zinc-200'
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div
+                className={`h-6 w-6 rounded-lg flex items-center justify-center ${
+                  activeTaskListId === 'upcoming'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
+                }`}
+              >
+                <Clock className="h-3.5 w-3.5" />
+              </div>
+              <span
+                className={`text-sm font-bold ${
+                  activeTaskListId === 'upcoming' ? 'text-white' : 'text-zinc-900 dark:text-zinc-100'
+                }`}
+              >
+                {upcomingTasksCount}
+              </span>
+            </div>
+            <span
+              className={`text-xs font-semibold mt-1.5 ${
+                activeTaskListId === 'upcoming' ? 'text-white/90' : 'text-zinc-600 dark:text-zinc-400'
+              }`}
+            >
+              Upcoming
+            </span>
+          </button>
+
+          {/* All Tasks Tile */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTaskListId('all');
+              if (filterMode === 'archived') setFilterMode('active');
+            }}
+            className={`p-2.5 rounded-xl flex flex-col justify-between text-left swiftui-tile cursor-pointer ${
+              activeTaskListId === 'all'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                : 'bg-white dark:bg-zinc-800/80 border border-zinc-200/70 dark:border-zinc-700/70 text-zinc-800 dark:text-zinc-200'
+            }`}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div
+                className={`h-6 w-6 rounded-lg flex items-center justify-center ${
                   activeTaskListId === 'all'
-                    ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
-                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    ? 'bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900'
+                    : 'bg-zinc-100 dark:bg-zinc-700/60 text-zinc-600 dark:text-zinc-400'
+                }`}
+              >
+                <CheckSquare className="h-3.5 w-3.5" />
+              </div>
+              <span
+                className={`text-sm font-bold ${
+                  activeTaskListId === 'all' ? 'text-white dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-100'
                 }`}
               >
                 {totalActiveTasksCount}
               </span>
-            )}
+            </div>
+            <span
+              className={`text-xs font-semibold mt-1.5 ${
+                activeTaskListId === 'all' ? 'text-white/90 dark:text-zinc-900/90' : 'text-zinc-600 dark:text-zinc-400'
+              }`}
+            >
+              All Tasks
+            </span>
           </button>
 
-          {/* Starred Tasks Item (Google Tasks) */}
+          {/* Starred Tile */}
           <button
+            type="button"
             onClick={() => {
               setActiveTaskListId('starred');
-              setFilterMode('active');
+              if (filterMode === 'archived') setFilterMode('active');
             }}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+            className={`p-2.5 rounded-xl flex flex-col justify-between text-left swiftui-tile cursor-pointer ${
               activeTaskListId === 'starred'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
-                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                ? 'bg-amber-400 text-zinc-950 shadow-xs'
+                : 'bg-white dark:bg-zinc-800/80 border border-zinc-200/70 dark:border-zinc-700/70 text-zinc-800 dark:text-zinc-200'
             }`}
           >
-            <div className="flex items-center gap-2.5 truncate">
-              <Star className="h-4.5 w-4.5 shrink-0 text-amber-500 fill-amber-500" />
-              <span className="truncate">Starred</span>
-            </div>
-            {totalStarredCount > 0 && (
-              <span
-                className={`text-xs font-mono px-2 py-0.5 rounded-md ${
+            <div className="flex items-center justify-between w-full">
+              <div
+                className={`h-6 w-6 rounded-lg flex items-center justify-center ${
                   activeTaskListId === 'starred'
-                    ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
-                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    ? 'bg-black/10 text-zinc-950'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-500'
+                }`}
+              >
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+              </div>
+              <span
+                className={`text-sm font-bold ${
+                  activeTaskListId === 'starred' ? 'text-zinc-950' : 'text-zinc-900 dark:text-zinc-100'
                 }`}
               >
                 {totalStarredCount}
               </span>
-            )}
+            </div>
+            <span
+              className={`text-xs font-semibold mt-1.5 ${
+                activeTaskListId === 'starred' ? 'text-zinc-950' : 'text-zinc-600 dark:text-zinc-400'
+              }`}
+            >
+              Starred
+            </span>
           </button>
         </div>
 
         {/* Task Lists Section */}
-        <div className="flex items-center justify-between pt-3 border-t border-zinc-200 dark:border-zinc-800/80 px-1">
+        <div className="pt-2 border-t border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between px-1">
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-            Lists
+            My Lists
           </span>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsNewListModalOpen(true)}
-            className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg"
+            className="h-6 w-6 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg swiftui-press"
             title="Create new list"
           >
-            <ListPlus className="h-4 w-4" />
+            <ListPlus className="h-3.5 w-3.5" />
           </Button>
         </div>
 
@@ -1224,22 +1375,22 @@ export const TasksView: React.FC = () => {
                   setActiveTaskListId(list.id);
                   if (activeTaskListId === 'archived_view') setFilterMode('active');
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer swiftui-press ${
                   isSelected
                     ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
-                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/70'
                 }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
-                  <CheckSquare className="h-4 w-4 shrink-0 text-zinc-400" />
+                <div className="flex items-center gap-2 truncate">
+                  <CheckSquare className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
                   <span className="truncate">{list.title}</span>
                 </div>
                 {count > 0 && (
                   <span
-                    className={`text-xs font-mono px-2 py-0.5 rounded-md ${
+                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
                       isSelected
                         ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
-                        : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                        : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                     }`}
                   >
                     {count}
@@ -1253,17 +1404,17 @@ export const TasksView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsNewListModalOpen(true)}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 rounded-xl transition-all cursor-pointer mt-1"
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 rounded-xl transition-all cursor-pointer swiftui-press mt-1"
           >
-            <Plus className="h-4 w-4 shrink-0 text-zinc-500" />
+            <Plus className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
             <span>Create new list</span>
           </button>
         </div>
 
         {/* Tags Section In Sidebar */}
         {allUniqueTags.length > 0 && (
-          <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800/80 space-y-1">
-            <div className="flex items-center justify-between px-3 py-1 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+          <div className="pt-2 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-1">
+            <div className="flex items-center justify-between px-1 py-0.5 text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
               <span>Tags</span>
               {selectedTag && (
                 <button
@@ -1275,17 +1426,18 @@ export const TasksView: React.FC = () => {
                 </button>
               )}
             </div>
-            <div className="space-y-0.5 max-h-36 overflow-y-auto">
+            <div className="space-y-0.5 max-h-32 overflow-y-auto">
               {allUniqueTags.map(([tag, count]) => {
                 const isSelected = selectedTag === tag;
                 return (
                   <button
                     key={tag}
                     onClick={() => setSelectedTag(isSelected ? null : tag)}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+                    title={`Filter by tag #${tag}`}
+                    className={`w-full flex items-center justify-between px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer swiftui-press ${
                       isSelected
-                        ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/70'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 truncate">
@@ -1309,28 +1461,28 @@ export const TasksView: React.FC = () => {
         )}
 
         {/* Archived Section In Sidebar */}
-        <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800/80 space-y-1">
+        <div className="pt-2 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-1">
           <button
             onClick={() => {
               setActiveTaskListId('archived_view');
               setFilterMode('archived');
             }}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer swiftui-press ${
               activeTaskListId === 'archived_view'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold'
-                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold'
+                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/70'
             }`}
           >
-            <div className="flex items-center gap-2.5 truncate">
-              <Archive className="h-4.5 w-4.5 shrink-0 text-zinc-500" />
+            <div className="flex items-center gap-2 truncate">
+              <Archive className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
               <span className="truncate">Archived Tasks</span>
             </div>
             {totalArchivedTasksCount > 0 && (
               <span
-                className={`text-xs font-mono px-2 py-0.5 rounded-md ${
+                className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
                   activeTaskListId === 'archived_view'
                     ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
-                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                 }`}
               >
                 {totalArchivedTasksCount}
@@ -1340,20 +1492,14 @@ export const TasksView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Task List Area with Scoped Zoom-Out & Expanded Canvas Width */}
+      {/* Main Task List Area with Clean Google Tasks + SwiftUI Layout */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto p-4 md:p-6 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-full mx-auto space-y-4 tasks-zoomout-container">
-        {/* List Header & Top Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800 gap-3">
+        {/* Header & Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-200/80 dark:border-zinc-800 gap-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                {activeTaskListId === 'all'
-                  ? 'All Tasks'
-                  : activeTaskListId === 'starred'
-                  ? 'Starred Tasks'
-                  : activeTaskListId === 'archived_view'
-                  ? 'Archived Tasks'
-                  : activeList?.title || 'My Tasks'}
+                {headerTitle}
               </h2>
 
               {/* Sync / Reconnect Button */}
@@ -1362,7 +1508,7 @@ export const TasksView: React.FC = () => {
                 size="sm"
                 onClick={handleSyncOrReconnect}
                 disabled={isSyncing || isReconnecting}
-                className={`h-7 text-xs gap-1.5 px-2 rounded-md ${
+                className={`h-7 text-xs gap-1.5 px-2 rounded-lg swiftui-press ${
                   isGoogleTokenExpired
                     ? 'text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40'
                     : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
@@ -1386,65 +1532,69 @@ export const TasksView: React.FC = () => {
               </Button>
 
               {/* Delete Custom List */}
-              {activeList && !activeList.isDefault && activeTaskListId !== 'all' && activeTaskListId !== 'archived_view' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteTaskList(activeList.id)}
-                  className="h-7 text-xs text-rose-500 hover:text-rose-600 gap-1 px-2"
-                  title="Delete current task list"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  <span>Delete List</span>
-                </Button>
-              )}
+              {activeList &&
+                !activeList.isDefault &&
+                activeTaskListId !== 'all' &&
+                activeTaskListId !== 'archived_view' &&
+                activeTaskListId !== 'starred' &&
+                activeTaskListId !== 'today' &&
+                activeTaskListId !== 'upcoming' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteTaskList(activeList.id)}
+                    className="h-7 text-xs text-rose-500 hover:text-rose-600 gap-1 px-2 rounded-lg swiftui-press"
+                    title="Delete current task list"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    <span>Delete List</span>
+                  </Button>
+                )}
             </div>
 
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               {activeTaskListId === 'archived_view'
-                ? 'Completed tasks are safely archived here for clean, focused productivity.'
-                : 'Google Tasks synchronized with automatic archiving for completed tasks.'}
+                ? 'Completed tasks are safely stored here for clean, focused productivity.'
+                : 'Google Tasks synchronized with Apple SwiftUI fluid animations.'}
             </p>
           </div>
 
-          {/* Header Action Buttons & Archive Controls */}
-          <div className="flex items-center gap-2.5 flex-wrap">
-            {/* Archive All Completed Button (if completed unarchived tasks exist) */}
+          {/* Controls Bar: Density, Grouping, Filter, Archive */}
+          <div className="flex items-center gap-2 flex-wrap">
             {completedUnarchivedCount > 0 && activeTaskListId !== 'archived_view' && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => archiveCompletedTasks(activeTaskListId)}
-                className="h-8 text-xs gap-1.5 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="h-7 text-xs gap-1.5 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg swiftui-press"
                 title="Archive completed tasks to clean up your view"
               >
-                <Archive className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
+                <Archive className="h-3 w-3 text-zinc-600 dark:text-zinc-400" />
                 <span>Archive Completed ({completedUnarchivedCount})</span>
               </Button>
             )}
 
-            {/* Clear All Archived Button (in archived view) */}
             {activeTaskListId === 'archived_view' && archivedScopedTasks.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => clearArchivedTasks(activeTaskListId)}
-                className="h-8 text-xs text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
+                className="h-7 text-xs text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 rounded-lg swiftui-press"
                 title="Permanently remove all archived tasks"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-3 w-3" />
                 <span>Clear All Archived</span>
               </Button>
             )}
 
-            {/* Density Selector: Compact | Comfortable | Board */}
-            <div className="flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
+            {/* Apple Segmented Density Selector */}
+            <div className="flex items-center rounded-lg border border-zinc-200/90 dark:border-zinc-800 p-0.5 bg-zinc-100/90 dark:bg-zinc-900">
               {(['compact', 'comfortable', 'board'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => handleSetDensityMode(mode)}
-                  className={`px-2 py-1 text-xs font-medium rounded-sm capitalize transition-all duration-150 ${
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-md capitalize transition-all duration-150 swiftui-press ${
                     densityMode === mode
                       ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
@@ -1457,8 +1607,8 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Group By Selector */}
-            <div className="flex items-center gap-1 text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded-md px-2 py-1 bg-zinc-50 dark:bg-zinc-900">
-              <Layers className="h-3.5 w-3.5 text-zinc-400" />
+            <div className="flex items-center gap-1 text-xs text-zinc-500 border border-zinc-200/90 dark:border-zinc-800 rounded-lg px-2 py-1 bg-white dark:bg-zinc-900">
+              <Layers className="h-3 w-3 text-zinc-400" />
               <select
                 value={groupBy}
                 onChange={(e) => handleSetGroupBy(e.target.value as any)}
@@ -1471,8 +1621,8 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Sort Selector */}
-            <div className="flex items-center gap-1 text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded-md px-2 py-1 bg-zinc-50 dark:bg-zinc-900">
-              <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
+            <div className="flex items-center gap-1 text-xs text-zinc-500 border border-zinc-200/90 dark:border-zinc-800 rounded-lg px-2 py-1 bg-white dark:bg-zinc-900">
+              <ArrowUpDown className="h-3 w-3 text-zinc-400" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
@@ -1485,14 +1635,14 @@ export const TasksView: React.FC = () => {
               </select>
             </div>
 
-            {/* Filter Mode Buttons (when not in full archived_view) */}
+            {/* Filter Mode Buttons */}
             {activeTaskListId !== 'archived_view' && (
-              <div className="flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-900">
+              <div className="flex items-center rounded-lg border border-zinc-200/90 dark:border-zinc-800 p-0.5 bg-zinc-100/90 dark:bg-zinc-900">
                 {(['active', 'archived', 'all'] as const).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setFilterMode(mode)}
-                    className={`px-3 py-1 text-xs font-medium rounded-sm capitalize transition-all duration-150 ${
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md capitalize transition-all duration-150 swiftui-press ${
                       filterMode === mode
                         ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
                         : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
@@ -1506,9 +1656,9 @@ export const TasksView: React.FC = () => {
           </div>
         </div>
 
-        {/* Google Session Expiration Reconnect Alert */}
+        {/* Google Session Expiration Alert */}
         {isGoogleTokenExpired && (
-          <div className="rounded-md border border-amber-300 dark:border-amber-800/80 bg-amber-50/80 dark:bg-amber-950/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs view-enter">
+          <div className="rounded-xl border border-amber-300 dark:border-amber-800/80 bg-amber-50/80 dark:bg-amber-950/20 p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs view-enter">
             <div className="flex items-start gap-3">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
               <div>
@@ -1516,7 +1666,7 @@ export const TasksView: React.FC = () => {
                   Google Tasks Session Expired
                 </div>
                 <p className="text-amber-700 dark:text-amber-300 mt-0.5">
-                  Google OAuth tokens expire after 1 hour. Reconnect your Google account to resume 2-way synchronization of your tasks.
+                  OAuth tokens expire after 1 hour. Reconnect your account to resume 2-way task synchronization.
                 </p>
               </div>
             </div>
@@ -1525,17 +1675,17 @@ export const TasksView: React.FC = () => {
               size="sm"
               onClick={handleSyncOrReconnect}
               disabled={isReconnecting || isSyncing}
-              className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-600 dark:hover:bg-amber-500 font-medium rounded-md"
+              className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white rounded-lg swiftui-press"
             >
               {isReconnecting ? 'Reconnecting...' : 'Reconnect & Sync'}
             </Button>
           </div>
         )}
 
-        {/* Search & Quick Add Section */}
+        {/* Search & Google Tasks Quick Add Bar */}
         {activeTaskListId !== 'archived_view' && (
-          <div className="space-y-2.5">
-            {/* Instant Search Bar */}
+          <div className="space-y-2">
+            {/* Search Input */}
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-zinc-400" />
               <input
@@ -1543,7 +1693,7 @@ export const TasksView: React.FC = () => {
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-8 pl-8 pr-8 rounded-lg border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 transition-all duration-150"
+                className="w-full h-8 pl-8 pr-8 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_1px_2px_0_rgba(0,0,0,0.03)] focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500/60 transition-all duration-150"
               />
               {searchQuery && (
                 <button
@@ -1555,13 +1705,13 @@ export const TasksView: React.FC = () => {
               )}
             </div>
 
-            {/* Inline Quick Add Task (Google Tasks Style) */}
+            {/* Google Tasks Clean Quick Add Form */}
             <form
               onSubmit={handleQuickAdd}
-              className="flex items-center gap-2.5 p-2 rounded-xl border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-900 shadow-sm focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500 transition-all duration-150"
+              className="flex items-center gap-2.5 p-2 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500 transition-all duration-200"
             >
-              <div className="flex items-center justify-center h-6 w-6 rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 ml-1 shrink-0">
-                <Plus className="h-4 w-4 stroke-[2.5]" />
+              <div className="flex items-center justify-center h-6 w-6 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 ml-0.5 shrink-0">
+                <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
               </div>
               <input
                 ref={quickInputRef}
@@ -1569,15 +1719,20 @@ export const TasksView: React.FC = () => {
                 placeholder="Add a task (press Enter to save)..."
                 value={quickTaskTitle}
                 onChange={(e) => setQuickTaskTitle(e.target.value)}
-                className="flex-1 bg-transparent text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none px-1"
+                className="flex-1 bg-transparent text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none px-1"
               />
               <input
                 type="date"
                 value={quickDueDate}
                 onChange={(e) => setQuickDueDate(e.target.value)}
-                className="text-xs font-mono text-zinc-500 bg-transparent border-0 focus:outline-none pr-2 cursor-pointer"
+                className="text-xs font-mono text-zinc-500 bg-transparent border-0 focus:outline-none pr-1 cursor-pointer"
               />
-              <Button type="submit" variant="primary" size="sm" className="h-7 px-3.5 text-xs font-semibold rounded-lg">
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="h-7 px-3.5 text-xs font-semibold rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 swiftui-press"
+              >
                 Add
               </Button>
             </form>
@@ -1586,15 +1741,13 @@ export const TasksView: React.FC = () => {
 
         {/* Active Tag Filter Indicator */}
         {selectedTag && (
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 text-xs">
+          <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/80 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                Filtered by tag:
-              </span>
-              <span className="font-mono px-2 py-0.5 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold">
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Filtered by tag:</span>
+              <span className="font-mono px-2 py-0.5 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold text-xs">
                 #{selectedTag}
               </span>
-              <span className="text-zinc-500 font-mono">
+              <span className="text-zinc-500 font-mono text-xs">
                 ({displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'})
               </span>
             </div>
@@ -1603,7 +1756,7 @@ export const TasksView: React.FC = () => {
               onClick={() => setSelectedTag(null)}
               className="flex items-center gap-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer text-xs"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3 w-3" />
               <span>Clear Filter</span>
             </button>
           </div>
@@ -1611,9 +1764,9 @@ export const TasksView: React.FC = () => {
 
         {/* Multi-Task Focus Launch Banner */}
         {focusSelection.size > 0 && (
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-md border border-zinc-700 dark:border-zinc-300 animate-slide-down">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-md border border-zinc-700 dark:border-zinc-300 animate-slide-down">
             <div className="flex items-center gap-2 text-xs font-medium">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-3.5 w-3.5" />
               <span>{focusSelection.size} {focusSelection.size === 1 ? 'task' : 'tasks'} selected for Pomodoro</span>
             </div>
             <div className="flex items-center gap-2">
@@ -1621,7 +1774,7 @@ export const TasksView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={handleStartMultiTaskFocus}
-                className="h-7 text-xs px-3 bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white"
+                className="h-6 text-xs px-2.5 bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white rounded-md swiftui-press"
               >
                 Start Multi-Task Focus
               </Button>
@@ -1629,7 +1782,7 @@ export const TasksView: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setFocusSelection(new Set())}
-                className="h-7 text-xs px-2 text-zinc-300 dark:text-zinc-600 hover:text-white dark:hover:text-black"
+                className="h-6 text-xs px-2 text-zinc-300 dark:text-zinc-600 hover:text-white dark:hover:text-black"
               >
                 Clear
               </Button>
@@ -1637,14 +1790,18 @@ export const TasksView: React.FC = () => {
           </div>
         )}
 
-        {/* Task Items List (Google Tasks Central Sheet) */}
-        <div className={`space-y-4 ${densityMode !== 'board' ? 'bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-4 md:p-6 shadow-sm' : ''}`}>
+        {/* Task Items List (Google Tasks + SwiftUI Inset Glass Sheet) */}
+        <div className={`space-y-4 ${densityMode !== 'board' ? 'swiftui-inset-card p-3 sm:p-5' : ''}`}>
           {displayedTasks.length === 0 ? (
-            <div className="py-16 text-center text-xs text-zinc-400 animate-fade-in">
+            <div className="py-14 text-center text-xs text-zinc-400 animate-fade-in">
               {searchQuery
                 ? 'No tasks match your search filter.'
                 : activeTaskListId === 'starred'
                 ? 'No starred tasks found. Star tasks to highlight your top priorities.'
+                : activeTaskListId === 'today'
+                ? 'No tasks due today. Enjoy your day!'
+                : activeTaskListId === 'upcoming'
+                ? 'No upcoming tasks scheduled.'
                 : activeTaskListId === 'archived_view'
                 ? 'No archived tasks yet. Completed tasks will appear here.'
                 : filterMode === 'archived'
@@ -1653,18 +1810,18 @@ export const TasksView: React.FC = () => {
             </div>
           ) : densityMode === 'board' ? (
             taskGroups.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-start animate-fade-in">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start animate-fade-in">
                 {taskGroups.map((group) => (
                   <div
                     key={group.id}
-                    className="clay-surface p-3.5 rounded-2xl flex flex-col gap-2 min-w-0"
+                    className="swiftui-inset-card p-3.5 flex flex-col gap-2 min-w-0"
                   >
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-200/80 dark:border-zinc-800">
                       <div className="flex items-center gap-1.5 min-w-0 font-semibold text-xs text-zinc-800 dark:text-zinc-200">
                         {group.icon}
                         <span className="truncate">{group.title}</span>
                       </div>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
                         {group.tasks.length}
                       </span>
                     </div>
@@ -1680,28 +1837,36 @@ export const TasksView: React.FC = () => {
               </div>
             )
           ) : taskGroups.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {taskGroups.map((group) => {
                 const isCollapsed = collapsedGroups.has(group.id);
                 return (
-                  <div key={group.id} className="space-y-2">
+                  <div key={group.id} className="space-y-1">
                     <button
                       type="button"
                       onClick={() => toggleGroupCollapse(group.id)}
-                      className="flex items-center gap-2 w-full text-left py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors group cursor-pointer"
+                      className="flex items-center gap-2 w-full text-left py-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors group cursor-pointer swiftui-press"
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         {group.icon}
-                        <span className={`truncate ${
-                          group.id === 'overdue' ? 'text-rose-500 dark:text-rose-400 font-bold' :
-                          group.id === 'today' ? 'text-sky-500 dark:text-sky-400 font-bold' :
-                          group.id === 'tomorrow' ? 'text-indigo-500 dark:text-indigo-400 font-bold' : ''
-                        }`}>{group.title}</span>
+                        <span
+                          className={`truncate ${
+                            group.id === 'overdue'
+                              ? 'text-rose-500 dark:text-rose-400 font-bold'
+                              : group.id === 'today'
+                              ? 'text-sky-500 dark:text-sky-400 font-bold'
+                              : group.id === 'tomorrow'
+                              ? 'text-indigo-500 dark:text-indigo-400 font-bold'
+                              : ''
+                          }`}
+                        >
+                          {group.title}
+                        </span>
                       </div>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
                         {group.tasks.length}
                       </span>
-                      <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800 ml-2" />
+                      <div className="flex-1 h-px bg-zinc-200/80 dark:border-zinc-800 ml-2" />
                       <ChevronDown
                         className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
                           isCollapsed ? '-rotate-90' : ''
@@ -1710,7 +1875,13 @@ export const TasksView: React.FC = () => {
                     </button>
 
                     {!isCollapsed && (
-                      <div className={`animate-slide-down ${densityMode === 'compact' ? 'space-y-0' : 'space-y-2'}`}>
+                      <div
+                        className={`animate-slide-down ${
+                          densityMode === 'compact'
+                            ? 'divide-y divide-zinc-100 dark:divide-zinc-800/60'
+                            : 'space-y-2 pt-1'
+                        }`}
+                      >
                         {group.tasks.map(renderTaskItem)}
                       </div>
                     )}
@@ -1719,28 +1890,34 @@ export const TasksView: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className={densityMode === 'compact' ? 'space-y-0' : 'space-y-2'}>
+            <div
+              className={
+                densityMode === 'compact'
+                  ? 'divide-y divide-zinc-100 dark:divide-zinc-800/60'
+                  : 'space-y-2'
+              }
+            >
               {displayedTasks.map(renderTaskItem)}
             </div>
           )}
         </div>
 
-        {/* Collapsible Archived Accordion in Active View */}
+        {/* Google Tasks Collapsible Completed / Archive Section */}
         {filterMode === 'active' && archivedScopedTasks.length > 0 && activeTaskListId !== 'archived_view' && (
-          <div className="pt-4 mt-6 border-t border-zinc-200 dark:border-zinc-800/80 space-y-3 animate-fade-in">
+          <div className="pt-3 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-2 animate-fade-in">
             <div className="flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setIsArchivedSectionOpen(!isArchivedSectionOpen)}
-                className="flex items-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors group cursor-pointer"
+                className="flex items-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors group cursor-pointer swiftui-press"
               >
                 <ChevronRight
-                  className={`h-4 w-4 transition-transform duration-200 ${
+                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
                     isArchivedSectionOpen ? 'rotate-90 text-zinc-900 dark:text-zinc-100' : ''
                   }`}
                 />
                 <span>Archived Tasks</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                   {archivedScopedTasks.length}
                 </span>
               </button>
@@ -1750,7 +1927,7 @@ export const TasksView: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => clearArchivedTasks(activeTaskListId)}
-                  className="h-7 text-xs text-rose-500 hover:text-rose-600 gap-1 px-2"
+                  className="h-6 text-xs text-rose-500 hover:text-rose-600 gap-1 px-2 rounded-md swiftui-press"
                   title="Clear all archived tasks from this list"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -1760,19 +1937,19 @@ export const TasksView: React.FC = () => {
             </div>
 
             {isArchivedSectionOpen && (
-              <div className="space-y-2 pt-1 animate-slide-down">
+              <div className="space-y-1.5 pt-1 animate-slide-down">
                 {archivedScopedTasks.map((t) => (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-zinc-200/50 dark:border-zinc-800/40 bg-zinc-50/60 dark:bg-zinc-900/30 opacity-80 hover:opacity-100 transition-opacity"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-zinc-200/50 dark:border-zinc-800/40 bg-zinc-50/60 dark:bg-zinc-900/30 opacity-75 hover:opacity-100 transition-opacity"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <button
                         onClick={() => unarchiveTask(t.id)}
-                        className="h-4 w-4 rounded-sm border bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0"
+                        className="h-4 w-4 rounded-[999px] border bg-zinc-900 border-zinc-900 text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0 cursor-pointer"
                         title="Click to restore / unarchive"
                       >
-                        <Check className="h-3 w-3 stroke-[3]" />
+                        <Check className="h-2.5 w-2.5 stroke-[3]" />
                       </button>
                       <div className="min-w-0 flex-1">
                         <span className="text-xs font-medium line-through text-zinc-400 dark:text-zinc-500 block truncate">
@@ -1791,7 +1968,7 @@ export const TasksView: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => unarchiveTask(t.id)}
-                        className="h-7 text-xs px-2 gap-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900"
+                        className="h-6 text-xs px-2 gap-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 rounded-md swiftui-press"
                         title="Restore task"
                       >
                         <RotateCcw className="h-3 w-3" />
@@ -1801,7 +1978,7 @@ export const TasksView: React.FC = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => deleteTask(t.id)}
-                        className="h-7 w-7 text-zinc-400 hover:text-rose-500"
+                        className="h-6 w-6 text-zinc-400 hover:text-rose-500 rounded-md swiftui-press"
                         title="Delete permanently"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -1840,7 +2017,7 @@ export const TasksView: React.FC = () => {
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
               placeholder="Add details, background context, or links..."
-              className="w-full rounded-md border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-950 p-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 dark:focus:ring-zinc-600/30 transition-all duration-150"
+              className="w-full rounded-xl border border-zinc-300/80 dark:border-zinc-700/80 bg-white dark:bg-zinc-950 p-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all duration-150"
             />
           </div>
 
@@ -1848,7 +2025,7 @@ export const TasksView: React.FC = () => {
             <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Subtasks ({currentEditingTask?.subtasks?.length || 0})
             </label>
-            <div className="space-y-1.5 border border-zinc-200 dark:border-zinc-800 rounded-md p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <div className="space-y-1.5 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
               {currentEditingTask?.subtasks && currentEditingTask.subtasks.length > 0 ? (
                 currentEditingTask.subtasks.map((st) => (
                   <div key={st.id} className="flex items-center justify-between text-xs py-0.5">
@@ -1888,14 +2065,14 @@ export const TasksView: React.FC = () => {
                       handleModalAddSubtask();
                     }
                   }}
-                  className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-sm px-2 py-1 flex-1 focus:outline-none"
+                  className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-md px-2 py-1 flex-1 focus:outline-none"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleModalAddSubtask}
-                  className="h-7 text-xs px-2"
+                  className="h-7 text-xs px-2 rounded-md swiftui-press"
                 >
                   Add Subtask
                 </Button>
@@ -1908,7 +2085,7 @@ export const TasksView: React.FC = () => {
             <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Tags ({editTags.length})
             </label>
-            <div className="space-y-2 border border-zinc-200 dark:border-zinc-800 rounded-md p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <div className="space-y-2 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 bg-zinc-50/50 dark:bg-zinc-900/50">
               <div className="flex flex-wrap gap-1.5 min-h-[24px]">
                 {editTags.map((tg) => (
                   <span
@@ -1942,14 +2119,14 @@ export const TasksView: React.FC = () => {
                       handleAddEditTag();
                     }
                   }}
-                  className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-sm px-2 py-1 flex-1 focus:outline-none"
+                  className="text-xs bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-md px-2 py-1 flex-1 focus:outline-none"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => handleAddEditTag()}
-                  className="h-7 text-xs px-2"
+                  className="h-7 text-xs px-2 rounded-md swiftui-press"
                 >
                   Add Tag
                 </Button>
@@ -2018,10 +2195,11 @@ export const TasksView: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => setEditingTask(null)}
+              className="rounded-lg swiftui-press"
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="sm">
+            <Button type="submit" variant="primary" size="sm" className="rounded-lg swiftui-press">
               Save Changes
             </Button>
           </div>
@@ -2050,10 +2228,11 @@ export const TasksView: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => setIsNewListModalOpen(false)}
+              className="rounded-lg swiftui-press"
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="sm">
+            <Button type="submit" variant="primary" size="sm" className="rounded-lg swiftui-press">
               Create List
             </Button>
           </div>
