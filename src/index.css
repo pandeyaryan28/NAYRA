@@ -295,6 +295,126 @@
 }
 
 .dark .swiftui-row:hover {
-  background-color: rgba(39, 39, 42, 0.45);
+  background-color: rgba(255, 255, 255, 0.035);
 }
+
+/* ==========================================================================
+   Apple HIG & macOS Reminders World-Class Physics Keyframes
+   ========================================================================== */
+
+@keyframes appleSpringCheck {
+  0% { transform: scale(0.75); }
+  50% { transform: scale(1.22); }
+  75% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+@keyframes appleSlideFadeIn {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes appleItemStagger {
+  0% { opacity: 0; transform: translateY(4px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.apple-check-spring {
+  animation: appleSpringCheck 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.apple-fade-in {
+  animation: appleSlideFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.apple-stagger-enter {
+  animation: appleItemStagger 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Apple macOS Reminders Dark Glass Card */
+.apple-card-surface {
+  background: #ffffff;
+  border: 1px solid rgba(228, 228, 231, 0.9);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .apple-card-surface {
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Apple Category Tile: Authentic macOS Reminders 2x2 Grid */
+.apple-reminders-tile {
+  background: #ffffff;
+  border: 1px solid rgba(228, 228, 231, 0.9);
+  border-radius: 1rem;
+  padding: 0.75rem 0.85rem;
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.dark .apple-reminders-tile {
+  background: #252528;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.3);
+}
+
+.apple-reminders-tile:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.08);
+}
+
+.dark .apple-reminders-tile:hover {
+  background: #2b2b2f;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.5);
+}
+
+.apple-reminders-tile:active {
+  transform: scale(0.97);
+}
+
+/* Apple Circular Checkbox with Spring Check */
+.apple-checkbox {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 1.75px solid #a1a1aa;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.18s ease, background-color 0.18s ease;
+  cursor: pointer;
+}
+
+.dark .apple-checkbox {
+  border-color: #52525b;
+}
+
+.apple-checkbox:hover {
+  border-color: #007AFF;
+  transform: scale(1.08);
+}
+
+.apple-checkbox:active {
+  transform: scale(0.88);
+}
+
+.apple-checkbox.checked {
+  background-color: #007AFF;
+  border-color: #007AFF;
+  color: #ffffff;
+}
+
+.dark .apple-checkbox.checked {
+  background-color: #0A84FF;
+  border-color: #0A84FF;
+  color: #ffffff;
+}
+
 
