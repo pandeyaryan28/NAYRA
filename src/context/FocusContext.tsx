@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { PomodoroMode, TimerState, TaskItem } from '@/types';
 import { useData } from './DataContext';
+import { useAuth } from './AuthContext';
 import { playSessionCompleteSound, playBreakCompleteSound } from '@/lib/audio';
 import { safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
 import { syncActiveTimerToFirestore, subscribeActiveTimerFromFirestore, OPERATOR_UID } from '@/lib/firebase';
@@ -49,6 +50,8 @@ interface StoredFocusState {
 
 export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { settings, logFocusSession, tasks } = useData();
+  const { user } = useAuth();
+  const effectiveUid = user?.uid || OPERATOR_UID;
 
   const getDurationForMode = useCallback(
     (targetMode: PomodoroMode): number => {
@@ -140,6 +143,7 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isExpiringRef = useRef<boolean>(false);
   const hasProcessedMountRef = useRef<boolean>(false);
+  const isRemoteSyncRef = useRef<boolean>(false);
 
   // Synchronously flushes elapsed interval since last slice and attributes it to current active tasks
   const flushSliceSync = useCallback((now: number = Date.now()): Record<string, number> => {
@@ -158,7 +162,70 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return taskAllocationsRef.current;
   }, []);
 
-  // Sync to localStorage and broadcast to nayra-tab / nayra-extension
+  // Broadcasts state transitions strictly on user actions / lifecycle events (no 1s tick flooding)
+  const broadcastStateTransition = useCallback(
+    (
+      nextState: TimerState,
+      nextMode: PomodoroMode = mode,
+      nextRem: number = remainingSeconds,
+      nextTargetEnd: number | null = targetEndTime,
+      nextCycle: number = currentCycle,
+      nextActiveTaskIds: string[] = activeTaskIds,
+      nextSelectedTaskId: string | null = selectedTaskId
+    ) => {
+      if (isRemoteSyncRef.current) return;
+
+      const payload: StoredFocusState = {
+        mode: nextMode,
+        timerState: nextState,
+        remainingSeconds: nextRem,
+        targetEndTime: nextTargetEnd,
+        currentCycle: nextCycle,
+        selectedTaskId: nextSelectedTaskId,
+        activeTaskIds: nextActiveTaskIds,
+        taskTimeAllocations: taskAllocationsRef.current,
+        lastSliceTime: lastSliceTimeRef.current,
+      };
+      safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
+
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const ch = new BroadcastChannel('nayra_focus_sync');
+          ch.postMessage({
+            type: 'STATE_CHANGE',
+            mode: nextMode,
+            timerState: nextState,
+            remainingSeconds: nextRem,
+            targetEndTime: nextTargetEnd,
+            currentCycle: nextCycle,
+            selectedTaskId: nextSelectedTaskId,
+            activeTaskIds: nextActiveTaskIds,
+            timestamp: Date.now(),
+            source: 'web',
+          });
+          ch.close();
+        } catch {
+          // ignore
+        }
+      }
+
+      // Sync to Firestore activeTimer for cross-app synchronization
+      syncActiveTimerToFirestore(effectiveUid, {
+        mode: nextMode,
+        timerState: nextState,
+        remainingSeconds: nextRem,
+        targetEndTime: nextTargetEnd,
+        currentCycle: nextCycle,
+        activeTaskIds: nextActiveTaskIds || [],
+        selectedTaskId: nextSelectedTaskId,
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'web',
+      });
+    },
+    [effectiveUid, mode, remainingSeconds, targetEndTime, currentCycle, activeTaskIds, selectedTaskId]
+  );
+
+  // Sync to local storage only when state variables change
   useEffect(() => {
     const payload: StoredFocusState = {
       mode,
@@ -172,40 +239,6 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       lastSliceTime: lastSliceTimeRef.current,
     };
     safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
-
-    if (typeof BroadcastChannel !== 'undefined') {
-      try {
-        const ch = new BroadcastChannel('nayra_focus_sync');
-        ch.postMessage({
-          type: 'STATE_CHANGE',
-          mode,
-          timerState,
-          remainingSeconds,
-          targetEndTime,
-          currentCycle,
-          selectedTaskId,
-          activeTaskIds,
-          timestamp: Date.now(),
-          source: 'web',
-        });
-        ch.close();
-      } catch {
-        // ignore
-      }
-    }
-
-    // Sync to Firestore activeTimer for cross-app synchronization
-    syncActiveTimerToFirestore(OPERATOR_UID, {
-      mode,
-      timerState,
-      remainingSeconds,
-      targetEndTime,
-      currentCycle,
-      activeTaskIds: activeTaskIds || [],
-      selectedTaskId,
-      updatedAt: new Date().toISOString(),
-      updatedBy: 'web',
-    });
   }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId, activeTaskIds, taskTimeAllocations]);
 
   // Clean up any stale/expired timer state from an abandoned session on initial mount
@@ -270,16 +303,39 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             });
             return;
           }
-          if (data.mode) setModeState(data.mode);
-          if (data.currentCycle) setCurrentCycle(data.currentCycle);
-          if (data.remainingSeconds !== undefined) setRemainingSeconds(data.remainingSeconds);
-          if (data.timerState) setTimerState(data.timerState);
-          if (data.targetEndTime !== undefined) setTargetEndTime(data.targetEndTime);
-          if (data.selectedTaskId !== undefined) {
-            setSelectedTaskId(data.selectedTaskId);
-            if (data.selectedTaskId) {
-              setActiveTaskIds([data.selectedTaskId]);
+
+          isRemoteSyncRef.current = true;
+          try {
+            if (data.mode) setModeState(data.mode);
+            if (data.currentCycle) setCurrentCycle(data.currentCycle);
+
+            if (data.timerState === 'running') {
+              const now = Date.now();
+              const target = data.targetEndTime || (now + (data.remainingSeconds || 0) * 1000);
+              const rem = Math.max(0, Math.round((target - now) / 1000));
+              setTimerState('running');
+              setRemainingSeconds(rem);
+              setTargetEndTime(target);
+              lastSliceTimeRef.current = now;
+            } else {
+              setTimerState(data.timerState || 'idle');
+              if (data.remainingSeconds !== undefined) setRemainingSeconds(data.remainingSeconds);
+              setTargetEndTime(null);
+              lastSliceTimeRef.current = null;
             }
+
+            if (data.activeTaskIds && Array.isArray(data.activeTaskIds)) {
+              setActiveTaskIds(data.activeTaskIds);
+              activeTaskIdsRef.current = data.activeTaskIds;
+              setSelectedTaskId(data.selectedTaskId || data.activeTaskIds[0] || null);
+            } else if (data.selectedTaskId !== undefined) {
+              setSelectedTaskId(data.selectedTaskId);
+              const ids = data.selectedTaskId ? [data.selectedTaskId] : [];
+              setActiveTaskIds(ids);
+              activeTaskIdsRef.current = ids;
+            }
+          } finally {
+            isRemoteSyncRef.current = false;
           }
         };
       } catch {
@@ -294,27 +350,50 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Listen for real-time Cloud Firestore activeTimer updates from nayra-extension or nayra-tab
   useEffect(() => {
-    const unsubTimer = subscribeActiveTimerFromFirestore(OPERATOR_UID, (cloudState) => {
+    const unsubTimer = subscribeActiveTimerFromFirestore(effectiveUid, (cloudState) => {
       if (!cloudState || cloudState.updatedBy === 'web') return;
-      if (cloudState.mode) setModeState(cloudState.mode);
-      if (cloudState.currentCycle) setCurrentCycle(cloudState.currentCycle);
-      if (cloudState.remainingSeconds !== undefined) setRemainingSeconds(cloudState.remainingSeconds);
-      if (cloudState.timerState) setTimerState(cloudState.timerState);
-      if (cloudState.targetEndTime !== undefined) setTargetEndTime(cloudState.targetEndTime);
-      if (cloudState.activeTaskIds && Array.isArray(cloudState.activeTaskIds)) {
-        setActiveTaskIds(cloudState.activeTaskIds);
-      } else if (cloudState.selectedTaskId !== undefined) {
-        setSelectedTaskId(cloudState.selectedTaskId);
-        if (cloudState.selectedTaskId) {
-          setActiveTaskIds([cloudState.selectedTaskId]);
+
+      isRemoteSyncRef.current = true;
+      try {
+        if (cloudState.mode) setModeState(cloudState.mode);
+        if (cloudState.currentCycle) setCurrentCycle(cloudState.currentCycle);
+
+        if (cloudState.timerState === 'running') {
+          const now = Date.now();
+          const target = cloudState.targetEndTime || (now + (cloudState.remainingSeconds || 0) * 1000);
+          const rem = Math.max(0, Math.round((target - now) / 1000));
+          setTimerState('running');
+          setRemainingSeconds(rem);
+          setTargetEndTime(target);
+          lastSliceTimeRef.current = now;
+        } else {
+          setTimerState(cloudState.timerState || 'idle');
+          if (cloudState.remainingSeconds !== undefined) {
+            setRemainingSeconds(cloudState.remainingSeconds);
+          }
+          setTargetEndTime(null);
+          lastSliceTimeRef.current = null;
         }
+
+        if (cloudState.activeTaskIds && Array.isArray(cloudState.activeTaskIds)) {
+          setActiveTaskIds(cloudState.activeTaskIds);
+          activeTaskIdsRef.current = cloudState.activeTaskIds;
+          setSelectedTaskId(cloudState.selectedTaskId || cloudState.activeTaskIds[0] || null);
+        } else if (cloudState.selectedTaskId !== undefined) {
+          setSelectedTaskId(cloudState.selectedTaskId);
+          const ids = cloudState.selectedTaskId ? [cloudState.selectedTaskId] : [];
+          setActiveTaskIds(ids);
+          activeTaskIdsRef.current = ids;
+        }
+      } finally {
+        isRemoteSyncRef.current = false;
       }
     });
 
     return () => {
       unsubTimer();
     };
-  }, []);
+  }, [effectiveUid]);
 
   const handleTimerExpiry = useCallback(() => {
     // 1. Play synthesized Web Audio chime
@@ -397,39 +476,46 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (mode === 'focus') {
       const isLongBreak = currentCycle % (settings.longBreakInterval || 4) === 0;
       const nextMode: PomodoroMode = isLongBreak ? 'longBreak' : 'shortBreak';
-      setModeState(nextMode);
       const nextDuration = getDurationForMode(nextMode);
+      setModeState(nextMode);
       setRemainingSeconds(nextDuration);
 
       if (settings.autoStartBreaks) {
         isExpiringRef.current = false;
         lastSliceTimeRef.current = Date.now();
-        setTargetEndTime(Date.now() + nextDuration * 1000);
+        const nextTarget = Date.now() + nextDuration * 1000;
+        setTargetEndTime(nextTarget);
         setTimerState('running');
+        broadcastStateTransition('running', nextMode, nextDuration, nextTarget, currentCycle, activeTaskIds, selectedTaskId);
       } else {
         setTargetEndTime(null);
         setTimerState('idle');
+        broadcastStateTransition('idle', nextMode, nextDuration, null, currentCycle, activeTaskIds, selectedTaskId);
       }
     } else {
       // Completed break
-      setModeState('focus');
-      setCurrentCycle((prev) => prev + 1);
+      const nextCycle = currentCycle + 1;
       const nextDuration = getDurationForMode('focus');
+      setModeState('focus');
+      setCurrentCycle(nextCycle);
       setRemainingSeconds(nextDuration);
 
       if (settings.autoStartPomodoros) {
         isExpiringRef.current = false;
         lastSliceTimeRef.current = Date.now();
-        setTargetEndTime(Date.now() + nextDuration * 1000);
+        const nextTarget = Date.now() + nextDuration * 1000;
+        setTargetEndTime(nextTarget);
         setTimerState('running');
+        broadcastStateTransition('running', 'focus', nextDuration, nextTarget, nextCycle, activeTaskIds, selectedTaskId);
       } else {
         setTargetEndTime(null);
         setTimerState('idle');
+        broadcastStateTransition('idle', 'focus', nextDuration, null, nextCycle, activeTaskIds, selectedTaskId);
       }
     }
-  }, [mode, currentCycle, flushSliceSync, getDurationForMode, logFocusSession, settings, tasks]);
+  }, [mode, currentCycle, flushSliceSync, getDurationForMode, logFocusSession, settings, tasks, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
-  // High-accuracy drift-proof ticker
+  // High-accuracy drift-proof ticker: updates remaining seconds locally without flooding cloud writes
   useEffect(() => {
     if (timerState !== 'running' || !targetEndTime) return;
 
@@ -440,7 +526,7 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const diffMs = targetEndTime - now;
       const secLeft = Math.max(0, Math.round(diffMs / 1000));
 
-      setRemainingSeconds(secLeft);
+      setRemainingSeconds((prev) => (prev !== secLeft ? secLeft : prev));
 
       if (diffMs <= 0) {
         isExpiringRef.current = true;
@@ -472,19 +558,22 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const target = Date.now() + remainingSeconds * 1000;
     setTargetEndTime(target);
     setTimerState('running');
-  }, [remainingSeconds]);
+    broadcastStateTransition('running', mode, remainingSeconds, target, currentCycle, activeTaskIds, selectedTaskId);
+  }, [remainingSeconds, mode, currentCycle, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const pauseTimer = useCallback(() => {
     isExpiringRef.current = false;
     flushSliceSync();
     lastSliceTimeRef.current = null;
+    let secLeft = remainingSeconds;
     if (targetEndTime) {
-      const secLeft = Math.max(0, Math.round((targetEndTime - Date.now()) / 1000));
+      secLeft = Math.max(0, Math.round((targetEndTime - Date.now()) / 1000));
       setRemainingSeconds(secLeft);
     }
     setTargetEndTime(null);
     setTimerState('paused');
-  }, [flushSliceSync, targetEndTime]);
+    broadcastStateTransition('paused', mode, secLeft, null, currentCycle, activeTaskIds, selectedTaskId);
+  }, [flushSliceSync, targetEndTime, remainingSeconds, mode, currentCycle, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const resumeTimer = useCallback(() => {
     isExpiringRef.current = false;
@@ -492,64 +581,83 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const target = Date.now() + remainingSeconds * 1000;
     setTargetEndTime(target);
     setTimerState('running');
-  }, [remainingSeconds]);
+    broadcastStateTransition('running', mode, remainingSeconds, target, currentCycle, activeTaskIds, selectedTaskId);
+  }, [remainingSeconds, mode, currentCycle, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const stopTimer = useCallback(() => {
     isExpiringRef.current = false;
     lastSliceTimeRef.current = null;
+    const defaultDur = getDurationForMode(mode);
     setTimerState('idle');
     setTargetEndTime(null);
-    setRemainingSeconds(getDurationForMode(mode));
+    setRemainingSeconds(defaultDur);
     taskAllocationsRef.current = {};
     setTaskTimeAllocations({});
-  }, [getDurationForMode, mode]);
+    broadcastStateTransition('idle', mode, defaultDur, null, currentCycle, activeTaskIds, selectedTaskId);
+  }, [getDurationForMode, mode, currentCycle, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const skipSession = useCallback(() => {
     isExpiringRef.current = false;
-    stopTimer();
+    lastSliceTimeRef.current = null;
+    taskAllocationsRef.current = {};
+    setTaskTimeAllocations({});
     if (mode === 'focus') {
       const isLongBreak = currentCycle % (settings.longBreakInterval || 4) === 0;
       const nextMode: PomodoroMode = isLongBreak ? 'longBreak' : 'shortBreak';
+      const nextDur = getDurationForMode(nextMode);
       setModeState(nextMode);
-      setRemainingSeconds(getDurationForMode(nextMode));
+      setRemainingSeconds(nextDur);
+      setTimerState('idle');
+      setTargetEndTime(null);
+      broadcastStateTransition('idle', nextMode, nextDur, null, currentCycle, activeTaskIds, selectedTaskId);
     } else {
+      const nextCycle = currentCycle + 1;
+      const nextDur = getDurationForMode('focus');
       setModeState('focus');
-      setCurrentCycle((prev) => prev + 1);
-      setRemainingSeconds(getDurationForMode('focus'));
+      setCurrentCycle(nextCycle);
+      setRemainingSeconds(nextDur);
+      setTimerState('idle');
+      setTargetEndTime(null);
+      broadcastStateTransition('idle', 'focus', nextDur, null, nextCycle, activeTaskIds, selectedTaskId);
     }
-  }, [currentCycle, getDurationForMode, mode, settings.longBreakInterval, stopTimer]);
+  }, [currentCycle, getDurationForMode, mode, settings.longBreakInterval, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const setMode = useCallback((newMode: PomodoroMode) => {
     isExpiringRef.current = false;
-    stopTimer();
+    lastSliceTimeRef.current = null;
+    const defaultDur = getDurationForMode(newMode);
+    setTimerState('idle');
+    setTargetEndTime(null);
     setModeState(newMode);
-    setRemainingSeconds(getDurationForMode(newMode));
-  }, [getDurationForMode, stopTimer]);
+    setRemainingSeconds(defaultDur);
+    taskAllocationsRef.current = {};
+    setTaskTimeAllocations({});
+    broadcastStateTransition('idle', newMode, defaultDur, null, currentCycle, activeTaskIds, selectedTaskId);
+  }, [getDurationForMode, currentCycle, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const selectTask = useCallback((task: TaskItem | null) => {
     if (timerState === 'running') {
       flushSliceSync();
     }
-    if (task) {
-      activeTaskIdsRef.current = [task.id];
-      setActiveTaskIds([task.id]);
-      setSelectedTaskId(task.id);
-    } else {
-      activeTaskIdsRef.current = [];
-      setActiveTaskIds([]);
-      setSelectedTaskId(null);
-    }
-  }, [flushSliceSync, timerState]);
+    const newActiveIds = task ? [task.id] : [];
+    const newSelectedId = task ? task.id : null;
+    activeTaskIdsRef.current = newActiveIds;
+    setActiveTaskIds(newActiveIds);
+    setSelectedTaskId(newSelectedId);
+    broadcastStateTransition(timerState, mode, remainingSeconds, targetEndTime, currentCycle, newActiveIds, newSelectedId);
+  }, [flushSliceSync, timerState, mode, remainingSeconds, targetEndTime, currentCycle, broadcastStateTransition]);
 
   const selectTasks = useCallback((taskList: TaskItem[]) => {
     if (timerState === 'running') {
       flushSliceSync();
     }
     const ids = Array.from(new Set(taskList.map((t) => t.id)));
+    const newSelectedId = ids[0] || null;
     activeTaskIdsRef.current = ids;
     setActiveTaskIds(ids);
-    setSelectedTaskId(ids[0] || null);
-  }, [flushSliceSync, timerState]);
+    setSelectedTaskId(newSelectedId);
+    broadcastStateTransition(timerState, mode, remainingSeconds, targetEndTime, currentCycle, ids, newSelectedId);
+  }, [flushSliceSync, timerState, mode, remainingSeconds, targetEndTime, currentCycle, broadcastStateTransition]);
 
   const addSessionTask = useCallback((task: TaskItem) => {
     if (timerState === 'running') {
@@ -561,7 +669,8 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     activeTaskIdsRef.current = next;
     setActiveTaskIds(next);
     setSelectedTaskId((prev) => prev || task.id);
-  }, [flushSliceSync, timerState]);
+    broadcastStateTransition(timerState, mode, remainingSeconds, targetEndTime, currentCycle, next, next[0] || null);
+  }, [flushSliceSync, timerState, mode, remainingSeconds, targetEndTime, currentCycle, broadcastStateTransition]);
 
   const removeSessionTask = useCallback((taskId: string) => {
     if (timerState === 'running') {
@@ -570,8 +679,9 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const filtered = activeTaskIdsRef.current.filter((id) => id !== taskId);
     activeTaskIdsRef.current = filtered;
     setActiveTaskIds(filtered);
-    setSelectedTaskId((prev) => (prev === taskId ? null : prev));
-  }, [flushSliceSync, timerState]);
+    setSelectedTaskId((prev) => (prev === taskId ? filtered[0] || null : prev));
+    broadcastStateTransition(timerState, mode, remainingSeconds, targetEndTime, currentCycle, filtered, filtered[0] || null);
+  }, [flushSliceSync, timerState, mode, remainingSeconds, targetEndTime, currentCycle, broadcastStateTransition]);
 
   const getTaskLiveSeconds = useCallback((taskId: string): number => {
     const base = taskTimeAllocations[taskId] || 0;

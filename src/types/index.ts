@@ -287,4 +287,6 @@ export interface ActiveTimerCloudState {
   selectedTaskId: string | null;
   updatedAt: string;
   updatedBy: 'extension' | 'tab' | 'web';
+  effectiveUid?: string;
 }
+

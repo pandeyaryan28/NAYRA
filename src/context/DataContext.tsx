@@ -581,19 +581,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (!active || !activeDoc || !Array.isArray(activeDoc.tasks)) return;
               if (activeDoc.source === 'extension' || activeDoc.source === 'tab') {
                 const incomingActive = activeDoc.tasks;
-                const incomingIds = new Set(incomingActive.map((t) => t.id));
+                const completedTaskIds = new Set<string>(
+                  Array.isArray((activeDoc as any).completedTaskIds) ? ((activeDoc as any).completedTaskIds as string[]) : []
+                );
+
                 setTasks((prev) => {
                   const prevMap = new Map(prev.map((t) => [t.id, t]));
                   let changed = false;
                   const newTasksForGoogle: TaskItem[] = [];
 
-                  // Check if any previously active tasks were completed or removed in extension/tab
-                  prev.forEach((existing) => {
-                    if (!existing.archived && existing.status !== 'completed' && !existing.completed) {
-                      if (!incomingIds.has(existing.id)) {
+                  // Process explicit task completions from peer if any
+                  if (completedTaskIds.size > 0) {
+                    completedTaskIds.forEach((doneId) => {
+                      const existing = prevMap.get(doneId);
+                      if (existing && existing.status !== 'completed' && !existing.completed && !existing.archived) {
                         changed = true;
                         const now = new Date().toISOString();
-                        prevMap.set(existing.id, {
+                        prevMap.set(doneId, {
                           ...existing,
                           status: 'completed',
                           completed: true,
@@ -602,16 +606,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                           archivedAt: now,
                           updatedAt: now,
                         });
-
-                        // Forward completion to Google Tasks API
                         if (googleAccessToken && existing.googleTaskId) {
                           const gtlId = resolveGoogleTaskListId(existing.taskListId || '@default', taskListsRef.current);
                           updateGoogleTaskStatus(googleAccessToken, gtlId, existing.googleTaskId, 'completed', taskListsRef.current).catch(console.warn);
                         }
                       }
-                    }
-                  });
+                    });
+                  }
 
+                  // Additively reconcile incoming active tasks
                   incomingActive.forEach((inc) => {
                     const existing = prevMap.get(inc.id);
                     if (!existing) {
@@ -625,12 +628,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       const rc = inc.pomodoroCount || 0;
                       const lf = existing.totalFocusSeconds || 0;
                       const lc = existing.pomodoroCount || 0;
-                      if (rf > lf || rc > lc || inc.title !== existing.title || inc.status !== existing.status) {
+                      const isRemoteComplete = inc.status === 'completed' || inc.completed === true || inc.archived === true;
+
+                      if (
+                        rf > lf ||
+                        rc > lc ||
+                        inc.title !== existing.title ||
+                        inc.status !== existing.status ||
+                        (isRemoteComplete && !existing.completed)
+                      ) {
                         prevMap.set(inc.id, {
                           ...existing,
                           ...inc,
                           totalFocusSeconds: Math.max(lf, rf),
                           pomodoroCount: Math.max(lc, rc),
+                          ...(isRemoteComplete ? { status: 'completed', completed: true, archived: true } : {}),
                         });
                         changed = true;
                       }
