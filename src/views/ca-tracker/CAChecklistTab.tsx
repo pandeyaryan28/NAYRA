@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Play,
   Check,
+  HelpCircle,
 } from 'lucide-react';
 import { useCATracker } from '@/context/CATrackerContext';
 import { Card } from './components/Card';
@@ -26,9 +27,13 @@ export type DateFilter = 'all' | 'today' | 'overdue' | 'scheduled' | 'unschedule
 
 interface CAChecklistTabProps {
   initialSubjectId?: string;
+  onNavigateToExercise?: (chapterNum?: number, unitNum?: number) => void;
 }
 
-export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({ initialSubjectId }) => {
+export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
+  initialSubjectId,
+  onNavigateToExercise,
+}) => {
   const { subjects, subjectGroups, updateTopicStatus, batchUpdateTopicStatus, updateTopic, addTopic } = useCATracker();
   const [selectedSubject, setSelectedSubject] = useState<SubjectId | 'all'>(
     (initialSubjectId as SubjectId) || 'all'
@@ -571,6 +576,21 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({ initialSubjectId
                                   <ExternalLink className="w-3 h-3 opacity-70" />
                                 </a>
                               )}
+                              {chapter.subjectId === 'paper4' && onNavigateToExercise && (
+                                <button
+                                  type="button"
+                                  aria-label={`Practice Digital Exercise for Chapter ${chapter.chapterNumber}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onNavigateToExercise(chapter.chapterNumber);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition-colors border border-emerald-200 dark:border-emerald-800/80 shrink-0 cursor-pointer min-h-[32px]"
+                                  title={`Practice Digital Exercise for Chapter ${chapter.chapterNumber}`}
+                                >
+                                  <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                  <span className="hidden xs:inline">Exercise</span>
+                                </button>
+                              )}
                             </div>
                             <div className="flex items-center gap-1.5 text-xs font-medium tabular-nums ml-auto sm:ml-0">
                               <span
@@ -716,6 +736,24 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({ initialSubjectId
                                           <ExternalLink className="w-3 h-3 opacity-70" />
                                         </a>
                                       )}
+
+                                      {/* Direct Unit-Level Exercise Practice (for Paper 4 Units) */}
+                                      {chapter.subjectId === 'paper4' && onNavigateToExercise && (() => {
+                                        const unitMatch = topic.title.match(/Unit\s*(\d+)/i);
+                                        const topicUnitNumber = (topic as any).unitNumber ?? (unitMatch ? Number(unitMatch[1]) : undefined);
+                                        return (
+                                          <button
+                                            type="button"
+                                            aria-label={topicUnitNumber ? `Practice Digital Exercise for Unit ${topicUnitNumber}` : `Practice Digital Exercise for ${topic.title}`}
+                                            onClick={() => onNavigateToExercise(chapter.chapterNumber, topicUnitNumber)}
+                                            className="p-1.5 rounded-md text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors inline-flex items-center gap-1 cursor-pointer min-h-[32px]"
+                                            title={topicUnitNumber ? `Practice Digital Exercise for Unit ${topicUnitNumber}` : `Practice Digital Exercise for ${topic.title}`}
+                                          >
+                                            <HelpCircle className="w-3.5 h-3.5" />
+                                            <span className="text-[11px] font-semibold">Exercise</span>
+                                          </button>
+                                        );
+                                      })()}
 
                                       <button
                                         type="button"

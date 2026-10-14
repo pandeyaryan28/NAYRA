@@ -136,4 +136,7 @@ export const CA_STORAGE_KEYS = {
   TARGET_EXAM_DATE: 'ca_tracker_target_exam_date',
   THEME: 'ca_theme',
   STREAK: 'ca_tracker_streak',
+  EXERCISE_ATTEMPTS: 'ca_tracker_exercise_attempts',
+  EXERCISE_ACTIVE_SESSION: 'ca_tracker_active_exercise_session',
 };
+

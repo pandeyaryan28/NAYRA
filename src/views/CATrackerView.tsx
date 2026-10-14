@@ -12,6 +12,7 @@ import {
   Flame,
   Clock,
   BookOpen,
+  HelpCircle,
 } from 'lucide-react';
 import { useCATracker } from '@/context/CATrackerContext';
 import { CADashboardTab } from './ca-tracker/CADashboardTab';
@@ -20,6 +21,7 @@ import { CAScheduleTab } from './ca-tracker/CAScheduleTab';
 import { CALecturesTab } from './ca-tracker/CALecturesTab';
 import { CATestsTab } from './ca-tracker/CATestsTab';
 import { CARevisionsTab } from './ca-tracker/CARevisionsTab';
+import { CAExercisesTab } from './ca-tracker/CAExercisesTab';
 import { CADataHubTab } from './ca-tracker/CADataHubTab';
 import { CASettingsTab } from './ca-tracker/CASettingsTab';
 
@@ -30,6 +32,7 @@ export type CATabId =
   | 'lectures'
   | 'tests'
   | 'revisions'
+  | 'exercises'
   | 'data-hub'
   | 'settings';
 
@@ -44,6 +47,11 @@ export const CATrackerView: React.FC = () => {
   const { metrics, settings, revisions, lectures, isCloudConnected } = useCATracker();
   const [activeTab, setActiveTab] = useState<CATabId>('dashboard');
   const [checklistFilter, setChecklistFilter] = useState<string | undefined>(undefined);
+  const [exerciseTarget, setExerciseTarget] = useState<{
+    chapterNumber?: number;
+    unitNumber?: number;
+    timestamp?: number;
+  } | undefined>(undefined);
 
   // Derived counts for tab badges
   const dueRevisionsCount = revisions.filter(
@@ -88,6 +96,12 @@ export const CATrackerView: React.FC = () => {
       badge: dueRevisionsCount > 0 ? dueRevisionsCount : undefined,
     },
     {
+      id: 'exercises',
+      label: 'Exercises',
+      icon: HelpCircle,
+      badge: '617 Qs',
+    },
+    {
       id: 'data-hub',
       label: 'Data Hub',
       icon: Database,
@@ -103,6 +117,20 @@ export const CATrackerView: React.FC = () => {
     setActiveTab(tab as CATabId);
     if (tab === 'checklist' && filter) {
       setChecklistFilter(filter);
+    }
+  };
+
+  const handleNavigateToExercise = (chapterNum?: number, unitNum?: number) => {
+    if (chapterNum) {
+      setExerciseTarget({
+        chapterNumber: chapterNum,
+        unitNumber: unitNum,
+        timestamp: Date.now(),
+      });
+      setActiveTab('exercises');
+    } else {
+      setExerciseTarget(undefined);
+      setActiveTab('exercises');
     }
   };
 
@@ -169,6 +197,8 @@ export const CATrackerView: React.FC = () => {
               <button
                 key={item.id}
                 type="button"
+                data-testid={`ca-nav-tab-${item.id}`}
+                aria-label={item.badge !== undefined ? `${item.label} (${item.badge})` : item.label}
                 onClick={() => handleNavigateTab(item.id)}
                 className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md whitespace-nowrap transition-colors ${
                   isActive
@@ -197,12 +227,30 @@ export const CATrackerView: React.FC = () => {
 
       {/* Active Tab View Body */}
       <div className="pt-2">
-        {activeTab === 'dashboard' && <CADashboardTab onNavigateTab={handleNavigateTab} />}
-        {activeTab === 'checklist' && <CAChecklistTab initialSubjectId={checklistFilter} />}
+        {activeTab === 'dashboard' && (
+          <CADashboardTab
+            onNavigateTab={handleNavigateTab}
+            onNavigateToExercise={handleNavigateToExercise}
+          />
+        )}
+        {activeTab === 'checklist' && (
+          <CAChecklistTab
+            initialSubjectId={checklistFilter}
+            onNavigateToExercise={handleNavigateToExercise}
+          />
+        )}
         {activeTab === 'schedule' && <CAScheduleTab />}
         {activeTab === 'lectures' && <CALecturesTab />}
         {activeTab === 'tests' && <CATestsTab />}
         {activeTab === 'revisions' && <CARevisionsTab onNavigateTab={handleNavigateTab} />}
+        {activeTab === 'exercises' && (
+          <CAExercisesTab
+            initialChapterNumber={exerciseTarget?.chapterNumber}
+            initialUnitNumber={exerciseTarget?.unitNumber}
+            navTimestamp={exerciseTarget?.timestamp}
+            onClearNavigationTarget={() => setExerciseTarget(undefined)}
+          />
+        )}
         {activeTab === 'data-hub' && <CADataHubTab />}
         {activeTab === 'settings' && <CASettingsTab />}
       </div>

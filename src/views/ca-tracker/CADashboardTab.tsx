@@ -15,6 +15,7 @@ import {
   FileText,
   ExternalLink,
   Play,
+  HelpCircle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCATracker } from '@/context/CATrackerContext';
@@ -25,12 +26,17 @@ import { Button } from './components/Button';
 import { RadialGauge } from './components/RadialGauge';
 import { SubjectId } from '@/types/ca';
 import { formatMinutes } from '@/lib/ca/utils';
+import { loadExerciseAttempts, economicsExercises } from '@/lib/ca/exerciseStorage';
 
 interface CADashboardTabProps {
   onNavigateTab?: (tab: string) => void;
+  onNavigateToExercise?: (chapterNum?: number, unitNum?: number) => void;
 }
 
-export const CADashboardTab: React.FC<CADashboardTabProps> = ({ onNavigateTab }) => {
+export const CADashboardTab: React.FC<CADashboardTabProps> = ({
+  onNavigateTab,
+  onNavigateToExercise,
+}) => {
   const {
     metrics,
     actionPlan,
@@ -358,6 +364,66 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({ onNavigateTab })
           })}
         </div>
       </section>
+
+      {/* Economics Exercises Quick-Access Banner Card */}
+      <Card className="p-5 sm:p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                Paper 4 • Business Economics
+              </span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                Official ICAI Study Module MCQ Bank
+              </span>
+            </div>
+
+            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+              Digital Exercise & Practice Hub
+            </h3>
+
+            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+              All 617 ICAI multiple-choice questions across 10 chapters (including 4 multi-unit chapters) with full verified answer keys, conceptual solutions, and keyboard shortcuts.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">617</span>
+                <span className="text-zinc-500">MCQs</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">10</span>
+                <span className="text-zinc-500">Chapters</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                <span className="font-bold tabular-nums text-rose-600 dark:text-rose-400">-0.25</span>
+                <span className="text-zinc-500">Exam Negative Marking</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-2.5 w-full lg:w-auto shrink-0">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => {
+                if (onNavigateTab) {
+                  onNavigateTab('exercises');
+                } else if (onNavigateToExercise) {
+                  onNavigateToExercise();
+                }
+              }}
+              leftIcon={<HelpCircle className="w-4 h-4" />}
+              className="w-full sm:w-auto font-semibold justify-center"
+            >
+              Practice Exercises
+            </Button>
+            <span className="text-[11px] text-zinc-500 text-center lg:text-right">
+              Exam & Practice modes available
+            </span>
+          </div>
+        </div>
+      </Card>
 
       {/* Today's Action Plan */}
       <section className="space-y-3">
