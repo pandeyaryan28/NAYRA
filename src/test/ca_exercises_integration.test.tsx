@@ -306,10 +306,44 @@ describe('NAYRA Built-in CA Tracker — Digital Economics Exercises Integration'
       expect(screen.getByRole('button', { name: /Marked \(1\)/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Pending \(1\)/i })).toBeInTheDocument();
 
+      // Verify embedded 3-column metric strip footer renders alongside legend
+      expect(screen.getAllByText('Answered').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText('Pending')).toBeInTheDocument();
+
       // Clicking Pending (1) should only show Question 2 button in the grid
       fireEvent.click(screen.getByRole('button', { name: /Pending \(1\)/i }));
       expect(screen.getByRole('button', { name: /Jump to question 2/i })).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /Jump to question 1/i })).not.toBeInTheDocument();
+    });
+
+    it('hides footer stats in review mode and supports showFooterStats=false', () => {
+      const { rerender } = render(
+        <QuestionPalette
+          questions={mockQuestions}
+          currentIndex={0}
+          selectedAnswers={{ 'beco-ch01-q001': 'd' }}
+          markedForReview={{}}
+          onSelectQuestion={vi.fn()}
+          isReviewMode={true}
+        />
+      );
+
+      // In review mode, session footer strip is hidden
+      expect(screen.queryByText('Pending')).not.toBeInTheDocument();
+
+      // With showFooterStats={false} in session mode, footer strip is hidden
+      rerender(
+        <QuestionPalette
+          questions={mockQuestions}
+          currentIndex={0}
+          selectedAnswers={{ 'beco-ch01-q001': 'd' }}
+          markedForReview={{}}
+          onSelectQuestion={vi.fn()}
+          isReviewMode={false}
+          showFooterStats={false}
+        />
+      );
+      expect(screen.queryByText('Pending')).not.toBeInTheDocument();
     });
   });
 
