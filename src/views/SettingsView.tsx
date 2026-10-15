@@ -78,14 +78,21 @@ export const SettingsView: React.FC = () => {
   const [offlineLinkMessage, setOfflineLinkMessage] = useState<string>('');
 
   useEffect(() => {
+    let isMounted = true;
     if (user && !user.isGuest) {
-      getGoogleOAuthStatusFromCloud().then((status) => {
-        setServerOAuthStatus(status);
-        if (status.clientId && !offlineClientId) {
-          setOfflineClientId(status.clientId);
-        }
-      });
+      getGoogleOAuthStatusFromCloud()
+        .then((status) => {
+          if (!isMounted) return;
+          setServerOAuthStatus(status);
+          if (status.clientId && !offlineClientId) {
+            setOfflineClientId(status.clientId);
+          }
+        })
+        .catch(() => {});
     }
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   const handleSaveServerCredentials = async () => {

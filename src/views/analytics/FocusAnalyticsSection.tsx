@@ -248,60 +248,6 @@ export const FocusAnalyticsSection: React.FC<FocusAnalyticsSectionProps> = ({
           </span>
         </div>
       </div>
-
-      {/* Highest Focus Allocation Tasks */}
-      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter interactive-card">
-        <div className="pb-2 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Highest Focus Allocation Tasks
-            </h3>
-            <p className="text-xs text-zinc-400">
-              Tasks receiving the greatest proportion of logged deep work hours.
-            </p>
-          </div>
-          <span className="text-[11px] font-mono text-zinc-400">
-            Ranked by total hours
-          </span>
-        </div>
-
-        {tagScopedTasks.filter((t) => t.totalFocusSeconds > 0).length === 0 ? (
-          <div className="py-8 text-center text-xs text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
-            <Clock className="h-6 w-6 mx-auto mb-2 text-zinc-300 dark:text-zinc-600" />
-            <p className="font-medium text-zinc-600 dark:text-zinc-300">No task focus logged yet.</p>
-            <p className="text-[11px] text-zinc-400 mt-0.5">
-              Select tasks in the Focus Lab to log Pomodoro focus time directly against tasks.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {tagScopedTasks
-              .filter((t) => t.totalFocusSeconds > 0)
-              .sort((a, b) => b.totalFocusSeconds - a.totalFocusSeconds)
-              .slice(0, 5)
-              .map((t) => (
-                <div key={t.id} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium text-zinc-800 dark:text-zinc-200 truncate pr-2">
-                      {t.title}
-                    </span>
-                    <span className="font-mono text-zinc-500 shrink-0">
-                      {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-sm overflow-hidden">
-                    <div
-                      className="h-full bg-zinc-900 dark:bg-zinc-100 progress-bar-animated"
-                      style={{
-                        width: `${Math.min(100, Math.round((t.totalFocusSeconds / (3600 * 5)) * 100))}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

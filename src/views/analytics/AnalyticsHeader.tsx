@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Activity, Copy, Check, Download } from 'lucide-react';
+import { Activity, Copy, Check, Download, Filter, X } from 'lucide-react';
 import { TimeHorizon } from '@/views/AnalyticsView';
 
 interface AnalyticsHeaderProps {
   timeHorizon: TimeHorizon;
   setTimeHorizon: (horizon: TimeHorizon) => void;
+  availableTags: [string, number][];
   activeTagFilter: string | null;
+  setActiveTagFilter: (tag: string | null) => void;
+  totalTaskCount: number;
   onCopyReport: () => void;
-  onExportJson: () => void;
+  onExportJson?: () => void;
 }
 
 export const HORIZON_LABELS: Record<TimeHorizon, { title: string; subtitle: string }> = {
@@ -22,7 +25,10 @@ export const HORIZON_LABELS: Record<TimeHorizon, { title: string; subtitle: stri
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
   timeHorizon,
   setTimeHorizon,
+  availableTags,
   activeTagFilter,
+  setActiveTagFilter,
+  totalTaskCount,
   onCopyReport,
   onExportJson,
 }) => {
@@ -54,7 +60,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
           </p>
         </div>
 
-        {/* Action Utilities (Copy Report & Export JSON) */}
+        {/* Action Utilities (Copy Report & Optional Export JSON) */}
         <div className="flex items-center gap-2 self-start lg:self-auto">
           <button
             type="button"
@@ -75,15 +81,17 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={onExportJson}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 shadow-xs transition-colors swiftui-press"
-            title="Download full analytics dataset as JSON"
-          >
-            <Download className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Export JSON</span>
-          </button>
+          {onExportJson && (
+            <button
+              type="button"
+              onClick={onExportJson}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-700/80 shadow-xs transition-colors swiftui-press"
+              title="Download full analytics dataset as JSON"
+            >
+              <Download className="h-3.5 w-3.5 text-zinc-500" />
+              <span>Export JSON</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -108,6 +116,73 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
           );
         })}
       </div>
+
+      {/* Interactive Tag Filter Bar */}
+      <div className="p-3 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+            <Filter className="w-3.5 h-3.5 text-sky-500" />
+            <span>Filter by Tag:</span>
+            {activeTagFilter ? (
+              <span className="font-mono text-[11px] text-sky-600 dark:text-sky-400 ml-1">
+                Active: [{activeTagFilter}]
+              </span>
+            ) : (
+              <span className="text-zinc-400 font-normal ml-1">Showing all activities</span>
+            )}
+          </div>
+
+          {activeTagFilter && (
+            <button
+              type="button"
+              onClick={() => setActiveTagFilter(null)}
+              className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 flex items-center gap-1 hover:underline swiftui-press"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Clear Filter</span>
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+          <button
+            type="button"
+            onClick={() => setActiveTagFilter(null)}
+            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all duration-150 swiftui-press ${
+              activeTagFilter === null
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+            }`}
+          >
+            All Tags ({totalTaskCount})
+          </button>
+
+          {availableTags.map(([tag, count]) => {
+            const isSelected = activeTagFilter === tag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setActiveTagFilter(isSelected ? null : tag)}
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono font-medium rounded-md transition-all duration-150 swiftui-press ${
+                  isSelected
+                    ? 'bg-sky-600 text-white shadow-xs'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                <span className="text-[10px] opacity-60">tag:</span>
+                <span>{tag}</span>
+                <span className="opacity-70 text-[10px]">({count})</span>
+              </button>
+            );
+          })}
+
+          {availableTags.length === 0 && (
+            <span className="text-xs text-zinc-400 italic">No tags created yet.</span>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
+export default AnalyticsHeader;

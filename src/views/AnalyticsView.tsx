@@ -3,34 +3,34 @@ import { useData } from '@/context/DataContext';
 import { TagAnalyticsItem } from '@/types';
 import { formatSecondsToHoursMinutes, getTodayDateString } from '@/lib/utils';
 import { subDays, addDays, format } from 'date-fns';
+import { Clock, CheckSquare, Flame, TrendingUp, TrendingDown, Target } from 'lucide-react';
 
-import { AnalyticsPerspective, SystemHealthScore, AutomatedInsight, HorizonDelta } from './analytics/types';
 import {
   calculateHorizonDeltas,
-  computeRealOSBalance,
-  generateAutomatedInsights,
-  generateMarkdownSummary,
-  exportAnalyticsAsJson,
+  calculateTaskPeriodFocus,
   detectPeakFocusWindow,
+  generateMarkdownSummary,
 } from './analytics/analyticsUtils';
 import { AnalyticsHeader, HORIZON_LABELS } from './analytics/AnalyticsHeader';
-import { AnalyticsFilterBar } from './analytics/AnalyticsFilterBar';
-import { ExecutiveOverview } from './analytics/ExecutiveOverview';
 import { FocusAnalyticsSection } from './analytics/FocusAnalyticsSection';
+import { TaskFocusBreakdown } from './analytics/TaskFocusBreakdown';
 import { TaskVelocitySection } from './analytics/TaskVelocitySection';
-import { HabitsAnalyticsSection } from './analytics/HabitsAnalyticsSection';
-import { NutritionAnalyticsSection } from './analytics/NutritionAnalyticsSection';
-import { CAStudyAnalyticsSection } from './analytics/CAStudyAnalyticsSection';
 
 export type TimeHorizon = 'today' | 'yesterday' | 'tomorrow' | '7d' | '30d' | 'all';
 
 export const AnalyticsView: React.FC = () => {
-  const { tasks, focusSessions, habits, calorieEntries, settings, focusStats, caTopics, caTests } = useData();
+  const { tasks, focusSessions, focusStats, habits } = useData();
 
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('7d');
-  const [activePerspective, setActivePerspective] = useState<AnalyticsPerspective>('overview');
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [tagSortBy, setTagSortBy] = useState<'focus' | 'tasks' | 'completion' | 'name'>('focus');
+
+  const activeHabits = useMemo(() => (habits || []).filter((h) => !h.archived), [habits]);
+  const avgHabitStreak = useMemo(() => {
+    if (activeHabits.length === 0) return focusStats.streakDays || 0;
+    const total = activeHabits.reduce((acc, h) => acc + (h.currentStreak || 0), 0);
+    return Math.round(total / activeHabits.length);
+  }, [activeHabits, focusStats.streakDays]);
 
   const todayStr = getTodayDateString();
   const yesterdayStr = format(subDays(new Date(), 1), 'yyyy-MM-dd');
@@ -120,33 +120,18 @@ export const AnalyticsView: React.FC = () => {
   // Horizon-filtered tasks
   const horizonTasks = useMemo(() => {
     return tagScopedTasks.filter((t) => {
-      const taskDueDate = t.due ? t.due.slice(0, 10) : undefined;
+      const taskDate = (t.due || t.completedAt || t.createdAt || '').slice(0, 10);
       switch (timeHorizon) {
         case 'today':
-          return (
-            taskDueDate === todayStr ||
-            (t.completedAt && t.completedAt.slice(0, 10) === todayStr) ||
-            (!taskDueDate && t.status !== 'completed')
-          );
+          return taskDate === todayStr;
         case 'yesterday':
-          return (
-            (t.completedAt && t.completedAt.slice(0, 10) === yesterdayStr) ||
-            taskDueDate === yesterdayStr
-          );
+          return taskDate === yesterdayStr;
         case 'tomorrow':
-          return taskDueDate === tomorrowStr;
+          return taskDate === tomorrowStr;
         case '7d':
-          return (
-            (taskDueDate && taskDueDate >= sevenDaysAgoStr && taskDueDate <= todayStr) ||
-            (t.completedAt && t.completedAt.slice(0, 10) >= sevenDaysAgoStr) ||
-            (!taskDueDate && t.status !== 'completed')
-          );
+          return taskDate >= sevenDaysAgoStr && taskDate <= todayStr;
         case '30d':
-          return (
-            (taskDueDate && taskDueDate >= thirtyDaysAgoStr && taskDueDate <= todayStr) ||
-            (t.completedAt && t.completedAt.slice(0, 10) >= thirtyDaysAgoStr) ||
-            (!taskDueDate && t.status !== 'completed')
-          );
+          return taskDate >= thirtyDaysAgoStr && taskDate <= todayStr;
         case 'all':
         default:
           return true;
@@ -154,67 +139,48 @@ export const AnalyticsView: React.FC = () => {
     });
   }, [tagScopedTasks, timeHorizon, todayStr, yesterdayStr, tomorrowStr, sevenDaysAgoStr, thirtyDaysAgoStr]);
 
-  // Prior period tasks
-  const priorPeriodTasks = useMemo(() => {
-    return tagScopedTasks.filter((t) => {
-      switch (timeHorizon) {
-        case 'today':
-          return t.completedAt && t.completedAt.slice(0, 10) === yesterdayStr;
-        case 'yesterday':
-          return t.completedAt && t.completedAt.slice(0, 10) === dayBeforeYesterdayStr;
-        case '7d':
-          return (
-            t.completedAt &&
-            t.completedAt.slice(0, 10) >= fourteenDaysAgoStr &&
-            t.completedAt.slice(0, 10) < sevenDaysAgoStr
-          );
-        case '30d':
-          return (
-            t.completedAt &&
-            t.completedAt.slice(0, 10) >= sixtyDaysAgoStr &&
-            t.completedAt.slice(0, 10) < thirtyDaysAgoStr
-          );
-        default:
-          return false;
-      }
-    });
-  }, [tagScopedTasks, timeHorizon, yesterdayStr, dayBeforeYesterdayStr, sevenDaysAgoStr, fourteenDaysAgoStr, thirtyDaysAgoStr, sixtyDaysAgoStr]);
-
-  // Horizon focus time
+  // Primary Aggregations
   const horizonFocusSeconds = useMemo(() => {
-    if (timeHorizon === 'tomorrow') {
-      const tomorrowTasks = tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr);
-      return tomorrowTasks.length * 25 * 60; // 25 min default per scheduled task
-    }
+    if (timeHorizon === 'tomorrow') return 0;
     return horizonSessions.reduce((sum, s) => sum + s.durationSeconds, 0);
-  }, [horizonSessions, timeHorizon, tagScopedTasks, tomorrowStr]);
+  }, [horizonSessions, timeHorizon]);
 
-  // Prior focus seconds
   const priorFocusSeconds = useMemo(() => {
     return priorPeriodSessions.reduce((sum, s) => sum + s.durationSeconds, 0);
   }, [priorPeriodSessions]);
 
-  // Horizon pomodoros count
-  const horizonPomodoroCount = useMemo(() => {
-    if (timeHorizon === 'tomorrow') {
-      const tomorrowTasks = tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr);
-      return tomorrowTasks.length;
-    }
-    return horizonSessions.length;
-  }, [horizonSessions, timeHorizon, tagScopedTasks, tomorrowStr]);
+  const horizonCompletedTasks = useMemo(() => {
+    return horizonTasks.filter((t) => t.status === 'completed' || t.archived).length;
+  }, [horizonTasks]);
 
+  const horizonTotalTasks = horizonTasks.length;
+
+  const priorCompletedTasks = useMemo(() => {
+    return tagScopedTasks.filter((t) => {
+      const d = (t.completedAt || t.due || '').slice(0, 10);
+      switch (timeHorizon) {
+        case 'today':
+          return d === yesterdayStr && (t.status === 'completed' || t.archived);
+        case 'yesterday':
+          return d === dayBeforeYesterdayStr && (t.status === 'completed' || t.archived);
+        case '7d':
+          return d >= fourteenDaysAgoStr && d < sevenDaysAgoStr && (t.status === 'completed' || t.archived);
+        case '30d':
+          return d >= sixtyDaysAgoStr && d < thirtyDaysAgoStr && (t.status === 'completed' || t.archived);
+        default:
+          return false;
+      }
+    }).length;
+  }, [tagScopedTasks, timeHorizon, yesterdayStr, dayBeforeYesterdayStr, sevenDaysAgoStr, fourteenDaysAgoStr, thirtyDaysAgoStr, sixtyDaysAgoStr]);
+
+  const horizonPomodoroCount = horizonSessions.length;
   const priorPomodoroCount = priorPeriodSessions.length;
 
-  // Task Velocity for Horizon
-  const horizonTotalTasks = horizonTasks.length;
-  const horizonCompletedTasks = horizonTasks.filter((t) => t.status === 'completed' || t.archived).length;
   const horizonCompletionRate =
     horizonTotalTasks > 0 ? Math.round((horizonCompletedTasks / horizonTotalTasks) * 100) : 0;
 
-  const priorCompletedTasks = priorPeriodTasks.length;
-
   // Deltas vs prior period
-  const horizonDeltas: HorizonDelta = useMemo(() => {
+  const horizonDeltas = useMemo(() => {
     return calculateHorizonDeltas(
       horizonFocusSeconds,
       priorFocusSeconds,
@@ -223,108 +189,111 @@ export const AnalyticsView: React.FC = () => {
       horizonPomodoroCount,
       priorPomodoroCount
     );
-  }, [
-    horizonFocusSeconds,
-    priorFocusSeconds,
-    horizonCompletedTasks,
-    priorCompletedTasks,
-    horizonPomodoroCount,
-    priorPomodoroCount,
-  ]);
+  }, [horizonFocusSeconds, priorFocusSeconds, horizonCompletedTasks, priorCompletedTasks, horizonPomodoroCount, priorPomodoroCount]);
 
-  // Habit metrics for horizon
-  const activeHabitsCount = habits.filter((h) => !h.archived).length;
-  const habitCompletionsForHorizon = useMemo(() => {
-    switch (timeHorizon) {
-      case 'today':
-        return habits.filter((h) => h.completions && h.completions[todayStr]).length;
-      case 'yesterday':
-        return habits.filter((h) => h.completions && h.completions[yesterdayStr]).length;
-      case 'tomorrow':
-        return activeHabitsCount; // Projected habits to complete
-      case '7d':
-      case '30d':
-      case 'all':
-      default:
-        return habits.reduce((sum, h) => sum + Object.keys(h.completions || {}).length, 0);
-    }
-  }, [habits, timeHorizon, todayStr, yesterdayStr, activeHabitsCount]);
+  // Peak focus window
+  const peakFocusWindow = useMemo(() => {
+    return detectPeakFocusWindow(horizonSessions);
+  }, [horizonSessions]);
 
-  const averageHabitStreak =
-    habits.length > 0 ? Math.round(habits.reduce((sum, h) => sum + h.currentStreak, 0) / habits.length) : 0;
+  // Full Task Focus Breakdown Items (NO 4-5 task limit!)
+  const taskPeriodItems = useMemo(() => {
+    return calculateTaskPeriodFocus(tagScopedTasks, horizonSessions, timeHorizon);
+  }, [tagScopedTasks, horizonSessions, timeHorizon]);
 
-  // 7-day focus distribution (reactive to tag filter)
+  // Daily distribution (past 7 days)
   const past7DaysFocus = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = subDays(new Date(), 6 - i);
-      const dStr = format(d, 'yyyy-MM-dd');
-      const sessions = tagScopedSessions.filter(
-        (s) => s.mode === 'focus' && s.completedAt.startsWith(dStr)
-      );
-      const totalSec = sessions.reduce((sum, s) => sum + s.durationSeconds, 0);
+    const days: Array<{ dateStr: string; dayName: string; totalSeconds: number; hours: string; pomodoroCount: number }> = [];
+    const count = timeHorizon === '30d' ? 30 : 7;
+    for (let i = count - 1; i >= 0; i--) {
+      const d = subDays(new Date(), i);
+      const dateStr = format(d, 'yyyy-MM-dd');
+      const dayName = count === 30 ? format(d, 'd MMM') : format(d, 'EEE');
 
-      return {
-        dateStr: dStr,
-        dayName: format(d, 'EEE'),
+      const daySessions = tagScopedSessions.filter(
+        (s) => s.mode === 'focus' && s.completedAt.slice(0, 10) === dateStr
+      );
+
+      const totalSec = daySessions.reduce((sum, s) => sum + s.durationSeconds, 0);
+
+      days.push({
+        dateStr,
+        dayName,
         totalSeconds: totalSec,
         hours: (totalSec / 3600).toFixed(1),
-        pomodoroCount: sessions.length,
-      };
-    });
-  }, [tagScopedSessions]);
+        pomodoroCount: daySessions.length,
+      });
+    }
+    return days;
+  }, [tagScopedSessions, timeHorizon]);
 
-  // Hourly distribution for Single Day view (Today / Yesterday)
+  // Hourly distribution for single day (Today or Yesterday)
   const singleDayHourlyDistribution = useMemo(() => {
     const targetDate = timeHorizon === 'yesterday' ? yesterdayStr : todayStr;
-    const daySessions = tagScopedSessions.filter(
-      (s) => s.mode === 'focus' && s.completedAt.startsWith(targetDate)
-    );
-
-    const timeBlocks = [
-      { label: '00-03', name: 'Late Night', startHour: 0, endHour: 3 },
-      { label: '03-06', name: 'Dawn', startHour: 3, endHour: 6 },
-      { label: '06-09', name: 'Early Morning', startHour: 6, endHour: 9 },
-      { label: '09-12', name: 'Late Morning', startHour: 9, endHour: 12 },
-      { label: '12-15', name: 'Afternoon', startHour: 12, endHour: 15 },
-      { label: '15-18', name: 'Late Afternoon', startHour: 15, endHour: 18 },
-      { label: '18-21', name: 'Evening', startHour: 18, endHour: 21 },
-      { label: '21-24', name: 'Night', startHour: 21, endHour: 24 },
+    const hours = [
+      { start: 8, end: 10, label: '8-10', name: '08:00 - 10:00' },
+      { start: 10, end: 12, label: '10-12', name: '10:00 - 12:00' },
+      { start: 12, end: 14, label: '12-14', name: '12:00 - 14:00' },
+      { start: 14, end: 16, label: '14-16', name: '14:00 - 16:00' },
+      { start: 16, end: 18, label: '16-18', name: '16:00 - 18:00' },
+      { start: 18, end: 20, label: '18-20', name: '18:00 - 20:00' },
+      { start: 20, end: 22, label: '20-22', name: '20:00 - 22:00' },
+      { start: 22, end: 24, label: '22-24', name: '22:00 - 24:00' },
     ];
 
-    return timeBlocks.map((block) => {
-      const blockSessions = daySessions.filter((s) => {
+    const daySessions = tagScopedSessions.filter(
+      (s) => s.mode === 'focus' && s.completedAt.slice(0, 10) === targetDate
+    );
+
+    return hours.map((h) => {
+      const bucketSessions = daySessions.filter((s) => {
         try {
           const dt = new Date(s.completedAt);
-          const h = dt.getHours();
-          return h >= block.startHour && h < block.endHour;
+          const hr = dt.getHours();
+          return hr >= h.start && hr < h.end;
         } catch {
           return false;
         }
       });
-      const totalSec = blockSessions.reduce((sum, s) => sum + s.durationSeconds, 0);
+
+      const totalSec = bucketSessions.reduce((sum, s) => sum + s.durationSeconds, 0);
+
       return {
-        label: block.label,
-        name: block.name,
+        label: h.label,
+        name: h.name,
         totalSeconds: totalSec,
         hours: (totalSec / 3600).toFixed(1),
-        pomodoroCount: blockSessions.length,
+        pomodoroCount: bucketSessions.length,
       };
     });
   }, [tagScopedSessions, timeHorizon, todayStr, yesterdayStr]);
 
-  // Tomorrow's projected task blocks
+  // Tomorrow projected blocks
   const tomorrowProjectedBlocks = useMemo(() => {
     const tomorrowTasks = tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr);
-    const priorities = [
-      { key: 'high', label: 'High Priority', count: tomorrowTasks.filter((t) => t.priority === 'high').length },
-      { key: 'medium', label: 'Medium Priority', count: tomorrowTasks.filter((t) => t.priority === 'medium').length },
-      { key: 'low', label: 'Low Priority', count: tomorrowTasks.filter((t) => t.priority === 'low').length },
+    const high = tomorrowTasks.filter((t) => t.priority === 'high').length;
+    const med = tomorrowTasks.filter((t) => t.priority === 'medium').length;
+    const low = tomorrowTasks.filter((t) => t.priority === 'low' || !t.priority).length;
+    return [
+      { key: 'high', label: 'High Priority', count: high },
+      { key: 'medium', label: 'Medium Priority', count: med },
+      { key: 'low', label: 'Low Priority', count: low },
+      { key: 'total', label: 'Total Scheduled', count: tomorrowTasks.length },
     ];
-    return priorities;
   }, [tagScopedTasks, tomorrowStr]);
 
-  // Tag Performance & Attribution Metrics (Always computes full set for table)
-  const tagAnalytics = useMemo<TagAnalyticsItem[]>(() => {
+  // Peak focus time for scaling charts
+  const maxFocusSec = useMemo(() => {
+    if (timeHorizon === 'today' || timeHorizon === 'yesterday') {
+      const maxHourly = Math.max(...singleDayHourlyDistribution.map((h) => h.totalSeconds), 0);
+      return Math.max(3600, maxHourly);
+    }
+    const maxDaily = Math.max(...past7DaysFocus.map((d) => d.totalSeconds), 0);
+    return Math.max(3600 * 3, maxDaily);
+  }, [timeHorizon, singleDayHourlyDistribution, past7DaysFocus]);
+
+  // Tag analytics
+  const tagAnalytics: TagAnalyticsItem[] = useMemo(() => {
     const tagMap = new Map<
       string,
       {
@@ -336,32 +305,28 @@ export const AnalyticsView: React.FC = () => {
       }
     >();
 
-    tasks.forEach((t) => {
-      if (t.tags && t.tags.length > 0) {
-        const uniqueTaskTags = Array.from(
-          new Set(t.tags.map((tg) => tg.trim().toLowerCase()).filter(Boolean))
-        );
-        uniqueTaskTags.forEach((tag) => {
-          const current = tagMap.get(tag) || {
-            totalTasks: 0,
-            completedTasks: 0,
-            pendingTasks: 0,
-            totalFocusSeconds: 0,
-            pomodoroCount: 0,
-          };
-
-          current.totalTasks += 1;
-          if (t.status === 'completed' || t.archived) {
-            current.completedTasks += 1;
-          } else {
-            current.pendingTasks += 1;
-          }
-          current.totalFocusSeconds += t.totalFocusSeconds || 0;
-          current.pomodoroCount += t.pomodoroCount || 0;
-
-          tagMap.set(tag, current);
-        });
-      }
+    tagScopedTasks.forEach((t) => {
+      if (!t.tags || t.tags.length === 0) return;
+      t.tags.forEach((rawTag) => {
+        const tag = rawTag.trim().toLowerCase();
+        if (!tag) return;
+        const current = tagMap.get(tag) || {
+          totalTasks: 0,
+          completedTasks: 0,
+          pendingTasks: 0,
+          totalFocusSeconds: 0,
+          pomodoroCount: 0,
+        };
+        current.totalTasks += 1;
+        if (t.status === 'completed' || t.archived) {
+          current.completedTasks += 1;
+        } else {
+          current.pendingTasks += 1;
+        }
+        current.totalFocusSeconds += t.totalFocusSeconds || 0;
+        current.pomodoroCount += t.pomodoroCount || 0;
+        tagMap.set(tag, current);
+      });
     });
 
     return Array.from(tagMap.entries()).map(([tag, data]) => ({
@@ -373,23 +338,22 @@ export const AnalyticsView: React.FC = () => {
       totalFocusSeconds: data.totalFocusSeconds,
       pomodoroCount: data.pomodoroCount,
     }));
-  }, [tasks]);
+  }, [tagScopedTasks]);
 
   const sortedTagAnalytics = useMemo(() => {
     return [...tagAnalytics].sort((a, b) => {
-      if (tagSortBy === 'focus') {
-        const diff = b.totalFocusSeconds - a.totalFocusSeconds;
-        return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
+      switch (tagSortBy) {
+        case 'focus':
+          return b.totalFocusSeconds - a.totalFocusSeconds;
+        case 'tasks':
+          return b.totalTasks - a.totalTasks;
+        case 'completion':
+          return b.completionRate - a.completionRate;
+        case 'name':
+          return a.tag.localeCompare(b.tag);
+        default:
+          return b.totalFocusSeconds - a.totalFocusSeconds;
       }
-      if (tagSortBy === 'tasks') {
-        const diff = b.totalTasks - a.totalTasks;
-        return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
-      }
-      if (tagSortBy === 'completion') {
-        const diff = b.completionRate - a.completionRate;
-        return diff !== 0 ? diff : a.tag.localeCompare(b.tag);
-      }
-      return a.tag.localeCompare(b.tag);
     });
   }, [tagAnalytics, tagSortBy]);
 
@@ -414,213 +378,192 @@ export const AnalyticsView: React.FC = () => {
     return taggedTasks.reduce((sum, item) => sum + (item.totalFocusSeconds || 0), 0);
   }, [tasks]);
 
-  const weekSessionsCount = past7DaysFocus.reduce((sum, d) => sum + d.pomodoroCount, 0);
-
-  // Maximum scale for charts
-  const maxFocusSec = Math.max(
-    ...(timeHorizon === 'today' || timeHorizon === 'yesterday'
-      ? singleDayHourlyDistribution.map((d) => d.totalSeconds)
-      : past7DaysFocus.map((d) => d.totalSeconds)),
-    3600 * 2
-  );
-
-  // 100% Real Live Computed Personal Operating System Balance
-  const computedHealthScores = useMemo(() => {
-    return computeRealOSBalance(
-      tasks || [],
-      focusSessions || [],
-      habits || [],
-      calorieEntries || [],
-      caTopics || [],
-      settings,
-      todayStr
-    );
-  }, [tasks, focusSessions, habits, calorieEntries, caTopics, settings, todayStr]);
-
-  // Automated heuristic insights
-  const automatedInsights = useMemo(() => {
-    return generateAutomatedInsights(
-      tasks || [],
-      horizonSessions || [],
-      habits || [],
-      calorieEntries || [],
-      caTopics || [],
-      settings,
-      todayStr
-    );
-  }, [tasks, horizonSessions, habits, calorieEntries, caTopics, settings, todayStr]);
-
-  // Handlers for export utilities
+  // Action: Copy markdown report
   const handleCopyReport = () => {
-    const peak = detectPeakFocusWindow(horizonSessions);
-    const summary = generateMarkdownSummary({
+    const topTasks = taskPeriodItems
+      .filter((i) => i.periodFocusSeconds > 0)
+      .sort((a, b) => b.periodFocusSeconds - a.periodFocusSeconds)
+      .slice(0, 10)
+      .map((i) => ({
+        title: i.task.title,
+        focusTime: formatSecondsToHoursMinutes(i.periodFocusSeconds),
+      }));
+
+    const report = generateMarkdownSummary({
       horizonLabel: HORIZON_LABELS[timeHorizon].title,
-      focusSeconds:
-        timeHorizon === '7d' && !activeTagFilter ? focusStats.weekFocusSeconds : horizonFocusSeconds,
+      focusSeconds: horizonFocusSeconds,
       pomodoroCount: horizonPomodoroCount,
       taskVelocityPercent: horizonCompletionRate,
       completedTasks: horizonCompletedTasks,
       totalTasks: horizonTotalTasks,
-      habitConsistency: `${habitCompletionsForHorizon}/${activeHabitsCount} active check-ins (${averageHabitStreak}d avg streak)`,
-      peakWindow: `${peak.windowName} (${peak.hoursRange})`,
-      healthScores: computedHealthScores,
+      topTasks,
     });
 
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(summary);
-    }
-  };
-
-  const handleExportJson = () => {
-    const telemetry = {
-      generatedAt: new Date().toISOString(),
-      timeHorizon,
-      activeTagFilter,
-      metrics: {
-        focusSeconds: horizonFocusSeconds,
-        pomodoroCount: horizonPomodoroCount,
-        taskVelocity: horizonCompletionRate,
-        completedTasks: horizonCompletedTasks,
-        totalTasks: horizonTotalTasks,
-      },
-      healthScores: computedHealthScores,
-      automatedInsights,
-      tagAnalytics,
-      distribution:
-        timeHorizon === 'today' || timeHorizon === 'yesterday'
-          ? singleDayHourlyDistribution
-          : past7DaysFocus,
-    };
-    exportAnalyticsAsJson(telemetry, `nayra-analytics-${timeHorizon}-${todayStr}.json`);
+    navigator.clipboard.writeText(report).catch((err) => {
+      console.warn('Failed to copy to clipboard:', err);
+    });
   };
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 select-none">
-      {/* Header with Title, Horizon Selector, Copy & Export Actions */}
+      {/* Header with Title, Horizon Selector, Tag Filter, and Copy Action */}
       <AnalyticsHeader
         timeHorizon={timeHorizon}
         setTimeHorizon={setTimeHorizon}
-        activeTagFilter={activeTagFilter}
-        onCopyReport={handleCopyReport}
-        onExportJson={handleExportJson}
-      />
-
-      {/* Domain Perspective Selector & Tag Filter Bar */}
-      <AnalyticsFilterBar
-        activePerspective={activePerspective}
-        setActivePerspective={setActivePerspective}
         availableTags={availableTags}
         activeTagFilter={activeTagFilter}
         setActiveTagFilter={setActiveTagFilter}
         totalTaskCount={tasks.length}
+        onCopyReport={handleCopyReport}
       />
 
-      {/* Perspective Sub-Views Rendering */}
-      {activePerspective === 'overview' && (
-        <div className="space-y-8">
-          <ExecutiveOverview
-            timeHorizon={timeHorizon}
-            activeTagFilter={activeTagFilter}
-            horizonFocusSeconds={horizonFocusSeconds}
-            weekFocusSeconds={focusStats.weekFocusSeconds}
-            weekSessionsCount={weekSessionsCount}
-            totalSessionsCount={focusStats.totalSessionsCount}
-            horizonPomodoroCount={horizonPomodoroCount}
-            streakDays={focusStats.streakDays}
-            horizonCompletionRate={horizonCompletionRate}
-            horizonCompletedTasks={horizonCompletedTasks}
-            horizonTotalTasks={horizonTotalTasks}
-            habitCompletionsForHorizon={habitCompletionsForHorizon}
-            activeHabitsCount={activeHabitsCount}
-            averageHabitStreak={averageHabitStreak}
-            deltas={horizonDeltas}
-            healthScores={computedHealthScores}
-            automatedInsights={automatedInsights}
-            onSelectPerspective={setActivePerspective}
-          />
+      {/* Decluttered Core Focus KPIs (Clean, quiet Apple/SwiftUI aesthetic) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 card-enter">
+        {/* Card 1: Total Focus Time */}
+        <div className="p-4 sm:p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Total Focus Time</span>
+            <Clock className="h-4 w-4 text-sky-500" />
+          </div>
 
-          {/* Deep Work Distribution (Available on Overview for immediate visual feedback & test compliance) */}
-          <FocusAnalyticsSection
-            timeHorizon={timeHorizon}
-            maxFocusSec={maxFocusSec}
-            past7DaysFocus={past7DaysFocus}
-            singleDayHourlyDistribution={singleDayHourlyDistribution}
-            tomorrowProjectedBlocks={tomorrowProjectedBlocks}
-            tomorrowTasksCount={tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr).length}
-            tomorrowStr={tomorrowStr}
-            tagScopedTasks={tagScopedTasks}
-            tagScopedSessions={tagScopedSessions}
-          />
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
+              {formatSecondsToHoursMinutes(horizonFocusSeconds)}
+            </span>
+            {timeHorizon !== 'tomorrow' && horizonDeltas.focusSecondsPercent !== 0 && (
+              <span
+                className={`text-[11px] font-mono font-medium flex items-center gap-0.5 ${
+                  horizonDeltas.focusSecondsPercent > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-zinc-400'
+                }`}
+                title={`Change vs prior period`}
+              >
+                {horizonDeltas.focusSecondsPercent > 0 ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                <span>
+                  {horizonDeltas.focusSecondsPercent > 0
+                    ? `+${horizonDeltas.focusSecondsPercent}%`
+                    : `${horizonDeltas.focusSecondsPercent}%`}
+                </span>
+              </span>
+            )}
+          </div>
 
-          {/* Tag Performance & Attribution (Available on Overview for immediate insight & test compliance) */}
-          <TaskVelocitySection
-            tagAnalytics={tagAnalytics}
-            sortedTagAnalytics={sortedTagAnalytics}
-            tagSortBy={tagSortBy}
-            setTagSortBy={setTagSortBy}
-            activeTagFilter={activeTagFilter}
-            setActiveTagFilter={setActiveTagFilter}
-            mostFocusedTag={mostFocusedTag}
-            highestVelocityTag={highestVelocityTag}
-            totalTaggedFocusSeconds={totalTaggedFocusSeconds}
-            tasks={tasks}
-          />
+          <span className="text-[10px] text-zinc-500 font-mono block">
+            {horizonPomodoroCount} sessions • {focusStats.totalSessionsCount} all-time
+          </span>
         </div>
-      )}
 
-      {activePerspective === 'focus' && (
-        <FocusAnalyticsSection
-          timeHorizon={timeHorizon}
-          maxFocusSec={maxFocusSec}
-          past7DaysFocus={past7DaysFocus}
-          singleDayHourlyDistribution={singleDayHourlyDistribution}
-          tomorrowProjectedBlocks={tomorrowProjectedBlocks}
-          tomorrowTasksCount={tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr).length}
-          tomorrowStr={tomorrowStr}
-          tagScopedTasks={tagScopedTasks}
-          tagScopedSessions={tagScopedSessions}
-        />
-      )}
+        {/* Card 2: Task Velocity */}
+        <div className="p-4 sm:p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Task Velocity</span>
+            <CheckSquare className="h-4 w-4 text-emerald-500" />
+          </div>
 
-      {activePerspective === 'tasks' && (
-        <TaskVelocitySection
-          tagAnalytics={tagAnalytics}
-          sortedTagAnalytics={sortedTagAnalytics}
-          tagSortBy={tagSortBy}
-          setTagSortBy={setTagSortBy}
-          activeTagFilter={activeTagFilter}
-          setActiveTagFilter={setActiveTagFilter}
-          mostFocusedTag={mostFocusedTag}
-          highestVelocityTag={highestVelocityTag}
-          totalTaggedFocusSeconds={totalTaggedFocusSeconds}
-          tasks={tasks}
-        />
-      )}
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
+              {horizonCompletionRate}%
+            </span>
+            {timeHorizon !== 'tomorrow' && horizonDeltas.completedTasksPercent !== 0 && (
+              <span
+                className={`text-[11px] font-mono font-medium flex items-center gap-0.5 ${
+                  horizonDeltas.completedTasksPercent > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-zinc-400'
+                }`}
+              >
+                {horizonDeltas.completedTasksPercent > 0 ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                <span>
+                  {horizonDeltas.completedTasksPercent > 0
+                    ? `+${horizonDeltas.completedTasksPercent}%`
+                    : `${horizonDeltas.completedTasksPercent}%`}
+                </span>
+              </span>
+            )}
+          </div>
 
-      {activePerspective === 'habits' && (
-        <HabitsAnalyticsSection
-          habits={habits}
-          timeHorizon={timeHorizon}
-          todayStr={todayStr}
-        />
-      )}
+          <span className="text-[10px] text-zinc-500 font-mono block">
+            {horizonCompletedTasks} completed / {horizonTotalTasks} total tasks
+          </span>
+        </div>
 
-      {activePerspective === 'nutrition' && (
-        <NutritionAnalyticsSection
-          calorieEntries={calorieEntries}
-          settings={settings}
-          timeHorizon={timeHorizon}
-          todayStr={todayStr}
-        />
-      )}
+        {/* Card 3: Habit Adherence */}
+        <div className="p-4 sm:p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Habit Adherence</span>
+            <Flame className="h-4 w-4 text-amber-500" />
+          </div>
 
-      {activePerspective === 'ca' && (
-        <CAStudyAnalyticsSection
-          caTopics={caTopics}
-          caTests={caTests}
-          todayStr={todayStr}
-        />
-      )}
+          <span className="text-2xl sm:text-3xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
+            {avgHabitStreak} days
+          </span>
+
+          <span className="text-[10px] text-zinc-500 font-mono block">
+            {activeHabits.length > 0 ? `${activeHabits.length} active habits • ` : ''}{focusStats.streakDays} day focus streak
+          </span>
+        </div>
+
+        {/* Card 4: Peak Focus Window */}
+        <div className="p-4 sm:p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Peak Focus Window</span>
+            <Target className="h-4 w-4 text-purple-500" />
+          </div>
+
+          <span className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 block truncate">
+            {peakFocusWindow.windowName}
+          </span>
+
+          <span className="text-[10px] text-zinc-500 font-mono block">
+            {peakFocusWindow.hoursRange} {peakFocusWindow.percentage > 0 ? `(${peakFocusWindow.percentage}% focus)` : ''}
+          </span>
+        </div>
+      </div>
+
+      {/* Daily / Hourly Focus Distribution Chart */}
+      <FocusAnalyticsSection
+        timeHorizon={timeHorizon}
+        maxFocusSec={maxFocusSec}
+        past7DaysFocus={past7DaysFocus}
+        singleDayHourlyDistribution={singleDayHourlyDistribution}
+        tomorrowProjectedBlocks={tomorrowProjectedBlocks}
+        tomorrowTasksCount={tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr).length}
+        tomorrowStr={tomorrowStr}
+        tagScopedTasks={tagScopedTasks}
+        tagScopedSessions={tagScopedSessions}
+      />
+
+      {/* Comprehensive Task Focus Breakdown (Shows EVERY Task with Period Focus Time!) */}
+      <TaskFocusBreakdown
+        taskPeriodItems={taskPeriodItems}
+        timeHorizon={timeHorizon}
+        activeTagFilter={activeTagFilter}
+        setActiveTagFilter={setActiveTagFilter}
+        horizonTotalFocusSec={horizonFocusSeconds}
+      />
+
+      {/* Tag Performance & Time Allocation */}
+      <TaskVelocitySection
+        tagAnalytics={tagAnalytics}
+        sortedTagAnalytics={sortedTagAnalytics}
+        tagSortBy={tagSortBy}
+        setTagSortBy={setTagSortBy}
+        activeTagFilter={activeTagFilter}
+        setActiveTagFilter={setActiveTagFilter}
+        mostFocusedTag={mostFocusedTag}
+        highestVelocityTag={highestVelocityTag}
+        totalTaggedFocusSeconds={totalTaggedFocusSeconds}
+        tasks={tasks}
+      />
     </div>
   );
 };
