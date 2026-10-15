@@ -235,6 +235,7 @@ export * from './ca';
 // SCInt-Engine Domain Types (Semiconductor)
 // ------------------------------------------
 export type SCIntTier = 0 | 1 | 2 | 3 | 4 | 5;
+export type SCIntHubId = 'journey' | 'blueprints' | 'subsidies' | 'clusters';
 
 export interface SCIntNodeBlueprint {
   id: string;
@@ -244,17 +245,66 @@ export interface SCIntNodeBlueprint {
   tierName: string;
   category: string;
   description: string;
+  marketSize?: string;
+  grossMargin?: string;
+  operatingMargin?: string;
   capexModularINR: number; // in Crores
   capexBenchmarkINR: number; // in Crores
+  modularCapacityLabel?: string;
+  commercialCapacityLabel?: string;
   subsidyPercentageISM: number; // e.g. 50
   subsidyPercentageSPECS: number; // e.g. 20
   targetClusters: string[];
   keyMachinery: string[];
+  keyMachineryImported?: string[];
+  keyMachineryDomestic?: string[];
   primaryRawMaterials: string[];
   offtakeBuyers: string[];
+  topSuppliers?: string[];
   ebitdaMarginExpected: string;
   paybackPeriodYears: number;
   techReadinessLevel: number;
+  sovereignMoat?: string;
+  clearances?: string[];
+  risksAndMitigations?: string[];
+  productSpecification?: Record<string, string>;
+}
+
+export interface SCIntCluster {
+  id: string;
+  name: string;
+  state: string;
+  category: string;
+  readinessScore: string;
+  overview: string;
+  anchorTenants: string[];
+  waterInfrastructure: {
+    source: string;
+    adequacy: string;
+    effluentHandling?: string;
+  };
+  powerInfrastructure: {
+    grid: string;
+    reliability: string;
+    tariff: string;
+  };
+  logisticsConnectivity: {
+    airCargo: string;
+    ports: string;
+    expressways: string;
+  };
+  recommendedComponents: string[];
+}
+
+export interface SCIntStatePolicy {
+  id: string;
+  state: string;
+  capexTopUpPercent: number;
+  landRebate: string;
+  powerSubsidy: string;
+  stampDuty: string;
+  waterRebate: string;
+  description: string;
 }
 
 // ------------------------------------------

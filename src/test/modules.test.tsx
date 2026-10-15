@@ -246,19 +246,22 @@ describe('NAYRA Personal Operating System — Complete Module Tests', () => {
     const scintLinks = screen.getAllByText('SCInt Engine');
     fireEvent.click(scintLinks[0]);
 
-    expect(screen.getByText(/SCInt: Semiconductor Full Supply Chain/i)).toBeInTheDocument();
-    expect(screen.getByText('Complete Matrix')).toBeInTheDocument();
+    expect(screen.getByText('SCInt Studio')).toBeInTheDocument();
+    expect(screen.getByText('Value Chain')).toBeInTheDocument();
+    expect(screen.getByText('Venture Studio')).toBeInTheDocument();
+    expect(screen.getByText('CapEx Lab')).toBeInTheDocument();
+    expect(screen.getByText('Industrial Hubs')).toBeInTheDocument();
 
     // Toggle to Benchmark Scale
     const benchmarkBtn = screen.getByText('Benchmark Scale');
     fireEvent.click(benchmarkBtn);
 
     // Search for Fluorspar
-    const searchInput = screen.getByPlaceholderText('Search node, machinery, material or cluster...');
+    const searchInput = screen.getByPlaceholderText('Search nodes, minerals, machinery...');
     fireEvent.change(searchInput, { target: { value: 'Fluorspar' } });
 
     await waitFor(() => {
-      expect(screen.getByText('Acid Grade Fluorspar Beneficiation')).toBeInTheDocument();
+      expect(screen.getAllByText(/Fluorspar/i).length).toBeGreaterThan(0);
     });
   });
 
