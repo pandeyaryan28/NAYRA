@@ -101,11 +101,14 @@ export const LoginView: React.FC = () => {
   const activeError = localError || error;
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 select-none">
+    <div className="min-h-screen w-full flex flex-col justify-between bg-gradient-to-br from-[#f8f9fc] via-[#f1f2f6] to-[#e8eaf0] dark:from-[#111113] dark:via-[#161619] dark:to-[#0f0f11] text-zinc-900 dark:text-zinc-100 select-none relative overflow-hidden">
+      {/* Ambient Luminescence Orbs for Frosted Depth */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] rounded-[999px] bg-blue-500/10 dark:bg-blue-600/10 blur-[130px] pointer-events-none" />
+
       {/* Top Bar with Brand & Theme Toggle */}
-      <header className="h-16 px-6 sm:px-12 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800">
+      <header className="h-16 px-6 sm:px-12 flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-xl relative z-20">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-xs tracking-wider">
+          <div className="h-8 w-8 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-xs tracking-wider shadow-[0_2px_6px_rgba(0,0,0,0.2)]">
             N
           </div>
           <div>
@@ -123,15 +126,15 @@ export const LoginView: React.FC = () => {
           size="icon"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          className="h-8 w-8 text-zinc-600 dark:text-zinc-300"
+          className="h-8 w-8 text-zinc-600 dark:text-zinc-300 rounded-lg swiftui-press"
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
       </header>
 
       {/* Main Auth Container */}
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm p-6 sm:p-8 space-y-6">
+      <main className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
+        <div className="w-full max-w-md apple-card-surface backdrop-blur-2xl bg-white/80 dark:bg-zinc-900/80 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 sm:p-8 space-y-6">
           {/* Card Header */}
           <div className="space-y-1.5 text-center">
             <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -145,13 +148,13 @@ export const LoginView: React.FC = () => {
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="flex rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-950">
+          <div className="flex rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 p-1 bg-zinc-100/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <button
               type="button"
               onClick={() => handleSwitchMode('signin')}
-              className={`flex-1 py-1.5 text-xs font-medium rounded-sm transition-colors ${
+              className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all swiftui-press ${
                 mode === 'signin'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
@@ -160,9 +163,9 @@ export const LoginView: React.FC = () => {
             <button
               type="button"
               onClick={() => handleSwitchMode('signup')}
-              className={`flex-1 py-1.5 text-xs font-medium rounded-sm transition-colors ${
+              className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all swiftui-press ${
                 mode === 'signup'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
@@ -275,7 +278,7 @@ export const LoginView: React.FC = () => {
             size="md"
             onClick={handleGoogleSignIn}
             disabled={isSubmitting || isLoading}
-            className="w-full gap-2.5"
+            className="w-full gap-2.5 rounded-xl swiftui-press shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -303,7 +306,7 @@ export const LoginView: React.FC = () => {
             <button
               type="button"
               onClick={handleGuestAccess}
-              className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors inline-flex items-center gap-1.5"
+              className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all swiftui-press inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg cursor-pointer"
             >
               <span>Explore as Guest (Local Sandbox)</span>
               <ArrowRight className="h-3 w-3" />

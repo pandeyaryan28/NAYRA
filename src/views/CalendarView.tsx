@@ -446,7 +446,7 @@ export const CalendarView: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-zinc-950 overflow-hidden select-none">
+    <div className="flex h-full flex-col bg-transparent overflow-hidden select-none">
       {/* Top Google Calendar Toolbar */}
       <div className="flex flex-wrap items-center justify-between px-6 py-3 border-b border-zinc-200/80 dark:border-zinc-800/80 gap-4 bg-white/75 dark:bg-zinc-950/75 backdrop-blur-2xl shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)]">
         <div className="flex items-center gap-3">
@@ -653,7 +653,7 @@ export const CalendarView: React.FC = () => {
                             e.stopPropagation();
                             openEditModal(ev);
                           }}
-                          className="px-1.5 py-0.5 rounded-xs text-[10px] bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 truncate cursor-pointer font-medium"
+                          className="px-2 py-0.5 rounded-md text-[10px] bg-zinc-900/90 text-zinc-50 dark:bg-zinc-100/90 dark:text-zinc-900 truncate cursor-pointer font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.25)] swiftui-press transition-all"
                         >
                           {ev.title}
                         </div>
@@ -673,10 +673,10 @@ export const CalendarView: React.FC = () => {
                               openEditTaskModal(t);
                             }}
                             title={`Task: ${t.title}. Click to edit.`}
-                            className={`px-1 py-0.5 rounded-xs text-[10px] truncate cursor-pointer flex items-center gap-1 border transition-all ${
+                            className={`px-1.5 py-0.5 rounded-md text-[10px] truncate cursor-pointer flex items-center gap-1 border transition-all swiftui-press ${
                               isCompleted
-                                ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 line-through opacity-60 border-zinc-200 dark:border-zinc-700'
-                                : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-800/80 font-medium'
+                                ? 'bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-400 line-through opacity-60 border-zinc-200 dark:border-zinc-700'
+                                : 'bg-amber-100/80 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-300/80 dark:border-amber-800/80 font-medium shadow-xs'
                             }`}
                           >
                             <button
@@ -733,7 +733,7 @@ export const CalendarView: React.FC = () => {
                                 e.stopPropagation();
                                 openEditModal(ev);
                               }}
-                              className="rounded-sm p-1.5 text-xs bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 shadow-xs mb-1 hover:opacity-90 transition-opacity cursor-grab active:cursor-grabbing"
+                              className="rounded-lg p-2 text-xs bg-zinc-900/95 text-zinc-50 dark:bg-zinc-100/95 dark:text-zinc-900 border border-white/20 dark:border-black/10 shadow-[0_2px_6px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.25)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.85)] mb-1 hover:opacity-95 transition-all cursor-grab active:cursor-grabbing swiftui-press"
                             >
                               <div className="font-semibold truncate">{ev.title}</div>
                               <div className="text-[10px] opacity-80 font-mono truncate">
@@ -757,10 +757,10 @@ export const CalendarView: React.FC = () => {
                                   openEditTaskModal(t);
                                 }}
                                 title={`Task: ${t.title}. Click to edit.`}
-                                className={`rounded-sm p-1 text-[11px] border mb-1 cursor-grab active:cursor-grabbing transition-opacity flex items-center gap-1 ${
+                                className={`rounded-lg p-1.5 text-[11px] border mb-1 cursor-grab active:cursor-grabbing transition-all flex items-center gap-1.5 swiftui-press ${
                                   isCompleted
-                                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 line-through opacity-60 border-zinc-200 dark:border-zinc-700'
-                                    : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-300 dark:border-amber-800/80 font-medium'
+                                    ? 'bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-400 line-through opacity-60 border-zinc-200 dark:border-zinc-700'
+                                    : 'bg-amber-100/80 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-300/80 dark:border-amber-800/80 font-medium shadow-xs'
                                 }`}
                               >
                                 <button
@@ -840,7 +840,7 @@ export const CalendarView: React.FC = () => {
                                 e.stopPropagation();
                                 toggleTaskComplete(t.id);
                               }}
-                              className={`h-3.5 w-3.5 rounded-xs border flex items-center justify-center shrink-0 ${isCompleted ? 'bg-amber-600 border-amber-600 text-white' : 'border-amber-600'}`}
+                              className={`h-3.5 w-3.5 rounded-sm border flex items-center justify-center shrink-0 ${isCompleted ? 'bg-amber-600 border-amber-600 text-white' : 'border-amber-600'}`}
                             >
                               {isCompleted && <Check className="h-2.5 w-2.5 stroke-[3]" />}
                             </button>
@@ -1000,7 +1000,7 @@ export const CalendarView: React.FC = () => {
                                     e.stopPropagation();
                                     openEditModal(ev);
                                   }}
-                                  className="px-1.5 py-0.5 rounded-sm text-[11px] bg-zinc-900 text-zinc-50 dark:bg-zinc-800 dark:text-zinc-200 truncate cursor-grab"
+                                  className="px-2 py-0.5 rounded-md text-[11px] bg-zinc-900/90 text-zinc-50 dark:bg-zinc-800/90 dark:text-zinc-200 border border-white/10 dark:border-white/5 shadow-[0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.2)] truncate cursor-grab active:cursor-grabbing swiftui-press transition-all"
                                 >
                                   {ev.title}
                                 </div>
@@ -1021,10 +1021,10 @@ export const CalendarView: React.FC = () => {
                                     openEditTaskModal(t);
                                   }}
                                   title={`Task: ${t.title} (${isCompleted ? 'Completed' : 'Pending'}). Click to edit.`}
-                                  className={`px-1.5 py-0.5 rounded-sm text-[11px] truncate cursor-pointer transition-all flex items-center gap-1 ${
+                                  className={`px-1.5 py-0.5 rounded-md text-[11px] truncate cursor-pointer transition-all flex items-center gap-1 swiftui-press ${
                                     isCompleted
-                                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 line-through opacity-60'
-                                      : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-800/80 font-medium'
+                                      ? 'bg-zinc-100/80 dark:bg-zinc-800/80 text-zinc-400 line-through opacity-60'
+                                      : 'bg-amber-100/80 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border border-amber-300/80 dark:border-amber-800/80 font-medium shadow-xs'
                                   }`}
                                 >
                                   <button
@@ -1095,7 +1095,7 @@ export const CalendarView: React.FC = () => {
                         <div
                           key={ev.id}
                           onClick={() => openEditModal(ev)}
-                          className="flex items-start justify-between p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors cursor-pointer"
+                          className="flex items-start justify-between p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl apple-card-surface hover:border-zinc-400 dark:hover:border-zinc-600 transition-all cursor-pointer swiftui-press"
                         >
                           <div className="space-y-1">
                             <span className="text-xs font-mono text-zinc-400 block">
@@ -1105,7 +1105,7 @@ export const CalendarView: React.FC = () => {
                               <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                                 {ev.title}
                               </h4>
-                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                                 Calendar Event
                               </span>
                             </div>
@@ -1121,7 +1121,7 @@ export const CalendarView: React.FC = () => {
                               </p>
                             )}
                           </div>
-                          <Button variant="ghost" size="sm" className="text-xs">
+                          <Button variant="ghost" size="sm" className="text-xs swiftui-press">
                             Edit
                           </Button>
                         </div>
@@ -1133,10 +1133,10 @@ export const CalendarView: React.FC = () => {
                         <div
                           key={t.id}
                           onClick={() => openEditTaskModal(t)}
-                          className={`flex items-start justify-between p-4 rounded-lg border transition-all cursor-pointer ${
+                          className={`flex items-start justify-between p-4 rounded-xl border transition-all cursor-pointer swiftui-press apple-card-surface ${
                             isCompleted
-                              ? 'border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 opacity-60'
-                              : 'border-amber-200 dark:border-amber-900/60 bg-amber-50/20 dark:bg-amber-950/20 hover:border-amber-400 dark:hover:border-amber-700 shadow-xs'
+                              ? 'border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/60 dark:bg-zinc-900/40 opacity-60'
+                              : 'border-amber-200/80 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/30 hover:border-amber-400 dark:hover:border-amber-700 shadow-xs'
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -1149,7 +1149,7 @@ export const CalendarView: React.FC = () => {
                                 e.stopPropagation();
                                 toggleTaskComplete(t.id);
                               }}
-                              className={`mt-0.5 h-4 w-4 rounded-xs border flex items-center justify-center shrink-0 ${
+                              className={`mt-0.5 h-4 w-4 rounded-sm border flex items-center justify-center shrink-0 ${
                                 isCompleted
                                   ? 'bg-amber-600 border-amber-600 text-white'
                                   : 'border-amber-600 text-transparent hover:border-amber-700'
@@ -1165,11 +1165,11 @@ export const CalendarView: React.FC = () => {
                                 <h4 className={`text-sm font-semibold ${isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
                                   {t.title}
                                 </h4>
-                                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200">
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200">
                                   Task
                                 </span>
                                 {t.priority === 'high' && (
-                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-semibold">
+                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-semibold">
                                     High Priority
                                   </span>
                                 )}
@@ -1184,7 +1184,7 @@ export const CalendarView: React.FC = () => {
                                   {t.tags.map((tg) => (
                                     <span
                                       key={tg}
-                                      className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
                                     >
                                       #{tg}
                                     </span>

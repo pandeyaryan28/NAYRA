@@ -192,7 +192,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
       </div>
 
       {/* Primary Score & Performance Metric Card */}
-      <Card className="p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+      <Card className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
@@ -221,7 +221,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
               onClick={handleRecordToTestSeries}
               disabled={recordedToTestSeries}
               className={cn(
-                'flex items-center gap-1.5 w-full md:w-auto justify-center font-semibold',
+                'flex items-center gap-1.5 w-full md:w-auto justify-center font-semibold swiftui-press',
                 !recordedToTestSeries && 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
               )}
             >
@@ -242,7 +242,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
 
         {/* Metric Badges Grid: Prominent KPI Score Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-6">
-          <div className="p-3.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
+          <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-800/60 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1">
               <Award className="w-3.5 h-3.5 text-zinc-400" />
               <span>Scaled Score</span>
@@ -255,7 +255,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             </div>
           </div>
 
-          <div className="p-3.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
+          <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-800/60 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1">
               <Target className="w-3.5 h-3.5 text-zinc-400" />
               <span>Raw Accuracy</span>
@@ -268,7 +268,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             </div>
           </div>
 
-          <div className="p-3.5 rounded-md border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20">
+          <div className="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/30 backdrop-blur-md shadow-[0_1px_3px_rgba(16,185,129,0.06)]">
             <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Correct</span>
@@ -281,7 +281,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             </div>
           </div>
 
-          <div className="p-3.5 rounded-md border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20">
+          <div className="p-3.5 rounded-xl border border-rose-200/80 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 backdrop-blur-md shadow-[0_1px_3px_rgba(244,63,94,0.06)]">
             <div className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 uppercase tracking-wider flex items-center gap-1">
               <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
               <span>Incorrect</span>
@@ -295,7 +295,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
           </div>
 
           {/* Marked for Review Card */}
-          <div className="p-3.5 rounded-md border border-amber-200 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20">
+          <div className="p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/30 backdrop-blur-md shadow-[0_1px_3px_rgba(245,158,11,0.06)]">
             <div className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
               <Bookmark className="w-3.5 h-3.5 fill-current" />
               <span>Marked for Review</span>
@@ -308,7 +308,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             </div>
           </div>
 
-          <div className="p-3.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
+          <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-800/60 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-zinc-400" />
               <span>Time Taken</span>
@@ -363,16 +363,16 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
       {/* Review Matrix & Filter Tabs */}
       <div className="flex flex-col gap-4">
         {/* Filter Navigation Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-zinc-200/80 dark:border-zinc-800/80">
           <button
             type="button"
             aria-label="Filter: All Questions"
             onClick={() => setActiveFilter('all')}
             className={cn(
-              'px-3 py-1.5 text-xs font-semibold rounded-md border transition-colors cursor-pointer shrink-0',
+              'px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 cursor-pointer shrink-0 swiftui-press shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
               activeFilter === 'all'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'
-                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-[0_2px_6px_rgba(0,0,0,0.15)]'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-800'
             )}
           >
             All Questions ({totalQuestions})
@@ -383,10 +383,10 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             aria-label="Filter: Incorrect"
             onClick={() => setActiveFilter('incorrect')}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-colors cursor-pointer shrink-0',
+              'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 cursor-pointer shrink-0 swiftui-press shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
               activeFilter === 'incorrect'
-                ? 'bg-rose-600 text-white border-rose-600'
-                : 'bg-white dark:bg-zinc-900 text-rose-700 dark:text-rose-400 border-zinc-200 dark:border-zinc-800 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                ? 'bg-rose-600 text-white border-rose-600 shadow-[0_2px_6px_rgba(244,63,94,0.25)]'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-rose-700 dark:text-rose-400 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-rose-50 dark:hover:bg-rose-950/30'
             )}
           >
             <span>Incorrect</span>
@@ -401,10 +401,10 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             aria-label="Filter: Marked for Review"
             onClick={() => setActiveFilter('marked')}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-colors cursor-pointer shrink-0',
+              'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 cursor-pointer shrink-0 swiftui-press shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
               activeFilter === 'marked'
-                ? 'bg-amber-600 text-white border-amber-600'
-                : 'bg-white dark:bg-zinc-900 text-amber-700 dark:text-amber-400 border-zinc-200 dark:border-zinc-800 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                ? 'bg-amber-600 text-white border-amber-600 shadow-[0_2px_6px_rgba(245,158,11,0.25)]'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-amber-700 dark:text-amber-400 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-amber-50 dark:hover:bg-amber-950/30'
             )}
           >
             <Bookmark className="w-3 h-3 fill-current" />
@@ -419,10 +419,10 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             aria-label="Filter: Correct"
             onClick={() => setActiveFilter('correct')}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-colors cursor-pointer shrink-0',
+              'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 cursor-pointer shrink-0 swiftui-press shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
               activeFilter === 'correct'
-                ? 'bg-emerald-600 text-white border-emerald-600'
-                : 'bg-white dark:bg-zinc-900 text-emerald-700 dark:text-emerald-400 border-zinc-200 dark:border-zinc-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-[0_2px_6px_rgba(16,185,129,0.25)]'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-emerald-700 dark:text-emerald-400 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
             )}
           >
             <span>Correct</span>
@@ -436,10 +436,10 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
             aria-label="Filter: Skipped"
             onClick={() => setActiveFilter('skipped')}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border transition-colors cursor-pointer shrink-0',
+              'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 cursor-pointer shrink-0 swiftui-press shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
               activeFilter === 'skipped'
-                ? 'bg-zinc-600 text-white border-zinc-600'
-                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                ? 'bg-zinc-600 text-white border-zinc-600 shadow-[0_2px_6px_rgba(0,0,0,0.2)]'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-800'
             )}
           >
             <span>Skipped</span>

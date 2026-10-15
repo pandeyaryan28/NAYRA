@@ -266,7 +266,7 @@ export const ExerciseSessionView: React.FC<ExerciseSessionViewProps> = ({
   return (
     <div className="flex flex-col min-h-[calc(100vh-5rem)] max-w-6xl mx-auto px-4 py-6 gap-6 select-none">
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
@@ -296,7 +296,7 @@ export const ExerciseSessionView: React.FC<ExerciseSessionViewProps> = ({
         {/* Live Timer & Action Buttons */}
         <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end shrink-0">
           {/* Timer Container */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 bg-white/60 dark:bg-zinc-800/60 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <Clock className="w-4 h-4 text-zinc-500 dark:text-zinc-400 shrink-0" />
             <div className="flex flex-col">
               <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium uppercase leading-tight">
@@ -359,7 +359,7 @@ export const ExerciseSessionView: React.FC<ExerciseSessionViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Question Card & Controls (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <Card className="p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+          <Card className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
             {/* Session Progress Bar */}
             <div className="mb-4">
               <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1.5 font-medium">
@@ -432,11 +432,11 @@ export const ExerciseSessionView: React.FC<ExerciseSessionViewProps> = ({
                     type="button"
                     onClick={() => handleSelectOption(option.key)}
                     className={cn(
-                      'group flex items-center justify-between gap-3.5 p-4 min-h-[48px] rounded-md border text-left transition-all duration-150 cursor-pointer text-sm leading-snug',
+                      'group flex items-center justify-between gap-3.5 p-4 min-h-[48px] rounded-xl border text-left transition-all duration-150 cursor-pointer text-sm leading-snug swiftui-press shadow-[0_1px_2px_rgba(0,0,0,0.02)]',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2',
                       isSelected
-                        ? 'border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800/95 text-zinc-950 dark:text-white font-medium ring-1 ring-zinc-900 dark:ring-zinc-100 shadow-sm'
-                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/70 dark:hover:bg-zinc-800/40'
+                        ? 'border-zinc-900 bg-zinc-100/90 dark:border-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-white font-medium ring-1 ring-zinc-900 dark:ring-zinc-100 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.08)]'
+                        : 'border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/70 text-zinc-800 dark:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/50'
                     )}
                   >
                     <div className="flex items-start gap-3.5 flex-1">

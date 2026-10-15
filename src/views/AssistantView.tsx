@@ -225,7 +225,7 @@ export const AssistantView: React.FC = () => {
           <button
             key={prompt}
             onClick={() => executeCommand(prompt)}
-            className="text-xs px-2.5 py-1 rounded-md border border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all hover:-translate-y-0.5 active:translate-y-0 shrink-0 shadow-[0_2px_5px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_2px_5px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.08)]"
+            className="text-xs px-3 py-1.5 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-all swiftui-press shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
           >
             {prompt}
           </button>
@@ -251,7 +251,7 @@ export const AssistantView: React.FC = () => {
                 className={`max-w-xl p-4 rounded-2xl text-xs leading-relaxed space-y-2 ${
                   isUser
                     ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_4px_12px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]'
-                    : 'clay-surface'
+                    : 'clay-surface apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80'
                 }`}
               >
                 <p className="whitespace-pre-line">{msg.text}</p>

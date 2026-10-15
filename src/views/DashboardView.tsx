@@ -49,7 +49,7 @@ export const DashboardView: React.FC = () => {
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 select-none">
       {/* Top Banner / Focus Status */}
-      <div className="p-6 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 card-enter interactive-card">
+      <div className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 card-enter interactive-card">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono font-medium text-zinc-500 uppercase tracking-wider">
@@ -108,7 +108,7 @@ export const DashboardView: React.FC = () => {
       {/* Grid: Calendar + Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Today's Schedule (Google Calendar) */}
-        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-1 interactive-card">
+        <div className="rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 p-5 space-y-4 card-enter stagger-1 interactive-card">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
@@ -136,7 +136,7 @@ export const DashboardView: React.FC = () => {
               todayEvents.map((ev) => (
                 <div
                   key={ev.id}
-                  className="flex items-start justify-between p-3 rounded-md border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 transition-colors"
+                  className="flex items-start justify-between p-3 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 transition-colors swiftui-press"
                 >
                   <div className="space-y-0.5">
                     <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 block">
@@ -155,7 +155,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Priority Tasks (Google Tasks) */}
-        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-2 interactive-card">
+        <div className="rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 p-5 space-y-4 card-enter stagger-2 interactive-card">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
@@ -183,7 +183,7 @@ export const DashboardView: React.FC = () => {
               pendingTasks.map((t) => (
                 <div
                   key={t.id}
-                  className="flex items-center justify-between p-2.5 rounded-md border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 transition-colors"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <button
@@ -223,7 +223,7 @@ export const DashboardView: React.FC = () => {
       {/* Habits + Calories Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Habit Trackers */}
-        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-3 interactive-card">
+        <div className="rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 p-5 space-y-4 card-enter stagger-3 interactive-card">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <Flame className="h-4 w-4 text-amber-500" />
@@ -252,7 +252,7 @@ export const DashboardView: React.FC = () => {
                 return (
                   <div
                     key={h.id}
-                    className="flex items-center justify-between p-2.5 rounded-md border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 transition-colors"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 transition-colors"
                   >
                     <div className="space-y-0.5 truncate mr-2">
                       <span className="text-xs font-medium text-zinc-800 dark:text-zinc-200 block truncate">
@@ -278,7 +278,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Nutrition Gauge */}
-        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-4 interactive-card">
+        <div className="rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 p-5 space-y-4 card-enter stagger-4 interactive-card">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <UtensilsCrossed className="h-4 w-4 text-emerald-500" />
@@ -318,7 +318,7 @@ export const DashboardView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">
-              <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
+              <div className="p-2 rounded-lg bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
                 <span className="text-[10px] text-zinc-400 block uppercase">Protein</span>
                 <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {calorieEntries
@@ -326,7 +326,7 @@ export const DashboardView: React.FC = () => {
                     .reduce((acc, c) => acc + c.proteinGrams, 0)}g
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
+              <div className="p-2 rounded-lg bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
                 <span className="text-[10px] text-zinc-400 block uppercase">Carbs</span>
                 <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {calorieEntries
@@ -334,7 +334,7 @@ export const DashboardView: React.FC = () => {
                     .reduce((acc, c) => acc + c.carbsGrams, 0)}g
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
+              <div className="p-2 rounded-lg bg-zinc-50/80 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
                 <span className="text-[10px] text-zinc-400 block uppercase">Fat</span>
                 <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {calorieEntries
@@ -351,10 +351,10 @@ export const DashboardView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
         <div
           onClick={() => navigate('/ca-tracker')}
-          className="p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all cursor-pointer flex items-center justify-between group interactive-card card-enter stagger-5"
+          className="p-5 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 hover:border-zinc-400/80 dark:hover:border-zinc-600/80 transition-all cursor-pointer flex items-center justify-between group interactive-card card-enter stagger-5 swiftui-press"
         >
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="h-10 w-10 rounded-xl bg-zinc-100/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-transform group-hover:scale-105 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
@@ -371,10 +371,10 @@ export const DashboardView: React.FC = () => {
 
         <div
           onClick={() => navigate('/scint-engine')}
-          className="p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all cursor-pointer flex items-center justify-between group interactive-card card-enter stagger-6"
+          className="p-5 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 hover:border-zinc-400/80 dark:hover:border-zinc-600/80 transition-all cursor-pointer flex items-center justify-between group interactive-card card-enter stagger-6 swiftui-press"
         >
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="h-10 w-10 rounded-xl bg-zinc-100/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-transform group-hover:scale-105 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
               <Cpu className="h-5 w-5" />
             </div>
             <div>

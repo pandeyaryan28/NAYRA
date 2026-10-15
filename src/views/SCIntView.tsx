@@ -58,23 +58,23 @@ export const SCIntView: React.FC = () => {
         </div>
 
         {/* CapEx Scale Switcher */}
-        <div className="flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-900">
+        <div className="flex items-center rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 p-1 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
           <button
             onClick={() => setCapexScale('modular')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm transition-colors ${
+            className={`px-3.5 py-1 text-xs font-medium rounded-lg transition-all swiftui-press ${
               capexScale === 'modular'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.15)]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
           >
             Modular Scale
           </button>
           <button
             onClick={() => setCapexScale('benchmark')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm transition-colors ${
+            className={`px-3.5 py-1 text-xs font-medium rounded-lg transition-all swiftui-press ${
               capexScale === 'benchmark'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.15)]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
           >
             Benchmark Scale
@@ -86,10 +86,10 @@ export const SCIntView: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         <button
           onClick={() => setSelectedTier('all')}
-          className={`p-2.5 rounded-lg border text-left transition-colors ${
+          className={`p-2.5 rounded-xl border text-left transition-all swiftui-press ${
             selectedTier === 'all'
-              ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-xs'
-              : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 hover:border-zinc-300'
+              ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+              : 'border-zinc-200/80 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/40 hover:border-zinc-300 dark:hover:border-zinc-700'
           }`}
         >
           <span className="text-[10px] font-mono text-zinc-400 uppercase block">Complete Matrix</span>
@@ -102,10 +102,10 @@ export const SCIntView: React.FC = () => {
             <button
               key={tier.tier}
               onClick={() => setSelectedTier(tier.tier)}
-              className={`p-2.5 rounded-lg border text-left transition-colors ${
+              className={`p-2.5 rounded-xl border text-left transition-all swiftui-press ${
                 isSelected
-                  ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-xs'
-                  : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 hover:border-zinc-300'
+                  ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
+                  : 'border-zinc-200/80 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/40 hover:border-zinc-300 dark:hover:border-zinc-700'
               }`}
             >
               <span className="text-[10px] font-mono text-zinc-400 uppercase block">
@@ -148,7 +148,7 @@ export const SCIntView: React.FC = () => {
               <div
                 key={node.id}
                 onClick={() => setSelectedBlueprint(node)}
-                className="p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-600 card-enter interactive-card cursor-pointer flex flex-col justify-between space-y-4"
+                className="p-5 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 hover:border-zinc-400/80 dark:hover:border-zinc-600/80 card-enter interactive-card cursor-pointer flex flex-col justify-between space-y-4 swiftui-press"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">

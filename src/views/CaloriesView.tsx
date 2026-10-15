@@ -166,14 +166,14 @@ export const CaloriesView: React.FC = () => {
               Today
             </Button>
           )}
-          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-md bg-zinc-50 dark:bg-zinc-900 px-2 py-1 gap-2">
-            <button onClick={handlePrevDay} className="text-zinc-500 hover:text-zinc-900 transition-colors">
+          <div className="flex items-center border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md px-2.5 py-1 gap-2 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <button onClick={handlePrevDay} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer">
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="font-mono text-xs font-semibold text-zinc-800 dark:text-zinc-200 min-w-28 text-center">
               {format(selectedDate, 'MMM d, yyyy')}
             </span>
-            <button onClick={handleNextDay} className="text-zinc-500 hover:text-zinc-900 transition-colors">
+            <button onClick={handleNextDay} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -192,7 +192,7 @@ export const CaloriesView: React.FC = () => {
       {/* Progress & Macro Summary Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Main Calorie Gauge Card */}
-        <div className="md:col-span-2 p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3 card-enter stagger-1 interactive-card">
+        <div className="md:col-span-2 p-5 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 space-y-3 card-enter stagger-1 interactive-card">
           <div className="flex items-baseline justify-between">
             <span className="text-xs uppercase font-mono tracking-wider text-zinc-400">
               Total Intake
@@ -227,7 +227,7 @@ export const CaloriesView: React.FC = () => {
               <button
                 key={c}
                 onClick={() => handleQuickAdd(c)}
-                className="px-2 py-0.5 rounded-sm border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-[10px] font-mono text-zinc-600 dark:text-zinc-300 transition-all active:scale-95"
+                className="px-2.5 py-1 rounded-md border border-zinc-200/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-800/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-[10px] font-mono text-zinc-600 dark:text-zinc-300 transition-all swiftui-press"
               >
                 +{c}
               </button>
@@ -236,7 +236,7 @@ export const CaloriesView: React.FC = () => {
         </div>
 
         {/* Protein Target */}
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 card-enter stagger-2 interactive-card">
+        <div className="p-4 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 space-y-1 card-enter stagger-2 interactive-card">
           <span className="text-[11px] font-mono uppercase text-zinc-400 block">Protein</span>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
@@ -255,7 +255,7 @@ export const CaloriesView: React.FC = () => {
         </div>
 
         {/* Carbs & Fat Targets */}
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-2 card-enter stagger-3 interactive-card">
+        <div className="p-4 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 space-y-2 card-enter stagger-3 interactive-card">
           <div>
             <div className="flex justify-between text-[11px] font-mono text-zinc-400 uppercase">
               <span>Carbs</span>
@@ -297,7 +297,7 @@ export const CaloriesView: React.FC = () => {
           return (
             <div
               key={meal.type}
-              className="clay-surface rounded-2xl p-4 space-y-3"
+              className="clay-surface rounded-2xl p-4 space-y-3 apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80"
             >
               <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export const CaloriesView: React.FC = () => {
       </div>
 
       {/* 7-Day Intake History SVG Bar Chart */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             7-Day Caloric Intake History

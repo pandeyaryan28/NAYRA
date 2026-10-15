@@ -42,9 +42,9 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
   return (
     <div className="flex flex-col max-w-6xl mx-auto px-4 py-6 gap-6 select-none">
       {/* Page Header */}
-      <div className="p-6 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+      <div className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shadow-xs">
             Paper 4 • Business Economics
           </span>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -61,8 +61,8 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
         </p>
 
         {/* Aggregate Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-zinc-100 dark:border-zinc-800">
-          <div className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-zinc-100/80 dark:border-zinc-800/80">
+          <div className="p-3.5 rounded-xl bg-white/60 dark:bg-zinc-800/60 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
               Total Questions
             </div>
@@ -70,7 +70,7 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
               {economicsExercises.totalQuestions}
             </div>
           </div>
-          <div className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+          <div className="p-3.5 rounded-xl bg-white/60 dark:bg-zinc-800/60 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
               Total Chapters
             </div>
@@ -78,7 +78,7 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
               {economicsExercises.totalChapters}
             </div>
           </div>
-          <div className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+          <div className="p-3.5 rounded-xl bg-white/60 dark:bg-zinc-800/60 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
               Multi-Unit Chapters
             </div>
@@ -86,7 +86,7 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
               4 (Ch 6, 7, 8, 9)
             </div>
           </div>
-          <div className="p-3 rounded-md bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800">
+          <div className="p-3.5 rounded-xl bg-white/60 dark:bg-zinc-800/60 backdrop-blur-md border border-zinc-200/70 dark:border-zinc-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
             <div className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
               Negative Marking
             </div>
@@ -118,7 +118,7 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
           return (
             <Card
               key={chapter.chapterId}
-              className="p-5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col justify-between shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+              className="p-5 md:p-6 rounded-2xl flex flex-col justify-between"
             >
               <div>
                 {/* Chapter Number & Question Count Header */}
