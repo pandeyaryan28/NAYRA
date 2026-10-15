@@ -358,19 +358,19 @@ export const DashboardView: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">
-                <div className="p-2 rounded-lg bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
+                <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                   <span className="text-[10px] text-blue-500 dark:text-blue-400 block uppercase font-semibold">Protein</span>
                   <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                     {todayProtein}g
                   </span>
                 </div>
-                <div className="p-2 rounded-lg bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
+                <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                   <span className="text-[10px] text-amber-500 dark:text-amber-400 block uppercase font-semibold">Carbs</span>
                   <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                     {todayCarbs}g
                   </span>
                 </div>
-                <div className="p-2 rounded-lg bg-white/60 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 clay-sunken">
+                <div className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                   <span className="text-[10px] text-emerald-500 dark:text-emerald-400 block uppercase font-semibold">Fat</span>
                   <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                     {todayFat}g

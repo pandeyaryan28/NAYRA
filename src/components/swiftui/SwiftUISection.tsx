@@ -19,7 +19,7 @@ export const SwiftUISection: React.FC<SwiftUISectionProps> = ({
 }) => {
   const cardStyles = {
     insetGrouped:
-      'clay-surface rounded-2xl p-4 sm:p-5 border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/90 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)]',
+      'apple-card-surface liquid-glass-card rounded-2xl p-4 sm:p-5 border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl shadow-[0_4px_20px_-2px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.45)]',
     glass:
       'liquid-glass-card rounded-2xl p-4 sm:p-5',
     plain:

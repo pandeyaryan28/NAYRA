@@ -254,7 +254,7 @@ export const AssistantView: React.FC = () => {
                 className={`max-w-xl p-4 rounded-2xl text-xs leading-relaxed space-y-2 ${
                   isUser
                     ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_4px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)]'
-                    : 'clay-surface apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10'
+                    : 'apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10'
                 }`}
               >
                 <p className="whitespace-pre-line">{msg.text}</p>

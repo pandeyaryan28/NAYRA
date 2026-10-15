@@ -6,3 +6,6 @@ export * from './SwiftUIToggle';
 export * from './SwiftUISection';
 export * from './SwiftUIGauge';
 export * from './SwiftUISheet';
+export * from './SwiftUITextField';
+export * from './SwiftUIPicker';
+export * from './SwiftUITextEditor';

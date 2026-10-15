@@ -7,55 +7,90 @@ import { Input } from '../components/common/Input';
 import { Select } from '../components/common/Select';
 import { Badge } from '../components/common/Badge';
 import { Modal } from '../components/common/Modal';
+import { SwiftUIButton } from '../components/swiftui/SwiftUIButton';
+import { SwiftUITextField } from '../components/swiftui/SwiftUITextField';
+import { SwiftUIPicker } from '../components/swiftui/SwiftUIPicker';
+import { SwiftUITextEditor } from '../components/swiftui/SwiftUITextEditor';
 import { safeLocalStorageGet } from '../lib/utils';
 import pkg from '../../package.json';
 
-describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Density Engine', () => {
+describe('NAYRA v2.4.0 — Apple SwiftUI Architecture Overhaul, Design System & Density Engine', () => {
   beforeEach(() => {
     window.localStorage.clear();
     window.history.pushState({}, '', '/');
   });
 
-  it('verifies package.json version is incremented to 1.7.0 or higher', () => {
+  it('verifies package.json version is incremented to 2.4.0 or higher', () => {
     const [major, minor] = pkg.version.split('.').map(Number);
-    expect(major > 1 || (major === 1 && minor >= 7)).toBe(true);
+    expect(major > 2 || (major === 2 && minor >= 4)).toBe(true);
   });
 
-  it('renders Button with tactile clay styling, active spring compression, and dual shadows', () => {
-    const { container, rerender } = render(<Button variant="primary">Primary Clay</Button>);
-    const primaryBtn = screen.getByText('Primary Clay').closest('button');
+  it('renders Button with authentic SwiftUI variants, spring physics, and focus rings', () => {
+    const { rerender } = render(<Button variant="primary">Primary SwiftUI</Button>);
+    const primaryBtn = screen.getByText('Primary SwiftUI').closest('button');
     expect(primaryBtn).toBeInTheDocument();
     expect(primaryBtn?.className).toContain('ease-[cubic-bezier(0.34,1.56,0.64,1)]');
     expect(primaryBtn?.className).toContain('active:scale-[0.98]');
+    expect(primaryBtn?.className).toContain('swiftui-press');
 
-    rerender(<Button variant="secondary">Secondary Clay</Button>);
-    const secondaryBtn = screen.getByText('Secondary Clay').closest('button');
+    rerender(<Button variant="secondary">Secondary SwiftUI</Button>);
+    const secondaryBtn = screen.getByText('Secondary SwiftUI').closest('button');
     expect(secondaryBtn?.className).toContain('border-zinc-200/60');
 
-    rerender(<Button variant="outline">Outline Clay</Button>);
-    const outlineBtn = screen.getByText('Outline Clay').closest('button');
+    rerender(<Button variant="outline">Outline SwiftUI</Button>);
+    const outlineBtn = screen.getByText('Outline SwiftUI').closest('button');
     expect(outlineBtn?.className).toContain('shadow-');
+
+    rerender(<Button variant="danger">Destructive SwiftUI</Button>);
+    const dangerBtn = screen.getByText('Destructive SwiftUI').closest('button');
+    expect(dangerBtn?.className).toContain('bg-rose-600');
   });
 
-  it('renders Input and Select with sunken clay indentation shadows', () => {
+  it('renders Input and Select with declarative SwiftUITextField and SwiftUIPicker without clay sunken indentation', () => {
     render(
       <div>
-        <Input label="Sunken Input" placeholder="Type here..." />
+        <Input label="SwiftUI Input" placeholder="Type here..." />
         <Select
-          label="Sunken Select"
+          label="SwiftUI Select"
           options={[{ value: 'a', label: 'Option A' }]}
         />
       </div>
     );
 
     const input = screen.getByPlaceholderText('Type here...');
-    expect(input.className).toContain('shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)]');
+    // Verifies rounded-xl, subtle border, and Apple focus ring
+    expect(input.className).toContain('rounded-xl');
+    expect(input.className).toContain('focus:ring-[#007AFF]/30');
+    // Verifies NO sunken clay indentation shadows
+    expect(input.className).not.toContain('shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)]');
+    expect(input.className).not.toContain('clay');
 
-    const select = screen.getByLabelText('Sunken Select');
-    expect(select.className).toContain('shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)]');
+    const select = screen.getByLabelText('SwiftUI Select');
+    expect(select.className).toContain('rounded-xl');
+    expect(select.className).toContain('focus:ring-[#007AFF]/30');
+    expect(select.className).not.toContain('shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)]');
+    expect(select.className).not.toContain('clay');
   });
 
-  it('renders Badges with tactile rim bevel while strictly maintaining rectangular rounded-md shape', () => {
+  it('renders direct SwiftUI input primitives correctly', () => {
+    render(
+      <div>
+        <SwiftUITextField placeholder="Direct TextField" />
+        <SwiftUIPicker options={[{ value: '1', label: 'One' }]} aria-label="Direct Picker" />
+        <SwiftUITextEditor placeholder="Direct TextEditor" />
+      </div>
+    );
+
+    const tf = screen.getByPlaceholderText('Direct TextField');
+    expect(tf.className).toContain('rounded-xl');
+    expect(tf.className).toContain('swiftui-press');
+
+    const te = screen.getByPlaceholderText('Direct TextEditor');
+    expect(te.className).toContain('rounded-xl');
+    expect(te.className).toContain('resize-none');
+  });
+
+  it('renders Badges with subtle Apple HIG borders while strictly maintaining rectangular rounded-md shape', () => {
     render(
       <div>
         <Badge variant="default">Default Tag</Badge>
@@ -70,17 +105,18 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
     expect(highTag.className).toContain('shadow-[0_1px_2px_rgba(0,0,0,0.04)');
   });
 
-  it('renders Modal with floating clay slab rounded-2xl container and spring scale animation', () => {
+  it('renders Modal with floating visionOS SwiftUISheet rounded-2xl container and spring scale animation', () => {
     render(
-      <Modal isOpen={true} onClose={() => {}} title="Clay Slab Dialog">
+      <Modal isOpen={true} onClose={() => {}} title="SwiftUI visionOS Sheet">
         <div>Modal Content</div>
       </Modal>
     );
 
-    const titleEl = screen.getByText('Clay Slab Dialog');
+    const titleEl = screen.getByText('SwiftUI visionOS Sheet');
     const modalSurface = titleEl.closest('.relative.w-full');
     expect(modalSurface).toBeInTheDocument();
     expect(modalSurface?.className).toContain('rounded-2xl');
+    expect(modalSurface?.className).toContain('swiftui-modal-surface');
     expect(modalSurface?.className).toContain('animate-scale-in-spring');
   });
 
@@ -95,7 +131,6 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
       expect(screen.getByPlaceholderText('Add a task (press Enter to save)...')).toBeInTheDocument();
     });
 
-    // Check that the tasks-zoomout-container class and max-w-6xl are present on the container
     const mainArea = document.querySelector('.tasks-zoomout-container');
     expect(mainArea).not.toBeNull();
     expect(mainArea?.className).toContain('max-w-6xl');
@@ -122,7 +157,7 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
     expect(boardBtn).toBeInTheDocument();
 
     // Default mode is compact
-    expect(window.localStorage.getItem('nayra_tasks_density_mode')).toBeFalsy(); // or default initialized
+    expect(window.localStorage.getItem('nayra_tasks_density_mode')).toBeFalsy();
 
     // Switch to Comfortable
     fireEvent.click(comfortableBtn);
@@ -203,25 +238,32 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
     expect(pingingElements.length).toBe(0);
   });
 
-  it('verifies platform-wide claymorphic surfaces on Dashboard and Habits views', async () => {
+  it('verifies platform-wide Apple SwiftUI liquid glass surfaces on Dashboard and Habits views with ZERO clay classes', async () => {
     render(<App />);
 
     // Verify Dashboard contains rounded-2xl interactive-cards
     const dashboardCards = document.querySelectorAll('.interactive-card.rounded-2xl');
     expect(dashboardCards.length).toBeGreaterThan(0);
 
-    // Navigate to Habits view and verify clay-surface table container
+    // Verify ABSOLUTELY ZERO clay classes in the entire document
+    const anyClayElements = document.querySelectorAll('[class*="clay-"]');
+    expect(anyClayElements.length).toBe(0);
+
+    // Navigate to Habits view and verify apple-card-surface liquid-glass-card table container
     const habitsLinks = screen.getAllByText('Habits');
     const habitsAnchor = habitsLinks[0].closest('a') || habitsLinks[0];
     fireEvent.click(habitsAnchor);
 
     await waitFor(() => {
-      const habitMatrix = document.querySelector('.clay-surface.rounded-2xl');
+      const habitMatrix = document.querySelector('.apple-card-surface.liquid-glass-card.rounded-2xl');
       expect(habitMatrix).not.toBeNull();
     });
+
+    // Verify again zero clay elements
+    expect(document.querySelectorAll('[class*="clay-"]').length).toBe(0);
   });
 
-  it('verifies Settings view cards feature clay-surface rounded-2xl styling', async () => {
+  it('verifies Settings view cards feature SwiftUISection insetGrouped liquid glass styling', async () => {
     render(<App />);
 
     const settingsLinks = screen.getAllByText('Settings');
@@ -232,11 +274,14 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
       expect(screen.getByText('Google Cloud & Account Integration')).toBeInTheDocument();
     });
 
-    const settingsCards = document.querySelectorAll('.clay-surface.rounded-2xl');
+    const settingsCards = document.querySelectorAll('.apple-card-surface.liquid-glass-card.rounded-2xl');
     expect(settingsCards.length).toBeGreaterThanOrEqual(4);
+
+    // Verify zero clay elements on Settings view
+    expect(document.querySelectorAll('[class*="clay-"]').length).toBe(0);
   });
 
-  it('verifies edit task modal textarea has sunken clay indentation shadow', async () => {
+  it('verifies edit task modal textarea has SwiftUI TextEditor styling without sunken clay indentation', async () => {
     render(<App />);
 
     const tasksLinks = screen.getAllByText('Tasks');
@@ -255,7 +300,9 @@ describe('NAYRA v1.6.0 — Claymorphic UI/UX, Overall Zoom & Tasks Zoomout / Den
     });
 
     const notesTextarea = screen.getByPlaceholderText('Add details, background context, or links...');
-    expect(notesTextarea.className).toContain('shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)]');
+    expect(notesTextarea.className).toContain('rounded-xl');
+    expect(notesTextarea.className).not.toContain('shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)]');
+    expect(notesTextarea.className).not.toContain('clay');
   });
 
   it('renders prominent New Task CTA in the main sidebar and navigates or focuses task creation', async () => {

@@ -177,7 +177,7 @@ export const HabitsView: React.FC = () => {
       </div>
 
       {/* Habit Matrix Table */}
-      <div className="clay-surface apple-card-surface liquid-glass-card rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+      <div className="apple-card-surface liquid-glass-card rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
         {/* Table Header */}
         <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_120px] border-b border-black/[0.05] dark:border-white/[0.08] bg-white/50 dark:bg-zinc-900/60 backdrop-blur-md p-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
           <div>Habit & Category</div>

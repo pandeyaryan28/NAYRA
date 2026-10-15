@@ -327,7 +327,7 @@ export const CaloriesView: React.FC = () => {
           return (
             <div
               key={meal.type}
-              className="clay-surface rounded-2xl p-4 space-y-3 apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10"
+              className="apple-card-surface liquid-glass-card rounded-2xl p-4 space-y-3 backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10"
             >
               <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
@@ -397,7 +397,7 @@ export const CaloriesView: React.FC = () => {
       </div>
 
       {/* 7-Day Intake History SVG Bar Chart */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4 apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10">
+      <div className="apple-card-surface liquid-glass-card rounded-2xl p-5 space-y-4 backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             7-Day Caloric Intake History

@@ -1990,7 +1990,7 @@ export const TasksView: React.FC = () => {
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
               placeholder="Add details, background context, or links..."
-              className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white/50 dark:bg-white/[0.03] backdrop-blur-md p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_5px_0_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:bg-white/80 dark:focus:bg-[#202024]/80 transition-all resize-none"
+              className="w-full rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white/50 dark:bg-white/[0.03] backdrop-blur-md p-3 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[0_1px_2px_rgba(0,0,0,0.03),inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.06)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:border-[#007AFF] focus:bg-white/80 dark:focus:bg-[#202024]/80 transition-all resize-none"
             />
           </div>
 
