@@ -75,15 +75,15 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              Interactive Capital & Subsidy Stack
+              Interactive Investment & Government Subsidy Calculator
             </h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Adjust CapEx scale or select your target state to see your net promoter capital outlay update in real time.
+              Adjust the factory size slider below, or switch states to see how much money the government pays toward your factory.
             </p>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs font-mono text-zinc-400 font-medium">State Incentive:</span>
+            <span className="text-xs font-mono text-zinc-400 font-medium">Select State Incentive:</span>
             <select
               value={selectedStateId}
               onChange={(e) => setSelectedStateId(e.target.value)}
@@ -102,7 +102,7 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between text-sm">
             <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-              Project Factory CapEx:
+              Total Factory Setup Cost:
             </span>
             <span className="font-mono text-xl font-extrabold text-zinc-900 dark:text-zinc-100">
               ₹{capexAmount.toLocaleString()} Crores
@@ -120,8 +120,8 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
           />
 
           <div className="flex justify-between text-xs font-mono text-zinc-400">
-            <span>Modular Scale: ₹{playbook.capexModularINR} Cr</span>
-            <span>Commercial Benchmark: ₹{playbook.capexBenchmarkINR} Cr</span>
+            <span>Smaller Pilot Factory: ₹{playbook.capexModularINR} Cr</span>
+            <span>Full Commercial Factory: ₹{playbook.capexBenchmarkINR} Cr</span>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/80 dark:border-zinc-700/60 space-y-4">
           <div className="space-y-3 text-sm">
             <div className="flex justify-between items-center py-1 border-b border-zinc-200 dark:border-zinc-700">
-              <span className="text-zinc-600 dark:text-zinc-400 font-medium">Total Factory Cost:</span>
+              <span className="text-zinc-600 dark:text-zinc-400 font-medium">Total Factory Setup Cost:</span>
               <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
                 ₹{capexAmount.toLocaleString()} Cr
               </span>
@@ -137,14 +137,14 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
 
             <div className="flex justify-between items-center text-sky-600 dark:text-sky-400">
               <span className="font-medium">
-                Central Government (ISM 2.0 Co-funding {centralGrantRate}%):
+                Central Government Grant (ISM 2.0 - {centralGrantRate}% Co-funding):
               </span>
               <span className="font-mono font-bold">-₹{centralGrantAmount.toFixed(1)} Cr</span>
             </div>
 
             <div className="flex justify-between items-center text-sky-600 dark:text-sky-400">
               <span className="font-medium">
-                {selectedState.state} State Industrial Incentive (+{selectedState.capexTopUpPercent}%):
+                {selectedState.state} State Government Grant (+{selectedState.capexTopUpPercent}% Top-Up):
               </span>
               <span className="font-mono font-bold">-₹{stateGrantAmount.toFixed(1)} Cr</span>
             </div>
@@ -152,10 +152,10 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
             <div className="flex justify-between items-center pt-3 border-t-2 border-zinc-300 dark:border-zinc-600">
               <div>
                 <span className="text-base font-bold text-zinc-900 dark:text-zinc-100 block">
-                  Your Net Capital Outlay ({totalSubsidyPercent}% Combined Govt Backing):
+                  Your Actual Net Cost ({totalSubsidyPercent}% Paid by Government Grants!):
                 </span>
                 <span className="text-xs text-zinc-500">
-                  Includes pure equity (₹{promoterPureCash.toFixed(0)} Cr) + bank debt (₹{estimatedDebt.toFixed(0)} Cr).
+                  You only need pure cash equity of ₹{promoterPureCash.toFixed(0)} Cr + ₹{estimatedDebt.toFixed(0)} Cr from bank loans.
                 </span>
               </div>
               <span className="font-mono text-3xl font-black text-emerald-600 dark:text-emerald-400">
@@ -168,23 +168,23 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         {/* Operational Highlights */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
           <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <span className="text-xs font-mono text-zinc-400 uppercase font-semibold block">Payback Period</span>
+            <span className="text-xs font-mono text-zinc-400 uppercase font-semibold block">Time to Recover Money</span>
             <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mt-1 block">
               {playbook.paybackPeriodYears} Years
             </span>
           </div>
 
           <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <span className="text-xs font-mono text-zinc-400 uppercase font-semibold block">Target Operating Margin</span>
+            <span className="text-xs font-mono text-zinc-400 uppercase font-semibold block">Expected Operating Profit</span>
             <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 block">
               {playbook.ebitdaMarginExpected}
             </span>
           </div>
 
           <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <span className="text-xs font-mono text-zinc-400 uppercase font-semibold block">Technology Readiness</span>
+            <span className="text-xs font-mono text-zinc-400 uppercase font-semibold block">Technology Maturity</span>
             <span className="text-2xl font-bold text-sky-600 dark:text-sky-400 mt-1 block">
-              TRL {playbook.techReadinessLevel} / 9
+              Proven Tech (Level {playbook.techReadinessLevel} of 9)
             </span>
           </div>
         </div>
@@ -196,10 +196,10 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         <div className="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4">
           <h4 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            <span>Confirmed Domestic Indian Offtake Customers</span>
+            <span>Ready Customers in India (Guaranteed Buyers for Your Factory)</span>
           </h4>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Direct anchor buyers operating manufacturing plants or fabs in India:
+            Companies currently manufacturing in India that need these supplies locally:
           </p>
 
           <div className="space-y-2">
@@ -218,10 +218,10 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         <div className="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4">
           <h4 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-sky-500" />
-            <span>Target Domestic Manufacturing Hubs</span>
+            <span>Best Industrial Parks in India to Build This Factory</span>
           </h4>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Industrial clusters offering dedicated utilities, water, and power skids:
+            Industrial clusters offering 24/7 dedicated power, chemical water, and fast logistics:
           </p>
 
           <div className="space-y-2">
@@ -246,15 +246,15 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
         >
           <div>
             <h4 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-              Technical Capital Machinery & Regulatory Clearances
+              Factory Machinery, Ingredients & Government Licenses
             </h4>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-              Explore imported tools, domestic fabrication systems, feedstocks, and statutory licenses.
+              Click to see the exact equipment to buy, raw materials needed, and required government permits.
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-sm font-semibold text-sky-600 dark:text-sky-400">
-            <span>{isTechnicalSpecsOpen ? 'Hide Technical Dossier' : 'View Deep Dive'}</span>
+            <span>{isTechnicalSpecsOpen ? 'Hide Details' : 'View Machinery & Permits'}</span>
             {isTechnicalSpecsOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </div>
         </button>
@@ -264,7 +264,7 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
             {/* Machinery Breakdown */}
             <div className="space-y-3 pt-6">
               <h5 className="font-bold text-zinc-900 dark:text-zinc-100 uppercase font-mono text-xs tracking-wider">
-                Capital Machinery & Manufacturing Systems
+                Heavy Factory Machines Needed
               </h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {playbook.keyMachinery.map((mach) => (
@@ -283,7 +283,7 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
               <div className="space-y-3">
                 <h5 className="font-bold text-zinc-900 dark:text-zinc-100 uppercase font-mono text-xs tracking-wider">
-                  Raw Materials & Chemical Feedstocks
+                  Raw Materials & Ingredients
                 </h5>
                 <div className="space-y-1.5">
                   {playbook.primaryRawMaterials.map((mat) => (
@@ -300,7 +300,7 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
               {playbook.clearances && playbook.clearances.length > 0 && (
                 <div className="space-y-3">
                   <h5 className="font-bold text-zinc-900 dark:text-zinc-100 uppercase font-mono text-xs tracking-wider">
-                    Statutory Environmental & Industrial Clearances
+                    Government Licenses & Permissions Required
                   </h5>
                   <div className="space-y-1.5">
                     {playbook.clearances.map((c) => (

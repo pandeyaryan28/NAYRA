@@ -13,7 +13,7 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
     render(<SCIntView />);
 
     expect(screen.getByText('SCInt Studio')).toBeInTheDocument();
-    expect(screen.getByText('Sovereign Industrial Intelligence Studio')).toBeInTheDocument();
+    expect(screen.getByText('India Microchip Business Guide')).toBeInTheDocument();
     expect(screen.getByLabelText('Select Sovereign Industrial Sector')).toBeInTheDocument();
 
     // 3-Step Guided Breadcrumbs
@@ -28,7 +28,7 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
   it('Step 1: renders all 6 spacious silicon continuum stages with comfortable typography', () => {
     render(<SCIntView />);
 
-    expect(screen.getByText(/Where in India's silicon journey do you want to build\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/Where in India's microchip journey do you want to build\?/i)).toBeInTheDocument();
 
     // Verify all 6 stages are rendered with proper stage badges
     expect(screen.getByText('Stage 00')).toBeInTheDocument();
@@ -38,9 +38,9 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
     expect(screen.getByText('Stage 04')).toBeInTheDocument();
     expect(screen.getByText('Stage 05')).toBeInTheDocument();
 
-    // Verify key stage descriptions
-    expect(screen.getByText(/Raw Mining & Mineral Extraction/i)).toBeInTheDocument();
-    expect(screen.getByText(/Semiconductor Fabrication \(Fabs\)/i)).toBeInTheDocument();
+    // Verify key stage descriptions in friendly plain language
+    expect(screen.getByText(/Raw Earth & Mined Minerals/i)).toBeInTheDocument();
+    expect(screen.getByText(/Chip Factories \(Cleanroom Fabs\)/i)).toBeInTheDocument();
   });
 
   it('Step 1 to Step 2: selecting a stage navigates to curated playbooks with high-contrast metrics', async () => {
@@ -52,13 +52,13 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
 
     // Should navigate to Step 2
     await waitFor(() => {
-      expect(screen.getByText(/Strategic Playbooks/i)).toBeInTheDocument();
+      expect(screen.getByText(/Strategic Business Playbooks/i)).toBeInTheDocument();
       expect(screen.getByText(/Acid-Grade Fluorspar/i)).toBeInTheDocument();
     });
 
     // Check financial clarity
-    expect(screen.getAllByText(/Total Factory CapEx/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Net Capital Outlay/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Total Factory Setup Cost/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Your Actual Outlay/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Govt Grant/i).length).toBeGreaterThan(0);
   });
 
@@ -93,15 +93,15 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
       expect(screen.getByText(/Acid-Grade Fluorspar/i)).toBeInTheDocument();
     });
 
-    const openDossierButtons = screen.getAllByText(/Open Dossier/i);
+    const openDossierButtons = screen.getAllByText(/View Business Plan/i);
     fireEvent.click(openDossierButtons[0]);
 
     // Should navigate to Step 3
     await waitFor(() => {
-      expect(screen.getByText(/Interactive Capital & Subsidy Stack/i)).toBeInTheDocument();
-      expect(screen.getByText(/Confirmed Domestic Indian Offtake Customers/i)).toBeInTheDocument();
-      expect(screen.getByText(/Target Domestic Manufacturing Hubs/i)).toBeInTheDocument();
-      expect(screen.getByText(/Technical Capital Machinery & Regulatory Clearances/i)).toBeInTheDocument();
+      expect(screen.getByText(/Interactive Investment & Government Subsidy Calculator/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ready Customers in India/i)).toBeInTheDocument();
+      expect(screen.getByText(/Best Industrial Parks in India to Build This Factory/i)).toBeInTheDocument();
+      expect(screen.getByText(/Factory Machinery, Ingredients & Government Licenses/i)).toBeInTheDocument();
     });
 
     // Test the state policy incentive dropdown
@@ -109,15 +109,15 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
     fireEvent.change(stateSelector, { target: { value: 'uttar-pradesh' } });
 
     // Verify calculated output includes UP incentive
-    expect(screen.getByText(/Uttar Pradesh State Industrial Incentive/i)).toBeInTheDocument();
+    expect(screen.getByText(/Uttar Pradesh State Government Grant/i)).toBeInTheDocument();
 
     // Toggle Technical Machinery Accordion Deep Dive
-    const viewDeepDiveBtn = screen.getByText('View Deep Dive');
+    const viewDeepDiveBtn = screen.getByText('View Machinery & Permits');
     fireEvent.click(viewDeepDiveBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Capital Machinery & Manufacturing Systems/i)).toBeInTheDocument();
-      expect(screen.getByText(/Raw Materials & Chemical Feedstocks/i)).toBeInTheDocument();
+      expect(screen.getByText(/Heavy Factory Machines Needed/i)).toBeInTheDocument();
+      expect(screen.getByText(/Raw Materials & Ingredients/i)).toBeInTheDocument();
     });
   });
 
@@ -138,7 +138,7 @@ describe('SCInt Studio — Guided 3-Step Decision Flow & Multi-Sector Architectu
     fireEvent.click(returnBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Where in India's silicon journey do you want to build\?/i)).toBeInTheDocument();
+      expect(screen.getByText(/Where in India's microchip journey do you want to build\?/i)).toBeInTheDocument();
     });
   });
 

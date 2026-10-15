@@ -249,7 +249,7 @@ describe('NAYRA Personal Operating System — Complete Module Tests', () => {
     expect(screen.getByText('SCInt Studio')).toBeInTheDocument();
     expect(screen.getByText('Step 1')).toBeInTheDocument();
     expect(screen.getByText('Value Chain Stage')).toBeInTheDocument();
-    expect(screen.getByText(/Where in India's silicon journey do you want to build\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/Where in India's microchip journey do you want to build\?/i)).toBeInTheDocument();
 
     // Select Stage 00 (Raw Mining & Feedstocks)
     const stage00Btn = screen.getByRole('button', { name: /Stage 00/i });
@@ -257,7 +257,7 @@ describe('NAYRA Personal Operating System — Complete Module Tests', () => {
 
     // Should navigate to Step 2
     await waitFor(() => {
-      expect(screen.getByText(/Strategic Playbooks/i)).toBeInTheDocument();
+      expect(screen.getByText(/Strategic Business Playbooks/i)).toBeInTheDocument();
       expect(screen.getByText(/Acid-Grade Fluorspar/i)).toBeInTheDocument();
     });
 

@@ -46,11 +46,11 @@ export const SCIntTopBar: React.FC<SCIntTopBarProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono uppercase tracking-wider text-sky-600 dark:text-sky-400 font-bold">
-              Sovereign Industrial Intelligence Studio
+              India Microchip Business Guide
             </span>
             <span className="text-zinc-300 dark:text-zinc-700">•</span>
             <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-              Venture Diligence Engine
+              Step-by-Step Investor Playbooks
             </span>
           </div>
 

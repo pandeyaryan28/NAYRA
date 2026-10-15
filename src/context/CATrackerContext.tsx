@@ -699,6 +699,8 @@ export const CATrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Real-time Cloud Synchronization Listener scoped to authenticated user
   useEffect(() => {
+    let isMounted = true;
+
     if (!currentUserId) {
       dispatch({ type: 'SET_CLOUD_CONNECTED', payload: false });
       return;
@@ -708,6 +710,7 @@ export const CATrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     fetchUserSettingsFromFirestore(currentUserId)
       .then((cloudSettings) => {
+        if (!isMounted) return;
         if (cloudSettings && cloudSettings.examDate) {
           const cached = loadCachedSettings();
           const merged = resolveSettingsConflict(cached, cloudSettings);
@@ -731,10 +734,14 @@ export const CATrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       })
       .catch((err) => {
-        console.warn('[Firestore Sync] Direct settings fetch notice:', err);
+        if (isMounted) {
+          console.warn('[Firestore Sync] Direct settings fetch notice:', err);
+        }
       })
       .finally(() => {
-        dispatch({ type: 'SET_SYNCING', payload: false });
+        if (isMounted) {
+          dispatch({ type: 'SET_SYNCING', payload: false });
+        }
       });
 
     const unsubscribe = subscribeToUserData(currentUserId, {
@@ -884,6 +891,7 @@ export const CATrackerProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     return () => {
+      isMounted = false;
       unsubscribe();
     };
   }, [currentUserId]);

@@ -13,10 +13,10 @@ export const SCIntStep1StageSelect: React.FC<SCIntStep1StageSelectProps> = ({ on
       {/* Hero Narrative Header */}
       <div className="space-y-2">
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Where in India's silicon journey do you want to build?
+          Where in India's microchip journey do you want to build?
         </h2>
         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
-          The semiconductor supply chain spans 6 sequential stages—from raw mineral extraction to advanced AI computing modules. Select a stage to explore curated venture playbooks.
+          Every microchip goes through 6 sequential steps—from digging raw rocks out of the ground to soldering finished chips onto electronics boards. Click a stage below to explore practical business opportunities.
         </p>
       </div>
 
@@ -37,7 +37,7 @@ export const SCIntStep1StageSelect: React.FC<SCIntStep1StageSelectProps> = ({ on
                     Stage 0{tier.tier}
                   </span>
                   <span className="text-xs font-mono font-semibold text-zinc-500 dark:text-zinc-400">
-                    {tier.count} Venture Playbooks
+                    {tier.count} Business Opportunities
                   </span>
                 </div>
 
@@ -53,12 +53,12 @@ export const SCIntStep1StageSelect: React.FC<SCIntStep1StageSelectProps> = ({ on
               {/* Feedstocks Preview & Action */}
               <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                  <strong className="text-zinc-700 dark:text-zinc-300 font-medium">Key Materials:</strong>{' '}
+                  <strong className="text-zinc-700 dark:text-zinc-300 font-medium">What is used here:</strong>{' '}
                   {tier.tagline}
                 </div>
 
                 <div className="flex items-center gap-1.5 text-sm font-bold text-sky-600 dark:text-sky-400 group-hover:translate-x-1 transition-transform flex-shrink-0">
-                  <span>Explore Playbooks</span>
+                  <span>Explore Opportunities</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>

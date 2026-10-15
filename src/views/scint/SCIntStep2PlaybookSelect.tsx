@@ -56,7 +56,7 @@ export const SCIntStep2PlaybookSelect: React.FC<SCIntStep2PlaybookSelectProps> =
               </span>
               <span className="text-zinc-300 dark:text-zinc-700">•</span>
               <span className="text-xs text-zinc-500 font-mono">
-                {stageBlueprints.length} Strategic Playbooks
+                {stageBlueprints.length} Strategic Business Playbooks
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 mt-1">
@@ -111,7 +111,7 @@ export const SCIntStep2PlaybookSelect: React.FC<SCIntStep2PlaybookSelectProps> =
                 {bp.offtakeBuyers.length > 0 && (
                   <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800">
                     <span className="text-xs font-mono font-semibold uppercase text-zinc-400 block mb-1">
-                      Confirmed Domestic Offtake Buyers:
+                      Ready Buyers in India (Who Will Purchase From You):
                     </span>
                     <div className="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">
                       {bp.offtakeBuyers.slice(0, 3).join(' • ')}
@@ -123,7 +123,7 @@ export const SCIntStep2PlaybookSelect: React.FC<SCIntStep2PlaybookSelectProps> =
                 <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-xs font-mono text-zinc-400 block">Total Factory CapEx</span>
+                      <span className="text-xs font-mono text-zinc-400 block">Total Factory Setup Cost</span>
                       <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                         ₹{rawCapex} Cr
                       </span>
@@ -131,7 +131,7 @@ export const SCIntStep2PlaybookSelect: React.FC<SCIntStep2PlaybookSelectProps> =
 
                     <div>
                       <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 block">
-                        Net Capital Outlay ({subsidyRate}% Govt Grant)
+                        Your Actual Outlay ({subsidyRate}% Govt Grant)
                       </span>
                       <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                         ₹{netOutlay.toFixed(0)} Cr
@@ -140,10 +140,10 @@ export const SCIntStep2PlaybookSelect: React.FC<SCIntStep2PlaybookSelectProps> =
                   </div>
 
                   <div className="flex items-center justify-between pt-2 text-xs text-zinc-500 font-medium">
-                    <span>Payback: <strong className="text-zinc-800 dark:text-zinc-200">{bp.paybackPeriodYears} yrs</strong></span>
-                    <span>Target Margin: <strong className="text-zinc-800 dark:text-zinc-200">{bp.ebitdaMarginExpected}</strong></span>
+                    <span>Money Back In: <strong className="text-zinc-800 dark:text-zinc-200">{bp.paybackPeriodYears} yrs</strong></span>
+                    <span>Profit Margin: <strong className="text-zinc-800 dark:text-zinc-200">{bp.ebitdaMarginExpected}</strong></span>
                     <span className="flex items-center gap-1.5 text-sm font-bold text-sky-600 dark:text-sky-400 group-hover:translate-x-1 transition-transform">
-                      Open Dossier <ArrowRight className="w-4 h-4" />
+                      View Business Plan <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
                 </div>
