@@ -240,24 +240,29 @@ describe('NAYRA Personal Operating System — Complete Module Tests', () => {
     });
   });
 
-  it('navigates to SCInt Engine and verifies 34 venture blueprints and CapEx scale switching', async () => {
+  it('navigates to SCInt Engine and verifies 3-step guided flow and search', async () => {
     render(<App />);
 
     const scintLinks = screen.getAllByText('SCInt Engine');
     fireEvent.click(scintLinks[0]);
 
     expect(screen.getByText('SCInt Studio')).toBeInTheDocument();
-    expect(screen.getByText('Value Chain')).toBeInTheDocument();
-    expect(screen.getByText('Venture Studio')).toBeInTheDocument();
-    expect(screen.getByText('CapEx Lab')).toBeInTheDocument();
-    expect(screen.getByText('Industrial Hubs')).toBeInTheDocument();
+    expect(screen.getByText('Step 1')).toBeInTheDocument();
+    expect(screen.getByText('Value Chain Stage')).toBeInTheDocument();
+    expect(screen.getByText(/Where in India's silicon journey do you want to build\?/i)).toBeInTheDocument();
 
-    // Toggle to Benchmark Scale
-    const benchmarkBtn = screen.getByText('Benchmark Scale');
-    fireEvent.click(benchmarkBtn);
+    // Select Stage 00 (Raw Mining & Feedstocks)
+    const stage00Btn = screen.getByRole('button', { name: /Stage 00/i });
+    fireEvent.click(stage00Btn);
+
+    // Should navigate to Step 2
+    await waitFor(() => {
+      expect(screen.getByText(/Strategic Playbooks/i)).toBeInTheDocument();
+      expect(screen.getByText(/Acid-Grade Fluorspar/i)).toBeInTheDocument();
+    });
 
     // Search for Fluorspar
-    const searchInput = screen.getByPlaceholderText('Search nodes, minerals, machinery...');
+    const searchInput = screen.getByPlaceholderText('Search playbooks, minerals, buyers...');
     fireEvent.change(searchInput, { target: { value: 'Fluorspar' } });
 
     await waitFor(() => {

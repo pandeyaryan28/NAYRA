@@ -232,8 +232,20 @@ export interface CATopic {
 export * from './ca';
 
 // ------------------------------------------
-// SCInt-Engine Domain Types (Semiconductor)
+// SCInt-Engine Domain Types (Semiconductor & Multi-Sector)
 // ------------------------------------------
+export type SovereignSectorId = 'semiconductor' | 'solar' | 'batteries' | 'minerals';
+
+export interface SovereignSectorMeta {
+  id: SovereignSectorId;
+  name: string;
+  shortName: string;
+  tagline: string;
+  status: 'live' | 'coming-soon';
+  stageCount: number;
+  nodeCount: number;
+}
+
 export type SCIntTier = 0 | 1 | 2 | 3 | 4 | 5;
 export type SCIntHubId = 'journey' | 'blueprints' | 'subsidies' | 'clusters';
 

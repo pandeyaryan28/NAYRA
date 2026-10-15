@@ -15,6 +15,10 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// Mock window.scrollTo and scroll
+window.scrollTo = () => {};
+window.scroll = () => {};
+
 // Mock Web Audio API
 class MockAudioContext {
   currentTime = 0;

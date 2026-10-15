@@ -1,4 +1,4 @@
-import { SCIntNodeBlueprint, SCIntTier, SCIntCluster, SCIntStatePolicy } from '@/types';
+import { SCIntNodeBlueprint, SCIntTier, SCIntCluster, SCIntStatePolicy, SovereignSectorMeta } from '@/types';
 
 export interface SCIntTierMeta {
   tier: SCIntTier;
@@ -16,6 +16,45 @@ export interface SCIntIndustryPreset {
   categoryLabel: string;
   description: string;
 }
+
+export const SOVEREIGN_SECTORS: SovereignSectorMeta[] = [
+  {
+    id: 'semiconductor',
+    name: 'Semiconductors & Microelectronics',
+    shortName: 'Semiconductors',
+    tagline: 'From raw mined quartz to 300mm fabs and 3D chiplet packaging',
+    status: 'live',
+    stageCount: 6,
+    nodeCount: 34,
+  },
+  {
+    id: 'solar',
+    name: 'Solar Photovoltaics & Clean Tech',
+    shortName: 'Solar PV',
+    tagline: 'Polysilicon ingots, TOPCon/HJT solar cells, and high-efficiency modules',
+    status: 'coming-soon',
+    stageCount: 4,
+    nodeCount: 16,
+  },
+  {
+    id: 'batteries',
+    name: 'Advanced Battery Storage (Lithium & Sodium)',
+    shortName: 'Battery Storage',
+    tagline: 'Cathode/anode precursors, solid-state electrolytes, and cell gigafactories',
+    status: 'coming-soon',
+    stageCount: 4,
+    nodeCount: 18,
+  },
+  {
+    id: 'minerals',
+    name: 'Critical Minerals & Strategic Metallurgy',
+    shortName: 'Critical Minerals',
+    tagline: 'Lithium, rare earths, titanium, gallium, and deep refining beneficiation',
+    status: 'coming-soon',
+    stageCount: 4,
+    nodeCount: 20,
+  },
+];
 
 export const SCINT_TIERS: SCIntTierMeta[] = [
   {
