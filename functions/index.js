@@ -209,7 +209,18 @@ exports.getFreshGoogleToken = onCall({ cors: true }, async (request) => {
     );
   }
 
-  const { refreshToken } = credDoc.data();
+  const credData = credDoc.data();
+  const { refreshToken, accessToken: cachedToken, expiryDate: cachedExpiry } = credData;
+
+  // If cached access token exists and is valid for at least 3 minutes, reuse it without making an external OAuth call or Firestore write
+  const now = Date.now();
+  if (cachedToken && cachedExpiry && (cachedExpiry - now > 3 * 60 * 1000)) {
+    return {
+      accessToken: cachedToken,
+      expiryDate: cachedExpiry,
+    };
+  }
+
   const oauth2Client = await getOAuth2Client();
   oauth2Client.setCredentials({ refresh_token: refreshToken });
 

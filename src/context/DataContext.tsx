@@ -393,6 +393,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   const isSyncingRef = useRef<boolean>(false);
+  const authFailureRetryCountRef = useRef<number>(0);
+  const lastAuthFailureTimeRef = useRef<number>(0);
+  const lastSyncedActiveTasksSignatureRef = useRef<string>('');
   const eventsRef = useRef(events);
   const tasksRef = useRef(tasks);
   const taskListsRef = useRef(taskLists);
@@ -415,7 +418,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     (taskList: TaskItem[], source: 'googleTasks' | 'webApp' = 'webApp') => {
       if (user && !user.isGuest) {
         const activeOnly = (taskList || []).filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
-        syncActiveTasksToFirestore(user.uid, activeOnly, source).catch(console.warn);
+        const signature = activeOnly
+          .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
+          .sort()
+          .join('|');
+        if (signature !== lastSyncedActiveTasksSignatureRef.current) {
+          lastSyncedActiveTasksSignatureRef.current = signature;
+          syncActiveTasksToFirestore(user.uid, activeOnly, source).catch(console.warn);
+        }
       }
     },
     [user]
@@ -554,7 +564,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     });
                     tasksRef.current = merged;
                     const activeOnly = merged.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
-                    syncActiveTasksToFirestore(uid, activeOnly, 'webApp').catch(console.warn);
+                    const activeSignature = activeOnly
+                      .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
+                      .sort()
+                      .join('|');
+                    if (activeSignature !== lastSyncedActiveTasksSignatureRef.current) {
+                      lastSyncedActiveTasksSignatureRef.current = activeSignature;
+                      syncActiveTasksToFirestore(uid, activeOnly, 'webApp').catch(console.warn);
+                    }
 
                     // Forward any task completed in Firestore to Google Tasks if Google token is available
                     if (googleAccessToken) {
@@ -818,14 +835,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const syncWithGoogle = useCallback(
     async (overrideToken?: string) => {
       let token = overrideToken || googleAccessToken;
+
+      // Reset retry count on fresh manual/scheduled syncs if 60s cooldown elapsed
+      if (!overrideToken && Date.now() - lastAuthFailureTimeRef.current > 60000) {
+        authFailureRetryCountRef.current = 0;
+      }
+
       const handleAuthFailure = async () => {
-        console.warn('Google API authentication error (401). Attempting silent background refresh...');
+        const now = Date.now();
+        // Strict guard: Allow maximum 1 automatic refresh per 60 seconds to eliminate infinite 100ms loops
+        if (authFailureRetryCountRef.current >= 1 || (now - lastAuthFailureTimeRef.current < 60000)) {
+          console.warn('Google API authentication error (401): Retry cap reached or cooldown active. Pausing sync until next window.');
+          setIsGoogleTokenExpired(true);
+          return false;
+        }
+
+        authFailureRetryCountRef.current += 1;
+        lastAuthFailureTimeRef.current = now;
+        console.warn('Google API authentication error (401). Attempting single silent background refresh...');
         const freshToken = await fetchFreshGoogleTokenFromCloud();
         if (freshToken) {
           setIsGoogleTokenExpired(false);
+          // Wait 2000ms before retrying once with fresh token, avoiding millisecond hammering
           setTimeout(() => {
             syncWithGoogle(freshToken).catch(console.warn);
-          }, 100);
+          }, 2000);
           return true;
         }
         setIsGoogleTokenExpired(true);
@@ -952,9 +986,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           taskListsRef.current = cleanLists;
           setTaskLists(cleanLists);
 
+          const existingListsMap = new Map(taskListsRef.current.map((l) => [l.id, l]));
           if (user && !user.isGuest) {
             cleanLists.forEach((l) => {
-              setDoc(doc(getUserTaskListsCollection(user.uid), l.id), sanitizeForFirestore(l), { merge: true }).catch(console.warn);
+              const existing = existingListsMap.get(l.id);
+              if (!existing || existing.title !== l.title || existing.isDefault !== l.isDefault) {
+                setDoc(doc(getUserTaskListsCollection(user.uid), l.id), sanitizeForFirestore(l), { merge: true }).catch(console.warn);
+              }
             });
           }
 
@@ -986,34 +1024,48 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return false;
           };
 
+          const isTaskDirty = (incoming: TaskItem, existing?: TaskItem) => {
+            if (!existing) return true;
+            return (
+              incoming.title !== existing.title ||
+              incoming.status !== existing.status ||
+              incoming.completed !== existing.completed ||
+              incoming.archived !== existing.archived ||
+              incoming.taskListId !== existing.taskListId ||
+              incoming.taskListName !== existing.taskListName ||
+              incoming.googleTaskId !== existing.googleTaskId ||
+              incoming.due !== existing.due ||
+              incoming.notes !== existing.notes ||
+              incoming.priority !== existing.priority ||
+              (incoming.subtasks?.length ?? 0) !== (existing.subtasks?.length ?? 0)
+            );
+          };
+
+          const initialTasks = [...tasksRef.current];
+          const initialTasksMap = new Map(initialTasks.map((t) => [t.id, t]));
+          const googleIdToLocalMap = new Map(initialTasks.filter((t) => t.googleTaskId).map((t) => [t.googleTaskId!, t]));
+          const unifiedMap = new Map(initialTasks.map((t) => [t.googleTaskId || t.id, t]));
+          const allDeletedTaskIds: string[] = [];
+
           for (const list of activeLists) {
             const gtlId = list.googleTaskListId || (list.id.startsWith('gtl_') ? list.id.replace('gtl_', '') : '@default');
             try {
               const remoteTasks = await fetchGoogleTasks(token, gtlId, list.id, cleanLists);
               const remoteGoogleTaskIds = new Set(remoteTasks.map((rt) => rt.googleTaskId).filter(Boolean));
-              const currentTasks = tasksRef.current;
 
-              // Identify tasks in currentTasks belonging to list.id that had a googleTaskId but are absent from Google Tasks (deleted)
-              const deletedTaskIds: string[] = [];
-              currentTasks.forEach((t) => {
+              // Identify tasks belonging to list.id that had a googleTaskId but are absent from Google Tasks (deleted on Google)
+              initialTasks.forEach((t) => {
                 if (t.googleTaskId && isMatchingList(t, list) && !remoteGoogleTaskIds.has(t.googleTaskId)) {
-                  deletedTaskIds.push(t.id);
+                  allDeletedTaskIds.push(t.id);
+                  unifiedMap.delete(t.googleTaskId);
+                  unifiedMap.delete(t.id);
                 }
               });
 
-              if (user && !user.isGuest && deletedTaskIds.length > 0) {
-                deletedTaskIds.forEach((delId) => {
-                  deleteDoc(doc(getUserTasksCollection(user.uid), delId)).catch(console.warn);
-                });
-              }
-
-              const remainingTasks = currentTasks.filter((t) => !deletedTaskIds.includes(t.id));
-              const map = new Map(remainingTasks.map((t) => [t.googleTaskId || t.id, t]));
-
               remoteTasks.forEach((rt) => {
-                const existing = map.get(rt.googleTaskId!);
+                const existing = unifiedMap.get(rt.googleTaskId!) || googleIdToLocalMap.get(rt.googleTaskId!);
                 if (existing) {
-                  map.set(rt.googleTaskId!, {
+                  unifiedMap.set(rt.googleTaskId!, {
                     ...existing,
                     ...rt,
                     id: existing.id,
@@ -1028,7 +1080,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     archivedAt: rt.archivedAt ?? existing.archivedAt,
                   });
                 } else {
-                  map.set(rt.googleTaskId!, {
+                  unifiedMap.set(rt.googleTaskId!, {
                     ...rt,
                     tags: (rt as any).tags || [],
                     taskListId: list.id,
@@ -1036,17 +1088,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   });
                 }
               });
-              const newArr = Array.from(map.values());
-              tasksRef.current = newArr;
-              setTasks(newArr);
-
-              if (user && !user.isGuest) {
-                newArr.forEach((taskItem) => {
-                  setDoc(doc(getUserTasksCollection(user.uid), taskItem.id), sanitizeForFirestore(taskItem), { merge: true }).catch(console.warn);
-                });
-                const activeOnly = newArr.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
-                syncActiveTasksToFirestore(user.uid, activeOnly, 'googleTasks').catch(console.warn);
-              }
             } catch (listErr: any) {
               if (
                 (listErr instanceof GoogleApiError && listErr.status === 401) ||
@@ -1060,9 +1101,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
 
+          if (user && !user.isGuest && allDeletedTaskIds.length > 0) {
+            allDeletedTaskIds.forEach((delId) => {
+              deleteDoc(doc(getUserTasksCollection(user.uid), delId)).catch(console.warn);
+            });
+          }
+
+          const newArr = Array.from(unifiedMap.values());
+          tasksRef.current = newArr;
+          setTasks(newArr);
+
           if (user && !user.isGuest) {
-            const activeOnly = tasksRef.current.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
-            syncActiveTasksToFirestore(user.uid, activeOnly, 'googleTasks').catch(console.warn);
+            // Write ONLY tasks that have actual field changes compared to initial state
+            const dirtyTasks = newArr.filter((item) => {
+              const existing = initialTasksMap.get(item.id) || googleIdToLocalMap.get(item.googleTaskId || '');
+              return isTaskDirty(item, existing);
+            });
+
+            dirtyTasks.forEach((taskItem) => {
+              setDoc(doc(getUserTasksCollection(user.uid), taskItem.id), sanitizeForFirestore(taskItem), { merge: true }).catch(console.warn);
+            });
+
+            const activeOnly = newArr.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+            const activeSignature = activeOnly
+              .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
+              .sort()
+              .join('|');
+            if (activeSignature !== lastSyncedActiveTasksSignatureRef.current) {
+              lastSyncedActiveTasksSignatureRef.current = activeSignature;
+              syncActiveTasksToFirestore(user.uid, activeOnly, 'googleTasks').catch(console.warn);
+            }
           }
 
           // Two-way sync: Push local tasks that are missing Google Task IDs
