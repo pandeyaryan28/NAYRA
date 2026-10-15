@@ -65,9 +65,13 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
           {playbook.name}
         </h2>
 
-        <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 max-w-4xl leading-relaxed">
-          {playbook.description}
-        </p>
+        <div className="space-y-4 pt-2">
+          {playbook.description.split('\n\n').map((paragraph, idx) => (
+            <p key={idx} className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
       </div>
 
       {/* The Visual Financial Waterfall & Simulator */}
@@ -189,6 +193,19 @@ export const SCIntStep3VentureDossier: React.FC<SCIntStep3VentureDossierProps> =
           </div>
         </div>
       </div>
+
+      {/* Sovereign Moat & High Profit Breakdown */}
+      {playbook.sovereignMoat && (
+        <div className="p-7 rounded-3xl border border-sky-200 dark:border-sky-800/60 bg-sky-50/50 dark:bg-sky-950/20 space-y-3">
+          <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300 font-bold text-base">
+            <ShieldCheck className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <span>Why This Business Has Zero Local Competition & High Margins</span>
+          </div>
+          <p className="text-base text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            {playbook.sovereignMoat}
+          </p>
+        </div>
+      )}
 
       {/* Confirmed Offtake Customers & Target Clusters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

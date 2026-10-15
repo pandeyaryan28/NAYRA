@@ -124,7 +124,7 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Kachchh, Gujarat"
     ],
     "keyMachinery": [
-      "Heavy Industrial Rock Crusher (crushes large mined boulders into gravel)",
+      "Heavy Industrial Rock Crusher (breaks large mined boulders into gravel)",
       "Ball Mill Pulverizer (grinds rock gravel into powder as fine as flour)",
       "Froth Flotation Separation Tanks (uses bubbling chemical foam to float pure minerals away from dirt)",
       "Continuous Flash Dryer (dries wet purified mineral powder with hot air)"
@@ -476,25 +476,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Dahej PCPIR, Gujarat"
     ],
     "keyMachinery": [
-      "Direct Chlorination Reactors (precision cleanroom machine used in factory operations)",
-      "Fractional Distillation Columns (precision cleanroom machine used in factory operations)",
-      "Decomposition Chambers (precision cleanroom machine used in factory operations)"
+      "Fluidized Bed Chemical Reactor (reacts silicon metal with acid gas to form pure liquid silane)",
+      "Fractional Distillation Distillation Columns (towering columns that separate silicon from metal impurities)",
+      "Siemens Chemical Vapor Deposition Ovens (heats silicon rods to 1,100°C to grow pure crystal logs)",
+      "Cleanroom Robotic Silicon Log Saws (cuts pure crystal logs into uniform chunks under argon gas)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Metallurgical Grade Silicon (MGS 99% pure)",
-      "Anhydrous Hydrogen Chloride (HCl Gas)",
-      "High-Purity Hydrogen Gas (H2 99.9999%)",
-      "Liquid Chlorine (Cl2)",
-      "Massive Electrical Power Grid (~80,000 kWh per metric ton)"
+      "Metallurgical Grade Silicon Metal (99% pure silicon crushed lumps from smelters)",
+      "Anhydrous Hydrochloric Acid Gas (chemical gas used to dissolve silicon into liquid)",
+      "Ultra-Pure Hydrogen Gas (carrier gas for vapor deposition ovens)",
+      "Demineralized Cooling Water (circulates through cooling jackets to condense pure liquids)"
     ],
     "offtakeBuyers": [
-      "Shin-Etsu Handotai",
-      "SUMCO Corporation",
-      "GlobalWafers",
-      "Siltronic AG",
-      "SK Siltron"
+      "Silicon Wafer Pulling & Slicing Fabs (Tata Electronics, international wafer makers like GlobalWafers)",
+      "Solar Monocrystalline Ingot Fabs (Reliance Solar, Adani Solar, Tata Power)",
+      "Synthetic Quartz Glass Makers (producers of cleanroom furnace tubes and crucibles)",
+      "Defense Silicon Research Laboratories (DRDO SSPL, SCL Mohali)"
     ],
     "topSuppliers": [
       "Wacker Chemie AG",
@@ -508,10 +507,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Monopolistic high-barrier business. Requires massive scale and deep chemical expertise. The Government of India co-funds up to 70% of capex under ISM 2.0. With global prices commanding high premiums over solar grades, this facility yields EBITDA margins of 38% to 52% with guaranteed purchases from wafer slicing plants.",
     "clearances": [
-      "Environmental Clearance (Category A - Chemical & Metallurgical Complex)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "PESO Hydrogen & Chlorosilane Storage License (government environmental & operating permit)",
-      "Industrial Development Corporation Land Allotment (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for Major Chemical Synthesis (MoEFCC Category A)",
+      "State Pollution Control Board Hazardous Chemical License (CTE/CTO)",
+      "PESO Hazardous Toxic & Flammable Gas Storage Permit (approves silane and hydrogen storage tanks)",
+      "Factory Act Chemical Plant Operating Concession (certifies automated fire suppression systems)"
     ]
   },
   {
@@ -536,24 +535,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Dholera SIR / Sanand, Gujarat"
     ],
     "keyMachinery": [
-      "Direct Chlorination Reactors (precision cleanroom machine used in factory operations)",
-      "Fractional Distillation Columns (precision cleanroom machine used in factory operations)",
-      "Decomposition Chambers (precision cleanroom machine used in factory operations)"
+      "Cryogenic Air Liquefaction Column (chills air to -190°C to turn it into liquid)",
+      "Noble Gas Fractional Distillation Towers (separates neon, krypton, and xenon at distinct boiling points)",
+      "Catalytic Deoxo Purifier (removes trace oxygen down to parts-per-billion levels)",
+      "High-Pressure Cleanroom Cylinder Filling System (compresses pure gas into electropolished cylinders)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Atmospheric Air (Processed through 50,000+ Nm3/hr Steel Mill ASUs)",
-      "Crude Neon-Helium Gas Concentrate (high-purity factory ingredient)",
-      "Helium-bearing Natural Gas Wells (Qatar, US, Algeria)",
-      "Cryogenic Liquid Nitrogen Refrigeration (high-purity factory ingredient)",
-      "Ultra-High Vacuum Dual-Valved Cylinders (high-purity factory ingredient)"
+      "Crude Noble Gas Feedstock (concentrated gas streams captured from steel mill oxygen plants)",
+      "Atmospheric Ambient Air (free natural air drawn into cryogenic chillers)",
+      "Electropolished High-Pressure Aluminum Cylinders (specialized containers that do not react with gases)",
+      "Industrial Liquid Nitrogen (used as a super-cold refrigerant to freeze air)"
     ],
     "offtakeBuyers": [
-      "ASML, Cymer & Gigaphoton",
-      "TSMC, Intel, Samsung",
-      "Micron & SK Hynix",
-      "Tata Electronics Dholera"
+      "Photolithography Equipment Makers & Fabs (ASML laser suppliers, Tata Electronics fab, SCL Mohali)",
+      "Medical MRI Scanner Facilities & Space Satellites (ISRO satellite thruster xenon supply)",
+      "Industrial Laser Cutting & Welding Companies (automotive and precision engineering firms)",
+      "Global Gas Distributors (Linde India, Air Liquide India, Inox Air Products)"
     ],
     "topSuppliers": [
       "Linde plc",
@@ -567,10 +566,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "High-margin strategic asset. Raw gas feedstocks are obtained at near-zero cost as side streams from existing Indian steel mills (like SAIL, Tata Steel, and JSW). ISM co-funding of up to 70% yields rapid capital payback in 2.8 years and EBITDA margins above 45%.",
     "clearances": [
-      "Environmental Clearance (Category B - Industrial Gases & Cryogenics)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "PESO High-Pressure Gas Cylinder Filling & Storage License (government environmental & operating permit)",
-      "Host Steel Mill Co-Location & Off-Take Concession Agreement (government environmental & operating permit)"
+      "PESO High-Pressure Compressed Gas License (certifies safety of gas compression manifolds)",
+      "Central Ministry Environmental Clearance for Air Separation Plants (MoEFCC Category B)",
+      "State Pollution Control Board Air Emissions Permit (CTE/CTO)",
+      "Industrial Gas Transportation Safety Permit (authorizes cryogenic road transport)"
     ]
   },
   {
@@ -595,23 +594,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Dahej PCPIR, Gujarat"
     ],
     "keyMachinery": [
-      "Direct Chlorination Reactors (precision cleanroom machine used in factory operations)",
-      "Fractional Distillation Columns (precision cleanroom machine used in factory operations)",
-      "Decomposition Chambers (precision cleanroom machine used in factory operations)"
+      "Hydrogen-Oxygen Flame Hydrolysis Torches (burns at 2,000°C to deposit pure glass soot)",
+      "Rotary Crucible Arc Fusion Furnace (spins glass powder against bowl walls while melting with electric arcs)",
+      "Precision Diamond-Tipped CNC Lathe (shapes and polishes quartz glass tubes to exact tolerances)",
+      "Optical Polariscopic Stress Scanner (uses polarized light to ensure glass has zero internal cracking)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Silicon Tetrachloride (SiCl4) High-Purity Liquid",
-      "High-Purity Natural Quartz Sand (Spruce Pine IOTA standard)",
-      "Industrial Hydrogen and Oxygen Gases (high-purity factory ingredient)",
-      "Hydrofluoric & Nitric Acids for Quartz Etch Cleaning (high-purity factory ingredient)"
+      "High-Purity Silicon Tetrachloride Liquid (synthetic chemical liquid synthesized from pure silicon)",
+      "Ultra-Pure Hydrogen & Oxygen Gases (clean fuels burned to create intense 2,000°C glass flames)",
+      "High-Purity Quartz Sand (granular lining used in crucible outer layers)",
+      "Demineralized Acid Rinse Water (washes finished glassware clean of handling oils)"
     ],
     "offtakeBuyers": [
-      "Shin-Etsu Handotai, SUMCO, GlobalWafers",
-      "Tokyo Electron & Applied Materials",
-      "Hoya & AGC",
-      "Tata Electronics Dholera"
+      "Silicon Wafer Crystal Ingot Fabs (Tata Electronics wafer plant, Adani Solar ingot plant)",
+      "Semiconductor Wafer Fabrication Plants (fabs using quartz diffusion furnace tubes)",
+      "Solar Monocrystalline Pullers (domestic solar cell manufacturers)",
+      "Optical Fiber Preform Makers (Sterlite Technologies, HFCL, Birla Cable)"
     ],
     "topSuppliers": [
       "Heraeus Quarzglas",
@@ -624,10 +624,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Continuous consumable business model. Every wafer factory on earth consumes dozens of quartz crucibles weekly. With 70% government capex grants and captive demand from upcoming Indian wafer fabs, operating margins stand at 35% to 48% with reliable recurring cash flow.",
     "clearances": [
-      "Environmental Clearance (Category B - Glass & Ceramic Manufacturing)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "High-Voltage Power Connection & Substation Sanction (15 MVA)",
-      "Industrial Land Allotment (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for Specialty Glass Manufacturing (MoEFCC Category B)",
+      "State Pollution Control Board Factory Operating License (CTE/CTO)",
+      "PESO Hydrogen Pipeline & Gas Storage Permit (certifies safe industrial flame gas delivery)",
+      "High-Temperature Furnace Industrial Safety License (certifies automated thermal safety controls)"
     ]
   },
   {
@@ -652,23 +652,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "Czochralski Crystal Pullers (precision cleanroom machine used in factory operations)",
-      "Diamond Wire Saws (precision cleanroom machine used in factory operations)",
-      "Chemical Mechanical Planarization (CMP)"
+      "Multi-Pass Reverse Osmosis Skids (high-pressure membranes that strip 99% of dissolved minerals)",
+      "Electrodeionization (EDI) Polishers (uses electric currents to pull remaining ionic mineral atoms from water)",
+      "185nm & 254nm Ultraviolet Bacteria Destroyers (breaks down organic molecules and sterilizes water)",
+      "Ceiling Fan Filter Units with ULPA Membranes (circulates spotless air filtered to 10-nanometer standards)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "PVDF (Polyvinylidene Fluoride) High-Purity Piping & Valves",
-      "High-Flux Polyamide Reverse Osmosis (RO) Membranes",
-      "185nm & 254nm Ultraviolet Quartz Lamps (high-purity factory ingredient)",
-      "Nuclear-Grade Ion Exchange Resins (high-purity factory ingredient)",
-      "ULPA (Ultra-Low Particulate Air) Borosilicate Glass Fiber Filter Media"
+      "Raw Municipal or River Water (pre-treated source water piped into industrial parks)",
+      "Specialty Ion-Exchange Polymer Beads (microscopic chemical resin beads that absorb mineral ions)",
+      "PVDF & Teflon Cleanroom Piping (plastic pipes so chemically inert they leach zero molecules into water)",
+      "High-Efficiency Particulate Air Filters (specialized glass-fiber membrane filters for cleanroom ceilings)"
     ],
     "offtakeBuyers": [
-      "Tata Electronics Dholera",
-      "Micron Sanand",
-      "TSMC, Samsung, Intel"
+      "Semiconductor Mega Fabs (Tata Electronics Dholera, Micron Sanand, CG Semi)",
+      "Advanced Display & Solar Fabs (domestic flat-panel and high-efficiency solar plants)",
+      "Pharmaceutical Biologics & Vaccine Plants (Serum Institute, Biocon, Dr. Reddy's)",
+      "Government Space & Defense Cleanrooms (ISRO satellite assembly cleanrooms, DRDO labs)"
     ],
     "topSuppliers": [
       "Kurita Water Industries",
@@ -682,10 +683,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Essential turnkey infrastructure project. Fabs cannot operate for a single minute without uninterrupted UPW and air filtration. Supported by 50% central and 20% state subsidies, this venture achieves stable 22% to 32% operating margins with long-term maintenance contracts spanning 15+ years.",
     "clearances": [
-      "Environmental Clearance (Category B - Industrial Infrastructure & Water Treatment)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "Central Ground Water Authority (CGWA) NOC / Canal Allocation",
-      "Industrial Single Window Clearance & Dholera DICDL Allotment (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for Infrastructure Systems (MoEFCC Category B)",
+      "State Pollution Control Board Water Extraction & Discharge Consent (CTE/CTO for water recycling)",
+      "Public Health & Municipal Industrial Water Connection Agreement (guaranteed municipal volume supply)",
+      "Factory Cleanroom Air Quality & Occupational Safety Certification (certifies ISO Class 1 compliance)"
     ]
   },
   {
@@ -710,25 +711,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Bengaluru, Karnataka"
     ],
     "keyMachinery": [
-      "Czochralski Crystal Pullers (precision cleanroom machine used in factory operations)",
-      "Diamond Wire Saws (precision cleanroom machine used in factory operations)",
-      "Chemical Mechanical Planarization (CMP)"
+      "Precision Multi-Axis CNC Machine Center (carves airtight process chambers from solid aluminum blocks)",
+      "Helium Mass Spectrometer Leak Detector (verifies vacuum chambers have zero microscopic air leaks)",
+      "Cleanroom Robotic Arm Assembly Jig (calibrates robotic arms that transfer wafers in vacuum)",
+      "High-Power Radio Frequency (RF) Plasma Test Bench (tests 13.56MHz plasma generators that ignite gas)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "High-Vacuum Chamber Aluminum (6061-T6 with specialized anodization)",
-      "High-Purity Quartz & Silicon Carbide Plasma Rings (high-purity factory ingredient)",
-      "Yttrium Oxide (Y2O3) Plasma-Resistant Ceramic Coatings",
-      "Turbo-Molecular Vacuum Pumps (Edwards, Pfeiffer)",
-      "Mass Flow Controllers (Horiba, Brooks Instrument)"
+      "Aircraft-Grade Aluminum & Stainless Steel Billets (dense metal blocks machined into vacuum chambers)",
+      "Ceramic Alumina & Quartz Chamber Liners (protective plates that stop plasma from eroding metal walls)",
+      "Magnetic-Levitation Turbo Vacuum Pumps (high-speed fans spinning at 60,000 RPM to create space vacuum)",
+      "Ultra-Pure Teflon & Kalrez O-Rings (specialized rubber seals that withstand harsh corrosive gases)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung Electronics",
-      "Intel",
-      "Micron & SK Hynix",
-      "Tata Electronics Dholera"
+      "Semiconductor Wafer Fabrication Plants (Tata Electronics Dholera, SCL Mohali)",
+      "Compound Semiconductor & Power Fabs (Zoho power fab, CG Semi, Continental Device India)",
+      "Advanced Solar Cell Fabs (TOPCon and Heterojunction solar cell manufacturers)",
+      "Academic & National Research Cleanrooms (IIT Bombay, IISc Bangalore, CeNSE)"
     ],
     "topSuppliers": [
       "Applied Materials (AMAT)",
@@ -742,10 +742,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Highest-value equipment segment in semiconductor manufacturing, representing over 40% of total fab machinery expenditure. ISM 2.0 provides up to 50% central plus 20% state capex support, yielding 25% to 35% operating margins and high recurring spare-parts revenue.",
     "clearances": [
-      "Environmental Clearance (Category B - Electronics Machinery Manufacturing)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "PESO Specialty Toxic & Fluorinated Gas Storage License (government environmental & operating permit)",
-      "KIADB Industrial Land Allotment (government environmental & operating permit)"
+      "Central Ministry Industrial Machinery Manufacturing Approval (Ministry of Heavy Industries)",
+      "State Pollution Control Board Precision Engineering Permit (CTE/CTO)",
+      "Cleanroom ISO Class 4 Assembly Certification (certifies dust-free machine building)",
+      "Export & Dual-Use Technology Compliance Clearance (approves manufacturing of high-tech tools)"
     ]
   },
   {
@@ -770,23 +770,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sriperumbudur, Tamil Nadu"
     ],
     "keyMachinery": [
-      "Czochralski Crystal Pullers (precision cleanroom machine used in factory operations)",
-      "Diamond Wire Saws (precision cleanroom machine used in factory operations)",
-      "Chemical Mechanical Planarization (CMP)"
+      "High-Voltage 500kV Insulation Test Chamber (tests giant electrical insulators against sparking)",
+      "Precision Magnetic Field Mapper (calibrates giant electromagnets that steer atomic beams)",
+      "High-Vacuum Chamber Pumping Station (pumps beamlines down to deep-space vacuum levels)",
+      "Faraday Cup Beam Current Calibrator (measures atomic beam flow down to micro-amperes)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Sub-Atmospheric SDS Cylinders (AsH3, PH3, BF3, GeF4)",
-      "High-Purity Tungsten & Molybdenum Arc Chamber Parts (high-purity factory ingredient)",
-      "Superconducting or Rare-Earth Analyzing Magnets (high-purity factory ingredient)",
-      "High-Voltage Ceramic Insulators (Alumina Al2O3)",
-      "Cryogenic Vacuum Pumps (high-purity factory ingredient)"
+      "Electrolytic Copper Magnet Coils (wound into giant electromagnets that bend atomic beams)",
+      "High-Purity Toxic Dopant Gases (compressed boron trifluoride and phosphine in sealed mini-canisters)",
+      "High-Voltage Ceramic Insulator Bushings (prevents 500,000-volt electrical arcs)",
+      "Electrostatic Silicon Wafer Clamping Chucks (heats and chills wafers while holding them with static electricity)"
     ],
     "offtakeBuyers": [
-      "TSMC & Samsung",
-      "Wolfspeed, STMicro, Onsemi",
-      "Tata Electronics Dholera"
+      "Automotive & Power Chip Fabs (producers of electric vehicle power transistors and switches)",
+      "Logic & Memory Wafer Fabs (Tata Electronics, international semiconductor fabs)",
+      "Nuclear & Physics Research Laboratories (TIFR, BARC, Raja Ramanna Centre for Advanced Technology)",
+      "Silicon Solar Cell Manufacturers (high-efficiency interdigitated back contact solar fabs)"
     ],
     "topSuppliers": [
       "Applied Materials (Varian)",
@@ -798,10 +799,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Strategic technology monopoly. Few companies worldwide possess ion beam engineering capabilities. Supported by government R&D and manufacturing capital grants of up to 70%, this venture commands operating margins of 30% to 45%.",
     "clearances": [
-      "Atomic Energy Regulatory Board (AERB) Particle Accelerator License",
-      "Environmental Clearance (Category B - Electronics Capital Goods)",
-      "PESO Toxic Gas & SF6 Insulating Gas Storage License (government environmental & operating permit)",
-      "TSIIC Industrial Land Allotment (government environmental & operating permit)"
+      "Atomic Energy Regulatory Board (AERB) Safety Clearance (approves high-voltage particle beam machinery)",
+      "Central Ministry Environmental Clearance for High-Tech Machinery (MoEFCC Category B)",
+      "State Pollution Control Board Electrical Engineering Permit (CTE/CTO)",
+      "PESO Specialty Toxic Gas Handling Certification (authorizes safe testing with dopant gases)"
     ]
   },
   {
@@ -826,24 +827,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Chennai, Tamil Nadu / Bengaluru, Karnataka"
     ],
     "keyMachinery": [
-      "Czochralski Crystal Pullers (precision cleanroom machine used in factory operations)",
-      "Diamond Wire Saws (precision cleanroom machine used in factory operations)",
-      "Chemical Mechanical Planarization (CMP)"
+      "Vibration-Isolated Granite Base Assembly Station (heavy stone tables that absorb ground vibrations)",
+      "Laser Interferometer Calibration Rig (measures mechanical stage movement down to sub-nanometers)",
+      "High-Vacuum Scanning Electron Beam Test Column (tests electron lenses that focus atomic beams)",
+      "Cleanroom Optical Alignment Tunnel (aligns laser beams and high-magnification quartz lenses)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Laser-Pumped Xenon Plasma Light Sources (Energetiq)",
-      "Ultra-Flat Fused Silica Objective Optics (high-purity factory ingredient)",
-      "Time Delay and Integration (TDI) High-Speed CCD/CMOS Sensors",
-      "Schottky Field Emission Electron Sources (high-purity factory ingredient)",
-      "Interferometric Laser Positioning Stages (high-purity factory ingredient)"
+      "Natural Granite Stone Machine Bases (ultra-dense rock blocks that stop building vibrations)",
+      "Deep-Ultraviolet Solid-State Laser Emitters (lasers producing light that spots 10-nanometer dust specks)",
+      "High-Resolution Time-Delay-Integration CCD Cameras (cameras taking billions of picture pixels per second)",
+      "Magnetic-Levitation Air-Bearing Stages (frictionless moving tables riding on thin cushions of air)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung Electronics",
-      "Intel",
-      "Tata Electronics Dholera"
+      "Semiconductor Wafer Fabs (Tata Electronics, SCL Mohali, international foundry plants)",
+      "Advanced Chip Packaging & ATMP Facilities (Micron Sanand, CG Semi packaging lines)",
+      "Photomask Manufacturing Plants (facilities inspecting master circuit stencils)",
+      "Premier Materials Science Universities & R&D Hubs (IITs, IISc Bangalore, CSIR labs)"
     ],
     "topSuppliers": [
       "KLA Corporation",
@@ -857,10 +858,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Yield-critical fab equipment. Fabs willingly pay premium prices for tools that prevent multi-million-dollar wafer scrappage. ISM grants cover up to 70% of capex, providing 30% to 42% operating margins.",
     "clearances": [
-      "Environmental Clearance (Category B - Electronics Assembly)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "Atomic Energy Regulatory Board (AERB) Low-Energy X-Ray / SEM NOC",
-      "KIADB Industrial Land Allotment (government environmental & operating permit)"
+      "Central Ministry Industrial Production Approval for Advanced Metrology Tools",
+      "State Pollution Control Board Operating License (CTE/CTO)",
+      "Laser Radiation Safety Board Certification (certifies Class 4 laser enclosures and interlocks)",
+      "National Physical Laboratory (NPL) Metrology Standards Calibration Audit"
     ]
   },
   {
@@ -885,25 +886,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "SCL Mohali, Punjab"
     ],
     "keyMachinery": [
-      "Czochralski Crystal Pullers (precision cleanroom machine used in factory operations)",
-      "Diamond Wire Saws (precision cleanroom machine used in factory operations)",
-      "Chemical Mechanical Planarization (CMP)"
+      "Active Pneumatic Anti-Vibration Isolation Platform (cancels out ocean tides and highway vibrations)",
+      "Dual-Stage Magnetic-Levitation Wafer Chuck (holds silicon wafers flat to within 1 nanometer)",
+      "Laser Beam Homogenizer & Illuminator Tube (creates perfectly uniform laser light across the stencil)",
+      "Environmental Temperature Chamber (+/- 0.001°C temperature-controlled cleanroom enclosure)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Carl Zeiss Mo/Si Ultra-Smooth Extreme UV Mirrors (high-purity factory ingredient)",
-      "TRUMPF / Cymer High-Power 30kW Pulsed CO2 Lasers (high-purity factory ingredient)",
-      "High-Purity Molten Tin (Sn 99.999%)",
-      "Synthetic Fused Silica & Calcium Fluoride (CaF2) Optical Glass",
-      "Ultra-High Vacuum (UHV) Turbomolecular Pumps"
+      "Calcium Fluoride & Fused Silica Optical Lenses (flawless quartz lenses that do not absorb laser light)",
+      "Invar & Zerodur Zero-Expansion Alloys (special metals that do not expand or shrink when heated)",
+      "Excimer Laser Discharge Chambers (pulsed laser cavities filled with krypton-fluoride gas)",
+      "Extreme-Speed Linear Electric Motors (accelerates wafer stages at 10 times the force of gravity)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung Electronics",
-      "Intel",
-      "SK Hynix & Micron",
-      "Tata Electronics Dholera"
+      "Trailing-Edge & Automotive Semiconductor Fabs (28nm/40nm/65nm automotive chip fabs in India)",
+      "Compound Semiconductor & Silicon Carbide Fabs (high-voltage electric vehicle chip fabs)",
+      "Advanced Chip Packaging Fabs (FOWLP and 2.5D interposer packaging lines)",
+      "Government Defense Microelectronics Facilities (SCL Mohali, GAETEC Hyderabad)"
     ],
     "topSuppliers": [
       "ASML Holding",
@@ -915,10 +915,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "The ultimate technological pinnacle of electronics. Global supply is tightly constrained by Dutch and Japanese firms. ISM 2.0 provides up to 70% capex grants, yielding premier operating margins of 35% to 50%.",
     "clearances": [
-      "Atomic Energy Regulatory Board (AERB) High-Power Laser License",
-      "Environmental Clearance (Category B - Electronics Assembly)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "PESO Fluorine Laser Gas Storage Approval (government environmental & operating permit)"
+      "Central Ministry High-Tech Defense & Industrial Equipment Manufacturing License",
+      "Atomic Energy Regulatory Board & Laser Radiation Safety Certification",
+      "State Pollution Control Board Precision Optics Permit (CTE/CTO)",
+      "National Semiconductor Standards & Metrology Accreditation (ISO 9001 & CE compliance)"
     ]
   },
   {
@@ -943,25 +943,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Dholera SIR, Gujarat"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "Sealed Stainless Steel Glovebox Chemical Synthesizers (airtight reactors operating under inert argon)",
+      "Multi-Stage High-Vacuum Fractional Distillation Column (separates pure chemicals from trace metal atoms)",
+      "Inductively Coupled Plasma Mass Spectrometer (ICP-MS - checks purity down to parts-per-trillion)",
+      "Automated Cleanroom Chemical Canister Filling Station (fills electropolished stainless canisters without air contact)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Hafnium Tetrachloride (HfCl4)",
-      "Tungsten Concentrates & Fluorine Gas (high-purity factory ingredient)",
-      "Silicon Tetrachloride (SiCl4)",
-      "Trialkylaluminum & Metal Chlorides (high-purity factory ingredient)",
-      "Electropolished Stainless Steel 316L Ampoules (high-purity factory ingredient)"
+      "Ultra-Pure Silicon & Metal Chlorides (silicon tetrachloride, titanium chloride, hafnium chloride)",
+      "Organic Precursor Reagents (cyclopentadienyl and alkylamino organic compounds)",
+      "Ultra-Pure Dry Argon & Helium Carrier Gases (inert gases used to bubble chemicals into ovens)",
+      "Electropolished Stainless Steel Bubbler Canisters (heavy-duty canisters with automated shutoff valves)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung & SK Hynix",
-      "Intel",
-      "Tata Electronics Dholera"
+      "Advanced Logic & Memory Fabs (Tata Electronics Dholera fab, international chipmakers)",
+      "Solar Cell Thin-Film Coating Plants (manufacturers of passivated emitter and contact solar cells)",
+      "Optical Lens & Precision Mirror Coaters (manufacturers of anti-reflective glass coatings)",
+      "Domestic Compound Semiconductor Fabs (high-frequency radio chip plants)"
     ],
     "topSuppliers": [
       "Entegris",
@@ -975,10 +974,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "High-value recurring consumables. Fabs never switch chemical suppliers once qualified due to qualification risks. Capital co-funding of up to 70% under ISM yields 35% to 45% operating margins.",
     "clearances": [
-      "Environmental Clearance (Category A - Organometallic Chemical Synthesis)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Pyrophoric Substance & High-Pressure Vessel License (government environmental & operating permit)",
-      "DISH Factory License & Major Accident Hazard (MAH) Clearance"
+      "Central Ministry Environmental Clearance for Specialty Chemicals (MoEFCC Category A)",
+      "State Pollution Control Board Chemical Facility Operating Permit (CTE/CTO)",
+      "PESO Compressed Chemical Storage & Hazardous Transportation License",
+      "Factory Directorate Chemical Safety & Emergency Containment Audit"
     ]
   },
   {
@@ -1003,26 +1002,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Jewar / YEIDA Corridor, Uttar Pradesh"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "Czochralski (CZ) High-Vacuum Crystal Pulling Furnace (melts silicon at 1,420°C and pulls giant crystal logs)",
+      "Diamond Wire Multi-Wafer Slicing Machine (spins microscopic diamond-coated wires to slice 1,000 disks at once)",
+      "Double-Sided Rotary Wafer Polisher (buffs both sides of the silicon disk flat using diamond liquids)",
+      "Laser Wafer Flatness & Surface Defect Interferometer (scans disk surface to verify sub-nanometer flatness)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "11N Electronic-Grade Polysilicon (EG-Si)",
-      "Ultra-High Purity Synthetic Fused Quartz Crucibles (high-purity factory ingredient)",
-      "High-purity Graphite Heaters & Thermal Shields (high-purity factory ingredient)",
-      "Diamond Plated Slicing Wire (high-purity factory ingredient)",
-      "CMP Slurry & Polyurethane Polishing Pads (high-purity factory ingredient)"
+      "Electronic-Grade Polysilicon Chunks (99.999999999% pure silicon raw feedstocks)",
+      "Synthetic Fused Silica Quartz Crucibles (large melting pots destroyed after each crystal pull)",
+      "Diamond-Impregnated High-Tensile Steel Wire (ultra-thin wire used to slice silicon logs into disks)",
+      "Ultra-Pure Polishing Slurry & Soft Polyurethane Pads (liquid polishing paste for mirror finishes)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung Electronics",
-      "Intel",
-      "Micron & SK Hynix",
-      "Tata Electronics Dholera"
+      "Tata Electronics Mega Fab (Dholera SIR, Gujarat - consumes thousands of 300mm wafers monthly)",
+      "Semiconductor Laboratory (SCL Mohali - India's premier government microchip fabrication fab)",
+      "Upcoming Indian Private Fabs & Foundries (commercial automotive and power chip fabs)",
+      "Global Semiconductor Foundry Giants (TSMC, GlobalFoundries, UMC, Intel)"
     ],
     "topSuppliers": [
       "Shin-Etsu Handotai (SEH)",
@@ -1036,10 +1033,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Massive captive market with guaranteed long-term offtake. Every chip factory in India requires tens of thousands of blank wafers each month. Supported by 70% government subsidies, operating margins average 25% to 35%.",
     "clearances": [
-      "Environmental Clearance (Category A - Semiconductor Wafer Complex)",
-      "Consent to Establish (CTE) & Consent to Operate (CTO)",
-      "PESO Cryogenic Argon & Nitrogen Storage License (government environmental & operating permit)",
-      "Factory License & High-Temperature Induction Furnace Approval (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for High-Tech Metallurgical Crystal Growth (MoEFCC Category A)",
+      "State Pollution Control Board Industrial Water & Effluent Permit (CTE/CTO)",
+      "Dedicated Uninterrupted 24/7 High-Voltage Power Connection Concession (100MW guaranteed grid supply)",
+      "Cleanroom ISO Class 3 Operating License (authorizes cleanroom wafer packaging and shipping)"
     ]
   },
   {
@@ -1064,26 +1061,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sriperumbudur, Tamil Nadu"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "High-Shear Nanoparticle Dispersion Homogenizer (breaks ceramic particles apart so they never clump)",
+      "Multi-Stage Sub-Micron Absolute Filter Bank (screens out any particle larger than 100 nanometers)",
+      "Precision Chemical Formulation Blending Tanks (electropolished stainless tanks with automated pH injection)",
+      "Particle Size Distribution Laser Analyzer (scans liquid to verify every nanoparticle is identical in size)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Colloidal Silica Nanoparticles (High-purity aqueous sol)",
-      "Rare Earth Cerium Oxide (CeO2) Powder",
-      "Prepolymer Isocyanates & Polyols (for polyurethane pads)",
-      "High-Purity Hydrogen Peroxide (H2O2 31%)",
-      "Corrosion Inhibitors (Benzotriazole BTA)"
+      "Colloidal Cerium Oxide & Silica Nanoparticles (uniform microscopic ceramic spheres)",
+      "Ultra-Pure Deionized Water (18.2 MOhm pharmaceutical-grade carrier liquid)",
+      "Chemical Oxidizers & pH Buffers (hydrogen peroxide, potassium hydroxide, organic acids)",
+      "Micro-Porous Polyurethane Foam Sheets (cast and grooved to create rotating polishing pads)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Intel",
-      "Samsung Electronics",
-      "Micron & SK Hynix",
-      "Tata Electronics Dholera"
+      "Tata Electronics Dholera Fab (consumes barrels of CMP slurry every operating shift)",
+      "Micron Sanand ATMP & Packaging Plant (uses polishing slurry during wafer thinning)",
+      "CG Semi Sanand Facility (uses slurry for surface planarization)",
+      "Global Semiconductor Foundries (Samsung, TSMC, GlobalFoundries)"
     ],
     "topSuppliers": [
       "Entegris (formerly Cabot Microelectronics)",
@@ -1097,10 +1092,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Pure recurring consumable business. Fabs consume dozens of barrels of slurry daily. Backed by 70% ISM grants and zero domestic manufacturing competitors, EBITDA margins reach 30% to 42%.",
     "clearances": [
-      "Environmental Clearance (Category A - Chemical Blending & Polymer Processing)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Chemical Storage License (Isocyanates & Flammable Solvents)",
-      "DISH Factory License & Cleanroom Workplace Safety Review (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for Chemical Formulations (MoEFCC Category B)",
+      "State Pollution Control Board Operating Permit (CTE/CTO for zero-discharge blending)",
+      "PESO Chemical Storage & Hazardous Handling License",
+      "Cleanroom Chemical Drum Packaging Certification (authorizes shipping to semiconductor fabs)"
     ]
   },
   {
@@ -1125,26 +1120,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Dahej PCPIR, Gujarat"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "Electrochemical Fluorination Reactors (synthesizes raw fluorinated gases under electric currents)",
+      "Cryogenic Gas Liquefaction & Distillation Columns (chills gases into liquids to boil out air impurities)",
+      "Trace Moisture & Particle Scrubbing Beds (molecular sieves that remove water molecules down to parts-per-billion)",
+      "Automated Cleanroom Gas Cylinder Filling Manifold (fills high-pressure cylinders with leak-tight safety valves)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Anhydrous Hydrogen Fluoride (AHF)",
-      "Anhydrous Ammonia (NH3)",
-      "High-Purity Chlorine Gas (Cl2)",
-      "Sulfur & Methane Precursors (high-purity factory ingredient)",
-      "Electropolished Stainless Steel / Hastelloy Cylinders (high-purity factory ingredient)"
+      "Anhydrous Hydrogen Fluoride (AHF - pure acid gas sourced from local Gujarat chemical plants)",
+      "Industrial Pure Ammonia Gas (nitrogen source used to synthesize nitrogen trifluoride)",
+      "High-Purity Chlorine & Methane Gases (carbon and chlorine sources for etching gases)",
+      "Electropolished Nickel-Lined Steel Cylinders (heavy-duty cylinders resistant to corrosive fluorine)"
     ],
     "offtakeBuyers": [
-      "Samsung Electronics",
-      "TSMC",
-      "Micron & SK Hynix",
-      "Intel",
-      "Tata Electronics Dholera"
+      "Semiconductor Wafer Fabrication Fabs (Tata Electronics Dholera, SCL Mohali)",
+      "Flat-Panel Display Manufacturing Plants (manufacturers of smartphone and television screens)",
+      "Solar Cell Manufacturing Plants (producers of passivated solar wafers requiring plasma cleaning)",
+      "Global Industrial Gas Distributors (Linde India, Air Liquide India, Inox Air Products)"
     ],
     "topSuppliers": [
       "SK Materials",
@@ -1158,10 +1151,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Essential fab consumable. Fabs cannot run for a single day without cleaning and etching gases. With 70% government subsidies and local chemical cluster integration in Dahej, operating margins exceed 32%.",
     "clearances": [
-      "Environmental Clearance (Category A - Specialty Toxic & Hazardous Gases)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Gas Cylinder Filling & High-Pressure Storage License (government environmental & operating permit)",
-      "DISH Factory License & Major Accident Hazard (MAH) Compliance"
+      "Central Ministry Environmental Clearance for Compressed Toxic & Corrosive Gases (MoEFCC Category A)",
+      "PESO High-Pressure Toxic Gas Storage & Filling Station License",
+      "State Pollution Control Board Factory Operating Consent (CTE/CTO)",
+      "National Disaster Management Authority (NDMA) Toxic Gas Emergency Containment Audit"
     ]
   },
   {
@@ -1186,26 +1179,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Cuddalore PCPIR, Tamil Nadu"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "Amber-Lit Cleanroom Polymer Synthesis Reactor (sealed glass-lined vessel operating under yellow light)",
+      "High-Vacuum Multi-Plate Solvent Distillation Still (purifies carrier solvents to parts-per-trillion levels)",
+      "1-Nanometer Absolute Micro-Pore Membrane Filter Bank (filters out individual polymer clumps)",
+      "Automated Cleanroom Bottle Filling & Nitrogen Purging Machine (fills brown light-blocking glass bottles)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Purified Specialty Acrylic & Norbornene Monomers (high-purity factory ingredient)",
-      "Onium Salt Precursors (Photoacid Generators)",
-      "Ultra-High Purity Electronic Solvents (PGMEA < 0.1 ppb metal trace)",
-      "Organic Amine Quenchers (high-purity factory ingredient)",
-      "Liquid Nitrogen for Temperature Control (high-purity factory ingredient)"
+      "Specialty Phenolic & Adamantyl Monomers (custom organic molecules that harden when exposed to light)",
+      "Photo-Acid Generator (PAG) Specialty Salts (complex chemical salts that release acid when hit by lasers)",
+      "Electronic-Grade PGMEA Solvent (ultra-pure organic liquid solvent that carries the resin)",
+      "Amber-Coated Light-Blocking Glass Bottles (specialized packaging that blocks all ultraviolet light)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung Electronics",
-      "Intel",
-      "Micron & SK Hynix",
-      "Tata Electronics Dholera"
+      "Semiconductor Wafer Fabs (Tata Electronics Dholera fab, SCL Mohali)",
+      "Leading Global Foundries (TSMC, Samsung, Intel, GlobalFoundries)",
+      "Compound Semiconductor Fabs (radio frequency and high-voltage power chip fabs)",
+      "Advanced Packaging R&D Centers (wafer-level packaging redistribution layer lines)"
     ],
     "topSuppliers": [
       "Tokyo Ohka Kogyo (TOK)",
@@ -1219,10 +1210,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Extremely high barrier to entry and massive profit margins (35% to 50%). Central and state subsidies cover up to 70% of capex. Guaranteed long-term customer lock-in once qualified by fabs.",
     "clearances": [
-      "Environmental Clearance (Category A - Synthetic Organic Chemicals)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Flammable Solvent Storage & Dispense License (government environmental & operating permit)",
-      "DISH Factory License & Chemical Process Safety Review (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for Specialty Organic Chemical Synthesis (MoEFCC Category A)",
+      "State Pollution Control Board Operating License (CTE/CTO)",
+      "PESO Flammable Solvent Storage & Handling Concession",
+      "Cleanroom ISO Class 3 Amber-Light Workplace Safety Audit"
     ]
   },
   {
@@ -1247,24 +1238,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Mohali, Punjab / Bengaluru, Karnataka"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "High-Energy Electron-Beam Pattern Generator (shoots focused electron beams to write circuit lines)",
+      "Inductively Coupled Plasma Chromium Etcher (dissolves exposed chromium metal with chlorine gas)",
+      "Deep-Ultraviolet Mask Defect Inspection Scanner (scans stencil with UV lasers to spot 5-nanometer errors)",
+      "Pellicle Automated Cleanroom Mounting Applicator (glues a dust-protective membrane over the glass stencil)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Synthetic Fused Silica Quartz Blanks (Hoya, AGC, Shin-Etsu)",
-      "Chromium Sputtering Targets & Molybdenum Silicide Targets (high-purity factory ingredient)",
-      "High-Resolution Electron Beam Resists (FEP, ZEP)",
-      "Carbon Nanotube (CNT) Pellicles",
-      "Chlorine & Oxygen High-Purity Etch Gases (high-purity factory ingredient)"
+      "Synthetic Fused Quartz Mask Blanks (6x6 inch square quartz plates polished to atomic flatness)",
+      "Ultra-Thin Chromium & Molybdenum-Silicide Coating (metallic film that blocks laser light)",
+      "Electron-Beam Sensitive Resist Paint (thin chemical layer exposed by electron beams)",
+      "Fluoropolymer Pellicle Protective Membranes (transparent dust covers glued over finished stencils)"
     ],
     "offtakeBuyers": [
-      "Foundries (TSMC, GlobalFoundries, UMC, PSMC)",
-      "IDMs (TI, Infineon, NXP, STMicro)",
-      "Tata Electronics Dholera"
+      "Indian Microchip Design Houses (Qualcomm India, MediaTek India, NXP India, Texas Instruments India)",
+      "Semiconductor Wafer Fabs (Tata Electronics Dholera fab, SCL Mohali)",
+      "Indian Fabless Startup Ecosystem (Mindgrove Technologies, InCore Semiconductors, Silizium Circuits)",
+      "Government Space & Defense Microelectronics Programs (ISRO, DRDO ANURAG)"
     ],
     "topSuppliers": [
       "Captive Mask Shops (TSMC, Intel, Samsung)",
@@ -1278,10 +1269,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Every chip design needs unique photomasks. With India hosting over 20% of the world's chip design engineers, a domestic photomask merchant shop has a massive captive local customer base, enjoying 35% to 45% operating margins.",
     "clearances": [
-      "Environmental Clearance (Category A - Precision Micro-Fabrication)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Toxic Etch Gas Storage License (Chlorine & SF6)",
-      "DISH Factory License & Cleanroom High-Voltage Safety Review (government environmental & operating permit)"
+      "Central Ministry Industrial Technology Manufacturing License (Ministry of Electronics and IT)",
+      "State Pollution Control Board Cleanroom Engineering Consent (CTE/CTO)",
+      "Atomic Energy Regulatory Board (AERB) Electron Beam Tool Safety Audit",
+      "Cleanroom Class 1 Precision Environmental Control Certification"
     ]
   },
   {
@@ -1306,26 +1297,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sriperumbudur, Tamil Nadu"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "Vacuum Hot Pressing & Sintering Furnace (compresses metal powders at 1,500°C into solid disks)",
+      "Diffusion Bonding Vacuum Furnace (welds metal target disks to copper cooling backing plates)",
+      "High-Precision CNC Lathe & Milling Center (machines target disks to microscopic flatness)",
+      "Ultrasonic C-Scan Void Detector (sound wave scanner that verifies the metal has zero internal air bubbles)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "99.99% Grade A Copper Cathodes (high-purity factory ingredient)",
-      "Refined Tantalum Metal Powder / K-Salt (high-purity factory ingredient)",
-      "High-Purity Titanium Sponge (Kroll process)",
-      "Tungsten Concentrate / Ammonium Paratungstate (APT)",
-      "Oxygen-Free High-Conductivity (OFHC) Copper Backing Plates"
+      "High-Purity Metal Ingots & Powders (99.9999% pure copper, titanium, tantalum, tungsten)",
+      "Oxygen-Free Copper Backing Plates (heavy copper disks that conduct heat away in vacuum tools)",
+      "Indium & Silver Bonding Foils (metallic solder sheets used to glue target disks to backing plates)",
+      "Multi-Layer Vacuum Foil Pouches (nitrogen-purged packaging that stops metal from tarnishing in air)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Intel",
-      "Samsung Electronics",
-      "GlobalFoundries & UMC",
-      "Tata Electronics Dholera"
+      "Semiconductor Wafer Fabrication Fabs (Tata Electronics Dholera, SCL Mohali)",
+      "Advanced Packaging & ATMP Plants (Micron Sanand, CG Semi packaging lines)",
+      "Thin-Film Solar Cell Manufacturers (manufacturers depositing metallic solar contacts)",
+      "Optical Glass & Eyewear Coating Facilities (manufacturers applying anti-reflective coatings)"
     ],
     "topSuppliers": [
       "JX Nippon Mining & Metals",
@@ -1339,10 +1328,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "High-margin recurring consumable. Sputtering targets must be replaced regularly. Backed by up to 70% capex co-funding, the venture captures 28% to 38% operating margins with strong domestic demand.",
     "clearances": [
-      "Environmental Clearance (Category A - Metallurgical Smelting & Refining)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO High-Pressure Vessel License (Argon HIP Chamber)",
-      "DISH Factory License & Heavy Metallurgical Workplace Safety Review (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for High-Purity Metallurgy (MoEFCC Category B)",
+      "State Pollution Control Board Metal Machining & Bonding Permit (CTE/CTO)",
+      "Factory Safety & High-Vacuum Induction Furnace License",
+      "Cleanroom Vacuum Packaging & Quality Certification"
     ]
   },
   {
@@ -1367,26 +1356,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Cuddalore / Ennore, Tamil Nadu"
     ],
     "keyMachinery": [
-      "DUV/EUV Photolithography Scanners (precision cleanroom machine used in factory operations)",
-      "Plasma Etchers (precision cleanroom machine used in factory operations)",
-      "Ion Implantation Tools (precision cleanroom machine used in factory operations)",
-      "Diffusion Furnaces (precision cleanroom machine used in factory operations)"
+      "Sub-Boiling Fluoropolymer Distillation Stills (gently boils acids inside pure Teflon stills to leave dirt behind)",
+      "Multi-Stage Cascade Micro-Filtration Skids (filters liquids through sub-micron Teflon membranes)",
+      "Online Inductively Coupled Plasma Mass Spectrometer (continuous real-time purity monitoring sensor)",
+      "Cleanroom Automated Chemical Drum Filling Booth (fills sealed shipping drums under ultra-clean laminar air)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Acid-Grade Fluorspar (CaF2 >97% purity)",
-      "Industrial Grade Sulfuric Acid (98% H2SO4)",
-      "Propylene & Pure Acetone (for UP-IPA synthesis)",
-      "Electronic Grade Anhydrous Ammonia Gas (high-purity factory ingredient)",
-      "ASTM D5127 Type E-1 Ultra-Pure Water (high-purity factory ingredient)"
+      "Technical-Grade Industrial Acids & Solvents (commercial sulfuric acid, hydrogen fluoride, and alcohol)",
+      "Semiconductor-Grade Hydrogen Peroxide (high-purity oxidizer liquid for chemical cleaning baths)",
+      "Ultra-Pure Cleanroom Water (18.2 MOhm water used to dilute acids to exact percentages)",
+      "Fluoropolymer Lined Chemical Drums (specialized plastic barrels that do not release mineral atoms)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Samsung Electronics",
-      "Intel",
-      "Micron & SK Hynix",
-      "Tata Electronics Dholera"
+      "Tata Electronics Mega Fab (Dholera SIR, Gujarat - consumes thousands of tons of clean acids annually)",
+      "Micron Sanand Packaging & Testing Plant (uses ultra-pure alcohol and cleaning solutions)",
+      "CG Semi Sanand ATMP Facility (uses cleaning chemicals during chip packaging)",
+      "Solar Cell Wet-Chemical Etching Lines (domestic solar wafer texturing facilities)"
     ],
     "topSuppliers": [
       "Stella Chemifa Corporation",
@@ -1400,10 +1387,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Massive physical volume demand. Fabs consume tank-truck loads of cleaning chemicals every week. With 70% capex subsidies and close proximity to Gujarat and Assam chip hubs, margins range from 24% to 35%.",
     "clearances": [
-      "Environmental Clearance (Category A - Bulk Heavy Inorganic Chemicals)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Toxic & Corrosive Chemical Storage License (government environmental & operating permit)",
-      "DISH Factory License & Chemical Major Accident Hazard (MAH) Compliance"
+      "Central Ministry Environmental Clearance for Major Chemical Purification (MoEFCC Category A)",
+      "State Pollution Control Board Hazardous Chemical License (CTE/CTO)",
+      "PESO Chemical Storage & Road Tanker Fleet Transportation License",
+      "Factory Directorate Chemical Safety & Emergency Neutralization System Audit"
     ]
   },
   {
@@ -1428,25 +1415,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "High-Speed UV Laser Micro-Via Drilling Machine (burns 10,000 microscopic holes per minute through resin)",
+      "Vacuum Heated Hydraulic Lamination Press (melts and presses insulating films flat without air bubbles)",
+      "Horizontal Chemical Copper Electroless Plating Line (fills micro-holes with pure conductive copper)",
+      "Automated Optical Inspection (AOI) Flying Probe Tester (tests millions of electrical connections in seconds)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Ajinomoto Build-up Film (ABF dielectric resin)",
-      "Ultra-thin Electrolytic Copper Foil (high-purity factory ingredient)",
-      "Woven Glass Fiber Cloth (high-purity factory ingredient)",
-      "ENEPIG Plating Chemicals (Nickel, Palladium, Gold salts)",
-      "Dry Film Photoresists (DFR)"
+      "Ajinomoto Build-up Film (ABF - specialized insulating resin sheets infused with silica nano-particles)",
+      "Ultra-Thin Copper Foil (copper foil measuring 2 microns thick on carrier sheets)",
+      "Copper Sulfate Chemical Plating Solution (chemical bath that plates copper wires into laser holes)",
+      "Specialty Liquid Solder Mask Paint (insulating protective green or blue coating)"
     ],
     "offtakeBuyers": [
-      "TSMC",
-      "Intel",
-      "AMD & NVIDIA",
-      "ASE Group & Amkor"
+      "Advanced Chip Packaging & ATMP Fabs (Tata Electronics, Micron Sanand, CG Semi)",
+      "Global Semiconductor Packaging Giants (ASE Group, Amkor Technology, JCET)",
+      "AI Accelerator & Server Board Assemblers (Foxconn India, Wistron, Pegatron)",
+      "Automotive Computer System Manufacturers (Bosch India, Continental, Uno Minda)"
     ],
     "topSuppliers": [
       "Unimicron Technology",
@@ -1460,10 +1446,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Extreme technological barrier with critical global supply shortages. Supported by 50% central plus 20% state capex subsidies under ISM 2.0, this plant commands operating margins of 32% to 45%.",
     "clearances": [
-      "Environmental Clearance (Category A - Electronics & Electroplating Complex)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Hazardous Chemical Storage License (Acids, Cyanide, Oxidizers)",
-      "DISH Factory License & Cleanroom Occupational Safety Review (government environmental & operating permit)"
+      "Central Ministry High-Density Electronics Manufacturing License (MeitY SPECS / ISM)",
+      "State Pollution Control Board Electroplating & Effluent Consent (CTE/CTO for zero-liquid discharge)",
+      "Factory Act Chemical Plating Workplace Safety Certification",
+      "Cleanroom ISO Class 4 Precision Manufacturing Operating License"
     ]
   },
   {
@@ -1488,25 +1474,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "Continuous Vacuum Melting & Upward Casting Machine (melts pure gold and copper rods without oxygen)",
+      "Multi-Stage Diamond Wire Drawing Bench (draws metal wire through 30 diamond dies down to 15 microns)",
+      "Continuous Protective Gas Annealing Furnace (bakes wire to restore flexibility so it does not snap during welding)",
+      "Automated Cleanroom Wire Spooling Machine (winds kilometers of delicate wire onto plastic spools)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "99.999% 5N Ultra-Pure Copper Rods (high-purity factory ingredient)",
-      "99.99% 4N Refined Gold Bullion (high-purity factory ingredient)",
-      "High-Purity Palladium Metal Sponge (high-purity factory ingredient)",
-      "Precision Diamond Wire Drawing Dies (high-purity factory ingredient)",
-      "Forming Gas (Nitrogen-Hydrogen mix)"
+      "High-Purity Fine Gold & Copper Bars (99.999% pure precious metals from certified refineries)",
+      "Palladium Coating Target Metals (used to coat copper wire so it never tarnishes or oxidizes)",
+      "Natural Diamond Wire Drawing Dies (microscopic diamond stones with laser-drilled holes)",
+      "Protective Nitrogen & Hydrogen Forming Gas (shields hot metal wire from ambient air)"
     ],
     "offtakeBuyers": [
-      "ASE Group",
-      "Amkor Technology",
-      "JCET Group",
-      "Micron Sanand & Tata Morigaon"
+      "Micron Sanand ATMP Facility (consumes thousands of kilometers of bonding wire monthly)",
+      "Tata Electronics Assam Packaging Fab (India's largest semiconductor assembly plant)",
+      "CG Semi Sanand Joint Venture (high-volume chip assembly and test lines)",
+      "Automotive Sensor & Discrete Assemblers (Continental Device India, CDIL)"
     ],
     "topSuppliers": [
       "Heraeus Electronics",
@@ -1519,10 +1504,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "High-turnover consumable directly tied to India's rapidly growing ATMP factories (Micron, Tata, CG Semi). Subsidized up to 70% by government grants, the plant achieves 25% to 35% operating margins.",
     "clearances": [
-      "Environmental Clearance (Category A - Precious Metallurgy & Wire Drawing)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Hydrogen Gas Storage & Tube Furnace License (government environmental & operating permit)",
-      "DISH Factory License & High-Speed Wire Drawing Safety Review (government environmental & operating permit)"
+      "State Pollution Control Board Precision Drawing & Annealing Consent (CTE/CTO)",
+      "Precious Metal Custody & Security Vault Certification (certifies armed vault and surveillance standards)",
+      "Factory Inspectorate Industrial Safety License",
+      "Cleanroom Packaging & Anti-Static Compliance Audit"
     ]
   },
   {
@@ -1547,23 +1532,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "High-Speed Mechanical PCB Drilling Spindles (drills thousands of 100-micron holes per minute at 300,000 RPM)",
+      "Electroless Copper Chemical Plating Line (deposits copper wiring inside drilled holes)",
+      "Laser Direct Imaging (LDI) Exposure Machine (projects circuit patterns directly onto copper boards without stencils)",
+      "Automated Surface Gold Plating Machine (plates pure gold onto contact pads to ensure corrosion-free soldering)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "BT Resin (Mitsubishi Gas Chemical supply)",
-      "Ultra-Fine Woven Glass Cloth (high-purity factory ingredient)",
-      "Electrodeposited Copper Foil (high-purity factory ingredient)",
-      "ENIG Gold & Nickel Salts (high-purity factory ingredient)"
+      "Bismaleimide-Triazine (BT) Resin Fiberglass Sheets (heat-resistant core material from Mitsubishi Gas Chemical)",
+      "Electrodeposited Copper Foil (thin copper sheets glued onto both sides of the core)",
+      "Liquid Photoimageable Solder Mask (green or black insulating resin painted over copper wires)",
+      "Immersion Gold & Nickel Chemical Solutions (precious metal plating baths for contact pads)"
     ],
     "offtakeBuyers": [
-      "Qualcomm & MediaTek",
-      "Samsung Electronics & SK Hynix",
-      "Micron Sanand & Tata Morigaon"
+      "Micron Technology Sanand (packaging memory chips for smartphones and SSDs)",
+      "Tata Electronics OSAT Lines (assembling microcontrollers and power management chips)",
+      "Samsung & SK Hynix Packaging Subcontractors",
+      "Domestic Automotive Module Fabricators (Uno Minda, Spark Minda, Motherson)"
     ],
     "topSuppliers": [
       "Unimicron",
@@ -1577,10 +1563,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "High-volume captive demand from memory packaging and microcontroller OSAT plants. 70% capex co-funding yields attractive 26% to 36% EBITDA margins and fast 3.2-year payback.",
     "clearances": [
-      "Environmental Clearance (Category A - Electronic PCB & Substrate Fabrication)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Chemical Storage License (Acids & Plating Reagents)",
-      "DISH Factory License & High-Speed Tooling Workplace Safety Review (government environmental & operating permit)"
+      "Central Ministry Electronics Hardware Manufacturing Concession (MeitY SPECS)",
+      "State Pollution Control Board PCB Manufacturing License (CTE/CTO for zero-liquid discharge)",
+      "Factory Act Hazardous Chemical & Plating Safety Audit",
+      "Cleanroom ISO Class 5 Production Certification"
     ]
   },
   {
@@ -1605,25 +1591,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "High-Speed Dry Powder Ribbon Mixer (blends resin flakes, silica balls, and pigments together)",
+      "Continuous Kneading Twin-Screw Extruder (heats and mixes ingredients into a uniform melted dough)",
+      "Chilled Steel Belt Cooling Conveyor (flattens melted resin into thin solid sheets within seconds)",
+      "Pelletizing & Stamping Press (punches solid resin sheets into uniform circular black pellets)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "High-Purity Spherical Fused Silica Powder (99.99% SiO2)",
-      "Epichlorohydrin & Bisphenol-A / Novolac Feedstocks (high-purity factory ingredient)",
-      "Phenolic Curing Agents (high-purity factory ingredient)",
-      "Silane Coupling Agents (high-purity factory ingredient)",
-      "Natural Carnauba Wax (high-purity factory ingredient)"
+      "Solid Ortho-Cresol Novolac Epoxy Resin (base plastic polymer that hardens under heat)",
+      "Spherical Fused Silica Powder (microscopic glass balls that make up 85% of the pellet weight to stop heat expansion)",
+      "Phenolic Resin Hardener & Catalysts (chemicals that trigger hardening inside the mold)",
+      "Carbon Black Pigment & Mold Release Wax (gives black color and prevents sticking to metal molds)"
     ],
     "offtakeBuyers": [
-      "ASE Group & SPIL",
-      "Amkor Technology",
-      "JCET & Tongfu Microelectronics",
-      "Tata OSAT Morigaon & Micron Sanand"
+      "Micron Sanand ATMP Facility (consumes thousands of tons of molding pellets for memory chips)",
+      "Tata Electronics Semiconductor Assembly Plant (Assam & Gujarat packaging fabs)",
+      "CG Semi Sanand Packaging Facility (sealing automotive and power microchips)",
+      "Domestic Power Device Assemblers (Continental Device India, HPL Electric)"
     ],
     "topSuppliers": [
       "Sumitomo Bakelite",
@@ -1636,10 +1621,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Universal packaging consumable. 100% of packaged chips require molding compound. Supported by 70% government grants, this facility achieves 28% to 38% operating margins with steady recurring cash flows.",
     "clearances": [
-      "Consent to Establish (CTE) & Operate (CTO) for Specialty Chemical Compounding",
-      "Environmental Clearance (EC) - Category B Formulation & Compounding",
-      "Petroleum & Explosives Safety Organization (PESO) Solvent & Gas Storage License",
-      "Hazardous Waste Handling & Management Authorization (government environmental & operating permit)"
+      "Central Ministry Environmental Clearance for Polymer Compounding (MoEFCC Category B)",
+      "State Pollution Control Board Factory Operating Consent (CTE/CTO)",
+      "PESO Factory Chemical Safety & Dust Explosion Mitigation License",
+      "Cleanroom Refrigerated Warehouse Storage Certification (keeps pellets cold at -20°C before shipping)"
     ]
   },
   {
@@ -1664,25 +1649,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sri City / Oragadam, Andhra Pradesh / Tamil Nadu"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "Ultrasonic Droplet Solidification Column (vibrates molten metal into microscopic droplets in cooling oil)",
+      "Centrifugal Air-Classifier Sizing Sieve (sorts solder balls by diameter with 5-micron precision)",
+      "High-Speed Digital Optical Sphere Inspection Machine (verifies roundness and spots deformed beads)",
+      "Planetary Vacuum Paste Mixer (blends fine solder powder with sticky chemical flux paste)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "99.99% Ultra-Pure Refined Tin (Sn) Ingots",
-      "99.99% Refined Silver (Ag) Grain",
-      "Ultra-Pure Copper (Cu)",
-      "Modified Hydrogenated Rosin / Synthetic Activators (high-purity factory ingredient)",
-      "Inert Liquid Nitrogen (N2)"
+      "Refined Pure Tin, Silver & Copper Ingots (99.99% pure lead-free SAC305 alloy metals)",
+      "Synthetic Rosin & Flux Chemicals (sticky chemical gel that cleans metal surfaces during soldering)",
+      "Inert Quenching Oil (mineral oil bath that chills liquid metal droplets into solid spheres)",
+      "Anti-Static Nitrogen-Flushed Plastic Jars (special containers that prevent solder spheres from sticking together)"
     ],
     "offtakeBuyers": [
-      "ASE Group & Amkor",
-      "TSMC",
-      "Intel & Micron",
-      "Micron Sanand & CG Power"
+      "Advanced Chip Packaging & ATMP Facilities (Tata Electronics, Micron, CG Semi)",
+      "Surface-Mount (SMT) Electronics Assemblers (Foxconn India, Dixon Technologies, Pegatron)",
+      "Automotive ECU Assemblers (Bosch India, Uno Minda, Continental India)",
+      "Smartphone & Laptop Motherboard Assembly Lines (Wistron, Flextronics)"
     ],
     "topSuppliers": [
       "Senju Metal Industry (SMIC)",
@@ -1695,10 +1679,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "High-volume recurring electronics consumable. With 70% capex grants and local proximity to major assembly corridors in Noida and Chennai, the plant achieves 25% to 34% EBITDA margins.",
     "clearances": [
-      "Environmental Clearance (Category A - Metallurgical Melting & Powder Processing)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Flammable Solvent Storage License (Isopropanol)",
-      "DISH Factory License & Molten Metal Workplace Safety Review (government environmental & operating permit)"
+      "State Pollution Control Board Non-Ferrous Alloy Melting Consent (CTE/CTO)",
+      "Central Ministry Environmental Clearance for Metallurgical Processing (MoEFCC Category B)",
+      "Factory Directorate Metal Smelting & Worker Hygiene Safety Review",
+      "Cleanroom Packing & Static-Dissipative Packaging Quality Audit"
     ]
   },
   {
@@ -1723,25 +1707,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat / Pune, Maharashtra"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "High-Speed Mechanical Stamping Press (punches intricate metal frames at 1,000 strokes per minute)",
+      "Reel-to-Reel Chemical Etching Spray Machine (sprays acid through photo-stencils for complex leadframes)",
+      "Continuous Reel-to-Reel Silver Spot Plating Line (electroplates pure silver onto chip mounting pads)",
+      "Automated Optical Vision Strip Inspector (cameras checking leadframe pin straightness in real time)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "High-Purity Copper Alloy Strips (C194, C7025)",
-      "Ferric Chloride (FeCl3) Etching Acid",
-      "Dry Film Photoresist (DFR)",
-      "Electroplating Salts (Silver Cyanide or MSA-based silver, Palladium salts, Gold salts)",
-      "Nitric Acid for Stripping (high-purity factory ingredient)"
+      "Precision Electronic Copper Alloy Coils (high-conductivity copper-iron and copper-nickel alloy strips)",
+      "Ferric Chloride Acid Etching Solution (chemical liquid that dissolves unmasked copper gaps)",
+      "High-Purity Silver & Nickel Plating Salts (precious metals electroplated onto connector pads)",
+      "Protective Interleaving Paper Tape (paper strips rolled between metal reels to prevent pin bending)"
     ],
     "offtakeBuyers": [
-      "Texas Instruments",
-      "STMicroelectronics & Infineon",
-      "NXP & Onsemi",
-      "CG Power Sanand & Kaynes Semicon"
+      "Automotive & Power Chip Assemblers (CG Semi, Continental Device India, CDIL)",
+      "Discrete Semiconductor Packaging Plants (manufacturers of transistors, diodes, and voltage regulators)",
+      "Consumer Electronics & White Goods Assemblers (Havells, Voltas, Godrej, Dixon)",
+      "Global Semiconductor Packaging Subcontractors (UTAC, JCET, Carsem)"
     ],
     "topSuppliers": [
       "Mitsui High-tec",
@@ -1755,10 +1738,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "High-volume automotive and industrial market demand. Supported by 70% government co-funding, this venture captures 22% to 32% operating margins with long-term contracts from domestic packaging plants.",
     "clearances": [
-      "Environmental Clearance (Category A - Metallurgical Stamping & Electroplating)",
-      "Consent to Establish & Operate (CTE/CTO)",
-      "PESO Toxic Cyanide Salt & Chemical Storage License (government environmental & operating permit)",
-      "DISH Factory License & High-Speed Punching Press Workplace Safety Review (government environmental & operating permit)"
+      "State Pollution Control Board Electroplating & Chemical Etching Consent (CTE/CTO)",
+      "Central Ministry Environmental Clearance for Metal Fabrication (MoEFCC Category B)",
+      "Factory Inspectorate High-Speed Stamping Machinery Safety Certification",
+      "Industrial Wastewater Zero-Liquid-Discharge (ZLD) Compliance Audit"
     ]
   },
   {
@@ -1783,23 +1766,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Bengaluru, Karnataka / Sanand, Gujarat"
     ],
     "keyMachinery": [
-      "High-Speed Die Attach Tools (precision cleanroom machine used in factory operations)",
-      "Wire Bonders (precision cleanroom machine used in factory operations)",
-      "Molding Presses (precision cleanroom machine used in factory operations)",
-      "ATE Testers (precision cleanroom machine used in factory operations)"
+      "Precision Progressive Stamping & Coining Press (presses pure copper plates into rigid chip lids)",
+      "Electroless Nickel Plating Line (plates shiny nickel over copper to prevent corrosion and tarnishing)",
+      "Double-Sided Lapping Machine (buffs copper lid contact surfaces to mirror flatness)",
+      "Vacuum Planetary Paste Compounding Mixer (mixes silicone gel with microscopic heat-conducting diamond powder)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Oxygen-Free Copper Sheets (99.99% Cu)",
-      "Refined Indium Metal (In 99.99%)",
-      "Nickel Sulfamate Plating Salts (high-purity factory ingredient)",
-      "Boron Nitride & Synthetic Diamond Powders (high-purity factory ingredient)"
+      "Oxygen-Free High-Conductivity Copper Strips (pure copper sheets with maximum thermal transfer)",
+      "Chemical Nickel & Gold Plating Salts (corrosion-resistant coatings for metal lids)",
+      "Microscopic Synthetic Diamond & Aluminum Oxide Powder (heat-conducting ceramic particles for thermal grease)",
+      "Liquid Silicone & Polyurethane Polymer Resins (flexible chemical base for thermal pads and paste)"
     ],
     "offtakeBuyers": [
-      "Intel",
-      "AMD & NVIDIA",
-      "TSMC & ASE"
+      "AI Server & Cloud Hardware Assemblers (Yotta Data Services, Foxconn India, Netweb Technologies)",
+      "Automotive Electric Vehicle Inverter Manufacturers (Tata AutoComp, Bosch India, Mahindra)",
+      "Advanced Chip Packaging Fabs (Tata Electronics, Micron Sanand packaging lines)",
+      "Telecom 5G Base Station Manufacturers (Tejas Networks, HFCL, VVDN Technologies)"
     ],
     "topSuppliers": [
       "Indium Corporation",
@@ -1813,10 +1797,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 9,
     "sovereignMoat": "Critical thermal management market driven by high-power AI accelerators and electric vehicle electronics. 70% government subsidies yield 28% to 38% operating margins with fast 3.2-year payback.",
     "clearances": [
-      "Consent to Establish (CTE) & Consent to Operate (CTO) for Metal Finishing",
-      "MOEFCC Environmental Clearance (Category B - Electroplating & Secondary Metallurgy)",
-      "Factory Directorate Heavy Press Safety & Machinery Operation License (government environmental & operating permit)",
-      "Hazardous Waste Handling & Plating Sludge Disposal Authorization (government environmental & operating permit)"
+      "State Pollution Control Board Metal Finishing & Plating Permit (CTE/CTO)",
+      "Central Ministry Environmental Clearance for Polymer Blending (MoEFCC Category B)",
+      "Factory Safety & Stamping Press Machinery Certification",
+      "Automotive ISO/TS 16949 Quality Management Accreditation"
     ]
   },
   {
@@ -1841,24 +1825,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat / Morigaon, Assam"
     ],
     "keyMachinery": [
-      "Pick-and-Place SMT Lines (precision cleanroom machine used in factory operations)",
-      "Reflow Ovens (precision cleanroom machine used in factory operations)",
-      "Automated Optical Inspection (AOI)"
+      "High-Density 2.5D/3D Chiplet Thermo-Compression Bonder (welds AI brain dies and memory cubes with micron precision)",
+      "Automated Cleanroom Wafer Dicing Saw (cuts processed silicon wafers into individual computing dies)",
+      "Teradyne Ultra-High-Speed Automated Test System (tests billions of digital logic gates under electrical stress)",
+      "Environmental Burn-In Chamber (bakes assembled AI chips at 125°C under heavy computing load to weed out failures)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "300mm Monocrystalline Prime Silicon Wafers (high-purity factory ingredient)",
-      "EUV & ArFi Photoresists & TMAH Developer (high-purity factory ingredient)",
-      "Ajinomoto Build-up Film (ABF)",
-      "Ultra-High Purity Copper Sputtering Targets & Plating Chemistry (high-purity factory ingredient)",
-      "Tungsten Hexafluoride (WF6) & High-k Hafnium ALD Precursors"
+      "Fabricated Advanced Logic Silicon Wafers (silicon wafers processed at leading foundry nodes like 3nm/5nm/28nm)",
+      "High-Bandwidth Memory (HBM) Cubes (stacked memory chips mounted next to the AI processor)",
+      "Ajinomoto Build-up Film High-Density Substrates (multi-layer organic wiring boards holding the package)",
+      "Thermal Interface Pastes & Metal Cooling Lids (protective nickel-plated copper lids that dissipate 400W of heat)"
     ],
     "offtakeBuyers": [
-      "NVIDIA",
-      "Apple",
-      "AMD",
-      "Cloud Hyperscalers (Microsoft, Google, AWS, Meta)"
+      "Indian Sovereign Cloud & Data Center Giants (Yotta Data Services, CtrlS, Tata Communications)",
+      "National Supercomputing Mission (C-DAC, Indian Institute of Science, IIT supercomputing clusters)",
+      "Telecom & AI Enterprise Infrastructure Providers (Reliance Jio, Bharti Airtel, Infosys, TCS)",
+      "Defense & Aerospace Autonomous Systems (DRDO, Indian Armed Forces autonomous drone programs)"
     ],
     "topSuppliers": [
       "TSMC",
@@ -1870,10 +1854,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Highest-value product in the global technology ecosystem. Backed by the IndiaAI Mission and ISM 2.0 with up to 70% capital co-funding, this business captures 40% to 55% gross margins and commands long-term sovereign cloud contracts.",
     "clearances": [
-      "Consent to Establish (CTE) & Consent to Operate (CTO) for High-Tech Electronics",
-      "Ministry of Electronics & IT (MeitY) Modified SPECS / ISM Project Sanction",
-      "Export-Import Dual-Use Technology Authorization (SCOMET License)",
-      "Bureau of Indian Standards (BIS) & Electronics Safety Certification (CRS)"
+      "Central Ministry Semiconductor Manufacturing Approval (India Semiconductor Mission & IndiaAI Scheme)",
+      "State Pollution Control Board High-Tech Assembly Consent (CTE/CTO)",
+      "Defense Export & Dual-Use Technology Compliance Clearance",
+      "Cleanroom ISO Class 4 Advanced Packaging Certification"
     ]
   },
   {
@@ -1898,23 +1882,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat / Sriperumbudur, Tamil Nadu"
     ],
     "keyMachinery": [
-      "Pick-and-Place SMT Lines (precision cleanroom machine used in factory operations)",
-      "Reflow Ovens (precision cleanroom machine used in factory operations)",
-      "Automated Optical Inspection (AOI)"
+      "Automotive 28nm/40nm Wafer Stepper Lithography Scanner (prints rugged microcontroller circuits onto wafers)",
+      "Thermal Oxidation & Diffusion Furnaces (grows insulating glass layers on silicon)",
+      "High-Temperature Tri-Temperature Automated Chip Tester (tests chips at -40°C, room temperature, and +150°C)",
+      "Leadframe Strip Molding & Trim-and-Form Press (seals chips in plastic and bends external metal legs)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "200mm & 300mm Polished Silicon Wafers (high-purity factory ingredient)",
-      "Copper Alloy Leadframe Strips (C194)",
-      "Palladium-Coated Copper Bonding Wire (high-purity factory ingredient)",
-      "Standard DUV / i-line Photoresists (high-purity factory ingredient)",
-      "Epoxy Molding Compound (EMC)"
+      "300mm Bare Silicon Wafers (mirror-smooth blank silicon plates)",
+      "Automotive-Grade Epoxy Molding Compound (high-temperature black plastic casing resin)",
+      "High-Conductivity Copper Leadframe Strips (stamped metal frames providing chip legs)",
+      "Pure Gold & Palladium-Coated Copper Bonding Wires (microscopic connector threads)"
     ],
     "offtakeBuyers": [
-      "Tier-1 Auto Systems (Bosch, Continental, Denso, Magna)",
-      "Consumer Electronics & Industrial (Apple, Samsung, Foxconn)",
-      "Indian Automotive OEMs (Maruti Suzuki, Tata Motors, Mahindra)"
+      "Automotive Tier-1 System Suppliers (Bosch India, Uno Minda, Motherson Sumi, Continental India)",
+      "Electric Two-Wheeler & Car Manufacturers (Tata Motors, Mahindra, Ola Electric, Ather Energy)",
+      "Industrial Automation & Solar Inverter Makers (Schneider Electric India, L&T Electrical, Havells)",
+      "Consumer Appliance Manufacturers (Voltas, Blue Star, Godrej, IFB Industries)"
     ],
     "topSuppliers": [
       "Texas Instruments",
@@ -1928,10 +1913,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Massive guaranteed domestic automotive demand (Tata Motors, Mahindra, Maruti, Bajaj). Automotive chips have long product lifecycles of 10 to 15 years with zero consumer tech obsolescence. ISM 70% capex co-funding yields 30% to 42% operating margins.",
     "clearances": [
-      "Consent to Establish (CTE) & Consent to Operate (CTO) for Semiconductor Packaging",
-      "IATF 16949 Automotive Quality Management System Certification (government environmental & operating permit)",
-      "AEC-Q100 Automotive IC Stress Test Reliability Qualification (government environmental & operating permit)",
-      "ISO 26262 ASIL-D Functional Safety Certification (government environmental & operating permit)"
+      "Central Ministry Semiconductor Fab Approval (India Semiconductor Mission ISM 2.0)",
+      "Automotive AEC-Q100 International Reliability Qualification Certification",
+      "State Pollution Control Board Semiconductor Fab Operating Permit (CTE/CTO)",
+      "Factory Act Chemical & Cleanroom Safety Compliance Review"
     ]
   },
   {
@@ -1955,24 +1940,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "Pick-and-Place SMT Lines (precision cleanroom machine used in factory operations)",
-      "Reflow Ovens (precision cleanroom machine used in factory operations)",
-      "Automated Optical Inspection (AOI)"
+      "Sub-Micron 3D Wafer-to-Wafer & Die Bonder (aligns and welds stacked memory dies with laser accuracy)",
+      "Ultra-Thin Wafer Grinding & Polishing Machine (thins memory wafers down to 30 microns—thinner than paper)",
+      "High-Speed Through-Silicon Via (TSV) Copper Plating Skid (fills microscopic vertical holes with conductive copper)",
+      "High-Frequency Memory Bus Diagnostic Tester (verifies data speeds exceeding 1 Terabyte per second)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "12-inch 300mm Prime Silicon Wafers (high-purity factory ingredient)",
-      "EUV Photoresist & Developer (high-purity factory ingredient)",
-      "Micro-bump Electroplating Chemicals (Cu, Sn, Ag)",
-      "Advanced Liquid Epoxy Resins / Non-Conductive Film (NCF)",
-      "Diamond Dicing Blades & Stealth Laser Slicing systems (high-purity factory ingredient)"
+      "Processed DRAM Memory Silicon Wafers (silicon wafers containing billions of tiny capacitor memory cells)",
+      "Microscopic Solder Micro-Bumps (lead-free alloy beads measuring 10 microns in diameter)",
+      "Non-Conductive Underfill Epoxy Adhesive (liquid resin that flows between stacked dies to glue them together)",
+      "Silicon Interposer Carrier Plates (etched silicon plates that connect memory cubes to computing processors)"
     ],
     "offtakeBuyers": [
-      "NVIDIA",
-      "AMD",
-      "Google & Amazon",
-      "Server OEMs (Dell, HPE, Supermicro)"
+      "AI Accelerator & GPU Manufacturers (sovereign Indian AI chipmakers, global processor companies)",
+      "High-Performance Supercomputing Centers (National Supercomputing Mission, C-DAC, IISc)",
+      "Cloud Server Motherboard Assemblers (Foxconn India, Netweb Technologies, Wistron)",
+      "Automotive Self-Driving Computer Manufacturers (autonomous driving computing units)"
     ],
     "topSuppliers": [
       "SK Hynix",
@@ -1984,10 +1969,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Extreme global demand driven by the worldwide artificial intelligence boom. Supported by 70% government subsidies, this facility commands premier operating margins of 35% to 50%.",
     "clearances": [
-      "Consent to Establish (CTE) & Consent to Operate (CTO) for Memory Packaging",
-      "Ministry of Electronics & IT (MeitY) India Semiconductor Mission (ISM) Sanction",
-      "JEDEC Solid State Technology Association Memory Compliance Certification (government environmental & operating permit)",
-      "Hazardous Chemicals & Pressurized Gas Storage License (government environmental & operating permit)"
+      "Central Ministry Advanced Packaging Facility Approval (India Semiconductor Mission ISM 2.0)",
+      "State Pollution Control Board Advanced Packaging Consent (CTE/CTO for zero-liquid discharge)",
+      "Cleanroom ISO Class 3 Environmental Air Certification",
+      "Dual-Use High-Speed Technology Export & Security Clearance"
     ]
   },
   {
@@ -2011,22 +1996,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand GIDC, Gujarat"
     ],
     "keyMachinery": [
-      "Pick-and-Place SMT Lines (precision cleanroom machine used in factory operations)",
-      "Reflow Ovens (precision cleanroom machine used in factory operations)",
-      "Automated Optical Inspection (AOI)"
+      "High-Aspect-Ratio Deep Plasma Trench Etcher (carves 200-layer microscopic vertical holes through silicon)",
+      "Atomic Layer Deposition (ALD) Dielectric Stack Coater (deposits alternating nanometer layers of insulator and metal)",
+      "High-Volume Automated Wafer Probe Tester (tests millions of storage cells per second with needle arrays)",
+      "Multi-Die Memory Stacking Wire Bonder (stacks up to 16 flash dies inside a single micro-SD card or phone chip)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "300mm Prime Silicon Wafers (high-purity factory ingredient)",
-      "Nitrogen Trifluoride (NF3) & Xenon (Xe) Etch Gases",
-      "Tungsten Hexafluoride (WF6) Precursor",
-      "BT Substrates & Gold/Cu Wire Bonds (high-purity factory ingredient)"
+      "300mm Bare Silicon Wafers (prime blank silicon plates for memory manufacturing)",
+      "Specialty Silane & Nitrous Oxide Precursor Gases (gases reacted to form hundreds of alternating oxide/nitride layers)",
+      "Tungsten Hexafluoride Chemical Gas (metal gas deposited to form the horizontal control gates)",
+      "Bismaleimide-Triazine Substrates & Epoxy Molding Compound (mounting board and black protective plastic casing)"
     ],
     "offtakeBuyers": [
-      "Cloud Hyperscalers (Amazon AWS, Microsoft Azure, Google)",
-      "Apple & Smartphone OEMs",
-      "PC & Server OEMs (Dell, HP, Lenovo)"
+      "Smartphone Assembly Plants (Foxconn India, Dixon, Pegatron, Samsung Noida fab)",
+      "Solid-State Drive (SSD) & Storage Card Assemblers (Micron Sanand, SanDisk suppliers)",
+      "Automotive Infotainment & Dashboard Computer Makers (Bosch India, Visteon, Uno Minda)",
+      "Cloud Server Storage Manufacturers (server blade and storage bay assemblers)"
     ],
     "topSuppliers": [
       "Samsung Electronics",
@@ -2040,10 +2027,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "Universal high-volume domestic commodity with non-stop consumer demand. Backed by 70% government capex grants, this plant achieves high economies of scale, 26% to 36% operating margins, and rapid payback.",
     "clearances": [
-      "Consent to Establish (CTE) & Consent to Operate (CTO) for Electronics Assembly",
-      "Ministry of Electronics & IT (MeitY) Modified PLI / SPECS Scheme Sanction",
-      "Bureau of Indian Standards (BIS) Compulsory Registration Scheme (CRS)",
-      "Federal Information Processing Standards (FIPS 140-3) Cryptographic Security"
+      "Central Ministry Mega Semiconductor Fab Approval (India Semiconductor Mission ISM 2.0)",
+      "State Pollution Control Board High-Volume Chemical Consent (CTE/CTO for water recycling and scrubbing)",
+      "Dedicated Mega-Watt Power Infrastructure Agreement (24/7 dedicated substation connection)",
+      "Cleanroom ISO Class 3 Microelectronics Operating License"
     ]
   },
   {
@@ -2068,23 +2055,24 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
       "Sanand / Dholera, Gujarat"
     ],
     "keyMachinery": [
-      "Pick-and-Place SMT Lines (precision cleanroom machine used in factory operations)",
-      "Reflow Ovens (precision cleanroom machine used in factory operations)",
-      "Automated Optical Inspection (AOI)"
+      "High-Temperature 1,700°C Silicon Carbide Epitaxial Reactor (grows crystal layers on SiC wafers at extreme heat)",
+      "High-Energy Ion Implantation Machine (shoots aluminum atoms into SiC crystal to form high-voltage switches)",
+      "High-Temperature Rapid Thermal Annealer (heats wafers to 1,800°C under argon to activate injected atoms)",
+      "High-Voltage Electrical Breakdown Prober (tests chips under 1,200V to 3,300V to guarantee zero electrical leakage)"
     ],
     "keyMachineryImported": [],
     "keyMachineryDomestic": [],
     "primaryRawMaterials": [
-      "Single-Crystal Silicon Carbide (4H-SiC) Wafers",
-      "High-purity Silane (SiH4) and Propane (C3H8) for Epitaxy",
-      "Direct Bonded Copper (DBC) Silicon Nitride Ceramic Substrates",
-      "Nano-Silver Sintering Pastes (high-purity factory ingredient)",
-      "High-purity Aluminum & Copper Wire Rods (high-purity factory ingredient)"
+      "Silicon Carbide (SiC) & Gallium Nitride (GaN) Wafers (black/green crystalline disks grown in specialty furnaces)",
+      "Direct-Bonded-Copper (DBC) Alumina Ceramic Substrates (ceramic plates that insulate 3,000V while conducting heat)",
+      "High-Purity Silane, Propane & Hydrogen Reaction Gases (fuels used to grow epitaxial crystal layers)",
+      "Heavy Aluminum & Copper Bonding Ribbons (thick metallic ribbons that carry 400 amperes of car motor current)"
     ],
     "offtakeBuyers": [
-      "Tesla & BYD",
-      "Tata Motors & Mahindra & Mahindra",
-      "Solar & Industrial (Siemens, ABB, Enphase, Sungrow)"
+      "Electric Vehicle & Scooter Manufacturers (Tata Motors, Mahindra, Ola Electric, Ather, TVS)",
+      "Solar Inverter & Renewable Energy Hardware Companies (L&T, Sungrow India, Havells, Delta Electronics)",
+      "Indian Railways & Electric Locomotive Traction Converters (BHEL, Alstom India, Siemens India)",
+      "Industrial Fast-Charging Station Network Operators (Tata Power EV Charging, Jio-bp, ChargeZone)"
     ],
     "topSuppliers": [
       "STMicroelectronics",
@@ -2097,10 +2085,10 @@ export const SCINT_VENTURE_BLUEPRINTS: SCIntNodeBlueprint[] = [
     "techReadinessLevel": 8,
     "sovereignMoat": "The fastest-growing semiconductor market worldwide. Supported by 70% central and state capital grants under ISM, operating profit margins reach 32% to 45% with guaranteed long-term offtake from electric vehicle and solar inverter manufacturers.",
     "clearances": [
-      "Consent to Establish (CTE) & Consent to Operate (CTO) for Power Electronics",
-      "IATF 16949 Automotive Quality Management System Certification (government environmental & operating permit)",
-      "AQG 324 Automotive Power Module Reliability Qualification (government environmental & operating permit)",
-      "Central Electricity Authority (CEA) / RDSO Railway Traction Certification"
+      "Central Ministry Semiconductor Fab Concession (India Semiconductor Mission ISM 2.0 Compound Semi Track)",
+      "State Pollution Control Board High-Temperature Fab Operating Permit (CTE/CTO)",
+      "Automotive AEC-Q101 High-Voltage Power Semiconductor Certification",
+      "PESO High-Pressure Hydrogen & Specialty Gas Safety License"
     ]
   }
 ]
