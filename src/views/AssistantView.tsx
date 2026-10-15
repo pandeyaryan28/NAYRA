@@ -17,6 +17,7 @@ import { Badge } from '@/components/common/Badge';
 import { AssistantMessage, AssistantActionReceipt } from '@/types';
 import { generateId, getTodayDateString, formatSecondsToHoursMinutes } from '@/lib/utils';
 import { addDays, format } from 'date-fns';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
 
 export const AssistantView: React.FC = () => {
   const {
@@ -219,7 +220,7 @@ export const AssistantView: React.FC = () => {
       </div>
 
       {/* Suggested Command Chips */}
-      <div className="py-3 flex items-center gap-2 overflow-x-auto border-b border-zinc-100 dark:border-zinc-800/80">
+      <HStack alignment="center" spacing={2} className="py-3 overflow-x-auto border-b border-zinc-100 dark:border-zinc-800/80">
         <span className="text-[11px] font-mono text-zinc-400 shrink-0">Suggestions:</span>
         {quickPrompts.map((prompt) => (
           <button
@@ -230,16 +231,18 @@ export const AssistantView: React.FC = () => {
             {prompt}
           </button>
         ))}
-      </div>
+      </HStack>
 
       {/* Chat Messages Log */}
       <div className="flex-1 overflow-y-auto py-6 space-y-4">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           return (
-            <div
+            <HStack
               key={msg.id}
-              className={`flex items-start gap-3 card-enter ${isUser ? 'justify-end' : 'justify-start'}`}
+              alignment="top"
+              spacing={3}
+              className={`card-enter ${isUser ? 'justify-end' : 'justify-start'}`}
             >
               {!isUser && (
                 <div className="h-7 w-7 rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-bold shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.15)]">
@@ -250,14 +253,14 @@ export const AssistantView: React.FC = () => {
               <div
                 className={`max-w-xl p-4 rounded-2xl text-xs leading-relaxed space-y-2 ${
                   isUser
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_4px_12px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.2)]'
-                    : 'clay-surface apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_4px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)]'
+                    : 'clay-surface apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10'
                 }`}
               >
                 <p className="whitespace-pre-line">{msg.text}</p>
 
                 {msg.actionReceipt && (
-                  <div className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+                  <div className="mt-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center gap-1.5 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     <span>{msg.actionReceipt.summary}</span>
                   </div>
@@ -269,7 +272,7 @@ export const AssistantView: React.FC = () => {
                   You
                 </div>
               )}
-            </div>
+            </HStack>
           );
         })}
       </div>

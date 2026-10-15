@@ -36,6 +36,8 @@ import {
   subMonths,
 } from 'date-fns';
 import { formatTimeRange, getTodayDateString } from '@/lib/utils';
+import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
+import { SwiftUISegmentedControl } from '@/components/swiftui/SwiftUISegmentedControl';
 
 type ViewMode = 'day' | 'week' | 'month' | 'agenda';
 
@@ -448,8 +450,8 @@ export const CalendarView: React.FC = () => {
   return (
     <div className="flex h-full flex-col bg-transparent overflow-hidden select-none">
       {/* Top Google Calendar Toolbar */}
-      <div className="flex flex-wrap items-center justify-between px-6 py-3 border-b border-zinc-200/80 dark:border-zinc-800/80 gap-4 bg-white/75 dark:bg-zinc-950/75 backdrop-blur-2xl shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)]">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between px-6 py-3 border-b border-white/80 dark:border-white/10 gap-4 bg-white/75 dark:bg-zinc-950/75 backdrop-blur-3xl shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)] liquid-glass">
+        <HStack alignment="center" spacing={3}>
           <Button
             variant="primary"
             size="sm"
@@ -464,21 +466,21 @@ export const CalendarView: React.FC = () => {
             Today
           </Button>
 
-          <div className="flex items-center gap-1">
+          <HStack alignment="center" spacing={1}>
             <Button variant="ghost" size="icon" onClick={handlePrev} className="h-8 w-8 swiftui-press">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleNext} className="h-8 w-8 swiftui-press">
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
+          </HStack>
 
           <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 min-w-44">
             {headerDateString}
           </h2>
-        </div>
+        </HStack>
 
-        <div className="flex items-center gap-3">
+        <HStack alignment="center" spacing={3}>
           {/* Search Bar */}
           <div className="relative w-48 sm:w-60">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-400" />
@@ -521,28 +523,25 @@ export const CalendarView: React.FC = () => {
           </Button>
 
           {/* Apple Segmented View Switcher */}
-          <div className="flex items-center rounded-lg border border-black/5 dark:border-white/10 p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
-            {(['day', 'week', 'month', 'agenda'] as ViewMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`px-3 py-1 text-xs font-semibold rounded-md capitalize transition-all duration-150 swiftui-press ${
-                  viewMode === mode
-                    ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-        </div>
+          <SwiftUISegmentedControl
+            options={[
+              { value: 'day', label: 'day' },
+              { value: 'week', label: 'week' },
+              { value: 'month', label: 'month' },
+              { value: 'agenda', label: 'agenda' },
+            ]}
+            value={viewMode}
+            onChange={(m) => setViewMode(m as ViewMode)}
+            className="capitalize"
+            ariaLabel="Calendar view switcher"
+          />
+        </HStack>
       </div>
 
       {/* Main Content Body: Left Mini-Calendar/List + Right Grid */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Side Pane */}
-        <div className="hidden lg:flex flex-col w-60 border-r border-zinc-200/80 dark:border-zinc-800/80 p-4 space-y-6 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950/40 backdrop-blur-md">
+        <div className="hidden lg:flex flex-col w-60 border-r border-white/80 dark:border-white/10 p-4 space-y-6 overflow-y-auto bg-white/40 dark:bg-zinc-950/40 backdrop-blur-2xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)]">
           {/* Calendar List */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 font-mono">

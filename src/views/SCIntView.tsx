@@ -15,6 +15,7 @@ import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
 import { SCINT_TIERS, SCINT_VENTURE_BLUEPRINTS } from '@/data/scintData';
 import { SCIntNodeBlueprint, SCIntTier } from '@/types';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
 
 export const SCIntView: React.FC = () => {
   const [selectedTier, setSelectedTier] = useState<SCIntTier | 'all'>('all');
@@ -58,12 +59,12 @@ export const SCIntView: React.FC = () => {
         </div>
 
         {/* CapEx Scale Switcher */}
-        <div className="flex items-center rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 p-1 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center rounded-xl p-1 liquid-glass-segmented shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
           <button
             onClick={() => setCapexScale('modular')}
-            className={`px-3.5 py-1 text-xs font-medium rounded-lg transition-all swiftui-press ${
+            className={`px-3.5 py-1 text-xs font-semibold rounded-lg transition-all swiftui-press ${
               capexScale === 'modular'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.15)]'
+                ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
           >
@@ -71,9 +72,9 @@ export const SCIntView: React.FC = () => {
           </button>
           <button
             onClick={() => setCapexScale('benchmark')}
-            className={`px-3.5 py-1 text-xs font-medium rounded-lg transition-all swiftui-press ${
+            className={`px-3.5 py-1 text-xs font-semibold rounded-lg transition-all swiftui-press ${
               capexScale === 'benchmark'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.15)]'
+                ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
           >
@@ -88,8 +89,8 @@ export const SCIntView: React.FC = () => {
           onClick={() => setSelectedTier('all')}
           className={`p-2.5 rounded-xl border text-left transition-all swiftui-press ${
             selectedTier === 'all'
-              ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
-              : 'border-zinc-200/80 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/40 hover:border-zinc-300 dark:hover:border-zinc-700'
+              ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50 border-white/90 dark:border-white/20'
+              : 'border-white/60 dark:border-white/10 bg-white/50 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/60'
           }`}
         >
           <span className="text-[10px] font-mono text-zinc-400 uppercase block">Complete Matrix</span>
@@ -104,8 +105,8 @@ export const SCIntView: React.FC = () => {
               onClick={() => setSelectedTier(tier.tier)}
               className={`p-2.5 rounded-xl border text-left transition-all swiftui-press ${
                 isSelected
-                  ? 'border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.06)]'
-                  : 'border-zinc-200/80 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/40 hover:border-zinc-300 dark:hover:border-zinc-700'
+                  ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50 border-white/90 dark:border-white/20'
+                  : 'border-white/60 dark:border-white/10 bg-white/50 dark:bg-zinc-900/40 hover:bg-white/80 dark:hover:bg-zinc-800/60'
               }`}
             >
               <span className="text-[10px] font-mono text-zinc-400 uppercase block">
@@ -127,7 +128,7 @@ export const SCIntView: React.FC = () => {
           placeholder="Search node, machinery, material or cluster..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-9 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+          className="h-9 w-full rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md pl-9 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)] focus:outline-none focus:ring-1 focus:ring-zinc-400"
         />
       </div>
 
@@ -148,7 +149,7 @@ export const SCIntView: React.FC = () => {
               <div
                 key={node.id}
                 onClick={() => setSelectedBlueprint(node)}
-                className="p-5 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 hover:border-zinc-400/80 dark:hover:border-zinc-600/80 card-enter interactive-card cursor-pointer flex flex-col justify-between space-y-4 swiftui-press"
+                className="p-5 rounded-2xl apple-card-surface liquid-glass-card liquid-glass-interactive backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 hover:border-zinc-400/80 dark:hover:border-zinc-600/80 card-enter interactive-card cursor-pointer flex flex-col justify-between space-y-4 swiftui-press"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">

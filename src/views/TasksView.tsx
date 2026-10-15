@@ -35,6 +35,7 @@ import { Badge } from '@/components/common/Badge';
 import { TaskItem, TaskPriority, TaskList } from '@/types';
 import { formatSecondsToHoursMinutes, formatGoogleTasksDue, safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
 import { isToday, isPast, isTomorrow, isThisWeek, parseISO } from 'date-fns';
+import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 
 export const TasksView: React.FC = () => {
   const navigate = useNavigate();
@@ -683,8 +684,8 @@ export const TasksView: React.FC = () => {
             isArchived || isCompleted ? 'opacity-60' : ''
           }`}
         >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+          <HStack alignment="center" spacing={3} className="w-full justify-between">
+            <HStack alignment="center" spacing={3} className="min-w-0 flex-1">
               {/* Apple circular spring checkbox */}
               <button
                 onClick={() => toggleTaskComplete(t.id)}
@@ -701,7 +702,7 @@ export const TasksView: React.FC = () => {
                 className="min-w-0 flex-1 cursor-pointer"
                 onClick={() => openEditModal(t)}
               >
-                <div className="flex items-center gap-2 flex-wrap">
+                <HStack alignment="center" spacing={2} wrap>
                   <span
                     className={`text-[13px] font-medium transition-colors ${
                       isCompleted
@@ -782,12 +783,12 @@ export const TasksView: React.FC = () => {
                       #{tg}
                     </span>
                   ))}
-                </div>
+                </HStack>
               </div>
-            </div>
+            </HStack>
 
             {/* Quick Actions (Hover Reveal for Zero Clutter) */}
-            <div className="flex items-center gap-1 shrink-0">
+            <HStack alignment="center" spacing={1} className="shrink-0">
               {/* Star toggle button */}
               <button
                 type="button"
@@ -861,8 +862,8 @@ export const TasksView: React.FC = () => {
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
-            </div>
-          </div>
+            </HStack>
+          </HStack>
 
           {/* Expanded Subtasks Tree (SwiftUI Spring) */}
           {isExpanded && (
@@ -925,29 +926,32 @@ export const TasksView: React.FC = () => {
     return (
       <div
         key={t.id}
-        className={`group flex items-start justify-between p-3.5 rounded-2xl border transition-all duration-200 task-item-enter swiftui-press ${
+        className={`group p-3.5 rounded-2xl border transition-all duration-200 task-item-enter swiftui-press ${
           isArchived || isCompleted
             ? 'border-black/[0.05] dark:border-white/[0.04] bg-white/40 dark:bg-white/[0.02] opacity-70 backdrop-blur-sm'
-            : 'swiftui-glass-card'
+            : 'liquid-glass-card liquid-glass-interactive'
         }`}
       >
-        <div className="flex items-start gap-3 min-w-0 flex-1">
-          {/* Circular Checkbox (Apple style) */}
-          <button
-            onClick={() => toggleTaskComplete(t.id)}
-            className={`apple-checkbox mt-0.5 rounded-[999px] ${isCompleted ? 'checked' : ''}`}
-            aria-label="Toggle complete"
-          >
-            {isCompleted && (
-              <Check className="h-2.5 w-2.5 stroke-[3.5] text-white apple-check-spring" />
-            )}
-          </button>
+        <HStack alignment="top" spacing={3} className="w-full justify-between">
+          <HStack alignment="top" spacing={3} className="min-w-0 flex-1">
+            {/* Circular Checkbox (Apple style) */}
+            <button
+              onClick={() => toggleTaskComplete(t.id)}
+              className={`apple-checkbox mt-0.5 rounded-[999px] ${isCompleted ? 'checked' : ''}`}
+              aria-label="Toggle complete"
+            >
+              {isCompleted && (
+                <Check className="h-2.5 w-2.5 stroke-[3.5] text-white apple-check-spring" />
+              )}
+            </button>
 
-          {/* Task Title & Details */}
-          <div
-            className="min-w-0 flex-1 cursor-pointer"
-            onClick={() => openEditModal(t)}
-          >
+            {/* Task Title & Details */}
+            <VStack
+              alignment="leading"
+              spacing={1}
+              className="min-w-0 flex-1 cursor-pointer"
+              onClick={() => openEditModal(t)}
+            >
             <span
               className={`text-[14px] font-medium block truncate transition-colors ${
                 isCompleted
@@ -963,7 +967,7 @@ export const TasksView: React.FC = () => {
               </p>
             )}
 
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <HStack alignment="center" spacing={2} wrap className="mt-1.5">
               {(activeTaskListId === 'all' ||
                 activeTaskListId === 'archived_view' ||
                 activeTaskListId === 'starred' ||
@@ -1050,7 +1054,7 @@ export const TasksView: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </HStack>
 
             {/* Expanded Subtasks View */}
             {isExpanded && (
@@ -1101,11 +1105,11 @@ export const TasksView: React.FC = () => {
                 </form>
               </div>
             )}
-          </div>
-        </div>
+          </VStack>
+        </HStack>
 
         {/* Actions (Smooth Fade on Hover) */}
-        <div className="flex items-center gap-1 shrink-0 ml-3">
+        <HStack alignment="center" spacing={1} className="shrink-0 ml-3">
           {/* Star toggle button */}
           <button
             type="button"
@@ -1179,8 +1183,9 @@ export const TasksView: React.FC = () => {
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
-        </div>
-      </div>
+        </HStack>
+      </HStack>
+    </div>
     );
   };
 
@@ -1192,7 +1197,7 @@ export const TasksView: React.FC = () => {
       <div className="pointer-events-none absolute -bottom-20 left-1/3 w-80 h-80 rounded-[999px] bg-sky-400/10 dark:bg-sky-500/10 blur-[90px]" />
 
       {/* Apple Reminders Sidebar */}
-      <div className="w-full md:w-64 lg:w-72 p-4 flex flex-col gap-4 shrink-0 border-r border-black/[0.06] dark:border-white/[0.06] bg-white/55 dark:bg-[#1a1a1d]/60 backdrop-blur-3xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)]">
+      <div className="w-full md:w-64 lg:w-72 p-4 flex flex-col gap-4 shrink-0 border-r border-white/80 dark:border-white/10 bg-white/60 dark:bg-[#1a1a1d]/65 backdrop-blur-3xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.6)] dark:shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)]">
         {/* Search Bar in Sidebar (Apple Reminders Location) */}
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-400" />
@@ -1543,7 +1548,7 @@ export const TasksView: React.FC = () => {
             )}
 
             {/* Apple Segmented Density Selector */}
-            <div className="flex items-center rounded-xl p-0.5 bg-black/[0.05] dark:bg-white/[0.06] backdrop-blur-xl border border-black/[0.05] dark:border-white/[0.08] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]">
+            <div className="flex items-center rounded-xl p-1 liquid-glass-segmented shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
               {(['compact', 'comfortable', 'board'] as const).map((mode) => (
                 <button
                   key={mode}
@@ -1551,7 +1556,7 @@ export const TasksView: React.FC = () => {
                   onClick={() => handleSetDensityMode(mode)}
                   className={`px-3 py-1 text-xs font-semibold rounded-lg capitalize transition-all duration-150 swiftui-press cursor-pointer ${
                     densityMode === mode
-                      ? 'bg-white/90 dark:bg-white/[0.18] text-zinc-900 dark:text-white backdrop-blur-md shadow-[0_1px_4px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] dark:shadow-[0_1px_4px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.18)]'
+                      ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50'
                       : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                   }`}
                   title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} density mode`}
@@ -1562,7 +1567,7 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Filter/Group/Sort Toolbar Dropdowns */}
-            <div className="flex items-center rounded-xl p-0.5 bg-black/[0.05] dark:bg-white/[0.06] backdrop-blur-xl border border-black/[0.05] dark:border-white/[0.08] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.25)]">
+            <div className="flex items-center rounded-xl p-1 liquid-glass-segmented shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
               <select
                 value={groupBy}
                 onChange={(e) => handleSetGroupBy(e.target.value as any)}
@@ -1677,7 +1682,7 @@ export const TasksView: React.FC = () => {
         )}
 
         {/* Apple Reminders Task List Card Surface */}
-        <div className={`space-y-4 ${densityMode !== 'board' ? 'apple-card-surface p-4 sm:p-6' : ''}`}>
+        <div className={`space-y-4 ${densityMode !== 'board' ? 'apple-card-surface liquid-glass-card p-4 sm:p-6' : ''}`}>
           {/* Apple Style Inline Quick Add Bar */}
           {activeTaskListId !== 'archived_view' && (
             <form
@@ -1735,7 +1740,7 @@ export const TasksView: React.FC = () => {
                 {taskGroups.map((group) => (
                   <div
                     key={group.id}
-                    className="apple-card-surface p-4 flex flex-col gap-2 min-w-0"
+                    className="apple-card-surface liquid-glass-card p-4 flex flex-col gap-2 min-w-0"
                   >
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-white/[0.06]">
                       <div className="flex items-center gap-1.5 min-w-0 font-bold text-xs text-zinc-800 dark:text-zinc-200">
@@ -1908,7 +1913,7 @@ export const TasksView: React.FC = () => {
         onClose={() => setEditingTask(null)}
         title="Edit Task Details"
         headerActions={
-          <div className="flex items-center gap-1">
+          <HStack alignment="center" spacing={1}>
             <button
               type="button"
               onClick={() => setEditStarred(!editStarred)}
@@ -1934,7 +1939,7 @@ export const TasksView: React.FC = () => {
             >
               <Trash2 className="h-4 w-4" />
             </button>
-          </div>
+          </HStack>
         }
       >
         <form onSubmit={handleSaveEdit} className="space-y-4">
@@ -1943,7 +1948,7 @@ export const TasksView: React.FC = () => {
             <label htmlFor="edit-task-title-input" className="sr-only">
               Task Title
             </label>
-            <div className="flex items-start gap-2.5">
+            <HStack alignment="top" spacing={2.5}>
               <button
                 type="button"
                 onClick={() => {
@@ -1971,7 +1976,7 @@ export const TasksView: React.FC = () => {
                   currentEditingTask?.status === 'completed' ? 'line-through text-zinc-400 dark:text-zinc-500' : ''
                 }`}
               />
-            </div>
+            </HStack>
           </div>
 
           {/* Notes area */}
@@ -1990,7 +1995,7 @@ export const TasksView: React.FC = () => {
           </div>
 
           {/* Minimal Google Tasks / Apple Reminders Quick Metadata Bar */}
-          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+          <HStack alignment="center" spacing={2} wrap className="pt-0.5">
             {/* Due Date Chip */}
             <div className="relative flex items-center">
               <label
@@ -2036,7 +2041,7 @@ export const TasksView: React.FC = () => {
             </div>
 
             {/* Priority Segmented Chip Selector */}
-            <div className="flex items-center rounded-lg p-0.5 bg-white/50 dark:bg-white/[0.05] backdrop-blur-md border border-black/[0.06] dark:border-white/[0.08]">
+            <HStack alignment="center" spacing={0.5} className="rounded-lg p-0.5 bg-white/50 dark:bg-white/[0.05] backdrop-blur-md border border-black/[0.06] dark:border-white/[0.08]">
               {(['low', 'medium', 'high'] as const).map((p) => {
                 const isSelected = editPriority === p;
                 const badgeColor =
@@ -2066,8 +2071,8 @@ export const TasksView: React.FC = () => {
                   </button>
                 );
               })}
-            </div>
-          </div>
+            </HStack>
+          </HStack>
 
           {/* Subtasks Section (Minimal Google Tasks Checklist) */}
           <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] space-y-1.5">
@@ -2202,7 +2207,7 @@ export const TasksView: React.FC = () => {
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
+          <HStack alignment="center" spacing={2} className="justify-end pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
             <Button
               type="button"
               variant="outline"
@@ -2220,7 +2225,7 @@ export const TasksView: React.FC = () => {
             >
               Save Changes
             </Button>
-          </div>
+          </HStack>
         </form>
       </Modal>
 

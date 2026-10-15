@@ -24,6 +24,8 @@ import {
   formatDateString,
 } from '@/lib/utils';
 import { parseISO } from 'date-fns';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
+import { SwiftUISegmentedControl } from '@/components/swiftui/SwiftUISegmentedControl';
 
 export const FocusView: React.FC = () => {
   const {
@@ -123,43 +125,22 @@ export const FocusView: React.FC = () => {
         </div>
 
         {/* Mode Selector */}
-        <div className="flex items-center rounded-lg border border-black/5 dark:border-white/10 p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
-          <button
-            onClick={() => setMode('focus')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
-              mode === 'focus'
-                ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-            }`}
-          >
-            Focus ({settings.defaultFocusMinutes || 25}m)
-          </button>
-          <button
-            onClick={() => setMode('shortBreak')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
-              mode === 'shortBreak'
-                ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-            }`}
-          >
-            Short Break ({settings.shortBreakMinutes || 5}m)
-          </button>
-          <button
-            onClick={() => setMode('longBreak')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
-              mode === 'longBreak'
-                ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-            }`}
-          >
-            Long Break ({settings.longBreakMinutes || 15}m)
-          </button>
-        </div>
+        <SwiftUISegmentedControl
+          options={[
+            { value: 'focus', label: `Focus (${settings.defaultFocusMinutes || 25}m)` },
+            { value: 'shortBreak', label: `Short Break (${settings.shortBreakMinutes || 5}m)` },
+            { value: 'longBreak', label: `Long Break (${settings.longBreakMinutes || 15}m)` },
+          ]}
+          value={mode}
+          onChange={(newMode) => setMode(newMode as any)}
+          ariaLabel="Focus mode selector"
+        />
       </div>
 
       {/* Main Timer Dial */}
       <div className="flex flex-col items-center justify-center py-6 card-enter stagger-1">
-        <div className={`relative flex items-center justify-center h-72 w-72 transition-transform duration-500 ${timerState === 'running' ? 'animate-dial-pulse' : ''}`}>
+        <div className={`relative flex items-center justify-center p-6 sm:p-8 rounded-[999px] liquid-glass transition-all duration-500 ${timerState === 'running' ? 'animate-dial-pulse shadow-[0_20px_60px_rgba(59,130,246,0.15)] dark:shadow-[0_24px_70px_rgba(59,130,246,0.25)]' : 'shadow-[0_16px_50px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)]'}`}>
+          <div className="relative flex items-center justify-center h-64 w-64 sm:h-72 sm:w-72">
           {/* Circular SVG Ring */}
           <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
             <circle
@@ -193,7 +174,7 @@ export const FocusView: React.FC = () => {
             </span>
 
             {/* Cycle Pips */}
-            <div className="flex items-center gap-1.5 pt-2">
+            <HStack alignment="center" spacing={1.5} className="pt-2">
               {Array.from({ length: settings.longBreakInterval || 4 }, (_, i) => {
                 const isCompleted = (currentCycle - 1) % (settings.longBreakInterval || 4) > i;
                 const isCurrent = (currentCycle - 1) % (settings.longBreakInterval || 4) === i && mode === 'focus';
@@ -210,12 +191,13 @@ export const FocusView: React.FC = () => {
                   />
                 );
               })}
-            </div>
+            </HStack>
           </div>
         </div>
+      </div>
 
         {/* Timer Action Buttons */}
-        <div className="flex items-center gap-3 mt-8">
+        <HStack alignment="center" spacing={3} className="mt-8">
           {timerState === 'idle' && (
             <Button
               variant="primary"
@@ -284,11 +266,11 @@ export const FocusView: React.FC = () => {
               </Button>
             </>
           )}
-        </div>
+        </HStack>
 
         {/* Dynamic Multi-Task Pomodoro Panel */}
-        <div className="mt-8 w-full max-w-lg p-5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-3.5 interactive-card apple-card-surface">
-          <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="mt-8 w-full max-w-lg p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-3.5 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive">
+          <div className="flex items-center justify-between pb-2.5 border-b border-black/[0.05] dark:border-white/[0.06]">
             <div>
               <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block font-semibold">
                 Associated Task
@@ -377,28 +359,28 @@ export const FocusView: React.FC = () => {
 
       {/* Focus Productivity Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-1">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-1">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Today Focus</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {formatSecondsToHoursMinutes(focusStats.todayFocusSeconds)}
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-2">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-2">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Pomodoros Today</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {focusStats.todayPomodoroCount}
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-3">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-3">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Weekly Focus</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {formatSecondsToHoursMinutes(focusStats.weekFocusSeconds)}
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-4">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-4">
           <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Focus Streak</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {focusStats.streakDays} days
@@ -407,7 +389,7 @@ export const FocusView: React.FC = () => {
       </div>
 
       {/* Recent Session History */}
-      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-4 interactive-card apple-card-surface card-enter stagger-2">
+      <div className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-4 interactive-card apple-card-surface liquid-glass-card card-enter stagger-2">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
             Recent Focus Sessions

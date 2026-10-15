@@ -5,6 +5,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Sun, Moon, Eye, EyeOff, Lock, Mail, User, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
 
 export const LoginView: React.FC = () => {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ export const LoginView: React.FC = () => {
 
       {/* Top Bar with Brand & Theme Toggle */}
       <header className="h-16 px-6 sm:px-12 flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-xl relative z-20">
-        <div className="flex items-center gap-3">
+        <HStack alignment="center" spacing={3}>
           <div className="h-8 w-8 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-xs tracking-wider shadow-[0_2px_6px_rgba(0,0,0,0.2)]">
             N
           </div>
@@ -119,7 +120,7 @@ export const LoginView: React.FC = () => {
               Autonomous Personal OS
             </span>
           </div>
-        </div>
+        </HStack>
 
         <Button
           variant="ghost"
@@ -134,7 +135,7 @@ export const LoginView: React.FC = () => {
 
       {/* Main Auth Container */}
       <main className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
-        <div className="w-full max-w-md apple-card-surface backdrop-blur-2xl bg-white/80 dark:bg-zinc-900/80 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 sm:p-8 space-y-6">
+        <div className="w-full max-w-md apple-card-surface liquid-glass-card backdrop-blur-3xl bg-white/80 dark:bg-zinc-900/80 rounded-2xl border border-white/85 dark:border-white/[0.12] shadow-[0_24px_64px_rgba(0,0,0,0.09)] dark:shadow-[0_28px_72px_rgba(0,0,0,0.7)] p-6 sm:p-8 space-y-6">
           {/* Card Header */}
           <div className="space-y-1.5 text-center">
             <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -148,13 +149,13 @@ export const LoginView: React.FC = () => {
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="flex rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 p-1 bg-zinc-100/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <HStack spacing={1} className="w-full rounded-xl p-1 liquid-glass-segmented shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
             <button
               type="button"
               onClick={() => handleSwitchMode('signin')}
-              className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all swiftui-press ${
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all swiftui-press ${
                 mode === 'signin'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
+                  ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
@@ -163,22 +164,22 @@ export const LoginView: React.FC = () => {
             <button
               type="button"
               onClick={() => handleSwitchMode('signup')}
-              className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all swiftui-press ${
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all swiftui-press ${
                 mode === 'signup'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
+                  ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
               Create Account
             </button>
-          </div>
+          </HStack>
 
           {/* Error Message Banner */}
           {activeError && (
-            <div className="p-3 rounded-md border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/30 flex items-start gap-2.5 text-xs text-rose-700 dark:text-rose-300">
+            <HStack alignment="top" spacing={2.5} className="p-3 rounded-md border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/30 text-xs text-rose-700 dark:text-rose-300">
               <AlertCircle className="h-4 w-4 shrink-0 text-rose-500 mt-0.5" />
               <div className="flex-1 leading-snug">{activeError}</div>
-            </div>
+            </HStack>
           )}
 
           {/* Form */}

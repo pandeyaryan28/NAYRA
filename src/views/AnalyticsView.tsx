@@ -17,6 +17,7 @@ import { Badge } from '@/components/common/Badge';
 import { TagAnalyticsItem } from '@/types';
 import { formatSecondsToHoursMinutes, getTodayDateString } from '@/lib/utils';
 import { subDays, format, parseISO, isSameDay } from 'date-fns';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
 
 export const AnalyticsView: React.FC = () => {
   const { tasks, focusSessions, habits, calorieEntries, settings, focusStats } = useData();
@@ -163,11 +164,11 @@ export const AnalyticsView: React.FC = () => {
       {/* Primary KPI Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Focus Time */}
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-1">
-          <div className="flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-1">
+          <HStack alignment="center" spacing={2} className="w-full justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Total Focus Time</span>
             <Clock className="h-4 w-4 text-zinc-400" />
-          </div>
+          </HStack>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
             {formatSecondsToHoursMinutes(focusStats.weekFocusSeconds)}
           </span>
@@ -177,11 +178,11 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Task Completion Velocity */}
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-2">
-          <div className="flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-2">
+          <HStack alignment="center" spacing={2} className="w-full justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Task Velocity</span>
             <CheckSquare className="h-4 w-4 text-zinc-400" />
-          </div>
+          </HStack>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
             {taskCompletionRate}%
           </span>
@@ -191,11 +192,11 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Habit Consistency */}
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-3">
-          <div className="flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-3">
+          <HStack alignment="center" spacing={2} className="w-full justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Habit Adherence</span>
             <Flame className="h-4 w-4 text-zinc-400" />
-          </div>
+          </HStack>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
             {averageHabitStreak} days
           </span>
@@ -205,11 +206,11 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Pomodoros Completed */}
-        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-4">
-          <div className="flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-1 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive card-enter stagger-4">
+          <HStack alignment="center" spacing={2} className="w-full justify-between">
             <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Pomodoros Done</span>
             <Award className="h-4 w-4 text-zinc-400" />
-          </div>
+          </HStack>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
             {focusStats.todayPomodoroCount} Today
           </span>
@@ -220,7 +221,7 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* 7-Day Focus Distribution Chart */}
-      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-4 card-enter stagger-2 interactive-card apple-card-surface">
+      <div className="rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-4 card-enter stagger-2 interactive-card apple-card-surface liquid-glass-card">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <div>
             <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">

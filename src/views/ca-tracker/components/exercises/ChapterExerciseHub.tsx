@@ -42,7 +42,7 @@ export const ChapterExerciseHub: React.FC<ChapterExerciseHubProps> = ({
   return (
     <div className="flex flex-col max-w-6xl mx-auto px-4 py-6 gap-6 select-none">
       {/* Page Header */}
-      <div className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
+      <div className="p-6 rounded-2xl apple-card-surface liquid-glass-card backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shadow-xs">
             Paper 4 • Business Economics

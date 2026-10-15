@@ -266,7 +266,7 @@ export const ExerciseSessionView: React.FC<ExerciseSessionViewProps> = ({
   return (
     <div className="flex flex-col min-h-[calc(100vh-5rem)] max-w-6xl mx-auto px-4 py-6 gap-6 select-none">
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
@@ -359,7 +359,7 @@ export const ExerciseSessionView: React.FC<ExerciseSessionViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Question Card & Controls (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <Card className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
+          <Card className="p-6 rounded-2xl apple-card-surface liquid-glass-card backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
             {/* Session Progress Bar */}
             <div className="mb-4">
               <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1.5 font-medium">

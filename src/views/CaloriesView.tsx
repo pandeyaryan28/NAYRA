@@ -18,6 +18,8 @@ import { Select } from '@/components/common/Select';
 import { CalorieEntry, MealType } from '@/types';
 import { format, subDays, addDays, isToday, parseISO } from 'date-fns';
 import { getTodayDateString } from '@/lib/utils';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
+import { SwiftUIGauge, RingData } from '@/components/swiftui/SwiftUIGauge';
 
 export const CaloriesView: React.FC = () => {
   const { calorieEntries, addCalorieEntry, updateCalorieEntry, deleteCalorieEntry, settings } = useData();
@@ -49,6 +51,13 @@ export const CaloriesView: React.FC = () => {
 
   const remainingCalories = Math.max(0, settings.dailyCalorieTarget - totalCalories);
   const caloriePercent = Math.min(100, Math.round((totalCalories / settings.dailyCalorieTarget) * 100));
+
+  const activityRings: RingData[] = [
+    { label: 'Calories', current: totalCalories, target: settings.dailyCalorieTarget, color: '#ef4444' },
+    { label: 'Protein', current: totalProtein, target: settings.proteinTargetGrams, color: '#3b82f6' },
+    { label: 'Carbs', current: totalCarbs, target: settings.carbsTargetGrams, color: '#f59e0b' },
+    { label: 'Fat', current: totalFat, target: settings.fatTargetGrams, color: '#10b981' },
+  ];
 
   const handlePrevDay = () => setSelectedDate((d) => subDays(d, 1));
   const handleNextDay = () => setSelectedDate((d) => addDays(d, 1));
@@ -191,8 +200,8 @@ export const CaloriesView: React.FC = () => {
 
       {/* Progress & Macro Summary Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Main Calorie Gauge Card */}
-        <div className="md:col-span-2 p-5 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 space-y-3 card-enter stagger-1 interactive-card">
+        {/* Main Calorie Gauge Card with Apple Health Activity Rings */}
+        <div className="md:col-span-2 p-5 rounded-2xl apple-card-surface liquid-glass-card liquid-glass-interactive backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 space-y-3 card-enter stagger-1 interactive-card">
           <div className="flex items-baseline justify-between">
             <span className="text-xs uppercase font-mono tracking-wider text-zinc-400">
               Total Intake
@@ -202,41 +211,62 @@ export const CaloriesView: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tabular-nums">
-              {totalCalories}
-            </span>
-            <span className="text-sm font-mono text-zinc-400">
-              / {settings.dailyCalorieTarget} kcal target
-            </span>
-          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <div className="shrink-0">
+              <SwiftUIGauge
+                rings={activityRings}
+                size={110}
+                strokeWidth={8}
+                ringGap={2.5}
+                centerContent={
+                  <div className="text-center font-mono">
+                    <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                      {caloriePercent}%
+                    </span>
+                    <span className="text-[8px] text-zinc-400 block -mt-0.5 uppercase">Target</span>
+                  </div>
+                }
+              />
+            </div>
 
-          <div className="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-sm overflow-hidden">
-            <div
-              className={`h-full progress-bar-animated ${
-                totalCalories > settings.dailyCalorieTarget ? 'bg-amber-500' : 'bg-zinc-900 dark:bg-zinc-100'
-              }`}
-              style={{ width: `${caloriePercent}%` }}
-            />
-          </div>
+            <div className="flex-1 w-full space-y-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold font-mono text-zinc-900 dark:text-zinc-100 tabular-nums">
+                  {totalCalories}
+                </span>
+                <span className="text-xs font-mono text-zinc-400">
+                  / {settings.dailyCalorieTarget} kcal target
+                </span>
+              </div>
 
-          {/* Quick Add Bar */}
-          <div className="flex items-center gap-2 pt-2">
-            <span className="text-[11px] text-zinc-400 font-mono">Quick add:</span>
-            {[100, 250, 500].map((c) => (
-              <button
-                key={c}
-                onClick={() => handleQuickAdd(c)}
-                className="px-2.5 py-1 rounded-md border border-zinc-200/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-800/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-[10px] font-mono text-zinc-600 dark:text-zinc-300 transition-all swiftui-press"
-              >
-                +{c}
-              </button>
-            ))}
+              <div className="h-2 w-full bg-black/[0.05] dark:bg-white/[0.08] rounded-sm overflow-hidden">
+                <div
+                  className={`h-full progress-bar-animated ${
+                    totalCalories > settings.dailyCalorieTarget ? 'bg-amber-500' : 'bg-zinc-900 dark:bg-zinc-100'
+                  }`}
+                  style={{ width: `${caloriePercent}%` }}
+                />
+              </div>
+
+              {/* Quick Add Bar */}
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-[11px] text-zinc-400 font-mono">Quick add:</span>
+                {[100, 250, 500].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => handleQuickAdd(c)}
+                    className="px-2 py-0.5 rounded-md border border-black/[0.06] dark:border-white/[0.1] bg-white/60 dark:bg-zinc-800/60 hover:bg-white dark:hover:bg-zinc-800 text-[10px] font-mono text-zinc-600 dark:text-zinc-300 transition-all swiftui-press shadow-xs"
+                  >
+                    +{c}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Protein Target */}
-        <div className="p-4 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 space-y-1 card-enter stagger-2 interactive-card">
+        <div className="p-4 rounded-2xl apple-card-surface liquid-glass-card liquid-glass-interactive backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 space-y-1 card-enter stagger-2 interactive-card">
           <span className="text-[11px] font-mono uppercase text-zinc-400 block">Protein</span>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
@@ -244,7 +274,7 @@ export const CaloriesView: React.FC = () => {
             </span>
             <span className="text-xs text-zinc-400 font-mono">/ {settings.proteinTargetGrams}g</span>
           </div>
-          <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-sm overflow-hidden mt-2">
+          <div className="h-1.5 w-full bg-black/[0.05] dark:bg-white/[0.08] rounded-sm overflow-hidden mt-2">
             <div
               className="h-full bg-blue-500 progress-bar-animated"
               style={{
@@ -255,13 +285,13 @@ export const CaloriesView: React.FC = () => {
         </div>
 
         {/* Carbs & Fat Targets */}
-        <div className="p-4 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 space-y-2 card-enter stagger-3 interactive-card">
+        <div className="p-4 rounded-2xl apple-card-surface liquid-glass-card liquid-glass-interactive backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 space-y-2 card-enter stagger-3 interactive-card">
           <div>
             <div className="flex justify-between text-[11px] font-mono text-zinc-400 uppercase">
               <span>Carbs</span>
               <span>{totalCarbs} / {settings.carbsTargetGrams}g</span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-sm overflow-hidden mt-1">
+            <div className="h-1.5 w-full bg-black/[0.05] dark:bg-white/[0.08] rounded-sm overflow-hidden mt-1">
               <div
                 className="h-full bg-emerald-500 progress-bar-animated"
                 style={{
@@ -276,7 +306,7 @@ export const CaloriesView: React.FC = () => {
               <span>Fat</span>
               <span>{totalFat} / {settings.fatTargetGrams}g</span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-sm overflow-hidden mt-1">
+            <div className="h-1.5 w-full bg-black/[0.05] dark:bg-white/[0.08] rounded-sm overflow-hidden mt-1">
               <div
                 className="h-full bg-amber-500 progress-bar-animated"
                 style={{
@@ -297,7 +327,7 @@ export const CaloriesView: React.FC = () => {
           return (
             <div
               key={meal.type}
-              className="clay-surface rounded-2xl p-4 space-y-3 apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80"
+              className="clay-surface rounded-2xl p-4 space-y-3 apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10"
             >
               <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center gap-2">
@@ -367,7 +397,7 @@ export const CaloriesView: React.FC = () => {
       </div>
 
       {/* 7-Day Intake History SVG Bar Chart */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4 apple-card-surface backdrop-blur-xl bg-white/75 dark:bg-zinc-900/75 border border-zinc-200/80 dark:border-zinc-800/80">
+      <div className="clay-surface rounded-2xl p-5 space-y-4 apple-card-surface liquid-glass-card backdrop-blur-2xl bg-white/75 dark:bg-zinc-900/75 border border-white/80 dark:border-white/10">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             7-Day Caloric Intake History

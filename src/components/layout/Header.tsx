@@ -1,15 +1,25 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Sun, Moon, RefreshCw, LogIn, LogOut, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Sun,
+  Moon,
+  RefreshCw,
+  LogIn,
+  LogOut,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Command,
+} from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Button } from '@/components/common/Button';
-import { Badge } from '@/components/common/Badge';
 import { formatDateString } from '@/lib/utils';
 
 export const Header: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
   const { user, signInWithGoogle, signOut, continueAsGuest } = useAuth();
   const { isSyncing, syncWithGoogle, reconnectAndSync, isGoogleTokenExpired, lastSyncTime } = useData();
@@ -62,20 +72,49 @@ export const Header: React.FC = () => {
   const todayStr = formatDateString(new Date(), 'EEEE, MMMM d');
 
   return (
-    <header className="h-14 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-950/75 backdrop-blur-2xl px-6 flex items-center justify-between z-20 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.85)] dark:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)]">
-      {/* Left: Breadcrumbs & Date */}
+    <header className="h-12 border-b border-black/[0.05] dark:border-white/[0.06] bg-white/70 dark:bg-[#161619]/75 backdrop-blur-3xl px-4 sm:px-6 flex items-center justify-between z-20 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.95)] dark:shadow-[0_2px_16px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)] select-none">
+      {/* Left: Navigation chevrons, Breadcrumbs & Date */}
       <div className="flex items-center gap-3">
+        {/* Navigation History Chevrons */}
+        <div className="hidden sm:flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="h-7 w-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer swiftui-press"
+            title="Go back"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(1)}
+            className="h-7 w-7 rounded-md flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer swiftui-press"
+            title="Go forward"
+            aria-label="Go forward"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Breadcrumb Title */}
         <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm tracking-tight">
             {getSectionTitle(location.pathname)}
           </span>
           <span className="mx-2 text-zinc-300 dark:text-zinc-700">/</span>
-          <span className="hidden sm:inline font-mono">{todayStr}</span>
+          <span className="hidden md:inline font-mono text-[11px]">{todayStr}</span>
         </div>
       </div>
 
       {/* Right: Actions, Sync, Theme, User Auth */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Keyboard shortcut hint */}
+        <div className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-md bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] text-[10px] text-zinc-400 font-mono">
+          <Command className="h-3 w-3" />
+          <span>1-9 tabs</span>
+        </div>
+
         {/* Google Sync Status */}
         {user && !user.isGuest && (
           isGoogleTokenExpired ? (
@@ -115,7 +154,7 @@ export const Header: React.FC = () => {
           size="icon"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          className="h-8 w-8 text-zinc-600 dark:text-zinc-300"
+          className="h-8 w-8 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
@@ -127,10 +166,10 @@ export const Header: React.FC = () => {
               <img
                 src={user.photoURL}
                 alt={user.displayName || 'User'}
-                className="h-7 w-7 rounded-sm border border-zinc-200 dark:border-zinc-700 object-cover"
+                className="h-7 w-7 rounded-md border border-zinc-200 dark:border-zinc-700 object-cover"
               />
             ) : (
-              <div className="h-7 w-7 rounded-sm bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-xs font-semibold">
+              <div className="h-7 w-7 rounded-md bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-xs font-semibold">
                 {user.displayName?.charAt(0).toUpperCase() || 'U'}
               </div>
             )}
@@ -147,7 +186,8 @@ export const Header: React.FC = () => {
               size="icon"
               onClick={signOut}
               title="Sign out"
-              className="h-7 w-7 text-zinc-400 hover:text-rose-500"
+              aria-label="Sign out"
+              className="h-7 w-7 text-zinc-400 hover:text-rose-500 rounded-md"
             >
               <LogOut className="h-3.5 w-3.5" />
             </Button>

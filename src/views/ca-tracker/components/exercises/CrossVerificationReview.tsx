@@ -192,7 +192,7 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
       </div>
 
       {/* Primary Score & Performance Metric Card */}
-      <Card className="p-6 rounded-2xl apple-card-surface backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
+      <Card className="p-6 rounded-2xl apple-card-surface liquid-glass-card backdrop-blur-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">

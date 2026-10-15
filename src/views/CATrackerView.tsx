@@ -157,27 +157,27 @@ export const CATrackerView: React.FC = () => {
         {/* Quick Persistent KPI Strip */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs">
           {/* Exam Countdown */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/70 dark:bg-zinc-850/70 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-700/80 text-zinc-800 dark:text-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass border border-white/80 dark:border-white/10 text-zinc-800 dark:text-zinc-200 shadow-[0_2px_8px_rgba(0,0,0,0.03)] swiftui-press">
             <Clock className="w-3.5 h-3.5 text-zinc-500" />
             <span className="font-semibold tabular-nums">{metrics.daysUntilExam}</span>
             <span className="text-zinc-500">Days to Exam</span>
           </div>
 
           {/* Study Streak */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 backdrop-blur-md border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 shadow-[0_1px_3px_rgba(245,158,11,0.08)]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 backdrop-blur-md border border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 shadow-[0_2px_8px_rgba(245,158,11,0.08)] swiftui-press">
             <Flame className="w-3.5 h-3.5 text-amber-500" />
             <span className="font-semibold tabular-nums">{metrics.currentStreakDays}</span>
             <span className="text-amber-700 dark:text-amber-300">Days Streak</span>
           </div>
 
           {/* Progress */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/40 backdrop-blur-md border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 shadow-[0_1px_3px_rgba(16,185,129,0.08)]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 backdrop-blur-md border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 shadow-[0_2px_8px_rgba(16,185,129,0.08)] swiftui-press">
             <span className="font-semibold tabular-nums">{metrics.overallProgressPercentage}%</span>
             <span className="text-emerald-700 dark:text-emerald-300">Complete</span>
           </div>
 
           {/* Cloud Sync Status */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/70 dark:bg-zinc-850/70 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass border border-white/80 dark:border-white/10 text-zinc-700 dark:text-zinc-300 shadow-[0_2px_8px_rgba(0,0,0,0.03)] swiftui-press">
             <Cloud className="w-3.5 h-3.5 text-emerald-500" />
             <span className="font-medium text-[11px]">
               {isCloudConnected ? 'Cloud Synced' : 'Syncing...'}
@@ -187,8 +187,8 @@ export const CATrackerView: React.FC = () => {
       </div>
 
       {/* Sub-Tab Navigation Bar */}
-      <div className="border-b border-zinc-200/80 dark:border-zinc-800/80">
-        <nav className="flex space-x-1 sm:space-x-1.5 overflow-x-auto no-scrollbar py-1">
+      <div className="p-1 rounded-2xl liquid-glass-segmented">
+        <nav className="flex space-x-1 sm:space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -200,10 +200,10 @@ export const CATrackerView: React.FC = () => {
                 data-testid={`ca-nav-tab-${item.id}`}
                 aria-label={item.badge !== undefined ? `${item.label} (${item.badge})` : item.label}
                 onClick={() => handleNavigateTab(item.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg whitespace-nowrap transition-all duration-150 swiftui-press ${
+                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl whitespace-nowrap transition-all duration-150 swiftui-press ${
                   isActive
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.18)] dark:shadow-[0_2px_8px_-1px_rgba(0,0,0,0.4)]'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50'
+                    ? 'liquid-glass-segment-active text-zinc-950 dark:text-zinc-50 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.12)]'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white/50 dark:hover:bg-white/[0.05]'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -212,8 +212,8 @@ export const CATrackerView: React.FC = () => {
                   <span
                     className={`ml-0.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-md ${
                       isActive
-                        ? 'bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800'
-                        : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
+                        ? 'bg-zinc-200/80 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100'
+                        : 'bg-zinc-200/60 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
                     }`}
                   >
                     {item.badge}

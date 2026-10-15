@@ -29,6 +29,8 @@ import {
   subDays,
 } from 'date-fns';
 import { getTodayDateString } from '@/lib/utils';
+import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
+import { SwiftUISegmentedControl } from '@/components/swiftui/SwiftUISegmentedControl';
 
 export const HabitsView: React.FC = () => {
   const {
@@ -140,43 +142,28 @@ export const HabitsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center border border-black/5 dark:border-white/10 rounded-lg p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
-            <button
-              type="button"
-              onClick={() => setShowArchived(false)}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
-                !showArchived
-                  ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
-              }`}
-            >
-              Active ({activeCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowArchived(true)}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
-                showArchived
-                  ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
-              }`}
-            >
-              Archived ({archivedCount})
-            </button>
-          </div>
+        <HStack alignment="center" spacing={2} wrap>
+          <SwiftUISegmentedControl
+            options={[
+              { value: 'active', label: `Active (${activeCount})` },
+              { value: 'archived', label: `Archived (${archivedCount})` },
+            ]}
+            value={showArchived ? 'archived' : 'active'}
+            onChange={(val) => setShowArchived(val === 'archived')}
+            ariaLabel="Habit status filter"
+          />
 
           <Button variant="outline" size="sm" onClick={handleTodayWeek} className="swiftui-press rounded-lg">
             Current Week
           </Button>
-          <div className="flex items-center gap-0.5">
+          <HStack alignment="center" spacing={0.5}>
             <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="h-8 w-8 swiftui-press rounded-lg">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleNextWeek} className="h-8 w-8 swiftui-press rounded-lg">
               <ChevronRight className="h-4 w-4" />
             </Button>
-          </div>
+          </HStack>
           <Button
             variant="primary"
             size="sm"
@@ -186,13 +173,13 @@ export const HabitsView: React.FC = () => {
             <Plus className="h-4 w-4 stroke-[2.5]" />
             <span>New Habit</span>
           </Button>
-        </div>
+        </HStack>
       </div>
 
       {/* Habit Matrix Table */}
-      <div className="clay-surface apple-card-surface rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+      <div className="clay-surface apple-card-surface liquid-glass-card rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
         {/* Table Header */}
-        <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_120px] border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/70 dark:bg-zinc-900/60 backdrop-blur-md p-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_120px] border-b border-black/[0.05] dark:border-white/[0.08] bg-white/50 dark:bg-zinc-900/60 backdrop-blur-md p-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
           <div>Habit & Category</div>
           {weekDays.map((d) => {
             const today = isToday(d);
@@ -236,8 +223,8 @@ export const HabitsView: React.FC = () => {
                   }`}
                 >
                   {/* Habit Title & Details */}
-                  <div className="min-w-0 pr-3">
-                    <div className="flex items-center gap-2">
+                  <VStack alignment="leading" spacing={1} className="min-w-0 pr-3">
+                    <HStack alignment="center" spacing={2}>
                       <span
                         className="h-2.5 w-2.5 rounded-sm shrink-0 shadow-xs"
                         style={{ backgroundColor: habit.color }}
@@ -250,18 +237,18 @@ export const HabitsView: React.FC = () => {
                           Archived
                         </span>
                       )}
-                    </div>
+                    </HStack>
                     {habit.description && (
                       <p className="text-[11px] text-zinc-400 truncate pl-4">
                         {habit.description}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 pl-4 pt-1">
+                    <HStack alignment="center" spacing={2} className="pl-4 pt-1">
                       <span className="text-[10px] text-zinc-400 font-mono capitalize">
                         {habit.category} • {weekCompletedCount}/{habit.targetDaysPerWeek} this week
                       </span>
-                    </div>
-                  </div>
+                    </HStack>
+                  </VStack>
 
                   {/* 7 Days Toggle Checkboxes */}
                   {weekDays.map((d) => {
@@ -289,7 +276,7 @@ export const HabitsView: React.FC = () => {
                   })}
 
                   {/* Streak, Edit, Archive & Delete */}
-                  <div className="flex items-center justify-end gap-1 pr-1">
+                  <HStack alignment="center" spacing={1} className="justify-end pr-1">
                     <div className="text-right font-mono mr-1">
                       <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">
                         {habit.currentStreak}d
@@ -332,7 +319,7 @@ export const HabitsView: React.FC = () => {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
-                  </div>
+                  </HStack>
                 </div>
               );
             })
@@ -426,7 +413,7 @@ export const HabitsView: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+          <HStack alignment="center" spacing={2} className="justify-end pt-2 border-t border-zinc-200 dark:border-zinc-800">
             <Button
               type="button"
               variant="outline"
@@ -438,7 +425,7 @@ export const HabitsView: React.FC = () => {
             <Button type="submit" variant="primary" size="sm">
               {editingHabit ? 'Save Changes' : 'Create Habit'}
             </Button>
-          </div>
+          </HStack>
         </form>
       </Modal>
     </div>
