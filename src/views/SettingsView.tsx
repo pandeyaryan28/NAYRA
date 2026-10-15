@@ -171,9 +171,9 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 md:p-8 space-y-8 select-none view-enter">
+    <div className="max-w-4xl mx-auto p-6 md:p-8 space-y-6 select-none view-enter">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center justify-between pb-4 border-b border-zinc-200/80 dark:border-zinc-800/80">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
             <Settings className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
@@ -193,13 +193,20 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Google Account & Authorization Status */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-1">
-        <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-sky-500" />
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Google Cloud & Account Integration
-            </h3>
+      <div className="clay-surface apple-card-surface rounded-2xl p-5 md:p-6 space-y-5 card-enter stagger-1">
+        <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100/80 dark:border-zinc-800/80">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 shadow-sm">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                Google Cloud & Account Integration
+              </h3>
+              <p className="text-[11px] text-zinc-400">
+                Google Calendar v3 & Google Tasks API synchronization
+              </p>
+            </div>
           </div>
           <Badge variant={user && !user.isGuest ? 'success' : 'default'}>
             {user && !user.isGuest ? 'Connected' : 'Local / Guest Mode'}
@@ -220,11 +227,11 @@ export const SettingsView: React.FC = () => {
 
           <div className="shrink-0">
             {user && !user.isGuest ? (
-              <Button variant="outline" size="sm" onClick={signOut}>
+              <Button variant="outline" size="sm" onClick={signOut} className="swiftui-press">
                 Disconnect Account
               </Button>
             ) : (
-              <Button variant="primary" size="sm" onClick={signInWithGoogle}>
+              <Button variant="primary" size="sm" onClick={signInWithGoogle} className="swiftui-press">
                 Sign In with Google
               </Button>
             )}
@@ -233,7 +240,7 @@ export const SettingsView: React.FC = () => {
 
         {/* Continuous 24/7 Background Synchronization Section */}
         {user && !user.isGuest && (
-          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          <div className="pt-4 border-t border-zinc-100/80 dark:border-zinc-800/80 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -261,7 +268,7 @@ export const SettingsView: React.FC = () => {
                 size="sm"
                 onClick={handleLinkOfflineSync}
                 disabled={isLinkingOffline}
-                className="shrink-0"
+                className="shrink-0 swiftui-press"
               >
                 {isLinkingOffline
                   ? 'Authorizing...'
@@ -272,14 +279,14 @@ export const SettingsView: React.FC = () => {
             </div>
 
             {offlineLinkStatus === 'success' && (
-              <div className="p-2.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2 shadow-sm">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                 <span>{offlineLinkMessage}</span>
               </div>
             )}
 
             {offlineLinkStatus === 'error' && (
-              <div className="p-2.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2 shadow-sm">
                 <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
                 <span>{offlineLinkMessage}</span>
               </div>
@@ -287,7 +294,7 @@ export const SettingsView: React.FC = () => {
 
             {/* Server OAuth Credentials Configuration */}
             {serverOAuthStatus?.isAdmin ? (
-              <div className="mt-3 p-3.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/40 space-y-3">
+              <div className="mt-3 p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/70 dark:bg-zinc-900/50 backdrop-blur-md space-y-3.5 shadow-sm">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                   <KeyRound className="h-3.5 w-3.5 text-zinc-500" />
                   <span>Cloud Functions OAuth Configuration (Administrator Only)</span>
@@ -324,7 +331,7 @@ export const SettingsView: React.FC = () => {
                     size="sm"
                     onClick={handleSaveServerCredentials}
                     disabled={isSavingServerCreds || !offlineClientId.trim() || !offlineClientSecret.trim()}
-                    className="shrink-0"
+                    className="shrink-0 swiftui-press"
                   >
                     {isSavingServerCreds ? 'Saving...' : 'Save to Cloud Functions'}
                   </Button>
@@ -332,7 +339,7 @@ export const SettingsView: React.FC = () => {
 
                 {saveCredsMessage && (
                   <div
-                    className={`p-2 rounded-md text-xs flex items-center gap-2 ${
+                    className={`p-2.5 rounded-lg text-xs flex items-center gap-2 ${
                       saveCredsStatus === 'success'
                         ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800/60'
                         : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800/60'
@@ -348,7 +355,7 @@ export const SettingsView: React.FC = () => {
                 )}
               </div>
             ) : serverOAuthStatus?.isConfigured ? (
-              <div className="mt-3 p-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/30 text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+              <div className="mt-3 p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/40 dark:bg-zinc-900/30 text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
                 <span>Global OAuth background credentials are configured and managed by your system administrator.</span>
               </div>
@@ -358,8 +365,8 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Appearance & Theme Mode */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-2">
-        <div className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="clay-surface apple-card-surface rounded-2xl p-5 md:p-6 space-y-4 card-enter stagger-2">
+        <div className="pb-3 border-b border-zinc-100/80 dark:border-zinc-800/80">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Appearance & Visual Theme
           </h3>
@@ -368,15 +375,15 @@ export const SettingsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="p-1 rounded-xl bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-700/60 grid grid-cols-3 gap-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
           {(['light', 'dark', 'system'] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => setTheme(mode)}
-              className={`p-3 rounded-md border text-center text-xs font-medium capitalize transition-all hover:-translate-y-0.5 active:translate-y-0 ${
+              className={`py-2 px-3 rounded-lg text-center text-xs font-medium capitalize transition-all duration-150 swiftui-press ${
                 theme === mode
-                  ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-semibold'
-                  : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                  ? 'border border-zinc-900/10 dark:border-zinc-100/10 bg-white dark:bg-zinc-700/90 text-zinc-900 dark:text-zinc-50 font-semibold shadow-[0_2px_6px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.12)]'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white/40 dark:hover:bg-zinc-700/40'
               }`}
             >
               {mode} Theme
@@ -386,12 +393,19 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Pomodoro Focus Lab Configuration */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-3">
-        <div className="flex items-center gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <Clock className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Focus / Pomodoro Durations
-          </h3>
+      <div className="clay-surface apple-card-surface rounded-2xl p-5 md:p-6 space-y-5 card-enter stagger-3">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-100/80 dark:border-zinc-800/80">
+          <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shadow-sm">
+            <Clock className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Focus / Pomodoro Durations
+            </h3>
+            <p className="text-[11px] text-zinc-400">
+              Interval timings and automated transitions
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -430,9 +444,9 @@ export const SettingsView: React.FC = () => {
           />
         </div>
 
-        <div className="pt-2 divide-y divide-zinc-100 dark:divide-zinc-800/80 space-y-3">
+        <div className="pt-2 divide-y divide-zinc-100/80 dark:divide-zinc-800/80">
           {/* Sound Notification */}
-          <div className="flex items-center justify-between text-xs pt-2">
+          <div className="flex items-center justify-between text-xs py-3 px-2 rounded-xl hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
             <div>
               <span className="text-zinc-800 dark:text-zinc-200 font-medium block">
                 Synthesized Web Audio notification chimes
@@ -446,18 +460,19 @@ export const SettingsView: React.FC = () => {
                 updateSettings({ soundEnabled: !settings.soundEnabled });
                 handleSaveNotification();
               }}
-              className={`p-1.5 rounded-md border ${
+              className={`p-2 rounded-lg border swiftui-press transition-all ${
                 settings.soundEnabled
-                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800'
-                  : 'border-zinc-300 dark:border-zinc-700 text-zinc-400'
+                  ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                  : 'border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/40'
               }`}
+              aria-label="Toggle audio chimes"
             >
               {settings.soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
             </button>
           </div>
 
           {/* Auto-start Breaks */}
-          <div className="flex items-center justify-between text-xs pt-3">
+          <div className="flex items-center justify-between text-xs py-3 px-2 rounded-xl hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
             <div>
               <span className="text-zinc-800 dark:text-zinc-200 font-medium block">
                 Auto-start break intervals
@@ -473,12 +488,12 @@ export const SettingsView: React.FC = () => {
                 updateSettings({ autoStartBreaks: e.target.checked });
                 handleSaveNotification();
               }}
-              className="h-4 w-4 rounded-sm border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer"
+              className="h-4 w-4 rounded-sm border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer accent-zinc-900 dark:accent-zinc-100"
             />
           </div>
 
           {/* Auto-start Pomodoros */}
-          <div className="flex items-center justify-between text-xs pt-3">
+          <div className="flex items-center justify-between text-xs py-3 px-2 rounded-xl hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
             <div>
               <span className="text-zinc-800 dark:text-zinc-200 font-medium block">
                 Auto-start focus intervals
@@ -494,12 +509,12 @@ export const SettingsView: React.FC = () => {
                 updateSettings({ autoStartPomodoros: e.target.checked });
                 handleSaveNotification();
               }}
-              className="h-4 w-4 rounded-sm border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer"
+              className="h-4 w-4 rounded-sm border-zinc-300 text-zinc-900 focus:ring-0 cursor-pointer accent-zinc-900 dark:accent-zinc-100"
             />
           </div>
 
           {/* Desktop Notifications */}
-          <div className="flex items-center justify-between text-xs pt-3">
+          <div className="flex items-center justify-between text-xs py-3 px-2 rounded-xl hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
             <div>
               <span className="text-zinc-800 dark:text-zinc-200 font-medium block">
                 Browser Desktop Notifications
@@ -517,7 +532,7 @@ export const SettingsView: React.FC = () => {
               size="sm"
               onClick={handleRequestNotification}
               disabled={notificationPerm === 'granted'}
-              className="gap-1.5"
+              className="gap-1.5 swiftui-press"
             >
               <Bell className="h-3.5 w-3.5" />
               <span>{notificationPerm === 'granted' ? 'Enabled' : 'Enable Notifications'}</span>
@@ -527,12 +542,19 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Nutrition & Daily Targets */}
-      <div className="clay-surface rounded-2xl p-5 space-y-4 card-enter stagger-4">
-        <div className="flex items-center gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <UtensilsCrossed className="h-4 w-4 text-emerald-500" />
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Nutrition & Macro Targets
-          </h3>
+      <div className="clay-surface apple-card-surface rounded-2xl p-5 md:p-6 space-y-4 card-enter stagger-4">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-100/80 dark:border-zinc-800/80">
+          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm">
+            <UtensilsCrossed className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Nutrition & Macro Targets
+            </h3>
+            <p className="text-[11px] text-zinc-400">
+              Daily caloric and macronutrient goals
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -581,7 +603,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Data Export & Backup */}
-      <div className="clay-surface rounded-2xl p-5 flex items-center justify-between card-enter stagger-5">
+      <div className="clay-surface apple-card-surface rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-enter stagger-5">
         <div>
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Export Personal Data Backup
@@ -595,7 +617,7 @@ export const SettingsView: React.FC = () => {
           variant="outline"
           size="sm"
           onClick={handleExportData}
-          className="gap-1.5 shrink-0"
+          className="gap-1.5 shrink-0 swiftui-press"
         >
           <Download className="h-4 w-4" />
           <span>Export JSON</span>
@@ -603,7 +625,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Reset to Clean Slate */}
-      <div className="p-5 rounded-2xl border border-rose-200/90 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/10 shadow-[0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-enter stagger-6">
+      <div className="apple-card-surface p-5 md:p-6 rounded-2xl border border-rose-200/90 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/10 shadow-[0_4px_12px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-enter stagger-6">
         <div>
           <h3 className="text-sm font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5">
             <Trash2 className="h-4 w-4" />
@@ -624,7 +646,7 @@ export const SettingsView: React.FC = () => {
               setTimeout(() => setSavedNotification(false), 3000);
             }
           }}
-          className="border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 shrink-0"
+          className="border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 shrink-0 swiftui-press"
         >
           <span>Reset All Data</span>
         </Button>

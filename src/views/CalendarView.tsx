@@ -448,32 +448,32 @@ export const CalendarView: React.FC = () => {
   return (
     <div className="flex h-full flex-col bg-white dark:bg-zinc-950 overflow-hidden select-none">
       {/* Top Google Calendar Toolbar */}
-      <div className="flex flex-wrap items-center justify-between px-6 py-3 border-b border-zinc-200 dark:border-zinc-800 gap-4 bg-white/90 dark:bg-zinc-950/90">
+      <div className="flex flex-wrap items-center justify-between px-6 py-3 border-b border-zinc-200/80 dark:border-zinc-800/80 gap-4 bg-white/75 dark:bg-zinc-950/75 backdrop-blur-2xl shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)]">
         <div className="flex items-center gap-3">
           <Button
             variant="primary"
             size="sm"
             onClick={() => openCreateModal()}
-            className="gap-1.5 shadow-sm"
+            className="gap-1.5 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.18)] swiftui-press"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 stroke-[2.5]" />
             <span>Create</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleToday}>
+          <Button variant="outline" size="sm" onClick={handleToday} className="swiftui-press">
             Today
           </Button>
 
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handlePrev} className="h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={handlePrev} className="h-8 w-8 swiftui-press">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleNext} className="h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={handleNext} className="h-8 w-8 swiftui-press">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
-          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 min-w-44">
+          <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 min-w-44">
             {headerDateString}
           </h2>
         </div>
@@ -487,7 +487,7 @@ export const CalendarView: React.FC = () => {
               placeholder="Search events"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 w-full rounded-md border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900 pl-8 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)] focus:outline-none focus:ring-2 focus:ring-zinc-400/30 transition-all duration-150"
+              className="h-8 w-full rounded-lg border border-zinc-200/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md pl-8 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)] focus:outline-none focus:ring-1 focus:ring-zinc-400/40 transition-all duration-150"
             />
           </div>
 
@@ -497,7 +497,7 @@ export const CalendarView: React.FC = () => {
             size="sm"
             onClick={handleSyncOrReconnect}
             disabled={isSyncing || isReconnecting}
-            className={`h-8 text-xs gap-1.5 px-2.5 rounded-md ${
+            className={`h-8 text-xs gap-1.5 px-2.5 rounded-lg swiftui-press ${
               isGoogleTokenExpired
                 ? 'text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
@@ -520,16 +520,16 @@ export const CalendarView: React.FC = () => {
             </span>
           </Button>
 
-          {/* View Switcher */}
-          <div className="flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-900">
+          {/* Apple Segmented View Switcher */}
+          <div className="flex items-center rounded-lg border border-black/5 dark:border-white/10 p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
             {(['day', 'week', 'month', 'agenda'] as ViewMode[]).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-sm capitalize transition-colors ${
+                className={`px-3 py-1 text-xs font-semibold rounded-md capitalize transition-all duration-150 swiftui-press ${
                   viewMode === mode
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                    ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }`}
               >
                 {mode}
@@ -542,44 +542,44 @@ export const CalendarView: React.FC = () => {
       {/* Main Content Body: Left Mini-Calendar/List + Right Grid */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Side Pane */}
-        <div className="hidden lg:flex flex-col w-60 border-r border-zinc-200 dark:border-zinc-800 p-4 space-y-6 overflow-y-auto">
+        <div className="hidden lg:flex flex-col w-60 border-r border-zinc-200/80 dark:border-zinc-800/80 p-4 space-y-6 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950/40 backdrop-blur-md">
           {/* Calendar List */}
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 font-mono">
               My Calendars
             </h4>
             <div className="space-y-1">
               {calendars.map((cal) => (
                 <label
                   key={cal.id}
-                  className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/60 cursor-pointer text-xs transition-colors"
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-white/80 dark:hover:bg-zinc-800/70 border border-transparent hover:border-black/5 dark:hover:border-white/5 cursor-pointer text-xs transition-all swiftui-press"
                 >
                   <input
                     type="checkbox"
                     checked={cal.selected}
                     onChange={() => toggleCalendarVisibility(cal.id)}
-                    className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-0"
+                    className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-0 cursor-pointer"
                   />
                   <span
-                    className="h-2 w-2 rounded-sm shrink-0"
+                    className="h-2.5 w-2.5 rounded-sm shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
                     style={{ backgroundColor: cal.backgroundColor }}
                   />
-                  <span className="truncate text-zinc-800 dark:text-zinc-200">
+                  <span className="truncate text-zinc-800 dark:text-zinc-200 font-medium">
                     {cal.summary}
                   </span>
                 </label>
               ))}
 
               {/* Tasks Calendar Integration */}
-              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                <label className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/60 cursor-pointer text-xs transition-colors">
+              <div className="pt-2 border-t border-zinc-200/80 dark:border-zinc-800/80">
+                <label className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-white/80 dark:hover:bg-zinc-800/70 border border-transparent hover:border-black/5 dark:hover:border-white/5 cursor-pointer text-xs transition-all swiftui-press">
                   <input
                     type="checkbox"
                     checked={showTasks}
                     onChange={() => setShowTasks(!showTasks)}
-                    className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-0"
+                    className="h-3.5 w-3.5 rounded-sm border-zinc-300 dark:border-zinc-700 text-zinc-900 focus:ring-0 cursor-pointer"
                   />
-                  <span className="h-2 w-2 rounded-sm shrink-0 bg-amber-500" />
+                  <span className="h-2.5 w-2.5 rounded-sm shrink-0 bg-amber-500 shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
                   <span className="truncate text-zinc-800 dark:text-zinc-200 font-medium">
                     Tasks (Google & Myra)
                   </span>
@@ -1224,14 +1224,14 @@ export const CalendarView: React.FC = () => {
         description={modalTab === 'event' ? 'Schedule a work session, meeting, or milestone.' : 'Schedule a task with due dates and priorities across your workspace.'}
       >
         {(!editingEvent && !editingTask) && (
-          <div className="flex rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-100 dark:bg-zinc-900 mb-4">
+          <div className="flex rounded-lg border border-black/5 dark:border-white/10 p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md mb-4 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
             <button
               type="button"
               onClick={() => setModalTab('event')}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-sm transition-colors ${
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
                 modalTab === 'event'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
               Event
@@ -1239,10 +1239,10 @@ export const CalendarView: React.FC = () => {
             <button
               type="button"
               onClick={() => setModalTab('task')}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-sm transition-colors ${
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
                 modalTab === 'task'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
             >
               Task

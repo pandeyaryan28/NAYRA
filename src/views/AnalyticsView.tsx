@@ -163,9 +163,9 @@ export const AnalyticsView: React.FC = () => {
       {/* Primary KPI Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Focus Time */}
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-1">
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase text-zinc-400">Total Focus Time</span>
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Total Focus Time</span>
             <Clock className="h-4 w-4 text-zinc-400" />
           </div>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
@@ -177,9 +177,9 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Task Completion Velocity */}
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-2">
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase text-zinc-400">Task Velocity</span>
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Task Velocity</span>
             <CheckSquare className="h-4 w-4 text-zinc-400" />
           </div>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
@@ -191,9 +191,9 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Habit Consistency */}
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-3">
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase text-zinc-400">Habit Adherence</span>
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Habit Adherence</span>
             <Flame className="h-4 w-4 text-zinc-400" />
           </div>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
@@ -205,9 +205,9 @@ export const AnalyticsView: React.FC = () => {
         </div>
 
         {/* Pomodoros Completed */}
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-1 interactive-card card-enter stagger-4">
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl space-y-1 interactive-card apple-card-surface card-enter stagger-4">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase text-zinc-400">Pomodoros Done</span>
+            <span className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">Pomodoros Done</span>
             <Award className="h-4 w-4 text-zinc-400" />
           </div>
           <span className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
@@ -220,10 +220,10 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* 7-Day Focus Distribution Chart */}
-      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 card-enter stagger-2 interactive-card">
+      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-4 card-enter stagger-2 interactive-card apple-card-surface">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
               7-Day Deep Work Distribution
             </h3>
             <p className="text-xs text-zinc-400">
@@ -271,10 +271,10 @@ export const AnalyticsView: React.FC = () => {
       </div>
 
       {/* Tag Performance & Time Allocation Section */}
-      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-5 card-enter stagger-3 interactive-card">
+      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-5 card-enter stagger-3 interactive-card apple-card-surface">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800 gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <Tag className="h-4 w-4 text-sky-500" />
               <span>Tag Performance & Time Allocation</span>
             </h3>
@@ -284,12 +284,12 @@ export const AnalyticsView: React.FC = () => {
           </div>
 
           {/* Sort Selector */}
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded-md px-2.5 py-1 bg-zinc-50 dark:bg-zinc-900 self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400 border border-black/5 dark:border-white/10 rounded-lg px-2.5 py-1.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] self-start sm:self-auto swiftui-press">
             <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
             <select
               value={tagSortBy}
               onChange={(e) => setTagSortBy(e.target.value as any)}
-              className="bg-transparent text-xs font-medium text-zinc-700 dark:text-zinc-300 border-0 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-zinc-800 dark:text-zinc-200 border-0 focus:outline-none cursor-pointer"
             >
               <option value="focus">Sort: Focus Time</option>
               <option value="tasks">Sort: Total Tasks</option>
@@ -354,7 +354,7 @@ export const AnalyticsView: React.FC = () => {
             {sortedTagAnalytics.map((item) => (
               <div
                 key={item.tag}
-                className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/40 dark:bg-zinc-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors"
+                className="p-3.5 rounded-xl border border-zinc-100/80 dark:border-zinc-800/80 bg-white/50 dark:bg-zinc-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/80 dark:hover:bg-zinc-800/60 transition-colors swiftui-row"
               >
                 {/* Tag Badge & Task Counts */}
                 <div className="space-y-1 min-w-0 sm:w-1/3">

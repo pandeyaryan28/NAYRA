@@ -14,10 +14,10 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        'rounded-lg p-4 sm:p-6 transition-all duration-200',
-        'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm',
+        'apple-card-surface rounded-lg p-4 sm:p-6 transition-all duration-200',
+        'bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm',
         hoverEffect &&
-          'hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer active:scale-[0.995]',
+          'hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md cursor-pointer swiftui-press active:scale-[0.995]',
         className
       )}
       {...props}

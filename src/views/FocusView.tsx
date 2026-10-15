@@ -123,33 +123,33 @@ export const FocusView: React.FC = () => {
         </div>
 
         {/* Mode Selector */}
-        <div className="flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-50 dark:bg-zinc-900">
+        <div className="flex items-center rounded-lg border border-black/5 dark:border-white/10 p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
           <button
             onClick={() => setMode('focus')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm transition-all duration-200 ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
               mode === 'focus'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold scale-[1.02]'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
+                ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             Focus ({settings.defaultFocusMinutes || 25}m)
           </button>
           <button
             onClick={() => setMode('shortBreak')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm transition-all duration-200 ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
               mode === 'shortBreak'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold scale-[1.02]'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
+                ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             Short Break ({settings.shortBreakMinutes || 5}m)
           </button>
           <button
             onClick={() => setMode('longBreak')}
-            className={`px-3 py-1 text-xs font-medium rounded-sm transition-all duration-200 ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
               mode === 'longBreak'
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold scale-[1.02]'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
+                ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             Long Break ({settings.longBreakMinutes || 15}m)
@@ -221,7 +221,7 @@ export const FocusView: React.FC = () => {
               variant="primary"
               size="lg"
               onClick={startTimer}
-              className="gap-2 px-8 shadow-sm transition-transform duration-150 active:scale-95"
+              className="gap-2 px-8 rounded-xl shadow-[0_4px_14px_-2px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.25)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.85)] swiftui-press"
             >
               <Play className="h-5 w-5 fill-current" />
               <span>Start Focus</span>
@@ -234,7 +234,7 @@ export const FocusView: React.FC = () => {
                 variant="primary"
                 size="lg"
                 onClick={pauseTimer}
-                className="gap-2 px-6"
+                className="gap-2 px-6 rounded-xl swiftui-press"
               >
                 <Pause className="h-5 w-5 fill-current" />
                 <span>Pause</span>
@@ -243,7 +243,7 @@ export const FocusView: React.FC = () => {
                 variant="outline"
                 size="lg"
                 onClick={stopTimer}
-                className="gap-2"
+                className="gap-2 rounded-xl swiftui-press"
                 title="Stop and Reset"
               >
                 <Square className="h-4 w-4" />
@@ -253,7 +253,7 @@ export const FocusView: React.FC = () => {
                 variant="ghost"
                 size="lg"
                 onClick={skipSession}
-                className="gap-2"
+                className="gap-2 rounded-xl swiftui-press"
                 title="Skip to next session"
               >
                 <SkipForward className="h-4 w-4" />
@@ -268,7 +268,7 @@ export const FocusView: React.FC = () => {
                 variant="primary"
                 size="lg"
                 onClick={resumeTimer}
-                className="gap-2 px-6"
+                className="gap-2 px-6 rounded-xl swiftui-press"
               >
                 <Play className="h-5 w-5 fill-current" />
                 <span>Resume</span>
@@ -277,7 +277,7 @@ export const FocusView: React.FC = () => {
                 variant="outline"
                 size="lg"
                 onClick={stopTimer}
-                className="gap-2"
+                className="gap-2 rounded-xl swiftui-press"
               >
                 <Square className="h-4 w-4" />
                 <span>Reset</span>
@@ -287,10 +287,10 @@ export const FocusView: React.FC = () => {
         </div>
 
         {/* Dynamic Multi-Task Pomodoro Panel */}
-        <div className="mt-8 w-full max-w-lg p-5 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3.5 interactive-card">
+        <div className="mt-8 w-full max-w-lg p-5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-3.5 interactive-card apple-card-surface">
           <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 dark:border-zinc-800">
             <div>
-              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block font-semibold">
                 Associated Task
               </span>
               <span className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -303,7 +303,7 @@ export const FocusView: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={handleOpenPicker}
-              className="text-xs shrink-0 gap-1.5"
+              className="text-xs shrink-0 gap-1.5 rounded-lg swiftui-press"
             >
               <ListTodo className="h-3.5 w-3.5" />
               <span>{selectedTasks.length === 0 ? 'Link Tasks' : 'Manage Tasks'}</span>
@@ -326,7 +326,7 @@ export const FocusView: React.FC = () => {
                 return (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between p-2.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60 text-xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white/60 dark:bg-zinc-800/50 text-xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors swiftui-row"
                   >
                     <div className="min-w-0 flex-1 pr-2">
                       <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate block">
@@ -362,7 +362,7 @@ export const FocusView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => removeSessionTask(t.id)}
-                      className="p-1 text-zinc-400 hover:text-rose-500 rounded-md transition-colors cursor-pointer shrink-0"
+                      className="p-1 text-zinc-400 hover:text-rose-500 rounded-md transition-colors cursor-pointer shrink-0 swiftui-press"
                       title="Remove from session (preserves accumulated time)"
                     >
                       <X className="h-4 w-4" />
@@ -377,29 +377,29 @@ export const FocusView: React.FC = () => {
 
       {/* Focus Productivity Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-1">
-          <span className="text-[11px] text-zinc-400 font-mono uppercase block">Today Focus</span>
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-1">
+          <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Today Focus</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {formatSecondsToHoursMinutes(focusStats.todayFocusSeconds)}
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-2">
-          <span className="text-[11px] text-zinc-400 font-mono uppercase block">Pomodoros Today</span>
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-2">
+          <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Pomodoros Today</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {focusStats.todayPomodoroCount}
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-3">
-          <span className="text-[11px] text-zinc-400 font-mono uppercase block">Weekly Focus</span>
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-3">
+          <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Weekly Focus</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {formatSecondsToHoursMinutes(focusStats.weekFocusSeconds)}
           </span>
         </div>
 
-        <div className="p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 interactive-card card-enter stagger-4">
-          <span className="text-[11px] text-zinc-400 font-mono uppercase block">Focus Streak</span>
+        <div className="p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-xl interactive-card apple-card-surface card-enter stagger-4">
+          <span className="text-[11px] text-zinc-400 font-mono uppercase block font-semibold">Focus Streak</span>
           <span className="text-xl font-bold font-mono text-zinc-900 dark:text-zinc-100 mt-1 block">
             {focusStats.streakDays} days
           </span>
@@ -407,9 +407,9 @@ export const FocusView: React.FC = () => {
       </div>
 
       {/* Recent Session History */}
-      <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4 interactive-card card-enter stagger-2">
+      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl p-5 space-y-4 interactive-card apple-card-surface card-enter stagger-2">
         <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
             Recent Focus Sessions
           </h3>
           <span className="text-xs text-zinc-400 font-mono">
@@ -424,7 +424,7 @@ export const FocusView: React.FC = () => {
             .map((s) => (
               <div
                 key={s.id}
-                className="flex items-center justify-between p-3 rounded-md border border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/50 text-xs hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-zinc-100/80 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-900/40 text-xs hover:bg-zinc-100/80 dark:hover:bg-zinc-800/70 transition-colors swiftui-row"
               >
                 <div className="space-y-0.5 truncate mr-3">
                   <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate block">
@@ -464,7 +464,7 @@ export const FocusView: React.FC = () => {
               placeholder="Search tasks by title or tag..."
               value={pickerSearch}
               onChange={(e) => setPickerSearch(e.target.value)}
-              className="w-full text-xs bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md p-2 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+              className="w-full text-xs bg-zinc-50/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800 rounded-lg p-2.5 placeholder:text-zinc-400 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)] focus:outline-none focus:ring-1 focus:ring-zinc-400 transition-all"
             />
           </div>
 
@@ -479,10 +479,10 @@ export const FocusView: React.FC = () => {
                 return (
                   <label
                     key={t.id}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all duration-150 swiftui-press ${
                       isChecked
-                        ? 'border-zinc-900 bg-zinc-100/80 dark:border-zinc-200 dark:bg-zinc-800/80'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
+                        ? 'border-zinc-900 bg-white dark:border-zinc-200 dark:bg-zinc-800 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.08)]'
+                        : 'border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
@@ -523,13 +523,13 @@ export const FocusView: React.FC = () => {
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center justify-between pt-3 border-t border-zinc-200 dark:border-zinc-800 gap-2">
+          <div className="flex items-center justify-between pt-3 border-t border-zinc-200/80 dark:border-zinc-800/80 gap-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={handleClearAllTasks}
-              className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+              className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 swiftui-press"
             >
               Clear All (Autonomous)
             </Button>
@@ -539,7 +539,7 @@ export const FocusView: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsTaskPickerOpen(false)}
-                className="text-xs"
+                className="text-xs swiftui-press rounded-lg"
               >
                 Cancel
               </Button>
@@ -548,9 +548,9 @@ export const FocusView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={handleApplyPicker}
-                className="text-xs"
+                className="text-xs swiftui-press rounded-lg"
               >
-                Apply ({pickerSelectedIds.size} Selected)
+                Apply Tasks ({pickerSelectedIds.size})
               </Button>
             </div>
           </div>

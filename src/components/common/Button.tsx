@@ -8,7 +8,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', ...props }, ref) => {
-    const base = 'inline-flex items-center justify-center font-medium transition-all duration-150 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.98] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer';
+    const base = 'inline-flex items-center justify-center font-medium transition-all duration-150 ease-[cubic-bezier(0.34,1.56,0.64,1)] swiftui-press active:scale-[0.98] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer';
 
     const variants = {
       primary: 'bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-[0_3px_8px_-1px_rgba(0,0,0,0.18),inset_0_1px_0_0_rgba(255,255,255,0.25),inset_0_-1px_0_0_rgba(0,0,0,0.2)] dark:shadow-[0_3px_8px_-1px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.7),inset_0_-1px_0_0_rgba(0,0,0,0.1)] active:shadow-[0_1px_2px_0_rgba(0,0,0,0.15),inset_0_2px_4px_0_rgba(0,0,0,0.3)]',

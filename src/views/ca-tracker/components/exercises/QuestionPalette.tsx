@@ -281,7 +281,7 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                 type="button"
                 onClick={() => onSelectQuestion(idx)}
                 className={cn(
-                  'relative flex items-center justify-center h-9 w-full rounded-md border text-xs font-medium transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm active:scale-95 cursor-pointer',
+                  'relative flex items-center justify-center h-9 w-full rounded-lg border text-xs font-semibold transition-all duration-150 swiftui-press cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.03)]',
                   statusClass,
                   isCurrent &&
                     'ring-2 ring-zinc-900 dark:ring-zinc-100 ring-offset-2 dark:ring-offset-zinc-900 font-bold z-10'
@@ -309,7 +309,7 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
       {/* 3-Column Metric Strip */}
       {showFooterStats && !isReviewMode && (
         <div className="grid grid-cols-3 gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800 text-center">
-          <div className="flex flex-col items-center justify-center py-2 px-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
+          <div className="flex flex-col items-center justify-center py-2 px-1 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/40 backdrop-blur-md border border-emerald-200/80 dark:border-emerald-800/60 shadow-[0_1px_3px_rgba(16,185,129,0.06)]">
             <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
               Answered
             </span>
@@ -317,7 +317,7 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
               {answeredCount}
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center py-2 px-1 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60">
+          <div className="flex flex-col items-center justify-center py-2 px-1 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 backdrop-blur-md border border-amber-200/80 dark:border-amber-800/60 shadow-[0_1px_3px_rgba(245,158,11,0.06)]">
             <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">
               Marked
             </span>
@@ -325,7 +325,7 @@ export const QuestionPalette: React.FC<QuestionPaletteProps> = ({
               {markedCount}
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center py-2 px-1 rounded-md bg-zinc-100 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700/60">
+          <div className="flex flex-col items-center justify-center py-2 px-1 rounded-lg bg-zinc-100/70 dark:bg-zinc-800/70 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
               Pending
             </span>

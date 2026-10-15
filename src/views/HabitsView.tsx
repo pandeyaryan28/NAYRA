@@ -141,13 +141,13 @@ export const HabitsView: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-md p-0.5 bg-zinc-100/50 dark:bg-zinc-800/50">
+          <div className="flex items-center border border-black/5 dark:border-white/10 rounded-lg p-0.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-md shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)]">
             <button
               type="button"
               onClick={() => setShowArchived(false)}
-              className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-all duration-150 ${
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
                 !showArchived
-                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                  ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
@@ -156,9 +156,9 @@ export const HabitsView: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowArchived(true)}
-              className={`px-2.5 py-1 text-xs font-medium rounded-sm transition-all duration-150 ${
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-150 swiftui-press ${
                 showArchived
-                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                  ? 'bg-white dark:bg-zinc-700/90 text-zinc-950 dark:text-zinc-50 shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_1px_rgba(0,0,0,0.06)]'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
@@ -166,14 +166,14 @@ export const HabitsView: React.FC = () => {
             </button>
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleTodayWeek} className="transition-transform active:scale-95">
+          <Button variant="outline" size="sm" onClick={handleTodayWeek} className="swiftui-press rounded-lg">
             Current Week
           </Button>
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="h-8 w-8 transition-transform active:scale-90">
+          <div className="flex items-center gap-0.5">
+            <Button variant="ghost" size="icon" onClick={handlePrevWeek} className="h-8 w-8 swiftui-press rounded-lg">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleNextWeek} className="h-8 w-8 transition-transform active:scale-90">
+            <Button variant="ghost" size="icon" onClick={handleNextWeek} className="h-8 w-8 swiftui-press rounded-lg">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -181,18 +181,18 @@ export const HabitsView: React.FC = () => {
             variant="primary"
             size="sm"
             onClick={handleOpenCreate}
-            className="gap-1.5 transition-transform active:scale-95"
+            className="gap-1.5 shadow-[0_2px_8px_-1px_rgba(0,0,0,0.18)] swiftui-press rounded-lg"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 stroke-[2.5]" />
             <span>New Habit</span>
           </Button>
         </div>
       </div>
 
       {/* Habit Matrix Table */}
-      <div className="clay-surface rounded-2xl overflow-hidden">
+      <div className="clay-surface apple-card-surface rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
         {/* Table Header */}
-        <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_120px] border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_120px] border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/70 dark:bg-zinc-900/60 backdrop-blur-md p-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
           <div>Habit & Category</div>
           {weekDays.map((d) => {
             const today = isToday(d);
@@ -231,7 +231,7 @@ export const HabitsView: React.FC = () => {
               return (
                 <div
                   key={habit.id}
-                  className={`grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_130px] items-center p-3 hover:bg-zinc-50/40 dark:hover:bg-zinc-900/30 transition-colors ${
+                  className={`grid grid-cols-[minmax(220px,1.5fr)_repeat(7,minmax(48px,1fr))_130px] items-center p-3 hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors swiftui-row ${
                     habit.archived ? 'opacity-65' : ''
                   }`}
                 >
@@ -239,14 +239,14 @@ export const HabitsView: React.FC = () => {
                   <div className="min-w-0 pr-3">
                     <div className="flex items-center gap-2">
                       <span
-                        className="h-2 w-2 rounded-sm shrink-0"
+                        className="h-2.5 w-2.5 rounded-sm shrink-0 shadow-xs"
                         style={{ backgroundColor: habit.color }}
                       />
                       <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                         {habit.title}
                       </span>
                       {habit.archived && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-mono">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-mono">
                           Archived
                         </span>
                       )}
@@ -273,16 +273,16 @@ export const HabitsView: React.FC = () => {
                       <div key={dateStr} className="flex justify-center">
                         <button
                           onClick={() => toggleHabitDate(habit.id, dateStr)}
-                          className={`h-7 w-7 rounded-sm flex items-center justify-center transition-all ${
+                          className={`h-7 w-7 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer swiftui-checkbox ${
                             isDone
-                              ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                              ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-[0_2px_6px_rgba(0,0,0,0.18)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.4)]'
                               : today
-                              ? 'border-2 border-dashed border-zinc-400 dark:border-zinc-600 hover:border-zinc-900 dark:hover:border-zinc-200'
-                              : 'border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
+                              ? 'border-2 border-zinc-400/80 dark:border-zinc-600 hover:border-zinc-900 dark:hover:border-zinc-200 bg-white/40 dark:bg-zinc-800/40'
+                              : 'border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-400 dark:hover:border-zinc-600 bg-white/20 dark:bg-zinc-800/20'
                           }`}
                           aria-label={`Toggle habit on ${dateStr}`}
                         >
-                          {isDone && <Check className="h-4 w-4 stroke-[3] task-checkbox-pop" />}
+                          {isDone && <Check className="h-4 w-4 stroke-[3] task-checkbox-pop apple-check-spring" />}
                         </button>
                       </div>
                     );
