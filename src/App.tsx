@@ -8,6 +8,7 @@ import { CATrackerProvider } from '@/context/CATrackerContext';
 
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { LoginView } from '@/views/LoginView';
 import { DashboardView } from '@/views/DashboardView';
 import { CalendarView } from '@/views/CalendarView';
@@ -35,7 +36,7 @@ export const App: React.FC = () => {
 
                 {/* Authenticated Application Shell & Modules */}
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/" element={<AppShell />}>
+                  <Route path="/" element={<ErrorBoundary><AppShell /></ErrorBoundary>}>
                     <Route index element={<DashboardView />} />
                     <Route path="calendar" element={<CalendarView />} />
                     <Route path="tasks" element={<TasksView />} />

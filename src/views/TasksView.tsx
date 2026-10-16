@@ -131,7 +131,8 @@ export const TasksView: React.FC = () => {
   const [newListTitle, setNewListTitle] = useState('');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
-  // Collapsible Archived accordion in active view
+  // Collapsible sections
+  const [isCompletedSectionOpen, setIsCompletedSectionOpen] = useState(true);
   const [isArchivedSectionOpen, setIsArchivedSectionOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
@@ -174,8 +175,11 @@ export const TasksView: React.FC = () => {
   const allUniqueTags = useMemo(() => {
     const map = new Map<string, number>();
     tasks.forEach((t) => {
+      if (!t || !Array.isArray(t.tags)) return;
       const uniqueTaskTags = new Set(
-        t.tags?.map((tg) => tg.trim().toLowerCase()).filter(Boolean)
+        t.tags
+          .filter((tg): tg is string => typeof tg === 'string' && tg.trim().length > 0)
+          .map((tg) => tg.trim().toLowerCase())
       );
       uniqueTaskTags.forEach((lower) => {
         map.set(lower, (map.get(lower) || 0) + 1);
@@ -246,13 +250,13 @@ export const TasksView: React.FC = () => {
 
   // Total count of starred active tasks
   const totalStarredCount = useMemo(() => {
-    return tasks.filter((t) => !t.archived && t.status !== 'completed' && Boolean(t.starred)).length;
+    return tasks.filter((t) => !t.archived && t.status !== 'completed' && !t.completed && Boolean(t.starred)).length;
   }, [tasks]);
 
   // In Apple Reminders, Today includes active tasks due today AND overdue/past tasks
   const todayTasksCount = useMemo(() => {
     return tasks.filter((t) => {
-      if (t.archived || t.status === 'completed' || !t.due) return false;
+      if (t.archived || t.status === 'completed' || t.completed || !t.due) return false;
       try {
         const parsed = parseISO(t.due);
         return isToday(parsed) || isPast(parsed);
@@ -265,7 +269,7 @@ export const TasksView: React.FC = () => {
   // Scheduled / Upcoming tasks (tomorrow and future)
   const upcomingTasksCount = useMemo(() => {
     return tasks.filter((t) => {
-      if (t.archived || t.status === 'completed' || !t.due) return false;
+      if (t.archived || t.status === 'completed' || t.completed || !t.due) return false;
       try {
         const parsed = parseISO(t.due);
         return !isPast(parsed) && !isToday(parsed);
@@ -319,27 +323,32 @@ export const TasksView: React.FC = () => {
 
   // Active (unarchived, not completed) tasks in scope
   const activeScopedTasks = useMemo(() => {
-    return scopedTasks.filter((t) => !t.archived && t.status !== 'completed');
+    return scopedTasks.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
   }, [scopedTasks]);
 
-  // Archived or completed tasks in scope
+  // Completed but unarchived tasks in scope
+  const completedScopedTasks = useMemo(() => {
+    return scopedTasks.filter((t) => !t.archived && (t.status === 'completed' || Boolean(t.completed)));
+  }, [scopedTasks]);
+
+  // Archived tasks in scope
   const archivedScopedTasks = useMemo(() => {
-    return scopedTasks.filter((t) => t.archived || t.status === 'completed');
+    return scopedTasks.filter((t) => Boolean(t.archived));
   }, [scopedTasks]);
 
   // Completed tasks in scope that haven't been marked archived
   const completedUnarchivedCount = useMemo(() => {
-    return scopedTasks.filter((t) => t.status === 'completed' && !t.archived).length;
-  }, [scopedTasks]);
+    return completedScopedTasks.length;
+  }, [completedScopedTasks]);
 
   // Helper to get total unarchived tasks across all lists
   const totalActiveTasksCount = useMemo(() => {
-    return tasks.filter((t) => !t.archived && t.status !== 'completed').length;
+    return tasks.filter((t) => !t.archived && t.status !== 'completed' && !t.completed).length;
   }, [tasks]);
 
   // Helper to get total archived tasks across all lists
   const totalArchivedTasksCount = useMemo(() => {
-    return tasks.filter((t) => t.archived || t.status === 'completed').length;
+    return tasks.filter((t) => Boolean(t.archived)).length;
   }, [tasks]);
 
   // Filter & sort tasks for main list display
@@ -347,25 +356,25 @@ export const TasksView: React.FC = () => {
     let result = scopedTasks;
 
     if (activeTaskListId === 'archived_view') {
-      result = result.filter((t) => t.archived || t.status === 'completed');
+      result = result.filter((t) => Boolean(t.archived));
     } else if (filterMode === 'active') {
-      result = result.filter((t) => !t.archived && t.status !== 'completed');
+      result = result.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
     } else if (filterMode === 'archived') {
-      result = result.filter((t) => t.archived || t.status === 'completed');
+      result = result.filter((t) => Boolean(t.archived));
     }
 
     if (selectedTag) {
       const lowerTag = selectedTag.toLowerCase();
-      result = result.filter((t) => t.tags && t.tags.some((tg) => tg.toLowerCase() === lowerTag));
+      result = result.filter((t) => Array.isArray(t.tags) && t.tags.some((tg) => typeof tg === 'string' && tg.toLowerCase() === lowerTag));
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(
         (t) =>
-          t.title.toLowerCase().includes(q) ||
-          (t.notes && t.notes.toLowerCase().includes(q)) ||
-          (t.tags && t.tags.some((tg) => tg.toLowerCase().includes(q)))
+          ((t.title || '').toLowerCase().includes(q)) ||
+          ((t.notes || '').toLowerCase().includes(q)) ||
+          (Array.isArray(t.tags) && t.tags.some((tg) => typeof tg === 'string' && tg.toLowerCase().includes(q)))
       );
     }
 
@@ -373,13 +382,13 @@ export const TasksView: React.FC = () => {
       result = [...result].sort((a, b) => {
         if (!a.due) return 1;
         if (!b.due) return -1;
-        return a.due.localeCompare(b.due);
+        return (a.due || '').localeCompare(b.due || '');
       });
     } else if (sortBy === 'priority') {
       const priorityWeight: Record<TaskPriority, number> = { high: 3, medium: 2, low: 1 };
-      result = [...result].sort((a, b) => priorityWeight[b.priority] - priorityWeight[a.priority]);
+      result = [...result].sort((a, b) => (priorityWeight[b.priority] || 2) - (priorityWeight[a.priority] || 2));
     } else if (sortBy === 'title') {
-      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+      result = [...result].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
     }
 
     return result;
@@ -433,9 +442,9 @@ export const TasksView: React.FC = () => {
 
       const sortByPriorityThenTitle = (arr: TaskItem[]) =>
         [...arr].sort((a, b) => {
-          const diff = priorityWeight[b.priority] - priorityWeight[a.priority];
+          const diff = (priorityWeight[b.priority] || 2) - (priorityWeight[a.priority] || 2);
           if (diff !== 0) return diff;
-          return a.title.localeCompare(b.title);
+          return (a.title || '').localeCompare(b.title || '');
         });
 
       const groups: TaskGroup[] = [
@@ -501,7 +510,7 @@ export const TasksView: React.FC = () => {
         [...arr].sort((a, b) => {
           if (!a.due) return 1;
           if (!b.due) return -1;
-          return a.due.localeCompare(b.due);
+          return (a.due || '').localeCompare(b.due || '');
         });
 
       const groups: TaskGroup[] = [
@@ -570,13 +579,14 @@ export const TasksView: React.FC = () => {
 
     if (!cleanTitle && !quickTaskTitle.trim()) return;
 
+    const defaultListId = uniqueTaskLists.find((l) => l.isDefault)?.id || uniqueTaskLists[0]?.id || taskLists[0]?.id || 'list_default';
     const targetListId =
       activeTaskListId === 'all' ||
       activeTaskListId === 'archived_view' ||
       activeTaskListId === 'starred' ||
       activeTaskListId === 'today' ||
       activeTaskListId === 'upcoming'
-        ? taskLists[0]?.id || 'list_default'
+        ? defaultListId
         : activeTaskListId;
 
     const initialTags = Array.from(
@@ -586,16 +596,35 @@ export const TasksView: React.FC = () => {
       ])
     );
 
+    // If adding while in Starred view, ensure new task is starred so it is immediately visible
+    const isStarred = activeTaskListId === 'starred';
+
+    // If adding while in Today or Upcoming view without explicit date, default appropriately so it is immediately visible
+    let resolvedDue = quickDueDate || undefined;
+    if (!resolvedDue) {
+      if (activeTaskListId === 'today') {
+        resolvedDue = new Date().toISOString().split('T')[0];
+      } else if (activeTaskListId === 'upcoming') {
+        resolvedDue = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      }
+    }
+
     await createTask({
       title: (cleanTitle || quickTaskTitle).trim(),
-      due: quickDueDate || (activeTaskListId === 'today' ? new Date().toISOString().split('T')[0] : undefined),
+      due: resolvedDue,
       taskListId: targetListId,
       priority: 'medium',
+      starred: isStarred,
       tags: initialTags,
     });
 
     setQuickTaskTitle('');
     setQuickDueDate('');
+
+    // If user was filtering by archived only, switch back to active so the new task is visible
+    if (filterMode === 'archived') {
+      setFilterMode('active');
+    }
   };
 
   const handleStartFocus = (task: TaskItem) => {
@@ -669,7 +698,7 @@ export const TasksView: React.FC = () => {
 
   // Render a task item across density modes
   const renderTaskItem = (t: TaskItem) => {
-    const isCompleted = t.status === 'completed';
+    const isCompleted = t.status === 'completed' || Boolean(t.completed);
     const isArchived = Boolean(t.archived);
     const isOverdue = t.due && isPast(parseISO(t.due)) && !isToday(parseISO(t.due)) && !isCompleted;
     const isDueToday = t.due && isToday(parseISO(t.due)) && !isCompleted;
@@ -1732,6 +1761,8 @@ export const TasksView: React.FC = () => {
                 ? 'No upcoming tasks scheduled.'
                 : activeTaskListId === 'archived_view'
                 ? 'No archived tasks yet.'
+                : completedScopedTasks.length > 0 && filterMode === 'active'
+                ? `All active tasks completed! (${completedScopedTasks.length} completed below)`
                 : 'No tasks. Click above to add a task!'}
             </div>
           ) : densityMode === 'board' ? (
@@ -1819,6 +1850,52 @@ export const TasksView: React.FC = () => {
         </div>
 
         {/* Collapsible Completed Section */}
+        {filterMode === 'active' && completedScopedTasks.length > 0 && activeTaskListId !== 'archived_view' && (
+          <div className="pt-2 space-y-2 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setIsCompletedSectionOpen(!isCompletedSectionOpen)}
+                className="flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors group cursor-pointer swiftui-press"
+              >
+                <ChevronRight
+                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                    isCompletedSectionOpen ? 'rotate-90 text-zinc-700 dark:text-zinc-300' : ''
+                  }`}
+                />
+                <span>Completed</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-200/60 dark:bg-white/[0.06] text-zinc-500">
+                  {completedScopedTasks.length}
+                </span>
+              </button>
+
+              {isCompletedSectionOpen && (
+                <button
+                  type="button"
+                  onClick={() => archiveCompletedTasks(activeTaskListId)}
+                  className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer swiftui-press"
+                  title="Archive all completed tasks in this list"
+                >
+                  Archive Completed
+                </button>
+              )}
+            </div>
+
+            {isCompletedSectionOpen && (
+              <div
+                className={`animate-slide-down ${
+                  densityMode === 'compact'
+                    ? 'divide-y divide-zinc-100 dark:divide-white/[0.05] apple-card-surface liquid-glass-card p-2 sm:p-4'
+                    : 'space-y-2.5 pt-1'
+                }`}
+              >
+                {completedScopedTasks.map(renderTaskItem)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Collapsible Archived Section */}
         {filterMode === 'active' && archivedScopedTasks.length > 0 && activeTaskListId !== 'archived_view' && (
           <div className="pt-2 space-y-2 animate-fade-in">
             <div className="flex items-center justify-between">

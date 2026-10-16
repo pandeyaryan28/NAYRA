@@ -81,7 +81,12 @@ export function resolveGoogleCalendarId(calendarId: string = 'primary', calendar
 }
 
 export function resolveGoogleTaskListId(taskListId: string = '@default', taskLists?: TaskList[]): string {
-  if (!taskListId || taskListId === 'list_default' || taskListId === '@default') {
+  const isVirtual = !taskListId || taskListId === 'list_default' || taskListId === '@default' || ['all', 'starred', 'today', 'upcoming', 'archived_view'].includes(taskListId);
+  if (isVirtual) {
+    const defaultList = taskLists?.find((l) => l.isDefault || l.id === 'list_default');
+    if (defaultList?.googleTaskListId) {
+      return defaultList.googleTaskListId;
+    }
     return '@default';
   }
   if (taskLists && taskLists.length > 0) {

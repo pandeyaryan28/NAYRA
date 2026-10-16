@@ -1361,33 +1361,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createTask = async (taskData: Partial<TaskItem>): Promise<TaskItem> => {
     const newId = generateId('task');
     const now = new Date().toISOString();
-    let googleTaskId: string | undefined = undefined;
 
-    const targetListId = taskData.taskListId || activeTaskListId;
+    const rawListId = taskData.taskListId || activeTaskListId;
+    const isVirtualList = !rawListId || ['all', 'starred', 'today', 'upcoming', 'archived_view'].includes(rawListId);
+    const targetListId = isVirtualList
+      ? (taskListsRef.current.find((l) => l.isDefault)?.id || taskListsRef.current[0]?.id || 'list_default')
+      : rawListId;
     const targetList = taskListsRef.current.find((l) => l.id === targetListId);
 
-    if (googleAccessToken && targetListId) {
-      try {
-        const gtlId = resolveGoogleTaskListId(targetListId, taskListsRef.current);
-        const resp = await createGoogleTask(googleAccessToken, gtlId, taskData, taskListsRef.current);
-        googleTaskId = resp?.id;
-      } catch (e) {
-        console.warn('Failed to create task in Google Tasks directly:', e);
-      }
-    }
+    const isTaskCompleted = taskData.status === 'completed' || Boolean(taskData.completed);
 
     const newTask: TaskItem = {
       id: newId,
-      googleTaskId,
+      googleTaskId: undefined,
       taskListId: targetListId,
-      taskListName: targetList?.title,
-      title: taskData.title || 'New Task',
+      taskListName: targetList?.title || 'My Tasks',
+      title: (taskData.title || 'New Task').trim(),
       notes: taskData.notes || '',
-      status: taskData.status || 'needsAction',
-      archived: taskData.archived || false,
+      status: isTaskCompleted ? 'completed' : 'needsAction',
+      completed: isTaskCompleted,
+      archived: Boolean(taskData.archived),
       archivedAt: taskData.archivedAt,
       due: taskData.due || undefined,
       priority: taskData.priority || 'medium',
+      starred: Boolean(taskData.starred),
       subtasks: taskData.subtasks || [],
       tags: taskData.tags || [],
       totalFocusSeconds: 0,
@@ -1396,15 +1393,35 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: now,
     };
 
+    // 1. Optimistic immediate state update so task appears with zero latency
     setTasks((prev) => {
       const next = [newTask, ...prev];
       tasksRef.current = next;
-      persistActiveTasks(next, 'webApp');
       return next;
     });
+    persistActiveTasks(tasksRef.current, 'webApp');
 
     if (user && !user.isGuest) {
       setDoc(doc(getUserTasksCollection(user.uid), newId), sanitizeForFirestore(newTask)).catch(console.warn);
+    }
+
+    // 2. Asynchronous Google Tasks synchronization without blocking the UI
+    if (googleAccessToken && targetListId) {
+      const gtlId = resolveGoogleTaskListId(targetListId, taskListsRef.current);
+      createGoogleTask(googleAccessToken, gtlId, taskData, taskListsRef.current)
+        .then((resp) => {
+          if (resp?.id) {
+            setTasks((prev) => prev.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t)));
+            tasksRef.current = tasksRef.current.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t));
+            persistActiveTasks(tasksRef.current, 'webApp');
+            if (user && !user.isGuest) {
+              setDoc(doc(getUserTasksCollection(user.uid), newId), { googleTaskId: resp.id }, { merge: true }).catch(console.warn);
+            }
+          }
+        })
+        .catch((e) => {
+          console.warn('Google Tasks direct create notice:', e);
+        });
     }
 
     return newTask;
@@ -1433,6 +1450,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const now = new Date().toISOString();
+    let updatedSnapshot: TaskItem | null = null;
+
     setTasks((prev) => {
       const nextTasks = prev.map((t) => {
         if (t.id === id) {
@@ -1440,29 +1459,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const targetList = taskListsRef.current.find((l) => l.id === targetListId);
           const taskListName = partial.taskListName || (partial.taskListId ? targetList?.title : t.taskListName || targetList?.title);
           const updated = { ...t, ...partial, taskListName, updatedAt: now };
-          if (user && !user.isGuest) {
-            setDoc(doc(getUserTasksCollection(user.uid), id), sanitizeForFirestore(updated), { merge: true }).catch(console.warn);
-          }
+          updatedSnapshot = updated;
           return updated;
         }
         return t;
       });
       tasksRef.current = nextTasks;
-      persistActiveTasks(nextTasks, 'webApp');
       return nextTasks;
     });
+
+    if (updatedSnapshot) {
+      persistActiveTasks(tasksRef.current, 'webApp');
+      if (user && !user.isGuest) {
+        setDoc(doc(getUserTasksCollection(user.uid), id), sanitizeForFirestore(updatedSnapshot), { merge: true }).catch(console.warn);
+      }
+    }
   };
 
   const toggleTaskComplete = async (id: string) => {
     const existing = tasksRef.current.find((t) => t.id === id) || tasks.find((t) => t.id === id);
     if (!existing) return;
-    const isCompleted = existing.status === 'completed';
+    const isCompleted = existing.status === 'completed' || Boolean(existing.completed);
     const nextStatus = isCompleted ? 'needsAction' : 'completed';
     const completedAt = nextStatus === 'completed' ? new Date().toISOString() : null;
-    const archived = nextStatus === 'completed';
-    const archivedAt = nextStatus === 'completed' ? completedAt : null;
 
-    await updateTask(id, { status: nextStatus, completedAt: completedAt as any, archived, archivedAt: archivedAt as any });
+    // Completing a task marks it completed, but does NOT immediately archive it.
+    // It remains in the list / completed section until the user explicitly archives it or clicks "Archive Completed".
+    const archived = nextStatus === 'completed' ? Boolean(existing.archived) : false;
+    const archivedAt = nextStatus === 'completed' ? (existing.archived ? existing.archivedAt : null) : null;
+
+    await updateTask(id, {
+      status: nextStatus,
+      completed: nextStatus === 'completed',
+      completedAt: completedAt as any,
+      archived,
+      archivedAt: archivedAt as any,
+    });
   };
 
   const archiveTask = async (id: string) => {
@@ -1473,6 +1505,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       archived: true,
       archivedAt: now,
       status: 'completed',
+      completed: true,
       completedAt: existing.completedAt || now,
     });
   };
@@ -1482,6 +1515,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       archived: false,
       archivedAt: null as any,
       status: 'needsAction',
+      completed: false,
       completedAt: null as any,
     });
   };
@@ -1490,7 +1524,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const now = new Date().toISOString();
     const currentTasks = tasksRef.current;
     const targetTasks = currentTasks.filter((t) => {
-      const isDone = t.status === 'completed';
+      const isDone = t.status === 'completed' || Boolean(t.completed);
       if (!isDone || t.archived) return false;
       if (taskListId && taskListId !== 'all') {
         return t.taskListId === taskListId;
