@@ -805,7 +805,7 @@ describe('Deep Two-Way Synchronization & Calendar Polish Verification', () => {
     expect(tasks[1].title).toBe('Task Page 2');
   });
 
-  it('fetchGoogleTasks maps completed tasks with archived: true and groups parent subtasks', async () => {
+  it('fetchGoogleTasks decouples completed tasks (archived: false) unless hidden (archived: true) and groups parent subtasks', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -813,13 +813,14 @@ describe('Deep Two-Way Synchronization & Calendar Polish Verification', () => {
         items: [
           { id: 'parent_1', title: 'Parent Objective', status: 'needsAction' },
           { id: 'sub_1', title: 'Child Step 1', status: 'completed', parent: 'parent_1' },
-          { id: 'archived_task', title: 'Historical Task', status: 'completed' },
+          { id: 'archived_task', title: 'Historical Task', status: 'completed', hidden: true },
+          { id: 'completed_task', title: 'Active Completed Task', status: 'completed' },
         ],
       }),
     });
 
     const tasks = await fetchGoogleTasks('test_token', '@default');
-    expect(tasks).toHaveLength(3);
+    expect(tasks).toHaveLength(4);
 
     const parent = tasks.find((t) => t.googleTaskId === 'parent_1');
     expect(parent).toBeDefined();
@@ -830,6 +831,10 @@ describe('Deep Two-Way Synchronization & Calendar Polish Verification', () => {
     const historical = tasks.find((t) => t.googleTaskId === 'archived_task');
     expect(historical?.archived).toBe(true);
     expect(historical?.status).toBe('completed');
+
+    const completedActive = tasks.find((t) => t.googleTaskId === 'completed_task');
+    expect(completedActive?.archived).toBe(false);
+    expect(completedActive?.status).toBe('completed');
   });
 
   it('renders TasksView, supports archiving completed tasks, and expands the collapsible archive section', async () => {

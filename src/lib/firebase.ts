@@ -105,7 +105,8 @@ export const OPERATOR_UID = 'yApeiNzo23bPTvpEXHgNIgiTX0y1';
 export interface ActiveTasksCloudDoc {
   tasks: any[];
   updatedAt: string;
-  source: 'googleTasks' | 'webApp' | 'tab' | 'extension';
+  source: 'googleTasks' | 'webApp' | 'tab' | 'extension' | 'androidApp';
+  completedTaskIds?: string[];
 }
 
 export const getUserActiveTasksDoc = (userId: string) => doc(db, 'users', userId, 'config', 'activeTasks');
@@ -116,7 +117,7 @@ export const getUserActiveTasksDoc = (userId: string) => doc(db, 'users', userId
 export async function syncActiveTasksToFirestore(
   uid: string = OPERATOR_UID,
   tasks: any[],
-  source: 'googleTasks' | 'webApp' | 'tab' | 'extension' = 'webApp'
+  source: 'googleTasks' | 'webApp' | 'tab' | 'extension' | 'androidApp' = 'webApp'
 ): Promise<void> {
   try {
     const ref = getUserActiveTasksDoc(uid);

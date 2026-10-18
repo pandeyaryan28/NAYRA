@@ -34,7 +34,7 @@ import { Select } from '@/components/common/Select';
 import { Badge } from '@/components/common/Badge';
 import { TaskItem, TaskPriority, TaskList } from '@/types';
 import { formatSecondsToHoursMinutes, formatGoogleTasksDue, safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
-import { isToday, isPast, isTomorrow, isThisWeek, parseISO } from 'date-fns';
+import { isToday, isPast, isTomorrow, isThisWeek, parseISO, format, addDays, isAfter, startOfDay } from 'date-fns';
 import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 
 export const TasksView: React.FC = () => {
@@ -259,7 +259,7 @@ export const TasksView: React.FC = () => {
       if (t.archived || t.status === 'completed' || t.completed || !t.due) return false;
       try {
         const parsed = parseISO(t.due);
-        return isToday(parsed) || isPast(parsed);
+        return !isAfter(startOfDay(parsed), startOfDay(new Date()));
       } catch {
         return false;
       }
@@ -272,7 +272,7 @@ export const TasksView: React.FC = () => {
       if (t.archived || t.status === 'completed' || t.completed || !t.due) return false;
       try {
         const parsed = parseISO(t.due);
-        return !isPast(parsed) && !isToday(parsed);
+        return isAfter(startOfDay(parsed), startOfDay(new Date()));
       } catch {
         return false;
       }
@@ -292,7 +292,7 @@ export const TasksView: React.FC = () => {
         if (!t.due) return false;
         try {
           const parsed = parseISO(t.due);
-          return isToday(parsed) || isPast(parsed);
+          return !isAfter(startOfDay(parsed), startOfDay(new Date()));
         } catch {
           return false;
         }
@@ -303,7 +303,7 @@ export const TasksView: React.FC = () => {
         if (!t.due) return false;
         try {
           const parsed = parseISO(t.due);
-          return !isPast(parsed) && !isToday(parsed);
+          return isAfter(startOfDay(parsed), startOfDay(new Date()));
         } catch {
           return false;
         }
@@ -603,9 +603,9 @@ export const TasksView: React.FC = () => {
     let resolvedDue = quickDueDate || undefined;
     if (!resolvedDue) {
       if (activeTaskListId === 'today') {
-        resolvedDue = new Date().toISOString().split('T')[0];
+        resolvedDue = format(new Date(), 'yyyy-MM-dd');
       } else if (activeTaskListId === 'upcoming') {
-        resolvedDue = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+        resolvedDue = format(addDays(new Date(), 1), 'yyyy-MM-dd');
       }
     }
 

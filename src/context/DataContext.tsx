@@ -573,15 +573,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       syncActiveTasksToFirestore(uid, activeOnly, 'webApp').catch(console.warn);
                     }
 
-                    // Forward any task completed in Firestore to Google Tasks if Google token is available
+                    // Forward any task created in Firestore (from Android/Ext) or completed in Firestore to Google Tasks
                     if (googleAccessToken) {
                       merged.forEach((item) => {
-                        if (item.googleTaskId && (item.status === 'completed' || item.completed || item.archived)) {
-                          const prevItem = prev.find((p) => p.id === item.id);
-                          if (prevItem && prevItem.status !== 'completed' && !prevItem.completed && !prevItem.archived) {
-                            const gtlId = resolveGoogleTaskListId(item.taskListId || '@default', taskListsRef.current);
-                            updateGoogleTaskStatus(googleAccessToken, gtlId, item.googleTaskId, 'completed', taskListsRef.current).catch(console.warn);
+                        const prevItem = prev.find((p) => p.id === item.id);
+                        if (item.googleTaskId) {
+                          if (item.status === 'completed' || item.completed || item.archived) {
+                            if (prevItem && prevItem.status !== 'completed' && !prevItem.completed && !prevItem.archived) {
+                              const gtlId = resolveGoogleTaskListId(item.taskListId || '@default', taskListsRef.current);
+                              updateGoogleTaskStatus(googleAccessToken, gtlId, item.googleTaskId, 'completed', taskListsRef.current).catch(console.warn);
+                            }
+                          } else if (item.status === 'needsAction' && !item.completed && !item.archived) {
+                            if (prevItem && (prevItem.status === 'completed' || prevItem.completed)) {
+                              const gtlId = resolveGoogleTaskListId(item.taskListId || '@default', taskListsRef.current);
+                              updateGoogleTaskStatus(googleAccessToken, gtlId, item.googleTaskId, 'needsAction', taskListsRef.current).catch(console.warn);
+                            }
                           }
+                        } else if (!item.archived && !item.completed && item.status !== 'completed' && !prevItem) {
+                          // Brand new task created in Firestore without googleTaskId
+                          const gtlId = resolveGoogleTaskListId(item.taskListId || '@default', taskListsRef.current);
+                          createGoogleTask(googleAccessToken, gtlId, item, taskListsRef.current)
+                            .then((created) => {
+                              if (created?.id) {
+                                setTasks((curr) => curr.map((t) => (t.id === item.id ? { ...t, googleTaskId: created.id } : t)));
+                                tasksRef.current = tasksRef.current.map((t) => (t.id === item.id ? { ...t, googleTaskId: created.id } : t));
+                                setDoc(doc(getUserTasksCollection(uid), item.id), { googleTaskId: created.id }, { merge: true }).catch(console.warn);
+                              }
+                            })
+                            .catch(console.warn);
                         }
                       });
                     }
@@ -596,7 +615,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             const unsubActiveTasks = subscribeActiveTasksFromFirestore(uid, (activeDoc) => {
               if (!active || !activeDoc || !Array.isArray(activeDoc.tasks)) return;
-              if (activeDoc.source === 'extension' || activeDoc.source === 'tab') {
+              if (activeDoc.source === 'extension' || activeDoc.source === 'tab' || activeDoc.source === 'androidApp') {
                 const incomingActive = activeDoc.tasks;
                 const completedTaskIds = new Set<string>(
                   Array.isArray((activeDoc as any).completedTaskIds) ? ((activeDoc as any).completedTaskIds as string[]) : []
@@ -614,15 +633,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       if (existing && existing.status !== 'completed' && !existing.completed && !existing.archived) {
                         changed = true;
                         const now = new Date().toISOString();
-                        prevMap.set(doneId, {
+                        const updated = {
                           ...existing,
-                          status: 'completed',
+                          status: 'completed' as const,
                           completed: true,
                           completedAt: now,
-                          archived: true,
-                          archivedAt: now,
+                          archived: Boolean(existing.archived),
+                          archivedAt: existing.archived ? existing.archivedAt : undefined,
                           updatedAt: now,
-                        });
+                        };
+                        prevMap.set(doneId, updated);
+                        if (user && !user.isGuest) {
+                          setDoc(doc(getUserTasksCollection(uid), doneId), sanitizeForFirestore(updated), { merge: true }).catch(console.warn);
+                        }
                         if (googleAccessToken && existing.googleTaskId) {
                           const gtlId = resolveGoogleTaskListId(existing.taskListId || '@default', taskListsRef.current);
                           updateGoogleTaskStatus(googleAccessToken, gtlId, existing.googleTaskId, 'completed', taskListsRef.current).catch(console.warn);
@@ -659,7 +682,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                           ...inc,
                           totalFocusSeconds: Math.max(lf, rf),
                           pomodoroCount: Math.max(lc, rc),
-                          ...(isRemoteComplete ? { status: 'completed', completed: true, archived: true } : {}),
+                          ...(isRemoteComplete ? { status: 'completed', completed: true, archived: Boolean(inc.archived ?? existing.archived) } : {}),
                         });
                         changed = true;
                       }
@@ -1047,47 +1070,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const unifiedMap = new Map(initialTasks.map((t) => [t.googleTaskId || t.id, t]));
           const allDeletedTaskIds: string[] = [];
 
+          const allRemoteTasks: { rt: TaskItem; list: TaskList }[] = [];
+          const allRemoteGoogleTaskIds = new Set<string>();
+          let allListsFetchedSuccessfully = true;
+
           for (const list of activeLists) {
             const gtlId = list.googleTaskListId || (list.id.startsWith('gtl_') ? list.id.replace('gtl_', '') : '@default');
             try {
               const remoteTasks = await fetchGoogleTasks(token, gtlId, list.id, cleanLists);
-              const remoteGoogleTaskIds = new Set(remoteTasks.map((rt) => rt.googleTaskId).filter(Boolean));
-
-              // Identify tasks belonging to list.id that had a googleTaskId but are absent from Google Tasks (deleted on Google)
-              initialTasks.forEach((t) => {
-                if (t.googleTaskId && isMatchingList(t, list) && !remoteGoogleTaskIds.has(t.googleTaskId)) {
-                  allDeletedTaskIds.push(t.id);
-                  unifiedMap.delete(t.googleTaskId);
-                  unifiedMap.delete(t.id);
+              for (const rt of remoteTasks) {
+                if (rt.googleTaskId) {
+                  allRemoteGoogleTaskIds.add(rt.googleTaskId);
                 }
-              });
-
-              remoteTasks.forEach((rt) => {
-                const existing = unifiedMap.get(rt.googleTaskId!) || googleIdToLocalMap.get(rt.googleTaskId!);
-                if (existing) {
-                  unifiedMap.set(rt.googleTaskId!, {
-                    ...existing,
-                    ...rt,
-                    id: existing.id,
-                    taskListId: list.id,
-                    taskListName: list.title,
-                    tags: existing.tags || (rt as any).tags || [],
-                    subtasks: existing.subtasks?.length ? existing.subtasks : rt.subtasks,
-                    totalFocusSeconds: Math.max(existing.totalFocusSeconds || 0, rt.totalFocusSeconds || 0),
-                    pomodoroCount: Math.max(existing.pomodoroCount || 0, rt.pomodoroCount || 0),
-                    priority: existing.priority || 'medium',
-                    archived: rt.archived ?? existing.archived,
-                    archivedAt: rt.archivedAt ?? existing.archivedAt,
-                  });
-                } else {
-                  unifiedMap.set(rt.googleTaskId!, {
-                    ...rt,
-                    tags: (rt as any).tags || [],
-                    taskListId: list.id,
-                    taskListName: list.title,
-                  });
-                }
-              });
+                allRemoteTasks.push({ rt, list });
+              }
             } catch (listErr: any) {
               if (
                 (listErr instanceof GoogleApiError && listErr.status === 401) ||
@@ -1097,9 +1093,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 await handleAuthFailure();
                 return;
               }
+              allListsFetchedSuccessfully = false;
               console.warn(`Failed to fetch tasks for list ${list.title}:`, listErr);
             }
           }
+
+          // Only delete tasks if all lists were successfully fetched, avoiding false deletions on transient network errors.
+          // Check across ALL remote lists so moving a task between lists on Google Tasks doesn't trigger deletion.
+          if (allListsFetchedSuccessfully) {
+            initialTasks.forEach((t) => {
+              if (t.googleTaskId && !allRemoteGoogleTaskIds.has(t.googleTaskId)) {
+                allDeletedTaskIds.push(t.id);
+                unifiedMap.delete(t.googleTaskId);
+                unifiedMap.delete(t.id);
+              }
+            });
+          }
+
+          allRemoteTasks.forEach(({ rt, list }) => {
+            const existing = unifiedMap.get(rt.googleTaskId!) || googleIdToLocalMap.get(rt.googleTaskId!);
+            if (existing) {
+              unifiedMap.set(rt.googleTaskId!, {
+                ...existing,
+                ...rt,
+                id: existing.id,
+                taskListId: list.id,
+                taskListName: list.title,
+                tags: existing.tags || (rt as any).tags || [],
+                subtasks: existing.subtasks?.length ? existing.subtasks : rt.subtasks,
+                totalFocusSeconds: Math.max(existing.totalFocusSeconds || 0, rt.totalFocusSeconds || 0),
+                pomodoroCount: Math.max(existing.pomodoroCount || 0, rt.pomodoroCount || 0),
+                priority: existing.priority || 'medium',
+                archived: rt.archived ? true : Boolean(existing.archived),
+                archivedAt: rt.archived ? (rt.archivedAt || existing.archivedAt) : existing.archivedAt,
+              });
+            } else {
+              unifiedMap.set(rt.googleTaskId!, {
+                ...rt,
+                tags: (rt as any).tags || [],
+                taskListId: list.id,
+                taskListName: list.title,
+              });
+            }
+          });
 
           if (user && !user.isGuest && allDeletedTaskIds.length > 0) {
             allDeletedTaskIds.forEach((delId) => {
@@ -1138,7 +1174,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const currentLists = taskListsRef.current;
           let anyPushed = false;
           for (const t of currentTasks) {
-            if (!t.googleTaskId) {
+            if (!t.googleTaskId && !t.archived) {
               try {
                 const gtlId = resolveGoogleTaskListId(t.taskListId || '@default', currentLists);
                 const created = await createGoogleTask(token, gtlId, t, currentLists);

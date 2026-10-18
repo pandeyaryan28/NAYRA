@@ -391,8 +391,8 @@ export async function fetchGoogleTasks(
       title: t.title || 'Untitled Task',
       notes: t.notes || '',
       status: isCompleted ? 'completed' : 'needsAction',
-      archived: isCompleted || Boolean(t.hidden),
-      archivedAt: isCompleted ? (t.completed || t.updated || new Date().toISOString()) : undefined,
+      archived: Boolean(t.hidden),
+      archivedAt: t.hidden ? (t.completed || t.updated || new Date().toISOString()) : undefined,
       due: t.due ? (t.due.includes('T00:00:00') ? t.due.split('T')[0] : t.due.replace('.000Z', '').replace('Z', '')) : undefined,
       completedAt: t.completed,
       priority: 'medium',
@@ -450,6 +450,8 @@ export async function updateGoogleTask(
     payload.status = task.status;
     if (task.status === 'completed') {
       payload.completed = task.completedAt || new Date().toISOString();
+    } else if (task.status === 'needsAction') {
+      payload.completed = null;
     }
   }
   if (task.due !== undefined) {
@@ -482,6 +484,8 @@ export async function updateGoogleTaskStatus(
   };
   if (status === 'completed') {
     payload.completed = new Date().toISOString();
+  } else {
+    payload.completed = null;
   }
 
   return fetchGoogleApi(
