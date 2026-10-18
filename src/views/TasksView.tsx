@@ -37,6 +37,64 @@ import { formatSecondsToHoursMinutes, formatGoogleTasksDue, safeLocalStorageGet,
 import { isToday, isPast, isTomorrow, isThisWeek, parseISO, format, addDays, isAfter, startOfDay } from 'date-fns';
 import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 
+export function isTaskInList(task: TaskItem, list: TaskList, allLists?: TaskList[]): boolean {
+  if (!task || !list) return false;
+
+  const isListDefault =
+    list.isDefault ||
+    list.id === 'list_default' ||
+    (list.title || '').trim().toLowerCase() === 'my tasks';
+
+  const taskListTitle = (task.taskListName || '').trim().toLowerCase();
+  const targetListTitle = (list.title || '').trim().toLowerCase();
+
+  // If the task explicitly carries a taskListName:
+  if (taskListTitle) {
+    if (taskListTitle === targetListTitle) {
+      return true;
+    }
+    // If the task names a different known custom list, exclude it from this list
+    if (allLists && allLists.length > 0) {
+      const matchesAnotherList = allLists.some(
+        (other) =>
+          other.id !== list.id &&
+          (other.title || '').trim().toLowerCase() === taskListTitle
+      );
+      if (matchesAnotherList) {
+        return false;
+      }
+    }
+  }
+
+  // Exact ID match
+  if (task.taskListId === list.id) return true;
+
+  // Google Task List ID match
+  if (list.googleTaskListId && list.googleTaskListId !== '@default') {
+    if (
+      task.taskListId === list.googleTaskListId ||
+      task.taskListId === `gtl_${list.googleTaskListId}` ||
+      (task.taskListId && task.taskListId.replace('gtl_', '') === list.googleTaskListId)
+    ) {
+      return true;
+    }
+  }
+
+  // Fallback for default list
+  if (isListDefault) {
+    if (!task.taskListId || task.taskListId === 'list_default' || task.taskListId === '@default') {
+      if (taskListTitle && taskListTitle !== 'my tasks') {
+        if (allLists && allLists.some((other) => (other.title || '').trim().toLowerCase() === taskListTitle)) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export const TasksView: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -219,9 +277,16 @@ export const TasksView: React.FC = () => {
     const res: TaskList[] = [];
 
     // Find default "My Tasks" list first
-    const defaultList = taskLists.find(
-      (l) => l.isDefault || l.id === 'list_default' || (l.title || '').trim().toLowerCase() === 'my tasks'
-    );
+    const defaultList =
+      taskLists.find(
+        (l) =>
+          (l.title || '').trim().toLowerCase() === 'my tasks' ||
+          l.id === 'list_default' ||
+          l.googleTaskListId === '@default'
+      ) ||
+      taskLists.find(
+        (l) => l.isDefault && (l.title || '').trim().toLowerCase() === 'my tasks'
+      );
     if (defaultList) {
       res.push({
         ...defaultList,
@@ -365,7 +430,7 @@ export const TasksView: React.FC = () => {
       if (!activeTaskListId || activeTaskListId === 'list_default' || activeTaskListId === '@default') {
         const def = uniqueTaskLists.find((l) => l.isDefault) || uniqueTaskLists[0];
         if (!def) return tasks;
-        return tasks.filter((t) => t.taskListId === def.id || t.taskListId === 'list_default' || t.taskListId === '@default');
+        return tasks.filter((t) => isTaskInList(t, def, uniqueTaskLists));
       }
       return tasks.filter((t) => {
         if (t.taskListId === activeTaskListId) return true;
@@ -375,31 +440,7 @@ export const TasksView: React.FC = () => {
       });
     }
 
-    const isDefault =
-      targetList.isDefault ||
-      targetList.id === 'list_default' ||
-      (targetList.title || '').trim().toLowerCase() === 'my tasks';
-
-    return tasks.filter((t) => {
-      // 1. Exact match on local taskListId
-      if (t.taskListId === targetList.id || t.taskListId === activeTaskListId) return true;
-
-      // 2. Google Task List ID match
-      if (targetList.googleTaskListId && targetList.googleTaskListId !== '@default') {
-        if (t.taskListId === targetList.googleTaskListId || t.taskListId === `gtl_${targetList.googleTaskListId}`) {
-          return true;
-        }
-      }
-
-      // 3. Fallback to default aliases ONLY for the default list
-      if (isDefault) {
-        if (t.taskListId === 'list_default' || t.taskListId === '@default') {
-          return true;
-        }
-      }
-
-      return false;
-    });
+    return tasks.filter((t) => isTaskInList(t, targetList, uniqueTaskLists));
   }, [tasks, activeTaskListId, activeList, uniqueTaskLists]);
 
   // Active (unarchived, not completed) tasks in scope
@@ -691,10 +732,12 @@ export const TasksView: React.FC = () => {
       }
     }
 
+    const targetList = uniqueTaskLists.find((l) => l.id === targetListId);
     await createTask({
       title: (cleanTitle || quickTaskTitle).trim(),
       due: resolvedDue,
       taskListId: targetListId,
+      taskListName: targetList?.title || (targetListId === defaultListId ? defaultList?.title : undefined),
       priority: 'medium',
       starred: isStarred,
       tags: initialTags,
@@ -1094,7 +1137,7 @@ export const TasksView: React.FC = () => {
                 activeTaskListId === 'today' ||
                 activeTaskListId === 'upcoming') && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-white/[0.06] text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/[0.05]">
-                  {uniqueTaskLists.find((l) => l.id === t.taskListId)?.title || 'My Tasks'}
+                  {uniqueTaskLists.find((l) => isTaskInList(t, l, uniqueTaskLists))?.title || t.taskListName || 'My Tasks'}
                 </span>
               )}
 
@@ -1463,15 +1506,9 @@ export const TasksView: React.FC = () => {
 
           <div className="space-y-0.5 overflow-y-auto flex-1 pr-1">
             {uniqueTaskLists.map((list) => {
-              const isDefault = list.isDefault || list.id === 'list_default' || (list.title || '').trim().toLowerCase() === 'my tasks';
               const count = tasks.filter((t) => {
                 if (t.archived || t.status === 'completed' || t.completed) return false;
-                if (t.taskListId === list.id) return true;
-                if (list.googleTaskListId && list.googleTaskListId !== '@default') {
-                  if (t.taskListId === list.googleTaskListId || t.taskListId === `gtl_${list.googleTaskListId}`) return true;
-                }
-                if (isDefault && (t.taskListId === 'list_default' || t.taskListId === '@default')) return true;
-                return false;
+                return isTaskInList(t, list, uniqueTaskLists);
               }).length;
 
               const isSelected = list.id === activeTaskListId;

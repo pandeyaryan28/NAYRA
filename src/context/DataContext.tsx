@@ -589,12 +589,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   const fTasks = tSnap.docs.map((d) => {
                     const data = d.data() as TaskItem;
                     const gId = data.googleTaskId || (d.id.startsWith('gtask_') ? d.id.replace('gtask_', '') : undefined);
+                    const matchingList = taskListsRef.current.find(
+                      (l) =>
+                        (data.taskListId && (l.id === data.taskListId || l.googleTaskListId === data.taskListId || l.id === `gtl_${data.taskListId}`)) ||
+                        (data.taskListName && (l.title || '').trim().toLowerCase() === data.taskListName.trim().toLowerCase())
+                    );
+                    const resolvedListId = matchingList ? matchingList.id : (data.taskListId || 'list_default');
+                    const resolvedListName = matchingList ? matchingList.title : (data.taskListName || (resolvedListId === 'list_default' ? 'My Tasks' : undefined));
                     return {
                       ...data,
                       id: d.id,
                       googleTaskId: gId,
-                      taskListId: data.taskListId || 'list_default',
-                      taskListName: data.taskListName || (data.taskListId === 'list_default' ? 'My Tasks' : undefined),
+                      taskListId: resolvedListId,
+                      taskListName: resolvedListName,
                     } as TaskItem;
                   });
                   setTasks((prev) => {
@@ -624,7 +631,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     }
 
                     // Forward any task created in Firestore (from Android/Ext) or completed in Firestore to Google Tasks
-                    if (googleAccessToken) {
+                    if (googleAccessToken && !isGoogleTokenExpired) {
                       merged.forEach((item) => {
                         const prevItem = prev.find((p) => p.id === item.id);
                         if (item.googleTaskId) {
@@ -639,7 +646,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                               updateGoogleTaskStatus(googleAccessToken, gtlId, item.googleTaskId, 'needsAction', taskListsRef.current).catch(console.warn);
                             }
                           }
-                        } else if (!item.archived && !item.completed && item.status !== 'completed' && !prevItem) {
+                        } else if (!item.archived && !item.completed && item.status !== 'completed' && (!prevItem || !prevItem.googleTaskId)) {
                           // Brand new task created in Firestore without googleTaskId
                           const gtlId = resolveGoogleTaskListId(item.taskListId || '@default', taskListsRef.current);
                           createGoogleTask(googleAccessToken, gtlId, item, taskListsRef.current)
@@ -650,7 +657,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 setDoc(doc(getUserTasksCollection(uid), item.id), { googleTaskId: created.id }, { merge: true }).catch(console.warn);
                               }
                             })
-                            .catch(console.warn);
+                            .catch((err: any) => {
+                              if ((err instanceof GoogleApiError && err.status === 401) || err?.status === 401 || err?.message?.includes('401')) {
+                                setIsGoogleTokenExpired(true);
+                              }
+                              console.warn('Realtime sync to Google Tasks notice:', err);
+                            });
                         }
                       });
                     }
@@ -778,12 +790,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const fTasks = tSnap.docs.map((d) => {
                 const data = d.data() as TaskItem;
                 const gId = data.googleTaskId || (d.id.startsWith('gtask_') ? d.id.replace('gtask_', '') : undefined);
+                const matchingList = taskListsRef.current.find(
+                  (l) =>
+                    (data.taskListId && (l.id === data.taskListId || l.googleTaskListId === data.taskListId || l.id === `gtl_${data.taskListId}`)) ||
+                    (data.taskListName && (l.title || '').trim().toLowerCase() === data.taskListName.trim().toLowerCase())
+                );
+                const resolvedListId = matchingList ? matchingList.id : (data.taskListId || 'list_default');
+                const resolvedListName = matchingList ? matchingList.title : (data.taskListName || (resolvedListId === 'list_default' ? 'My Tasks' : undefined));
                 return {
                   ...data,
                   id: d.id,
                   googleTaskId: gId,
-                  taskListId: data.taskListId || 'list_default',
-                  taskListName: data.taskListName || (data.taskListId === 'list_default' ? 'My Tasks' : undefined),
+                  taskListId: resolvedListId,
+                  taskListName: resolvedListName,
                 } as TaskItem;
               });
               setTasks((prev) => {
@@ -985,7 +1004,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           token = silentToken;
           setTokenWithTimestamp(silentToken);
           setIsGoogleTokenExpired(false);
-        } else if (!token) {
+        } else {
           return;
         }
       }
@@ -1098,6 +1117,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const previousListsMap = new Map(taskListsRef.current.map((l) => [l.id, l]));
           const combined = [...taskListsRef.current, ...listsToProcess];
           const { cleanLists, idRemap } = deduplicateTaskLists(combined);
+          // Push any local custom task lists to Google Tasks if they don't have a googleTaskListId yet
+          for (let i = 0; i < cleanLists.length; i++) {
+            const list = cleanLists[i];
+            const isDef = list.isDefault || list.id === 'list_default' || (list.title || '').trim().toLowerCase() === 'my tasks';
+            if (!isDef && !list.googleTaskListId && !list.id.startsWith('gtl_')) {
+              try {
+                const resp = await createGoogleTaskList(token, list.title);
+                if (resp?.id) {
+                  const newGtlId = resp.id;
+                  const newLocalId = `gtl_${newGtlId}`;
+                  const oldId = list.id;
+                  cleanLists[i] = {
+                    ...list,
+                    id: newLocalId,
+                    googleTaskListId: newGtlId,
+                  };
+                  idRemap.set(oldId, newLocalId);
+                  if (user && !user.isGuest) {
+                    deleteDoc(doc(getUserTaskListsCollection(user.uid), oldId)).catch(console.warn);
+                    setDoc(doc(getUserTaskListsCollection(user.uid), newLocalId), sanitizeForFirestore(cleanLists[i]), { merge: true }).catch(console.warn);
+                  }
+                }
+              } catch (listCreateErr: any) {
+                if (
+                  (listCreateErr instanceof GoogleApiError && listCreateErr.status === 401) ||
+                  listCreateErr?.status === 401 ||
+                  listCreateErr?.message?.includes('401')
+                ) {
+                  await handleAuthFailure();
+                  return;
+                }
+                console.warn(`Failed to push local list ${list.title} to Google Tasks:`, listCreateErr);
+              }
+            }
+          }
+
           taskListsRef.current = cleanLists;
           setTaskLists(cleanLists);
 
@@ -1477,7 +1532,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const resp = await createGoogleTaskList(googleAccessToken, title);
         googleTaskListId = resp?.id;
-      } catch (e) {
+      } catch (e: any) {
+        if (
+          (e instanceof GoogleApiError && e.status === 401) ||
+          e?.status === 401 ||
+          e?.message?.includes('401')
+        ) {
+          setIsGoogleTokenExpired(true);
+        }
         console.warn('Failed to create task list in Google Tasks directly:', e);
       }
     }
@@ -1578,9 +1640,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 2. Asynchronous Google Tasks synchronization without blocking the UI
     if (googleAccessToken && targetListId) {
-      const gtlId = resolveGoogleTaskListId(targetListId, taskListsRef.current);
-      createGoogleTask(googleAccessToken, gtlId, taskData, taskListsRef.current)
-        .then((resp) => {
+      const pushTask = async (tokenToUse: string) => {
+        try {
+          const gtlId = resolveGoogleTaskListId(targetListId, taskListsRef.current);
+          const resp = await createGoogleTask(tokenToUse, gtlId, newTask, taskListsRef.current);
           if (resp?.id) {
             setTasks((prev) => prev.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t)));
             tasksRef.current = tasksRef.current.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t));
@@ -1589,10 +1652,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setDoc(doc(getUserTasksCollection(user.uid), newId), { googleTaskId: resp.id }, { merge: true }).catch(console.warn);
             }
           }
-        })
-        .catch((e) => {
-          console.warn('Google Tasks direct create notice:', e);
-        });
+        } catch (e: any) {
+          if (
+            (e instanceof GoogleApiError && e.status === 401) ||
+            e?.status === 401 ||
+            e?.message?.includes('401')
+          ) {
+            setIsGoogleTokenExpired(true);
+            const fresh = await fetchFreshGoogleTokenFromCloud();
+            if (fresh) {
+              setTokenWithTimestamp(fresh);
+              setIsGoogleTokenExpired(false);
+              try {
+                const retryGtlId = resolveGoogleTaskListId(targetListId, taskListsRef.current);
+                const retryResp = await createGoogleTask(fresh, retryGtlId, newTask, taskListsRef.current);
+                if (retryResp?.id) {
+                  setTasks((prev) => prev.map((t) => (t.id === newId ? { ...t, googleTaskId: retryResp.id } : t)));
+                  tasksRef.current = tasksRef.current.map((t) => (t.id === newId ? { ...t, googleTaskId: retryResp.id } : t));
+                  persistActiveTasks(tasksRef.current, 'webApp');
+                  if (user && !user.isGuest) {
+                    setDoc(doc(getUserTasksCollection(user.uid), newId), { googleTaskId: retryResp.id }, { merge: true }).catch(console.warn);
+                  }
+                }
+              } catch (retryErr) {
+                console.warn('Retry Google Tasks direct create notice:', retryErr);
+              }
+            }
+          } else {
+            console.warn('Google Tasks direct create notice:', e);
+          }
+        }
+      };
+      pushTask(googleAccessToken);
     }
 
     return newTask;
@@ -1603,7 +1694,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (existing && googleAccessToken) {
       const gtlId = resolveGoogleTaskListId(partial.taskListId || existing.taskListId, taskListsRef.current);
       if (existing.googleTaskId) {
-        updateGoogleTask(googleAccessToken, gtlId, existing.googleTaskId, partial, taskListsRef.current).catch(console.warn);
+        updateGoogleTask(googleAccessToken, gtlId, existing.googleTaskId, partial, taskListsRef.current).catch((err) => {
+          if (
+            (err instanceof GoogleApiError && err.status === 401) ||
+            err?.status === 401 ||
+            err?.message?.includes('401')
+          ) {
+            setIsGoogleTokenExpired(true);
+          }
+          console.warn('Google Tasks direct update notice:', err);
+        });
       } else {
         createGoogleTask(googleAccessToken, gtlId, { ...existing, ...partial }, taskListsRef.current)
           .then((created) => {
@@ -1616,7 +1716,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           })
-          .catch(console.warn);
+          .catch((err) => {
+            if (
+              (err instanceof GoogleApiError && err.status === 401) ||
+              err?.status === 401 ||
+              err?.message?.includes('401')
+            ) {
+              setIsGoogleTokenExpired(true);
+            }
+            console.warn('Google Tasks direct create notice:', err);
+          });
       }
     }
 

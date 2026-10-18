@@ -1,8 +1,9 @@
 import React from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TasksView } from '../views/TasksView';
+import { TasksView, isTaskInList } from '../views/TasksView';
 import { DataProvider, deduplicateTaskLists } from '../context/DataContext';
+import { resolveGoogleTaskListId } from '../lib/googleApi';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { FocusProvider } from '../context/FocusContext';
@@ -249,5 +250,107 @@ describe('Tasks View Fixes & Reliability', () => {
 
     // New task appears immediately in 01 Lab
     expect(await screen.findByText('New Lab Experiment Task')).toBeInTheDocument();
+  });
+
+  it('isTaskInList strictly segregates tasks and prevents cross-list leakage', () => {
+    const allLists = [
+      { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_lab', googleTaskListId: 'lab_gid', title: '01 Lab', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_ca', googleTaskListId: 'ca_gid', title: 'CA', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+    ];
+    const defaultList = allLists[0];
+    const labList = allLists[1];
+    const caList = allLists[2];
+
+    // Case 1: Task with corrupted taskListId='list_default' but taskListName='01 Lab'
+    const leakedLabTask: any = {
+      id: 'task_leak_1',
+      title: 'Lab research notes',
+      taskListId: 'list_default',
+      taskListName: '01 Lab',
+    };
+    // Must be in 01 Lab
+    expect(isTaskInList(leakedLabTask, labList, allLists)).toBe(true);
+    // Must NOT be in My Tasks
+    expect(isTaskInList(leakedLabTask, defaultList, allLists)).toBe(false);
+    // Must NOT be in CA
+    expect(isTaskInList(leakedLabTask, caList, allLists)).toBe(false);
+
+    // Case 2: Task with raw Google Task List ID from Android (e.g. 'lab_gid' without 'gtl_')
+    const androidLabTask: any = {
+      id: 'task_android_1',
+      title: 'Android lab assignment',
+      taskListId: 'lab_gid',
+    };
+    expect(isTaskInList(androidLabTask, labList, allLists)).toBe(true);
+    expect(isTaskInList(androidLabTask, defaultList, allLists)).toBe(false);
+
+    // Case 3: Genuine default task
+    const genuineDefaultTask: any = {
+      id: 'task_def_1',
+      title: 'Buy groceries',
+      taskListId: 'list_default',
+      taskListName: 'My Tasks',
+    };
+    expect(isTaskInList(genuineDefaultTask, defaultList, allLists)).toBe(true);
+    expect(isTaskInList(genuineDefaultTask, labList, allLists)).toBe(false);
+    expect(isTaskInList(genuineDefaultTask, caList, allLists)).toBe(false);
+  });
+
+  it('TasksView isolates tasks even when taskListId was defaulted to list_default if taskListName names a custom list', async () => {
+    const initialLists = [
+      { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_lab', googleTaskListId: 'lab_gid', title: '01 Lab', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+    ];
+    const initialTasks = [
+      {
+        id: 't_real_default',
+        title: 'Real Personal Task',
+        taskListId: 'list_default',
+        taskListName: 'My Tasks',
+        status: 'needsAction',
+        priority: 'medium',
+      },
+      {
+        id: 't_corrupted_lab',
+        title: 'Corrupted Lab Task with list_default id',
+        taskListId: 'list_default', // Old corrupted ID
+        taskListName: '01 Lab',     // But explicit custom list name
+        status: 'needsAction',
+        priority: 'high',
+      },
+    ];
+
+    window.localStorage.setItem('nayra_test_operator_id_task_lists', JSON.stringify(initialLists));
+    window.localStorage.setItem('nayra_test_operator_id_tasks', JSON.stringify(initialTasks));
+
+    render(
+      <TestWrapper>
+        <TasksView />
+      </TestWrapper>
+    );
+
+    // In My Tasks: Real Personal Task is shown, but Corrupted Lab Task is NOT shown
+    expect(await screen.findByText('Real Personal Task')).toBeInTheDocument();
+    expect(screen.queryByText('Corrupted Lab Task with list_default id')).not.toBeInTheDocument();
+
+    // Click 01 Lab: Corrupted Lab Task IS shown, Real Personal Task is NOT shown
+    const labBtn = screen.getByRole('button', { name: /01 Lab/i });
+    fireEvent.click(labBtn);
+
+    expect(await screen.findByText('Corrupted Lab Task with list_default id')).toBeInTheDocument();
+    expect(screen.queryByText('Real Personal Task')).not.toBeInTheDocument();
+  });
+
+  it('resolveGoogleTaskListId correctly maps default lists and custom lists', () => {
+    const lists = [
+      { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_custom_1', googleTaskListId: 'google_custom_1', title: '01 Lab', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+    ];
+
+    expect(resolveGoogleTaskListId('@default', lists)).toBe('@default');
+    expect(resolveGoogleTaskListId('list_default', lists)).toBe('@default');
+    expect(resolveGoogleTaskListId('gtl_custom_1', lists)).toBe('google_custom_1');
+    expect(resolveGoogleTaskListId('google_custom_1', lists)).toBe('google_custom_1');
   });
 });

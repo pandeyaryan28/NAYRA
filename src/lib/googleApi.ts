@@ -102,6 +102,9 @@ export function resolveGoogleTaskListId(taskListId: string = '@default', taskLis
     if (found?.googleTaskListId && found.googleTaskListId !== 'list_default') {
       return found.googleTaskListId;
     }
+    if (found?.isDefault || (found?.title || '').trim().toLowerCase() === 'my tasks') {
+      return found?.googleTaskListId && found.googleTaskListId !== 'list_default' ? found.googleTaskListId : '@default';
+    }
   }
 
   const resolved = taskListId.startsWith('gtl_') ? taskListId.replace('gtl_', '') : taskListId;
@@ -295,6 +298,12 @@ export async function fetchGoogleTaskLists(accessToken: string): Promise<TaskLis
     }
     pageToken = data.nextPageToken;
   } while (pageToken);
+
+  // If fetching @default list ID failed, designate Google's primary default list
+  if (!defaultGtlId && allRawItems.length > 0) {
+    const myTasksMatch = allRawItems.find((l) => (l.title || '').trim().toLowerCase() === 'my tasks');
+    defaultGtlId = myTasksMatch ? myTasksMatch.id : allRawItems[0].id;
+  }
 
   return allRawItems.map((list) => {
     const isDefault = defaultGtlId
