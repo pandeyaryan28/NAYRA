@@ -275,15 +275,21 @@ export const TasksView: React.FC = () => {
       activeTaskListId === 'upcoming'
     )
       return null;
-    return (
+
+    const matched =
       uniqueTaskLists.find((l) => l.id === activeTaskListId) ||
       uniqueTaskLists.find(
         (l) => l.googleTaskListId && (activeTaskListId === l.googleTaskListId || activeTaskListId === `gtl_${l.googleTaskListId}`)
-      ) ||
-      uniqueTaskLists.find((l) => l.isDefault) ||
-      uniqueTaskLists[0] ||
-      null
-    );
+      );
+
+    if (matched) return matched;
+
+    // Only default to My Tasks if activeTaskListId specifically points to default or is empty
+    if (!activeTaskListId || activeTaskListId === 'list_default' || activeTaskListId === '@default') {
+      return uniqueTaskLists.find((l) => l.isDefault) || uniqueTaskLists[0] || null;
+    }
+
+    return null;
   }, [uniqueTaskLists, activeTaskListId]);
 
   // Total count of starred active tasks
@@ -351,10 +357,23 @@ export const TasksView: React.FC = () => {
     const targetList =
       activeList ||
       uniqueTaskLists.find((l) => l.id === activeTaskListId) ||
-      uniqueTaskLists.find((l) => l.isDefault) ||
-      uniqueTaskLists[0];
+      uniqueTaskLists.find(
+        (l) => l.googleTaskListId && (activeTaskListId === l.googleTaskListId || activeTaskListId === `gtl_${l.googleTaskListId}`)
+      );
 
-    if (!targetList) return tasks;
+    if (!targetList) {
+      if (!activeTaskListId || activeTaskListId === 'list_default' || activeTaskListId === '@default') {
+        const def = uniqueTaskLists.find((l) => l.isDefault) || uniqueTaskLists[0];
+        if (!def) return tasks;
+        return tasks.filter((t) => t.taskListId === def.id || t.taskListId === 'list_default' || t.taskListId === '@default');
+      }
+      return tasks.filter((t) => {
+        if (t.taskListId === activeTaskListId) return true;
+        if (activeTaskListId.startsWith('gtl_') && t.taskListId === activeTaskListId.replace('gtl_', '')) return true;
+        if (!activeTaskListId.startsWith('gtl_') && t.taskListId === `gtl_${activeTaskListId}`) return true;
+        return false;
+      });
+    }
 
     const isDefault =
       targetList.isDefault ||
@@ -756,8 +775,17 @@ export const TasksView: React.FC = () => {
     if (activeTaskListId === 'today') return 'Today';
     if (activeTaskListId === 'upcoming') return 'Upcoming';
     if (activeTaskListId === 'archived_view') return 'Archived Tasks';
-    return activeList?.title || 'My Tasks';
-  }, [activeTaskListId, activeList]);
+    if (activeList?.title) return activeList.title;
+    const taskWithName = tasks.find(
+      (t) =>
+        (t.taskListId === activeTaskListId ||
+          (activeTaskListId.startsWith('gtl_') && t.taskListId === activeTaskListId.replace('gtl_', '')) ||
+          (!activeTaskListId.startsWith('gtl_') && t.taskListId === `gtl_${activeTaskListId}`)) &&
+        t.taskListName
+    );
+    if (taskWithName?.taskListName) return taskWithName.taskListName;
+    return 'My Tasks';
+  }, [activeTaskListId, activeList, tasks]);
 
   // Render a task item across density modes
   const renderTaskItem = (t: TaskItem) => {

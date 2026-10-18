@@ -37,6 +37,7 @@ export interface AuthContextValue {
   resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   continueAsGuest: () => void;
+  setTokenWithTimestamp: (token: string | null) => void;
   error: string | null;
   setError: (err: string | null) => void;
 }
@@ -94,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Attempt silent cloud token refresh on boot if user is signed in
   useEffect(() => {
-    if (user && !user.isGuest) {
+    if ((user && !user.isGuest) || firebaseUser) {
       fetchFreshGoogleTokenFromCloud().then((freshToken) => {
         if (freshToken) {
           setTokenWithTimestamp(freshToken);
@@ -102,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }).catch(console.warn);
     }
-  }, [user?.uid]);
+  }, [user?.uid, firebaseUser?.uid]);
 
   // Handle redirect result on boot (crucial for mobile/tablet browsers)
   useEffect(() => {
@@ -480,6 +481,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetPassword,
         signOut,
         continueAsGuest,
+        setTokenWithTimestamp,
         error,
         setError,
       }}

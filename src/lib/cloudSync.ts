@@ -1,4 +1,4 @@
-import { functions, httpsCallable } from './firebase';
+import { auth, functions, httpsCallable } from './firebase';
 
 export interface FreshTokenResponse {
   accessToken: string;
@@ -12,6 +12,13 @@ export interface FreshTokenResponse {
  */
 export async function fetchFreshGoogleTokenFromCloud(): Promise<string | null> {
   try {
+    if (typeof (auth as any).authStateReady === 'function') {
+      await (auth as any).authStateReady();
+    }
+    if (!auth.currentUser) {
+      console.debug('Cloud token refresh skipped: Firebase Auth session not ready yet.');
+      return null;
+    }
     const getFreshTokenFn = httpsCallable<{}, FreshTokenResponse>(functions, 'getFreshGoogleToken');
     const response = await getFreshTokenFn();
     if (response?.data?.accessToken) {

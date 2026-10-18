@@ -316,6 +316,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isGoogleTokenExpired,
     setIsGoogleTokenExpired,
     reconnectGoogle,
+    setTokenWithTimestamp,
   } = useAuth();
   const userId = user?.uid || GUEST_USER_ID;
 
@@ -585,7 +586,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               getUserTasksCollection(uid),
               (tSnap) => {
                 if (active) {
-                  const fTasks = tSnap.docs.map((d) => ({ id: d.id, ...d.data() } as TaskItem));
+                  const fTasks = tSnap.docs.map((d) => {
+                    const data = d.data() as TaskItem;
+                    const gId = data.googleTaskId || (d.id.startsWith('gtask_') ? d.id.replace('gtask_', '') : undefined);
+                    return {
+                      ...data,
+                      id: d.id,
+                      googleTaskId: gId,
+                      taskListId: data.taskListId || 'list_default',
+                      taskListName: data.taskListName || (data.taskListId === 'list_default' ? 'My Tasks' : undefined),
+                    } as TaskItem;
+                  });
                   setTasks((prev) => {
                     const localMetrics = new Map(
                       prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
@@ -764,7 +775,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } catch (tErr) {
             const tSnap = await getDocs(getUserTasksCollection(uid));
             if (!tSnap.empty && active) {
-              const fTasks = tSnap.docs.map((d) => ({ id: d.id, ...d.data() } as TaskItem));
+              const fTasks = tSnap.docs.map((d) => {
+                const data = d.data() as TaskItem;
+                const gId = data.googleTaskId || (d.id.startsWith('gtask_') ? d.id.replace('gtask_', '') : undefined);
+                return {
+                  ...data,
+                  id: d.id,
+                  googleTaskId: gId,
+                  taskListId: data.taskListId || 'list_default',
+                  taskListName: data.taskListName || (data.taskListId === 'list_default' ? 'My Tasks' : undefined),
+                } as TaskItem;
+              });
               setTasks((prev) => {
                 const localMetrics = new Map(
                   prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
@@ -786,18 +807,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
 
-          // 4. Task Lists
-          const tlSnap = await getDocs(getUserTaskListsCollection(uid));
-          if (!tlSnap.empty && active) {
-            const loadedLists = tlSnap.docs.map((d) => d.data() as TaskList);
-            const { cleanLists } = deduplicateTaskLists(loadedLists);
-            setTaskLists(cleanLists);
-            taskListsRef.current = cleanLists;
-            if (cleanLists.length > 0) {
-              setActiveTaskListId((prev) => {
-                const stillExists = cleanLists.some((l) => l.id === prev);
-                return stillExists ? prev : (cleanLists.find((l) => l.isDefault)?.id || cleanLists[0].id);
-              });
+          // 4. Task Lists (Real-time snapshot listener)
+          try {
+            const unsubTaskLists = onSnapshot(
+              getUserTaskListsCollection(uid),
+              (tlSnap) => {
+                if (active && !tlSnap.empty) {
+                  const loadedLists = tlSnap.docs.map((d) => d.data() as TaskList);
+                  const { cleanLists } = deduplicateTaskLists(loadedLists);
+                  setTaskLists(cleanLists);
+                  taskListsRef.current = cleanLists;
+                  if (cleanLists.length > 0) {
+                    setActiveTaskListId((prev) => {
+                      const stillExists = cleanLists.some((l) => l.id === prev);
+                      return stillExists ? prev : (cleanLists.find((l) => l.isDefault)?.id || cleanLists[0].id);
+                    });
+                  }
+                }
+              },
+              (err) => console.warn('Task lists realtime sync warning:', err)
+            );
+            unsubs.push(unsubTaskLists);
+          } catch (tlErr) {
+            const tlSnap = await getDocs(getUserTaskListsCollection(uid));
+            if (!tlSnap.empty && active) {
+              const loadedLists = tlSnap.docs.map((d) => d.data() as TaskList);
+              const { cleanLists } = deduplicateTaskLists(loadedLists);
+              setTaskLists(cleanLists);
+              taskListsRef.current = cleanLists;
+              if (cleanLists.length > 0) {
+                setActiveTaskListId((prev) => {
+                  const stillExists = cleanLists.some((l) => l.id === prev);
+                  return stillExists ? prev : (cleanLists.find((l) => l.isDefault)?.id || cleanLists[0].id);
+                });
+              }
             }
           }
 
@@ -924,11 +967,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('Google API authentication error (401). Attempting single silent background refresh...');
         const freshToken = await fetchFreshGoogleTokenFromCloud();
         if (freshToken) {
+          setTokenWithTimestamp(freshToken);
           setIsGoogleTokenExpired(false);
-          // Wait 2000ms before retrying once with fresh token, avoiding millisecond hammering
+          // Wait 1000ms before retrying once with fresh token
           setTimeout(() => {
             syncWithGoogle(freshToken).catch(console.warn);
-          }, 2000);
+          }, 1000);
           return true;
         }
         setIsGoogleTokenExpired(true);
@@ -939,6 +983,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const silentToken = await fetchFreshGoogleTokenFromCloud();
         if (silentToken) {
           token = silentToken;
+          setTokenWithTimestamp(silentToken);
           setIsGoogleTokenExpired(false);
         } else if (!token) {
           return;
@@ -1050,16 +1095,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: new Date().toISOString() }
           ];
 
+          const previousListsMap = new Map(taskListsRef.current.map((l) => [l.id, l]));
           const combined = [...taskListsRef.current, ...listsToProcess];
           const { cleanLists, idRemap } = deduplicateTaskLists(combined);
           taskListsRef.current = cleanLists;
           setTaskLists(cleanLists);
 
-          const existingListsMap = new Map(taskListsRef.current.map((l) => [l.id, l]));
           if (user && !user.isGuest) {
             cleanLists.forEach((l) => {
-              const existing = existingListsMap.get(l.id);
-              if (!existing || existing.title !== l.title || existing.isDefault !== l.isDefault) {
+              const existing = previousListsMap.get(l.id);
+              if (!existing || existing.title !== l.title || existing.isDefault !== l.isDefault || existing.googleTaskListId !== l.googleTaskListId) {
                 setDoc(doc(getUserTaskListsCollection(user.uid), l.id), sanitizeForFirestore(l), { merge: true }).catch(console.warn);
               }
             });
@@ -1112,8 +1157,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           const initialTasks = [...tasksRef.current];
           const initialTasksMap = new Map(initialTasks.map((t) => [t.id, t]));
-          const googleIdToLocalMap = new Map(initialTasks.filter((t) => t.googleTaskId).map((t) => [t.googleTaskId!, t]));
-          const unifiedMap = new Map(initialTasks.map((t) => [t.googleTaskId || t.id, t]));
+
+          const resolveGoogleId = (t: TaskItem): string | undefined =>
+            t.googleTaskId || (t.id.startsWith('gtask_') ? t.id.replace('gtask_', '') : undefined);
+
+          const googleIdToLocalMap = new Map<string, TaskItem>();
+          initialTasks.forEach((t) => {
+            const gid = resolveGoogleId(t);
+            if (gid) googleIdToLocalMap.set(gid, t);
+          });
+
+          const unifiedMap = new Map<string, TaskItem>();
+          initialTasks.forEach((t) => {
+            const key = resolveGoogleId(t) || t.id;
+            unifiedMap.set(key, t);
+          });
           const allDeletedTaskIds: string[] = [];
 
           const allRemoteTasks: { rt: TaskItem; list: TaskList }[] = [];
@@ -1169,12 +1227,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
 
           allRemoteTasks.forEach(({ rt, list }) => {
-            const existing = unifiedMap.get(rt.googleTaskId!) || googleIdToLocalMap.get(rt.googleTaskId!);
+            const rGid = rt.googleTaskId!;
+            const existing = unifiedMap.get(rGid) || googleIdToLocalMap.get(rGid) || initialTasksMap.get(rt.id);
             if (existing) {
-              unifiedMap.set(rt.googleTaskId!, {
+              if (existing.id !== rGid && unifiedMap.has(existing.id)) {
+                unifiedMap.delete(existing.id);
+              }
+              unifiedMap.set(rGid, {
                 ...existing,
                 ...rt,
                 id: existing.id,
+                googleTaskId: rGid,
                 taskListId: list.id,
                 taskListName: list.title,
                 tags: existing.tags || (rt as any).tags || [],
@@ -1186,7 +1249,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 archivedAt: rt.archived ? (rt.archivedAt || existing.archivedAt) : existing.archivedAt,
               });
             } else {
-              unifiedMap.set(rt.googleTaskId!, {
+              unifiedMap.set(rGid, {
                 ...rt,
                 tags: (rt as any).tags || [],
                 taskListId: list.id,
@@ -1208,7 +1271,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (user && !user.isGuest) {
             // Write ONLY tasks that have actual field changes compared to initial state
             const dirtyTasks = newArr.filter((item) => {
-              const existing = initialTasksMap.get(item.id) || googleIdToLocalMap.get(item.googleTaskId || '');
+              const existing = initialTasksMap.get(item.id) || (item.googleTaskId ? googleIdToLocalMap.get(item.googleTaskId) : undefined);
               return isTaskDirty(item, existing);
             });
 
@@ -1283,7 +1346,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsSyncing(false);
       }
     },
-    [googleAccessToken, isGoogleTokenExpired, setIsGoogleTokenExpired, user]
+    [googleAccessToken, isGoogleTokenExpired, setIsGoogleTokenExpired, setTokenWithTimestamp, user]
   );
 
   const reconnectAndSync = useCallback(async () => {
@@ -1471,7 +1534,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ? (taskListsRef.current.find((l) => l.isDefault)?.id || taskListsRef.current[0]?.id || 'list_default')
       : rawListId;
     const targetList = taskListsRef.current.find(
-      (l) => l.id === targetListId || (targetListId.startsWith('gtl_') && l.googleTaskListId === targetListId.replace('gtl_', ''))
+      (l) =>
+        l.id === targetListId ||
+        (targetListId.startsWith('gtl_') && l.googleTaskListId === targetListId.replace('gtl_', '')) ||
+        (l.googleTaskListId && l.googleTaskListId === targetListId)
     );
 
     const isTaskCompleted = taskData.status === 'completed' || Boolean(taskData.completed);
@@ -1479,8 +1545,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newTask: TaskItem = {
       id: newId,
       googleTaskId: undefined,
-      taskListId: targetListId,
-      taskListName: targetList?.title || 'My Tasks',
+      taskListId: targetList?.id || targetListId,
+      taskListName: targetList?.title || (targetListId === 'list_default' ? 'My Tasks' : undefined),
       title: (taskData.title || 'New Task').trim(),
       notes: taskData.notes || '',
       status: isTaskCompleted ? 'completed' : 'needsAction',
@@ -1561,9 +1627,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const nextTasks = prev.map((t) => {
         if (t.id === id) {
           const targetListId = partial.taskListId || t.taskListId;
-          const targetList = taskListsRef.current.find((l) => l.id === targetListId);
+          const targetList = taskListsRef.current.find(
+            (l) =>
+              l.id === targetListId ||
+              (targetListId.startsWith('gtl_') && l.googleTaskListId === targetListId.replace('gtl_', '')) ||
+              (l.googleTaskListId && l.googleTaskListId === targetListId)
+          );
           const taskListName = partial.taskListName || (partial.taskListId ? targetList?.title : t.taskListName || targetList?.title);
-          const updated = { ...t, ...partial, taskListName, updatedAt: now };
+          const canonicalListId = partial.taskListId ? (targetList?.id || targetListId) : t.taskListId;
+          const updated = { ...t, ...partial, taskListId: canonicalListId, taskListName, updatedAt: now };
           updatedSnapshot = updated;
           return updated;
         }
