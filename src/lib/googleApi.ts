@@ -81,21 +81,34 @@ export function resolveGoogleCalendarId(calendarId: string = 'primary', calendar
 }
 
 export function resolveGoogleTaskListId(taskListId: string = '@default', taskLists?: TaskList[]): string {
-  const isVirtual = !taskListId || taskListId === 'list_default' || taskListId === '@default' || ['all', 'starred', 'today', 'upcoming', 'archived_view'].includes(taskListId);
+  const isVirtual =
+    !taskListId ||
+    taskListId === 'list_default' ||
+    taskListId === '@default' ||
+    ['all', 'starred', 'today', 'upcoming', 'archived_view'].includes(taskListId);
+
   if (isVirtual) {
-    const defaultList = taskLists?.find((l) => l.isDefault || l.id === 'list_default');
-    if (defaultList?.googleTaskListId) {
+    const defaultList = taskLists?.find(
+      (l) => l.isDefault || l.id === 'list_default' || (l.title || '').trim().toLowerCase() === 'my tasks'
+    );
+    if (defaultList?.googleTaskListId && defaultList.googleTaskListId !== '@default' && defaultList.googleTaskListId !== 'list_default') {
       return defaultList.googleTaskListId;
     }
     return '@default';
   }
+
   if (taskLists && taskLists.length > 0) {
     const found = taskLists.find((l) => l.id === taskListId || l.googleTaskListId === taskListId);
-    if (found?.googleTaskListId) {
+    if (found?.googleTaskListId && found.googleTaskListId !== 'list_default') {
       return found.googleTaskListId;
     }
   }
-  return taskListId.startsWith('gtl_') ? taskListId.replace('gtl_', '') : taskListId;
+
+  const resolved = taskListId.startsWith('gtl_') ? taskListId.replace('gtl_', '') : taskListId;
+  if (resolved === 'list_default' || !resolved) {
+    return '@default';
+  }
+  return resolved;
 }
 
 
@@ -250,6 +263,20 @@ export async function fetchGoogleTaskLists(accessToken: string): Promise<TaskLis
   let allRawItems: any[] = [];
   let pageToken: string | undefined = undefined;
 
+  // Determine Google's exact designated default list ID
+  let defaultGtlId: string | null = null;
+  try {
+    const def = await fetchGoogleApi<{ id: string }>(
+      `${TASKS_API_BASE}/users/@me/lists/@default`,
+      accessToken
+    );
+    if (def?.id) {
+      defaultGtlId = def.id;
+    }
+  } catch {
+    // If fetching @default fails, fall back to title matching
+  }
+
   do {
     const params = new URLSearchParams({
       maxResults: '100',
@@ -269,13 +296,19 @@ export async function fetchGoogleTaskLists(accessToken: string): Promise<TaskLis
     pageToken = data.nextPageToken;
   } while (pageToken);
 
-  return allRawItems.map((list, idx) => ({
-    id: `gtl_${list.id}`,
-    googleTaskListId: list.id,
-    title: list.title || 'My Tasks',
-    isDefault: idx === 0,
-    updatedAt: list.updated || new Date().toISOString(),
-  }));
+  return allRawItems.map((list) => {
+    const isDefault = defaultGtlId
+      ? list.id === defaultGtlId
+      : (list.title || '').trim().toLowerCase() === 'my tasks';
+
+    return {
+      id: isDefault ? 'list_default' : `gtl_${list.id}`,
+      googleTaskListId: list.id,
+      title: list.title || (isDefault ? 'My Tasks' : 'Untitled List'),
+      isDefault,
+      updatedAt: list.updated || new Date().toISOString(),
+    };
+  });
 }
 
 export async function createGoogleTaskList(

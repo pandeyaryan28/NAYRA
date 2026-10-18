@@ -189,13 +189,19 @@ export function deduplicateTaskLists(lists: TaskList[]): { cleanLists: TaskList[
   const seenGtl = new Set<string>();
   const seenTitles = new Set<string>();
 
+  // Filter ONLY true default "My Tasks" lists. NEVER treat a custom list as "My Tasks" just because isDefault was corrupted!
   const myTasksLists = lists.filter(
-    (l) => (l.title && l.title.trim().toLowerCase() === 'my tasks') || l.id === 'list_default' || l.isDefault
+    (l) =>
+      (l.title && l.title.trim().toLowerCase() === 'my tasks') ||
+      l.id === 'list_default' ||
+      l.googleTaskListId === '@default'
   );
 
   let canonicalDefault: TaskList | null = null;
   if (myTasksLists.length > 0) {
-    const withGtl = myTasksLists.find((l) => l.googleTaskListId && l.googleTaskListId !== '@default');
+    const withGtl = myTasksLists.find(
+      (l) => l.googleTaskListId && l.googleTaskListId !== '@default' && l.googleTaskListId !== 'list_default'
+    );
     const base = withGtl || myTasksLists[0];
     canonicalDefault = {
       id: 'list_default',
@@ -205,41 +211,74 @@ export function deduplicateTaskLists(lists: TaskList[]): { cleanLists: TaskList[
       updatedAt: base.updatedAt || new Date().toISOString(),
     };
     cleanLists.push(canonicalDefault);
-    if (canonicalDefault.googleTaskListId) {
+    if (canonicalDefault.googleTaskListId && canonicalDefault.googleTaskListId !== '@default') {
       seenGtl.add(canonicalDefault.googleTaskListId);
     }
     seenTitles.add('my tasks');
 
     myTasksLists.forEach((l) => {
-      idRemap.set(l.id, 'list_default');
-      if (l.googleTaskListId) {
-        idRemap.set(l.googleTaskListId, 'list_default');
-        idRemap.set(`gtl_${l.googleTaskListId}`, 'list_default');
+      if (l.id !== 'list_default') {
+        idRemap.set(l.id, 'list_default');
+      }
+      if (l.googleTaskListId && l.googleTaskListId !== '@default') {
+        if (l.googleTaskListId === canonicalDefault?.googleTaskListId) {
+          idRemap.set(l.googleTaskListId, 'list_default');
+          idRemap.set(`gtl_${l.googleTaskListId}`, 'list_default');
+        }
       }
     });
+  } else {
+    canonicalDefault = {
+      id: 'list_default',
+      googleTaskListId: '@default',
+      title: 'My Tasks',
+      isDefault: true,
+      updatedAt: new Date().toISOString(),
+    };
+    cleanLists.push(canonicalDefault);
+    seenTitles.add('my tasks');
   }
 
   lists.forEach((l) => {
     const normTitle = (l.title || '').trim().toLowerCase();
-    if (normTitle === 'my tasks' || l.id === 'list_default' || (canonicalDefault && l.isDefault)) {
+    // Skip My Tasks entries as they were already handled
+    if (normTitle === 'my tasks' || l.id === 'list_default' || l.googleTaskListId === '@default') {
       return;
     }
 
-    if (l.googleTaskListId && seenGtl.has(l.googleTaskListId)) {
-      const existing = cleanLists.find((el) => el.googleTaskListId === l.googleTaskListId);
-      if (existing) idRemap.set(l.id, existing.id);
+    // Force isDefault to false on all custom lists to heal any previous corruption
+    const sanitizedList: TaskList = {
+      ...l,
+      isDefault: false,
+      id: l.id.startsWith('gtl_') || l.googleTaskListId
+        ? (l.id.startsWith('gtl_') ? l.id : `gtl_${l.googleTaskListId}`)
+        : l.id,
+    };
+
+    if (sanitizedList.googleTaskListId && seenGtl.has(sanitizedList.googleTaskListId)) {
+      const existing = cleanLists.find((el) => el.googleTaskListId === sanitizedList.googleTaskListId);
+      if (existing && existing.id !== sanitizedList.id) {
+        idRemap.set(sanitizedList.id, existing.id);
+      }
       return;
     }
 
     if (seenTitles.has(normTitle)) {
       const existing = cleanLists.find((el) => (el.title || '').trim().toLowerCase() === normTitle);
-      if (existing) idRemap.set(l.id, existing.id);
+      if (existing) {
+        if (existing.id !== sanitizedList.id) {
+          idRemap.set(sanitizedList.id, existing.id);
+        }
+        if (!existing.googleTaskListId && sanitizedList.googleTaskListId) {
+          existing.googleTaskListId = sanitizedList.googleTaskListId;
+        }
+      }
       return;
     }
 
-    if (l.googleTaskListId) seenGtl.add(l.googleTaskListId);
+    if (sanitizedList.googleTaskListId) seenGtl.add(sanitizedList.googleTaskListId);
     seenTitles.add(normTitle);
-    cleanLists.push(l);
+    cleanLists.push(sanitizedList);
   });
 
   return { cleanLists, idRemap };
@@ -751,8 +790,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const tlSnap = await getDocs(getUserTaskListsCollection(uid));
           if (!tlSnap.empty && active) {
             const loadedLists = tlSnap.docs.map((d) => d.data() as TaskList);
-            setTaskLists(loadedLists);
-            if (loadedLists.length > 0) setActiveTaskListId(loadedLists[0].id);
+            const { cleanLists } = deduplicateTaskLists(loadedLists);
+            setTaskLists(cleanLists);
+            taskListsRef.current = cleanLists;
+            if (cleanLists.length > 0) {
+              setActiveTaskListId((prev) => {
+                const stillExists = cleanLists.some((l) => l.id === prev);
+                return stillExists ? prev : (cleanLists.find((l) => l.isDefault)?.id || cleanLists[0].id);
+              });
+            }
           }
 
           // 5. Calendars
@@ -1075,7 +1121,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           let allListsFetchedSuccessfully = true;
 
           for (const list of activeLists) {
-            const gtlId = list.googleTaskListId || (list.id.startsWith('gtl_') ? list.id.replace('gtl_', '') : '@default');
+            const isDefaultList = list.isDefault || list.id === 'list_default' || (list.title || '').trim().toLowerCase() === 'my tasks';
+            const gtlId = list.googleTaskListId && list.googleTaskListId !== '@default'
+              ? list.googleTaskListId
+              : list.id.startsWith('gtl_')
+              ? list.id.replace('gtl_', '')
+              : isDefaultList
+              ? '@default'
+              : undefined;
+
+            if (!gtlId) {
+              continue;
+            }
+
             try {
               const remoteTasks = await fetchGoogleTasks(token, gtlId, list.id, cleanLists);
               for (const rt of remoteTasks) {
@@ -1369,7 +1427,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: new Date().toISOString(),
     };
     setTaskLists((prev) => [...prev, newList]);
+    taskListsRef.current = [...taskListsRef.current, newList];
     setActiveTaskListId(newList.id);
+    if (user && !user.isGuest) {
+      setDoc(doc(getUserTaskListsCollection(user.uid), newList.id), sanitizeForFirestore(newList)).catch(console.warn);
+    }
     return newList;
   };
 
@@ -1382,6 +1444,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setTaskLists((prev) => prev.filter((l) => l.id !== listId));
+    taskListsRef.current = taskListsRef.current.filter((l) => l.id !== listId);
+    if (user && !user.isGuest) {
+      deleteDoc(doc(getUserTaskListsCollection(user.uid), listId)).catch(console.warn);
+    }
+
     setTasks((prev) => {
       const remainingTasks = prev.filter((t) => t.taskListId !== listId);
       tasksRef.current = remainingTasks;
@@ -1403,7 +1470,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const targetListId = isVirtualList
       ? (taskListsRef.current.find((l) => l.isDefault)?.id || taskListsRef.current[0]?.id || 'list_default')
       : rawListId;
-    const targetList = taskListsRef.current.find((l) => l.id === targetListId);
+    const targetList = taskListsRef.current.find(
+      (l) => l.id === targetListId || (targetListId.startsWith('gtl_') && l.googleTaskListId === targetListId.replace('gtl_', ''))
+    );
 
     const isTaskCompleted = taskData.status === 'completed' || Boolean(taskData.completed);
 

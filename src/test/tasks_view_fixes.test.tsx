@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TasksView } from '../views/TasksView';
-import { DataProvider } from '../context/DataContext';
+import { DataProvider, deduplicateTaskLists } from '../context/DataContext';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { FocusProvider } from '../context/FocusContext';
@@ -165,5 +165,89 @@ describe('Tasks View Fixes & Reliability', () => {
     const compactBtn = screen.getByRole('button', { name: /^Compact$/i });
     fireEvent.click(compactBtn);
     expect(screen.getByText('Task Active Two')).toBeInTheDocument();
+  });
+
+  it('deduplicateTaskLists strictly protects custom lists even if legacy isDefault was true', () => {
+    const corruptedLists = [
+      { id: 'gtl_01lab', googleTaskListId: '01lab_gid', title: '01 Lab', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_ca', googleTaskListId: 'ca_gid', title: 'CA', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+    ];
+
+    const { cleanLists, idRemap } = deduplicateTaskLists(corruptedLists);
+
+    // My Tasks must be canonical default
+    const myTasks = cleanLists.find((l: any) => l.title === 'My Tasks');
+    expect(myTasks).toBeDefined();
+    expect(myTasks!.isDefault).toBe(true);
+    expect(myTasks!.id).toBe('list_default');
+
+    // Custom lists must NOT be merged into My Tasks and must have isDefault: false
+    const labList = cleanLists.find((l: any) => l.title === '01 Lab');
+    expect(labList).toBeDefined();
+    expect(labList!.isDefault).toBe(false);
+    expect(labList!.id).toBe('gtl_01lab');
+
+    const caList = cleanLists.find((l: any) => l.title === 'CA');
+    expect(caList).toBeDefined();
+    expect(caList!.isDefault).toBe(false);
+    expect(caList!.id).toBe('gtl_ca');
+
+    // idRemap must NEVER map custom lists to list_default
+    expect(idRemap.get('gtl_01lab')).toBeUndefined();
+    expect(idRemap.get('01lab_gid')).toBeUndefined();
+    expect(idRemap.get('gtl_ca')).toBeUndefined();
+  });
+
+  it('tasks of different lists are isolated and newly created tasks appear in the active list', async () => {
+    const initialLists = [
+      { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_lab', googleTaskListId: 'lab_gid', title: '01 Lab', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+    ];
+    const initialTasks = [
+      {
+        id: 't_mytask',
+        title: 'General In My Tasks',
+        taskListId: 'list_default',
+        status: 'needsAction',
+        priority: 'medium',
+      },
+      {
+        id: 't_labtask',
+        title: 'Make video for 01 lab',
+        taskListId: 'gtl_lab',
+        status: 'needsAction',
+        priority: 'high',
+      },
+    ];
+
+    window.localStorage.setItem('nayra_test_operator_id_task_lists', JSON.stringify(initialLists));
+    window.localStorage.setItem('nayra_test_operator_id_tasks', JSON.stringify(initialTasks));
+
+    render(
+      <TestWrapper>
+        <TasksView />
+      </TestWrapper>
+    );
+
+    // Initially in My Tasks: "General In My Tasks" is visible, "Make video for 01 lab" is NOT visible
+    expect(await screen.findByText('General In My Tasks')).toBeInTheDocument();
+    expect(screen.queryByText('Make video for 01 lab')).not.toBeInTheDocument();
+
+    // Click 01 Lab in the sidebar
+    const labButton = screen.getByRole('button', { name: /01 Lab/i });
+    fireEvent.click(labButton);
+
+    // Now in 01 Lab: "Make video for 01 lab" is visible, "General In My Tasks" is NOT visible
+    expect(await screen.findByText('Make video for 01 lab')).toBeInTheDocument();
+    expect(screen.queryByText('General In My Tasks')).not.toBeInTheDocument();
+
+    // Add a new task in 01 Lab
+    const input = screen.getByPlaceholderText(/Add a task/i);
+    fireEvent.change(input, { target: { value: 'New Lab Experiment Task' } });
+    fireEvent.submit(input.closest('form')!);
+
+    // New task appears immediately in 01 Lab
+    expect(await screen.findByText('New Lab Experiment Task')).toBeInTheDocument();
   });
 });
