@@ -36,6 +36,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { formatTimeRange, getTodayDateString } from '@/lib/utils';
+import { normalizeTag } from '@/lib/tagUtils';
 import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 import { SwiftUISegmentedControl } from '@/components/swiftui/SwiftUISegmentedControl';
 
@@ -738,6 +739,18 @@ export const CalendarView: React.FC = () => {
                               <div className="text-[10px] opacity-80 font-mono truncate">
                                 {formatTimeRange(ev.start, ev.end)}
                               </div>
+                              {ev.tags && ev.tags.length > 0 && (
+                                <div className="flex items-center gap-1 flex-wrap pt-1">
+                                  {ev.tags.map((tg) => (
+                                    <span
+                                      key={tg}
+                                      className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-white/20 dark:bg-black/20 text-inherit border border-white/20 dark:border-black/20 shadow-2xs"
+                                    >
+                                      #{tg}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           ))}
 
@@ -1183,7 +1196,7 @@ export const CalendarView: React.FC = () => {
                                   {t.tags.map((tg) => (
                                     <span
                                       key={tg}
-                                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                                      className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 shadow-xs"
                                     >
                                       #{tg}
                                     </span>
@@ -1435,13 +1448,13 @@ export const CalendarView: React.FC = () => {
                     {taskTags.map((tg) => (
                       <span
                         key={tg}
-                        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                        className="inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 shadow-xs"
                       >
                         <span>#{tg}</span>
                         <button
                           type="button"
                           onClick={() => setTaskTags(taskTags.filter((t) => t !== tg))}
-                          className="text-zinc-400 hover:text-rose-500 p-0.5 cursor-pointer"
+                          className="text-zinc-400 hover:text-rose-500 p-0.5 cursor-pointer rounded-full"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -1460,7 +1473,7 @@ export const CalendarView: React.FC = () => {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          const clean = taskNewTag.trim().replace(/^#/, '').toLowerCase();
+                          const clean = normalizeTag(taskNewTag);
                           if (clean && !taskTags.includes(clean)) {
                             setTaskTags([...taskTags, clean]);
                           }

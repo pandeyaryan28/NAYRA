@@ -63,6 +63,7 @@ export interface CalendarEvent {
   recurrence?: string[];
   attendees?: Array<{ email: string; displayName?: string; responseStatus?: string }>;
   remindersMinutesBefore?: number;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -144,6 +145,10 @@ export interface TagAnalyticsItem {
   completionRate: number;
   totalFocusSeconds: number;
   pomodoroCount: number;
+  periodFocusSeconds?: number;
+  periodPomodoroCount?: number;
+  sessionCount?: number;
+  aliases?: string[];
 }
 
 // ------------------------------------------

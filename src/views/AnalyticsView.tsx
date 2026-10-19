@@ -15,6 +15,11 @@ import { AnalyticsHeader, HORIZON_LABELS } from './analytics/AnalyticsHeader';
 import { FocusAnalyticsSection } from './analytics/FocusAnalyticsSection';
 import { TaskFocusBreakdown } from './analytics/TaskFocusBreakdown';
 import { TaskVelocitySection } from './analytics/TaskVelocitySection';
+import {
+  normalizeTag,
+  areTagsSimilar,
+  calculateComprehensiveTagAnalytics,
+} from '@/lib/tagUtils';
 
 export type TimeHorizon = 'today' | 'yesterday' | 'tomorrow' | '7d' | '30d' | 'all';
 
@@ -41,13 +46,23 @@ export const AnalyticsView: React.FC = () => {
   const thirtyDaysAgoStr = format(subDays(new Date(), 29), 'yyyy-MM-dd');
   const sixtyDaysAgoStr = format(subDays(new Date(), 59), 'yyyy-MM-dd');
 
-  // List of all unique tags in the system
+  // List of all unique tags in the system across tasks and focus sessions
   const availableTags = useMemo(() => {
     const map = new Map<string, number>();
     tasks.forEach((t) => {
       if (t.tags) {
         t.tags.forEach((tag) => {
-          const clean = tag.trim().toLowerCase();
+          const clean = normalizeTag(tag);
+          if (clean) {
+            map.set(clean, (map.get(clean) || 0) + 1);
+          }
+        });
+      }
+    });
+    focusSessions.forEach((s) => {
+      if (s.tags) {
+        s.tags.forEach((tag) => {
+          const clean = normalizeTag(tag);
           if (clean) {
             map.set(clean, (map.get(clean) || 0) + 1);
           }
@@ -55,21 +70,32 @@ export const AnalyticsView: React.FC = () => {
       }
     });
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-  }, [tasks]);
+  }, [tasks, focusSessions]);
 
-  // Tasks scoped by tag filter
+  // Tasks scoped by tag filter (fuzzy/canonical matching)
   const tagScopedTasks = useMemo(() => {
     if (!activeTagFilter) return tasks;
     return tasks.filter((t) =>
-      t.tags && t.tags.some((tg) => tg.trim().toLowerCase() === activeTagFilter.toLowerCase())
+      t.tags && t.tags.some((tg) => areTagsSimilar(tg, activeTagFilter))
     );
   }, [tasks, activeTagFilter]);
 
-  // Tag-scoped focus sessions
+  // Tag-scoped focus sessions (supports session tags, linked task tags, multi-tasks)
   const tagScopedSessions = useMemo(() => {
     if (!activeTagFilter) return focusSessions;
     const allowedTaskIds = new Set(tagScopedTasks.map((t) => t.id));
-    return focusSessions.filter((s) => s.taskId && allowedTaskIds.has(s.taskId));
+    return focusSessions.filter((s) => {
+      if (s.tags && s.tags.some((tg) => areTagsSimilar(tg, activeTagFilter))) {
+        return true;
+      }
+      if (s.taskId && allowedTaskIds.has(s.taskId)) {
+        return true;
+      }
+      if (s.taskIds && s.taskIds.some((id) => allowedTaskIds.has(id))) {
+        return true;
+      }
+      return false;
+    });
   }, [focusSessions, tagScopedTasks, activeTagFilter]);
 
   // Horizon-filtered focus sessions
@@ -292,53 +318,10 @@ export const AnalyticsView: React.FC = () => {
     return Math.max(3600 * 3, maxDaily);
   }, [timeHorizon, singleDayHourlyDistribution, past7DaysFocus]);
 
-  // Tag analytics
+  // Tag analytics with comprehensive time tracking & cluster recognition
   const tagAnalytics: TagAnalyticsItem[] = useMemo(() => {
-    const tagMap = new Map<
-      string,
-      {
-        totalTasks: number;
-        completedTasks: number;
-        pendingTasks: number;
-        totalFocusSeconds: number;
-        pomodoroCount: number;
-      }
-    >();
-
-    tagScopedTasks.forEach((t) => {
-      if (!t.tags || t.tags.length === 0) return;
-      t.tags.forEach((rawTag) => {
-        const tag = rawTag.trim().toLowerCase();
-        if (!tag) return;
-        const current = tagMap.get(tag) || {
-          totalTasks: 0,
-          completedTasks: 0,
-          pendingTasks: 0,
-          totalFocusSeconds: 0,
-          pomodoroCount: 0,
-        };
-        current.totalTasks += 1;
-        if (t.status === 'completed' || t.archived) {
-          current.completedTasks += 1;
-        } else {
-          current.pendingTasks += 1;
-        }
-        current.totalFocusSeconds += t.totalFocusSeconds || 0;
-        current.pomodoroCount += t.pomodoroCount || 0;
-        tagMap.set(tag, current);
-      });
-    });
-
-    return Array.from(tagMap.entries()).map(([tag, data]) => ({
-      tag,
-      totalTasks: data.totalTasks,
-      completedTasks: data.completedTasks,
-      pendingTasks: data.pendingTasks,
-      completionRate: data.totalTasks > 0 ? Math.round((data.completedTasks / data.totalTasks) * 100) : 0,
-      totalFocusSeconds: data.totalFocusSeconds,
-      pomodoroCount: data.pomodoroCount,
-    }));
-  }, [tagScopedTasks]);
+    return calculateComprehensiveTagAnalytics(tasks, focusSessions, horizonSessions);
+  }, [tasks, focusSessions, horizonSessions]);
 
   const sortedTagAnalytics = useMemo(() => {
     return [...tagAnalytics].sort((a, b) => {
@@ -375,8 +358,18 @@ export const AnalyticsView: React.FC = () => {
 
   const totalTaggedFocusSeconds = useMemo(() => {
     const taggedTasks = tasks.filter((t) => t.tags && t.tags.some((tg) => tg.trim().length > 0));
-    return taggedTasks.reduce((sum, item) => sum + (item.totalFocusSeconds || 0), 0);
-  }, [tasks]);
+    const taskSec = taggedTasks.reduce((sum, item) => sum + (item.totalFocusSeconds || 0), 0);
+    const autonomousTaggedSessions = focusSessions.filter(
+      (s) =>
+        s.mode === 'focus' &&
+        !s.taskId &&
+        (!s.taskIds || s.taskIds.length === 0) &&
+        s.tags &&
+        s.tags.length > 0
+    );
+    const sessionSec = autonomousTaggedSessions.reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+    return taskSec + sessionSec;
+  }, [tasks, focusSessions]);
 
   // Action: Copy markdown report
   const handleCopyReport = () => {

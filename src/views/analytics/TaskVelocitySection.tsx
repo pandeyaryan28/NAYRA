@@ -225,9 +225,9 @@ export const TaskVelocitySection: React.FC<TaskVelocitySectionProps> = ({
                 >
                   {/* Tag Badge & Task Counts */}
                   <div className="space-y-1 min-w-0 sm:w-1/3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className={`font-mono text-xs font-semibold px-2 py-0.5 rounded-md border ${
+                        className={`font-mono text-xs font-semibold px-2.5 py-0.5 rounded-full border shadow-xs ${
                           isTagFiltered
                             ? 'bg-sky-600 text-white border-sky-600'
                             : 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-800 dark:border-zinc-200'
@@ -235,6 +235,14 @@ export const TaskVelocitySection: React.FC<TaskVelocitySectionProps> = ({
                       >
                         #{item.tag}
                       </span>
+                      {item.aliases && item.aliases.length > 0 && (
+                        <span
+                          className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-white/[0.06] px-1.5 py-0.5 rounded-full border border-black/5 dark:border-white/5"
+                          title={`Includes similar tags: ${item.aliases.map((a) => `#${a}`).join(', ')}`}
+                        >
+                          +{item.aliases.length} similar
+                        </span>
+                      )}
                       <span className="text-xs text-zinc-600 dark:text-zinc-400">
                         {item.completedTasks} of {item.totalTasks} completed
                       </span>
@@ -261,10 +269,26 @@ export const TaskVelocitySection: React.FC<TaskVelocitySectionProps> = ({
                   {/* Focus Time & Pomodoro Count */}
                   <div className="text-left sm:text-right sm:w-1/3">
                     <span className="text-sm font-bold font-mono text-zinc-900 dark:text-zinc-100 block">
-                      {formatSecondsToHoursMinutes(item.totalFocusSeconds)}
+                      {formatSecondsToHoursMinutes(
+                        item.periodFocusSeconds !== undefined && item.periodFocusSeconds > 0
+                          ? item.periodFocusSeconds
+                          : item.totalFocusSeconds
+                      )}
                     </span>
                     <span className="text-[10px] text-zinc-400 font-mono block">
-                      {item.pomodoroCount} {item.pomodoroCount === 1 ? 'pomodoro' : 'pomodoros'} logged
+                      {item.periodFocusSeconds !== undefined &&
+                      item.periodFocusSeconds > 0 &&
+                      item.periodFocusSeconds !== item.totalFocusSeconds ? (
+                        <>
+                          <span className="text-zinc-500 font-medium">in horizon</span> •{' '}
+                          {formatSecondsToHoursMinutes(item.totalFocusSeconds)} all-time ({item.pomodoroCount}{' '}
+                          {item.pomodoroCount === 1 ? 'pomo' : 'pomos'})
+                        </>
+                      ) : (
+                        <>
+                          {item.pomodoroCount} {item.pomodoroCount === 1 ? 'pomodoro' : 'pomodoros'} logged
+                        </>
+                      )}
                     </span>
                   </div>
                 </div>

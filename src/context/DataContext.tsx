@@ -71,6 +71,7 @@ import {
   fetchActiveTasksFromFirestore,
 } from '@/lib/firebase';
 import { generateId, safeLocalStorageGet, safeLocalStorageSet, getTodayDateString } from '@/lib/utils';
+import { extractHashtags, cleanTitleWithHashtags, mergeTags } from '@/lib/tagUtils';
 import { subDays, isSameWeek, isSameMonth, parseISO, format } from 'date-fns';
 
 export interface DataContextValue {
@@ -1542,10 +1543,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const now = new Date().toISOString();
     let googleEventId: string | undefined = undefined;
 
-    if (googleAccessToken && eventData.calendarId) {
+    const titleExtract = cleanTitleWithHashtags(eventData.title || '');
+    const descTags = extractHashtags(eventData.description || '');
+    const combinedTags = mergeTags(eventData.tags, [...titleExtract.extractedTags, ...descTags]);
+    const eventPayload = {
+      ...eventData,
+      title: titleExtract.cleanTitle || eventData.title,
+      tags: combinedTags,
+    };
+
+    if (googleAccessToken && eventPayload.calendarId) {
       try {
-        const gcalId = resolveGoogleCalendarId(eventData.calendarId, calendarsRef.current);
-        const resp = await createGoogleEvent(googleAccessToken, gcalId, eventData);
+        const gcalId = resolveGoogleCalendarId(eventPayload.calendarId, calendarsRef.current);
+        const resp = await createGoogleEvent(googleAccessToken, gcalId, eventPayload);
         googleEventId = resp?.id;
       } catch (e) {
         console.warn('Failed to create event in Google Calendar directly:', e);
@@ -1553,7 +1563,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const newEvent: CalendarEvent = {
-      ...eventData,
+      ...eventPayload,
       id: newId,
       googleEventId,
       createdAt: now,
@@ -1571,12 +1581,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateEvent = async (id: string, partial: Partial<CalendarEvent>) => {
     const existing = eventsRef.current.find((e) => e.id === id) || events.find((e) => e.id === id);
+
+    const titleExtract = partial.title !== undefined ? cleanTitleWithHashtags(partial.title) : undefined;
+    const descTags = partial.description !== undefined ? extractHashtags(partial.description) : [];
+    const rawTags = partial.tags !== undefined ? partial.tags : existing?.tags;
+    const combinedTags = (partial.title !== undefined || partial.description !== undefined || partial.tags !== undefined)
+      ? mergeTags(rawTags, [...(titleExtract?.extractedTags || []), ...descTags])
+      : existing?.tags;
+
+    const sanitizedPartial = {
+      ...partial,
+      ...(titleExtract ? { title: titleExtract.cleanTitle || partial.title } : {}),
+      ...(combinedTags !== undefined ? { tags: combinedTags } : {}),
+    };
+
     if (existing && googleAccessToken) {
-      const gcalId = resolveGoogleCalendarId(partial.calendarId || existing.calendarId, calendarsRef.current);
+      const gcalId = resolveGoogleCalendarId(sanitizedPartial.calendarId || existing.calendarId, calendarsRef.current);
       if (existing.googleEventId) {
-        updateGoogleEvent(googleAccessToken, gcalId, existing.googleEventId, partial).catch(console.warn);
+        updateGoogleEvent(googleAccessToken, gcalId, existing.googleEventId, sanitizedPartial).catch(console.warn);
       } else {
-        createGoogleEvent(googleAccessToken, gcalId, { ...existing, ...partial })
+        createGoogleEvent(googleAccessToken, gcalId, { ...existing, ...sanitizedPartial })
           .then((created) => {
             if (created?.id) {
               setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, googleEventId: created.id } : e)));
@@ -1593,7 +1617,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setEvents((prev) =>
       prev.map((e) => {
         if (e.id === id) {
-          const updated = { ...e, ...partial, updatedAt: now };
+          const updated = { ...e, ...sanitizedPartial, updatedAt: now };
           if (user && !user.isGuest) {
             setDoc(doc(getUserEventsCollection(user.uid), id), sanitizeForFirestore(updated), { merge: true }).catch(console.warn);
           }
@@ -1737,12 +1761,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isTaskCompleted = taskData.status === 'completed' || Boolean(taskData.completed);
 
+    const titleExtract = cleanTitleWithHashtags(taskData.title || 'New Task');
+    const notesTags = extractHashtags(taskData.notes);
+    const combinedTags = mergeTags(taskData.tags, [...titleExtract.extractedTags, ...notesTags]);
+    const cleanTaskTitle = titleExtract.cleanTitle || (taskData.title || 'New Task').trim();
+
     const newTask: TaskItem = {
       id: newId,
       googleTaskId: undefined,
       taskListId: targetList?.id || targetListId,
       taskListName: targetList?.title || (targetListId === 'list_default' ? 'My Tasks' : undefined),
-      title: (taskData.title || 'New Task').trim(),
+      title: cleanTaskTitle,
       notes: taskData.notes || '',
       status: isTaskCompleted ? 'completed' : 'needsAction',
       completed: isTaskCompleted,
@@ -1752,7 +1781,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       priority: taskData.priority || 'medium',
       starred: Boolean(taskData.starred),
       subtasks: taskData.subtasks || [],
-      tags: taskData.tags || [],
+      tags: combinedTags,
       totalFocusSeconds: 0,
       pomodoroCount: 0,
       createdAt: now,
@@ -1877,7 +1906,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           );
           const taskListName = partial.taskListName || (partial.taskListId ? targetList?.title : t.taskListName || targetList?.title);
           const canonicalListId = partial.taskListId ? (targetList?.id || targetListId) : t.taskListId;
-          const updated = { ...t, ...partial, taskListId: canonicalListId, taskListName, updatedAt: now };
+
+          const titleExtract = partial.title !== undefined ? cleanTitleWithHashtags(partial.title) : undefined;
+          const notesTags = partial.notes !== undefined ? extractHashtags(partial.notes) : [];
+          const rawTags = partial.tags !== undefined ? partial.tags : t.tags;
+          const combinedTags = (partial.title !== undefined || partial.notes !== undefined || partial.tags !== undefined)
+            ? mergeTags(rawTags, [...(titleExtract?.extractedTags || []), ...notesTags])
+            : t.tags;
+          const updatedTitle = titleExtract ? (titleExtract.cleanTitle || partial.title?.trim() || t.title) : (partial.title !== undefined ? partial.title : t.title);
+
+          const updated = {
+            ...t,
+            ...partial,
+            title: updatedTitle,
+            tags: combinedTags,
+            taskListId: canonicalListId,
+            taskListName,
+            updatedAt: now,
+          };
           updatedSnapshot = updated;
           return updated;
         }

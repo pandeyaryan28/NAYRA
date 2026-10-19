@@ -4,6 +4,7 @@ import { useData } from './DataContext';
 import { useAuth } from './AuthContext';
 import { playSessionCompleteSound, playBreakCompleteSound } from '@/lib/audio';
 import { safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
+import { extractHashtags, normalizeTag, mergeTags } from '@/lib/tagUtils';
 import { syncActiveTimerToFirestore, subscribeActiveTimerFromFirestore, OPERATOR_UID } from '@/lib/firebase';
 
 export interface FocusContextValue {
@@ -17,6 +18,12 @@ export interface FocusContextValue {
   selectedTasks: TaskItem[];
   activeTaskIds: string[];
   taskTimeAllocations: Record<string, number>;
+  sessionIntention: string;
+  sessionTags: string[];
+  setSessionIntention: (val: string) => void;
+  setSessionTags: (tags: string[]) => void;
+  addSessionTag: (tag: string) => void;
+  removeSessionTag: (tag: string) => void;
   selectTask: (task: TaskItem | null) => void;
   selectTasks: (tasks: TaskItem[]) => void;
   addSessionTask: (task: TaskItem) => void;
@@ -46,6 +53,8 @@ interface StoredFocusState {
   activeTaskIds?: string[];
   taskTimeAllocations?: Record<string, number>;
   lastSliceTime?: number | null;
+  sessionIntention?: string;
+  sessionTags?: string[];
 }
 
 export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -106,6 +115,37 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     return initialStored?.selectedTaskId ? [initialStored.selectedTaskId] : [];
   });
+
+  const [sessionIntention, setSessionIntentionState] = useState<string>(initialStored?.sessionIntention || '');
+  const [sessionTags, setSessionTagsState] = useState<string[]>(initialStored?.sessionTags || []);
+  const sessionIntentionRef = useRef(sessionIntention);
+  sessionIntentionRef.current = sessionIntention;
+  const sessionTagsRef = useRef(sessionTags);
+  sessionTagsRef.current = sessionTags;
+
+  const setSessionIntention = useCallback((val: string) => {
+    setSessionIntentionState(val);
+    const hashtags = extractHashtags(val);
+    if (hashtags.length > 0) {
+      setSessionTagsState((prev) => mergeTags(prev, hashtags));
+    }
+  }, []);
+
+  const setSessionTags = useCallback((tags: string[]) => {
+    setSessionTagsState(tags.map(normalizeTag).filter(Boolean));
+  }, []);
+
+  const addSessionTag = useCallback((tag: string) => {
+    const cleaned = normalizeTag(tag);
+    if (cleaned) {
+      setSessionTagsState((prev) => mergeTags(prev, [cleaned]));
+    }
+  }, []);
+
+  const removeSessionTag = useCallback((tag: string) => {
+    const cleaned = normalizeTag(tag);
+    setSessionTagsState((prev) => prev.filter((t) => t !== cleaned));
+  }, []);
 
   const [taskTimeAllocations, setTaskTimeAllocations] = useState<Record<string, number>>(
     initialStored?.taskTimeAllocations || {}
@@ -185,6 +225,8 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activeTaskIds: nextActiveTaskIds,
         taskTimeAllocations: taskAllocationsRef.current,
         lastSliceTime: lastSliceTimeRef.current,
+        sessionIntention: sessionIntentionRef.current,
+        sessionTags: sessionTagsRef.current,
       };
       safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
 
@@ -237,9 +279,11 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       activeTaskIds,
       taskTimeAllocations,
       lastSliceTime: lastSliceTimeRef.current,
+      sessionIntention,
+      sessionTags,
     };
     safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
-  }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId, activeTaskIds, taskTimeAllocations]);
+  }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId, activeTaskIds, taskTimeAllocations, sessionIntention, sessionTags]);
 
   // Clean up any stale/expired timer state from an abandoned session on initial mount
   useEffect(() => {
@@ -447,17 +491,23 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
 
+      const intentionTags = extractHashtags(sessionIntentionRef.current);
       const allSessionTags = Array.from(
-        new Set(linkedTasks.flatMap((t) => t.tags || []))
+        new Set([
+          ...linkedTasks.flatMap((t) => t.tags || []),
+          ...sessionTagsRef.current,
+          ...intentionTags,
+        ].map(normalizeTag).filter(Boolean))
       );
 
       const primary = linkedTasks[0] || null;
+      const fallbackTitle = sessionIntentionRef.current.trim() || null;
 
       logFocusSession({
         taskId: primary?.id || null,
-        taskTitle: primary?.title || null,
+        taskTitle: primary?.title || fallbackTitle,
         taskIds: allLinkedIds,
-        taskTitles: linkedTasks.map((t) => t.title),
+        taskTitles: linkedTasks.length > 0 ? linkedTasks.map((t) => t.title) : (fallbackTitle ? [fallbackTitle] : []),
         tags: allSessionTags,
         taskTimeAllocations: finalAllocations,
         mode: 'focus',
@@ -705,6 +755,12 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         selectedTasks,
         activeTaskIds,
         taskTimeAllocations,
+        sessionIntention,
+        sessionTags,
+        setSessionIntention,
+        setSessionTags,
+        addSessionTag,
+        removeSessionTag,
         selectTask,
         selectTasks,
         addSessionTask,

@@ -148,10 +148,10 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
           <button
             type="button"
             onClick={() => setActiveTagFilter(null)}
-            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all duration-150 swiftui-press ${
+            className={`px-3 py-1 text-xs font-medium rounded-full border transition-all duration-150 swiftui-press ${
               activeTagFilter === null
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-white shadow-xs font-semibold'
+                : 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border-black/5 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-zinc-700'
             }`}
           >
             All Tags ({totalTaskCount})
@@ -164,13 +164,13 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
                 key={tag}
                 type="button"
                 onClick={() => setActiveTagFilter(isSelected ? null : tag)}
-                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-mono font-medium rounded-md transition-all duration-150 swiftui-press ${
+                className={`flex items-center gap-1 px-3 py-1 text-xs font-mono font-medium rounded-full border transition-all duration-150 swiftui-press ${
                   isSelected
-                    ? 'bg-sky-600 text-white shadow-xs'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                    ? 'bg-sky-600 text-white border-sky-600 shadow-xs font-semibold'
+                    : 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border-black/5 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                 }`}
               >
-                <span className="text-[10px] opacity-60">tag:</span>
+                <span className="text-[10px] opacity-60">#</span>
                 <span>{tag}</span>
                 <span className="opacity-70 text-[10px]">({count})</span>
               </button>

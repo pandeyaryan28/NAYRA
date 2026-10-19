@@ -34,6 +34,7 @@ import { Select } from '@/components/common/Select';
 import { Badge } from '@/components/common/Badge';
 import { TaskItem, TaskPriority, TaskList } from '@/types';
 import { formatSecondsToHoursMinutes, formatGoogleTasksDue, safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
+import { extractHashtags, cleanTitleWithHashtags, mergeTags, normalizeTag } from '@/lib/tagUtils';
 import { isToday, isPast, isTomorrow, isThisWeek, parseISO, format, addDays, isAfter, startOfDay } from 'date-fns';
 import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 
@@ -128,9 +129,10 @@ export const TasksView: React.FC = () => {
     reconnectAndSync,
     isGoogleTokenExpired,
     lastSyncTime,
+    focusSessions,
   } = useData();
 
-  const { selectTask, selectTasks, startTimer } = useFocus();
+  const { selectTask, selectTasks, startTimer, setSessionTags, setSessionIntention } = useFocus();
   const location = useLocation();
   const quickInputRef = useRef<HTMLInputElement>(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
@@ -245,10 +247,12 @@ export const TasksView: React.FC = () => {
       const uniqueTaskTags = new Set(
         t.tags
           .filter((tg): tg is string => typeof tg === 'string' && tg.trim().length > 0)
-          .map((tg) => tg.trim().toLowerCase())
+          .map((tg) => normalizeTag(tg))
       );
       uniqueTaskTags.forEach((lower) => {
-        map.set(lower, (map.get(lower) || 0) + 1);
+        if (lower) {
+          map.set(lower, (map.get(lower) || 0) + 1);
+        }
       });
     });
     return Array.from(map.entries()).sort((a, b) => {
@@ -256,6 +260,33 @@ export const TasksView: React.FC = () => {
       return diff !== 0 ? diff : a[0].localeCompare(b[0]);
     });
   }, [tasks]);
+
+  // Focus time map per tag across tasks and autonomous focus blocks
+  const tagFocusTimeMap = useMemo(() => {
+    const map = new Map<string, number>();
+    tasks.forEach((t) => {
+      if (!t || !Array.isArray(t.tags)) return;
+      t.tags.forEach((tg) => {
+        const norm = normalizeTag(tg);
+        if (norm) {
+          map.set(norm, (map.get(norm) || 0) + (t.totalFocusSeconds || 0));
+        }
+      });
+    });
+    (focusSessions || []).forEach((s) => {
+      if (s.mode !== 'focus') return;
+      const hasLinkedTasks = (s.taskIds && s.taskIds.length > 0) || Boolean(s.taskId);
+      if (!hasLinkedTasks && Array.isArray(s.tags)) {
+        s.tags.forEach((tg) => {
+          const norm = normalizeTag(tg);
+          if (norm) {
+            map.set(norm, (map.get(norm) || 0) + (s.durationSeconds || 0));
+          }
+        });
+      }
+    });
+    return map;
+  }, [tasks, focusSessions]);
 
   const toggleFocusSelect = (taskId: string) => {
     setFocusSelection((prev) => {
@@ -797,13 +828,17 @@ export const TasksView: React.FC = () => {
     e.preventDefault();
     if (!editingTask || !editTitle.trim()) return;
 
+    const titleExtract = cleanTitleWithHashtags(editTitle.trim());
+    const notesTags = extractHashtags(editNotes.trim());
+    const combinedTags = mergeTags(editTags, [...titleExtract.extractedTags, ...notesTags]);
+
     await updateTask(editingTask.id, {
-      title: editTitle.trim(),
+      title: titleExtract.cleanTitle || editTitle.trim(),
       notes: editNotes.trim(),
       due: editDue || undefined,
       priority: editPriority,
       starred: editStarred,
-      tags: editTags,
+      tags: combinedTags,
     });
 
     setEditingTask(null);
@@ -946,10 +981,10 @@ export const TasksView: React.FC = () => {
                         e.stopPropagation();
                         setSelectedTag(selectedTag === tg.toLowerCase() ? null : tg.toLowerCase());
                       }}
-                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md transition-colors cursor-pointer ${
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all duration-150 cursor-pointer shadow-xs active:scale-95 swiftui-press ${
                         selectedTag === tg.toLowerCase()
-                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold'
-                          : 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white font-semibold'
+                          : 'bg-zinc-100/80 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 border-black/[0.04] dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                     >
                       #{tg}
@@ -1214,10 +1249,10 @@ export const TasksView: React.FC = () => {
                         e.stopPropagation();
                         setSelectedTag(selectedTag === tg.toLowerCase() ? null : tg.toLowerCase());
                       }}
-                      className={`text-xs font-mono px-2 py-0.5 rounded-md border transition-colors cursor-pointer ${
+                      className={`text-xs font-mono px-2.5 py-0.5 rounded-full border transition-all duration-150 cursor-pointer shadow-xs active:scale-95 swiftui-press ${
                         selectedTag === tg.toLowerCase()
                           ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white font-semibold'
-                          : 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 border-transparent hover:border-zinc-300 dark:hover:border-zinc-700'
+                          : 'bg-zinc-100/80 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-300 border-black/[0.04] dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                       title={`Filter by tag #${tg}`}
                     >
@@ -1593,9 +1628,16 @@ export const TasksView: React.FC = () => {
                       <span className="text-zinc-400 font-mono">#</span>
                       <span className="truncate">{tag}</span>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
-                      {count}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {(tagFocusTimeMap.get(tag) || 0) > 0 && (
+                        <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400">
+                          {formatSecondsToHoursMinutes(tagFocusTimeMap.get(tag) || 0)}
+                        </span>
+                      )}
+                      <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                        {count}
+                      </span>
+                    </div>
                   </button>
                 );
               })}
@@ -1801,24 +1843,44 @@ export const TasksView: React.FC = () => {
 
         {/* Active Tag Filter Indicator */}
         {selectedTag && (
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-zinc-200/80 dark:bg-white/[0.08] text-xs">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-3.5 py-2.5 rounded-2xl bg-zinc-200/80 dark:bg-white/[0.08] backdrop-blur-md text-xs border border-black/[0.04] dark:border-white/[0.08] shadow-xs gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-zinc-800 dark:text-zinc-200">Filtered by tag:</span>
-              <span className="font-mono px-2 py-0.5 rounded-md bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold text-xs">
+              <span className="font-mono px-3 py-0.5 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold text-xs shadow-xs">
                 #{selectedTag}
               </span>
               <span className="text-zinc-500 font-mono text-xs">
-                ({displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'})
+                ({displayedTasks.length} {displayedTasks.length === 1 ? 'task' : 'tasks'}
+                {(tagFocusTimeMap.get(selectedTag.toLowerCase()) || 0) > 0 && (
+                  <span> • {formatSecondsToHoursMinutes(tagFocusTimeMap.get(selectedTag.toLowerCase()) || 0)} focus time</span>
+                )})
               </span>
             </div>
-            <button
-              type="button"
-              onClick={() => setSelectedTag(null)}
-              className="flex items-center gap-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer text-xs"
-            >
-              <X className="h-3 w-3" />
-              <span>Clear Filter</span>
-            </button>
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSessionTags([selectedTag]);
+                  setSessionIntention(`Focus on #${selectedTag}`);
+                  navigate('/focus');
+                }}
+                className="h-6 text-[11px] px-2.5 rounded-full text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/30 swiftui-press"
+                title={`Start focus session for #${selectedTag}`}
+              >
+                <Clock className="h-3 w-3 mr-1" />
+                Focus on #{selectedTag}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setSelectedTag(null)}
+                className="flex items-center gap-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer text-xs"
+                aria-label="Clear Filter"
+              >
+                <X className="h-3 w-3" />
+                <span>Clear Filter</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -2379,7 +2441,7 @@ export const TasksView: React.FC = () => {
                 {editTags.map((tg) => (
                   <span
                     key={tg}
-                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md bg-white/60 dark:bg-white/[0.06] backdrop-blur-md text-zinc-800 dark:text-zinc-200 border border-black/[0.06] dark:border-white/[0.08] animate-scale-in"
+                    className="inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full bg-white/60 dark:bg-white/[0.06] backdrop-blur-md text-zinc-800 dark:text-zinc-200 border border-black/[0.06] dark:border-white/[0.08] shadow-xs animate-scale-in"
                   >
                     <span>#{tg}</span>
                     <button

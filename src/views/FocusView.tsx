@@ -12,6 +12,8 @@ import {
   Award,
   X,
   Plus,
+  Hash,
+  Tag,
 } from 'lucide-react';
 import { useFocus } from '@/context/FocusContext';
 import { useData } from '@/context/DataContext';
@@ -23,6 +25,7 @@ import {
   formatSecondsToHoursMinutes,
   formatDateString,
 } from '@/lib/utils';
+import { extractHashtags, normalizeTag } from '@/lib/tagUtils';
 import { parseISO } from 'date-fns';
 import { HStack, VStack, Spacer } from '@/components/swiftui/SwiftUIStack';
 import { SwiftUISegmentedControl } from '@/components/swiftui/SwiftUISegmentedControl';
@@ -39,6 +42,12 @@ export const FocusView: React.FC = () => {
     selectedTasks,
     activeTaskIds,
     taskTimeAllocations,
+    sessionIntention,
+    sessionTags,
+    setSessionIntention,
+    setSessionTags,
+    addSessionTag,
+    removeSessionTag,
     selectTask,
     selectTasks,
     addSessionTask,
@@ -108,6 +117,21 @@ export const FocusView: React.FC = () => {
         (t.tags && t.tags.some((tg) => tg.toLowerCase().includes(q)))
     );
   }, [tasks, pickerSearch]);
+
+  const allActiveTags = useMemo(() => {
+    const taskTags = selectedTasks.flatMap((t) => t.tags || []);
+    const intentionTags = extractHashtags(sessionIntention);
+    return Array.from(new Set([...taskTags, ...sessionTags, ...intentionTags].map(normalizeTag).filter(Boolean)));
+  }, [selectedTasks, sessionTags, sessionIntention]);
+
+  const availableSuggestions = useMemo(() => {
+    const all = new Set<string>();
+    tasks.forEach((t) => (t.tags || []).forEach((tg) => all.add(normalizeTag(tg))));
+    focusSessions.forEach((s) => (s.tags || []).forEach((tg) => all.add(normalizeTag(tg))));
+    ['deepwork', 'study', 'focus'].forEach((tg) => all.add(tg));
+    allActiveTags.forEach((tg) => all.delete(tg));
+    return Array.from(all).filter(Boolean).slice(0, 5);
+  }, [tasks, focusSessions, allActiveTags]);
 
   const strokeDashoffset = 283 - (283 * progressPercentage) / 100;
 
@@ -268,8 +292,69 @@ export const FocusView: React.FC = () => {
           )}
         </HStack>
 
-        {/* Dynamic Multi-Task Pomodoro Panel */}
+        {/* Focus Intention & Dynamic Hashtags Panel */}
         <div className="mt-8 w-full max-w-lg p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-3.5 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive">
+          <div className="flex items-center justify-between pb-2 border-b border-black/[0.05] dark:border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <Hash className="h-4 w-4 text-sky-500" />
+              <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                Focus Intention & Tagged Time
+              </span>
+            </div>
+            {allActiveTags.length > 0 && (
+              <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
+                {allActiveTags.length} active tag{allActiveTags.length === 1 ? '' : 's'}
+              </span>
+            )}
+          </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="What are you focusing on? (e.g. Revising #economics, deep #code review)..."
+              value={sessionIntention}
+              onChange={(e) => setSessionIntention(e.target.value)}
+              className="w-full text-xs bg-white/50 dark:bg-zinc-800/50 border border-black/[0.08] dark:border-white/[0.1] rounded-xl px-3 py-2.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
+            />
+          </div>
+
+          {/* Active Tag Pills & Suggestions */}
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+            {allActiveTags.map((tg) => (
+              <span
+                key={tg}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium border border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400 backdrop-blur-md shadow-xs animate-scale-in"
+              >
+                <span>#{tg}</span>
+                {sessionTags.includes(tg) && (
+                  <button
+                    type="button"
+                    onClick={() => removeSessionTag(tg)}
+                    className="text-sky-400 hover:text-rose-500 p-0.5 rounded-full cursor-pointer transition-colors"
+                    title={`Remove #${tg}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </span>
+            ))}
+
+            {availableSuggestions.map((tg) => (
+              <button
+                key={tg}
+                type="button"
+                onClick={() => addSessionTag(tg)}
+                className="px-2.5 py-1 rounded-full text-xs font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-white/40 dark:bg-white/[0.03] transition-all cursor-pointer swiftui-press"
+                title={`Add #${tg} to focus session`}
+              >
+                + #{tg}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Dynamic Multi-Task Pomodoro Panel */}
+        <div className="mt-4 w-full max-w-lg p-5 rounded-2xl border border-white/80 dark:border-white/10 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-2xl space-y-3.5 interactive-card apple-card-surface liquid-glass-card liquid-glass-interactive">
           <div className="flex items-center justify-between pb-2.5 border-b border-black/[0.05] dark:border-white/[0.06]">
             <div>
               <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block font-semibold">
@@ -298,7 +383,7 @@ export const FocusView: React.FC = () => {
                 Autonomous Focus (No Tasks Linked)
               </span>
               <span className="text-[11px] text-zinc-400 block mt-0.5">
-                Link tasks to dynamically track per-task deep work duration and velocity.
+                Link tasks or specify hashtags above to dynamically track deep work duration.
               </span>
             </div>
           ) : (
@@ -331,7 +416,7 @@ export const FocusView: React.FC = () => {
                             {t.tags.map((tg) => (
                               <span
                                 key={tg}
-                                className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-200/50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-300/40 dark:border-zinc-700/40"
+                                className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-zinc-200/50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-300/40 dark:border-zinc-700/40"
                               >
                                 #{tg}
                               </span>
@@ -417,9 +502,16 @@ export const FocusView: React.FC = () => {
                   <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono flex-wrap">
                     <span>{formatDateString(s.completedAt, 'MMM d, h:mm a')} • {s.mode}</span>
                     {s.tags && s.tags.length > 0 && (
-                      <span className="text-zinc-500">
-                        {s.tags.map((tg) => `#${tg}`).join(' ')}
-                      </span>
+                      <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                        {s.tags.map((tg) => (
+                          <span
+                            key={tg}
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20"
+                          >
+                            #{tg}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
