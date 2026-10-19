@@ -84,7 +84,5 @@ class MockBroadcastChannel {
   }
 }
 
-if (typeof (globalThis as any).BroadcastChannel === 'undefined' || !(globalThis as any).BroadcastChannel) {
-  (globalThis as any).BroadcastChannel = MockBroadcastChannel;
-  (window as any).BroadcastChannel = MockBroadcastChannel;
-}
+(globalThis as any).BroadcastChannel = MockBroadcastChannel;
+(window as any).BroadcastChannel = MockBroadcastChannel;

@@ -1,4 +1,4 @@
-import { TaskItem } from '@/types';
+import { TaskItem, FocusSession } from '@/types';
 
 export interface HorizonDelta {
   focusSecondsDiff: number;
@@ -29,4 +29,5 @@ export interface TaskPeriodFocusItem {
   periodFocusSeconds: number;
   periodPomodoroCount: number;
   percentOfTotalFocus: number;
+  sessions?: FocusSession[];
 }

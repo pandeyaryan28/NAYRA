@@ -14,6 +14,7 @@ import {
 import { AnalyticsHeader, HORIZON_LABELS } from './analytics/AnalyticsHeader';
 import { FocusAnalyticsSection } from './analytics/FocusAnalyticsSection';
 import { TaskFocusBreakdown } from './analytics/TaskFocusBreakdown';
+import { FocusSessionTimeline } from './analytics/FocusSessionTimeline';
 import { TaskVelocitySection } from './analytics/TaskVelocitySection';
 import {
   normalizeTag,
@@ -549,13 +550,20 @@ export const AnalyticsView: React.FC = () => {
         tagScopedSessions={tagScopedSessions}
       />
 
-      {/* Comprehensive Task Focus Breakdown (Shows EVERY Task with Period Focus Time!) */}
+      {/* Comprehensive Task Focus Breakdown (Shows EVERY Task with Period Focus Time & Expandable Timestamps) */}
       <TaskFocusBreakdown
         taskPeriodItems={taskPeriodItems}
         timeHorizon={timeHorizon}
         activeTagFilter={activeTagFilter}
         setActiveTagFilter={setActiveTagFilter}
         horizonTotalFocusSec={horizonFocusSeconds}
+      />
+
+      {/* Focus Session Log & Discrepancy Timeline */}
+      <FocusSessionTimeline
+        sessions={horizonSessions}
+        tasks={tagScopedTasks}
+        timeHorizon={timeHorizon}
       />
 
       {/* Tag Performance & Time Allocation */}

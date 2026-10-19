@@ -130,6 +130,8 @@ export interface DataContextValue {
   // Focus
   focusSessions: FocusSession[];
   logFocusSession: (session: Omit<FocusSession, 'id'>) => void;
+  deleteFocusSession: (sessionId: string) => Promise<void>;
+  reconcileTaskFocusMetrics: () => Promise<number>;
   focusStats: FocusStats;
 
   // Clean Slate Reset
@@ -143,7 +145,7 @@ export interface DataContextValue {
   lastSyncTime: Date | null;
 }
 
-const DataContext = createContext<DataContextValue | undefined>(undefined);
+export const DataContext = createContext<DataContextValue | undefined>(undefined);
 
 const CURRENT_DATA_VERSION = 'v1.0.4_clean';
 
@@ -286,6 +288,54 @@ export function deduplicateTaskLists(lists: TaskList[]): { cleanLists: TaskList[
   return { cleanLists, idRemap };
 }
 
+export function isDuplicateFocusSession(a: FocusSession, b: FocusSession): boolean {
+  if (a.id && b.id && a.id === b.id) return true;
+
+  const aEnd = new Date(a.completedAt || 0).getTime();
+  const bEnd = new Date(b.completedAt || 0).getTime();
+  const diffMs = Math.abs(aEnd - bEnd);
+
+  const aTaskId = a.taskId || (a.taskIds && a.taskIds[0]) || null;
+  const bTaskId = b.taskId || (b.taskIds && b.taskIds[0]) || null;
+  const aTitle = (a.taskTitle || '').trim().toLowerCase();
+  const bTitle = (b.taskTitle || '').trim().toLowerCase();
+  const isAGeneric = !aTitle || aTitle === 'universal focus session' || aTitle === 'linked task' || aTitle === 'focus session';
+  const isBGeneric = !bTitle || bTitle === 'universal focus session' || bTitle === 'linked task' || bTitle === 'focus session';
+
+  // 1. Proximity with same task: sessions completed within 15 minutes targeting the same task or intention
+  if (diffMs < 15 * 60 * 1000) {
+    if (aTaskId && bTaskId && aTaskId === bTaskId) return true;
+    if (!isAGeneric && !isBGeneric && aTitle === bTitle) return true;
+  }
+
+  // 2. High time interval overlap >= 35%
+  const aDur = a.durationSeconds || 1500;
+  const bDur = b.durationSeconds || 1500;
+  const aStart = a.startedAt ? new Date(a.startedAt).getTime() : aEnd - aDur * 1000;
+  const bStart = b.startedAt ? new Date(b.startedAt).getTime() : bEnd - bDur * 1000;
+
+  const overlapStart = Math.max(aStart, bStart);
+  const overlapEnd = Math.min(aEnd, bEnd);
+  if (overlapEnd > overlapStart) {
+    const overlapSec = (overlapEnd - overlapStart) / 1000;
+    const minDur = Math.min(aDur, bDur);
+    if (overlapSec >= minDur * 0.35) {
+      if (aTaskId && bTaskId && aTaskId !== bTaskId) return false;
+      if (!isAGeneric && !isBGeneric && aTitle !== bTitle) return false;
+      return true;
+    }
+  }
+
+  // 3. Proximity within 3 minutes if neither has conflicting distinct tasks
+  if (diffMs < 3 * 60 * 1000) {
+    if (aTaskId && bTaskId && aTaskId !== bTaskId) return false;
+    if (!isAGeneric && !isBGeneric && aTitle !== bTitle) return false;
+    return true;
+  }
+
+  return false;
+}
+
 export function deduplicateFocusSessions(sessions: FocusSession[]): FocusSession[] {
   if (!Array.isArray(sessions)) return [];
   const clean: FocusSession[] = [];
@@ -297,13 +347,25 @@ export function deduplicateFocusSessions(sessions: FocusSession[]): FocusSession
   for (const s of sorted) {
     if (s.mode !== 'focus') continue;
 
-    const sTime = new Date(s.completedAt).getTime();
-    const isDuplicate = clean.some((existing) => {
-      const eTime = new Date(existing.completedAt).getTime();
-      return Math.abs(sTime - eTime) < 60000;
-    });
+    const existingIdx = clean.findIndex((existing) => isDuplicateFocusSession(s, existing));
+    if (existingIdx !== -1) {
+      const existing = clean[existingIdx];
+      // Merge richer metadata into existing
+      const sHasTitle = Boolean(s.taskTitle && s.taskTitle !== 'Universal Focus Session' && s.taskTitle !== 'Linked Task');
+      const existingHasTitle = Boolean(existing.taskTitle && existing.taskTitle !== 'Universal Focus Session' && existing.taskTitle !== 'Linked Task');
+      const sHasAllocations = Boolean(s.taskTimeAllocations && Object.keys(s.taskTimeAllocations).length > 0);
+      const existingHasAllocations = Boolean(existing.taskTimeAllocations && Object.keys(existing.taskTimeAllocations).length > 0);
 
-    if (!isDuplicate) {
+      clean[existingIdx] = {
+        ...existing,
+        taskId: existing.taskId || s.taskId,
+        taskTitle: sHasTitle ? s.taskTitle : (existingHasTitle ? existing.taskTitle : existing.taskTitle),
+        taskIds: existing.taskIds?.length ? existing.taskIds : (s.taskIds || []),
+        taskTitles: existing.taskTitles?.length ? existing.taskTitles : (s.taskTitles || []),
+        taskTimeAllocations: existingHasAllocations ? existing.taskTimeAllocations : (sHasAllocations ? s.taskTimeAllocations : existing.taskTimeAllocations),
+        tags: Array.from(new Set([...(existing.tags || []), ...(s.tags || [])])),
+      };
+    } else {
       clean.push(s);
     }
   }
@@ -504,6 +566,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tasksRef = useRef(tasks);
   const taskListsRef = useRef(taskLists);
   const calendarsRef = useRef(calendars);
+  const focusSessionsRef = useRef(focusSessions);
   const deletedTaskListIdsRef = useRef<Set<string>>(new Set());
 
   // Load tombstoned deleted list IDs on mount
@@ -529,6 +592,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     calendarsRef.current = calendars;
   }, [calendars]);
+  useEffect(() => {
+    focusSessionsRef.current = focusSessions;
+  }, [focusSessions]);
 
   const persistActiveTasks = useCallback(
     (taskList: TaskItem[], source: 'googleTasks' | 'webApp' = 'webApp') => {
@@ -1148,6 +1214,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (s.mode === 'focus') {
               setFocusSessions((prev) => deduplicateFocusSessions([s, ...prev]));
             }
+          } else if (data.type === 'SESSION_DELETED' && data.sessionId) {
+            setFocusSessions((prev) => prev.filter((s) => s.id !== data.sessionId));
           }
         };
       } catch {
@@ -2467,15 +2535,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logFocusSession = (sessionData: Omit<FocusSession, 'id'>) => {
     if (sessionData.mode !== 'focus') return;
 
-    const targetTime = new Date(sessionData.completedAt).getTime();
+    const currentSessions = focusSessionsRef.current;
+    const tempCandidate: FocusSession = {
+      ...sessionData,
+      id: '__candidate__',
+    };
 
-    // Check if an existing session within 60s already exists to prevent duplicate logging
-    const isDuplicate = focusSessions.some((s) => {
-      const existingTime = new Date(s.completedAt).getTime();
-      return Math.abs(targetTime - existingTime) < 60000;
-    });
-
+    const isDuplicate = currentSessions.some((s) => isDuplicateFocusSession(tempCandidate, s));
     if (isDuplicate) {
+      console.log('[DataContext] Suppressed duplicate focus session log:', sessionData.taskTitle, sessionData.completedAt);
       return;
     }
 
@@ -2483,7 +2551,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...sessionData,
       id: generateId('fs'),
     };
-    setFocusSessions((prev) => deduplicateFocusSessions([newSession, ...prev]));
+    const nextSessions = deduplicateFocusSessions([newSession, ...currentSessions]);
+    setFocusSessions(nextSessions);
+    focusSessionsRef.current = nextSessions;
 
     // Update credited tasks in memory and Firestore
     if (sessionData.taskTimeAllocations && Object.keys(sessionData.taskTimeAllocations).length > 0) {
@@ -2496,11 +2566,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             totalFocusSeconds: newSec,
             pomodoroCount: newCnt,
           });
-          setDoc(
-            doc(getUserTasksCollection(effectiveUid), taskId),
-            { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
-            { merge: true }
-          ).catch(console.warn);
+          if (effectiveUid) {
+            setDoc(
+              doc(getUserTasksCollection(effectiveUid), taskId),
+              { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
+              { merge: true }
+            ).catch(console.warn);
+          }
         }
       }
     } else if (sessionData.taskIds && sessionData.taskIds.length > 0) {
@@ -2513,11 +2585,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           totalFocusSeconds: newSec,
           pomodoroCount: newCnt,
         });
-        setDoc(
-          doc(getUserTasksCollection(effectiveUid), taskId),
-          { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
-          { merge: true }
-        ).catch(console.warn);
+        if (effectiveUid) {
+          setDoc(
+            doc(getUserTasksCollection(effectiveUid), taskId),
+            { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
+            { merge: true }
+          ).catch(console.warn);
+        }
       }
     } else if (sessionData.taskId) {
       const currentTask = tasksRef.current.find((t) => t.id === sessionData.taskId) || tasks.find((t) => t.id === sessionData.taskId);
@@ -2527,15 +2601,159 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         totalFocusSeconds: newSec,
         pomodoroCount: newCnt,
       });
-      setDoc(
-        doc(getUserTasksCollection(effectiveUid), sessionData.taskId),
-        { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
-        { merge: true }
-      ).catch(console.warn);
+      if (effectiveUid) {
+        setDoc(
+          doc(getUserTasksCollection(effectiveUid), sessionData.taskId),
+          { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
+          { merge: true }
+        ).catch(console.warn);
+      }
     }
 
-    setDoc(doc(getUserFocusSessionsCollection(effectiveUid), newSession.id), sanitizeForFirestore(newSession)).catch(console.warn);
+    if (effectiveUid) {
+      setDoc(doc(getUserFocusSessionsCollection(effectiveUid), newSession.id), sanitizeForFirestore(newSession)).catch(console.warn);
+    }
   };
+
+  const deleteFocusSession = async (sessionId: string): Promise<void> => {
+    const currentSessions = focusSessionsRef.current;
+    const target = currentSessions.find((s) => s.id === sessionId);
+    if (!target) return;
+
+    // Deduct focus metrics from credited tasks
+    const tasksToDebit: { taskId: string; seconds: number }[] = [];
+    if (target.taskTimeAllocations && Object.keys(target.taskTimeAllocations).length > 0) {
+      for (const [taskId, allocatedSec] of Object.entries(target.taskTimeAllocations)) {
+        if (allocatedSec > 0) tasksToDebit.push({ taskId, seconds: allocatedSec });
+      }
+    } else if (target.taskIds && target.taskIds.length > 0) {
+      const splitSec = Math.round(target.durationSeconds / target.taskIds.length);
+      for (const taskId of target.taskIds) {
+        tasksToDebit.push({ taskId, seconds: splitSec });
+      }
+    } else if (target.taskId) {
+      tasksToDebit.push({ taskId: target.taskId, seconds: target.durationSeconds });
+    }
+
+    tasksToDebit.forEach(({ taskId, seconds }) => {
+      const task = tasksRef.current.find((t) => t.id === taskId);
+      if (task) {
+        const newSec = Math.max(0, (task.totalFocusSeconds || 0) - seconds);
+        const newCnt = Math.max(0, (task.pomodoroCount || 0) - 1);
+        updateTask(taskId, { totalFocusSeconds: newSec, pomodoroCount: newCnt });
+        if (effectiveUid) {
+          setDoc(
+            doc(getUserTasksCollection(effectiveUid), taskId),
+            { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
+            { merge: true }
+          ).catch(console.warn);
+        }
+      }
+    });
+
+    const nextSessions = currentSessions.filter((s) => s.id !== sessionId);
+    setFocusSessions(nextSessions);
+    focusSessionsRef.current = nextSessions;
+
+    if (effectiveUid) {
+      await deleteDoc(doc(getUserFocusSessionsCollection(effectiveUid), sessionId)).catch(console.warn);
+    }
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const ch = new BroadcastChannel('nayra_focus_sync');
+        ch.postMessage({ type: 'SESSION_DELETED', sessionId, source: 'web' });
+        ch.close();
+      } catch {}
+    }
+  };
+
+  const reconcileTaskFocusMetrics = useCallback(async (): Promise<number> => {
+    const cleanSessions = deduplicateFocusSessions(focusSessionsRef.current);
+    const taskMetrics = new Map<string, { totalSeconds: number; count: number }>();
+
+    cleanSessions.forEach((s) => {
+      if (s.mode !== 'focus') return;
+      const dur = s.durationSeconds || ((s as any).durationMinutes ? (s as any).durationMinutes * 60 : 0) || 1500;
+
+      if (s.taskTimeAllocations && Object.keys(s.taskTimeAllocations).length > 0) {
+        for (const [taskId, allocatedSec] of Object.entries(s.taskTimeAllocations)) {
+          if (allocatedSec > 0) {
+            const m = taskMetrics.get(taskId) || { totalSeconds: 0, count: 0 };
+            m.totalSeconds += allocatedSec;
+            m.count += 1;
+            taskMetrics.set(taskId, m);
+          }
+        }
+      } else if (s.taskIds && s.taskIds.length > 0) {
+        const splitSec = Math.round(dur / s.taskIds.length);
+        s.taskIds.forEach((taskId) => {
+          const m = taskMetrics.get(taskId) || { totalSeconds: 0, count: 0 };
+          m.totalSeconds += splitSec;
+          m.count += 1;
+          taskMetrics.set(taskId, m);
+        });
+      } else if (s.taskId) {
+        const m = taskMetrics.get(s.taskId) || { totalSeconds: 0, count: 0 };
+        m.totalSeconds += dur;
+        m.count += 1;
+        taskMetrics.set(s.taskId, m);
+      }
+    });
+
+    // Also match by task title for sessions logged without taskId
+    const taskTitleMap = new Map<string, TaskItem>();
+    tasksRef.current.forEach((t) => {
+      if (t.title) taskTitleMap.set(t.title.trim().toLowerCase(), t);
+    });
+
+    cleanSessions.forEach((s) => {
+      if (s.mode !== 'focus') return;
+      if (!s.taskId && (!s.taskIds || s.taskIds.length === 0) && s.taskTitle) {
+        const matched = taskTitleMap.get(s.taskTitle.trim().toLowerCase());
+        if (matched) {
+          const dur = s.durationSeconds || 1500;
+          const m = taskMetrics.get(matched.id) || { totalSeconds: 0, count: 0 };
+          m.totalSeconds += dur;
+          m.count += 1;
+          taskMetrics.set(matched.id, m);
+        }
+      }
+    });
+
+    let fixedCount = 0;
+    const updatedTasks = tasksRef.current.map((t) => {
+      const calculated = taskMetrics.get(t.id) || { totalSeconds: 0, count: 0 };
+      if ((t.totalFocusSeconds || 0) !== calculated.totalSeconds || (t.pomodoroCount || 0) !== calculated.count) {
+        fixedCount++;
+        const updated = {
+          ...t,
+          totalFocusSeconds: calculated.totalSeconds,
+          pomodoroCount: calculated.count,
+          updatedAt: new Date().toISOString(),
+        };
+        if (effectiveUid) {
+          setDoc(
+            doc(getUserTasksCollection(effectiveUid), t.id),
+            { totalFocusSeconds: calculated.totalSeconds, pomodoroCount: calculated.count, updatedAt: updated.updatedAt },
+            { merge: true }
+          ).catch(console.warn);
+        }
+        return updated;
+      }
+      return t;
+    });
+
+    if (fixedCount > 0) {
+      setTasks(updatedTasks);
+      tasksRef.current = updatedTasks;
+      persistActiveTasks(updatedTasks, 'webApp');
+    }
+
+    setFocusSessions(cleanSessions);
+    focusSessionsRef.current = cleanSessions;
+    return fixedCount;
+  }, [effectiveUid, persistActiveTasks]);
 
   // Computed Focus Statistics with dynamic consecutive-day streak calculation (local calendar timezone safe)
   const focusStats = useMemo<FocusStats>(() => {
@@ -2675,6 +2893,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addCATestRecord,
         focusSessions,
         logFocusSession,
+        deleteFocusSession,
+        reconcileTaskFocusMetrics,
         focusStats,
         resetAllDataToCleanSlate,
         isSyncing,

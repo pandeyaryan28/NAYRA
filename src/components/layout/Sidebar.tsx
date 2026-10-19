@@ -274,7 +274,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggleCollapse })
           {!collapsed && <span className="tracking-tight">Settings</span>}
           {!collapsed && (
             <span className="ml-auto text-[10px] font-mono font-medium text-zinc-400 dark:text-zinc-500">
-              v2.10.1
+              v2.11.1
             </span>
           )}
         </NavLink>

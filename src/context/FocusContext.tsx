@@ -344,7 +344,9 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // 3. Record completed session ONLY for focus intervals (never log breaks as focus sessions)
       if (mode === 'focus') {
         const duration = getDurationForMode('focus');
-        const nowIso = new Date().toISOString();
+        const completionTime = targetEndTime && targetEndTime <= Date.now() ? targetEndTime : Date.now();
+        const completedAtIso = new Date(completionTime).toISOString();
+        const startedAtIso = new Date(completionTime - duration * 1000).toISOString();
 
         // Flush final slice
         const flushedAllocations = flushSliceSync();
@@ -422,8 +424,8 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           taskTimeAllocations: finalAllocations,
           mode: 'focus' as const,
           durationSeconds: duration,
-          startedAt: new Date(Date.now() - duration * 1000).toISOString(),
-          completedAt: nowIso,
+          startedAt: startedAtIso,
+          completedAt: completedAtIso,
           interrupted: false,
         };
 

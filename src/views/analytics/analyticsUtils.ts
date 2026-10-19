@@ -2,6 +2,7 @@ import { FocusSession, TaskItem } from '@/types';
 import { TimeHorizon } from '@/views/AnalyticsView';
 import { HorizonDelta, TaskPeriodFocusItem } from './types';
 import { formatSecondsToHoursMinutes } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 /**
  * Calculates percentage change between current and previous values
@@ -101,6 +102,32 @@ export function detectPeakFocusWindow(sessions: FocusSession[]): {
   };
 }
 
+export function formatSessionTimeRange(startedAt?: string, completedAt?: string): string {
+  if (!completedAt) return '';
+  try {
+    const end = parseISO(completedAt);
+    let start: Date;
+    if (startedAt) {
+      start = parseISO(startedAt);
+    } else {
+      start = new Date(end.getTime() - 25 * 60 * 1000);
+    }
+    return `${format(start, 'h:mm a')} – ${format(end, 'h:mm a')}`;
+  } catch {
+    return completedAt;
+  }
+}
+
+export function formatSessionDate(completedAt?: string): string {
+  if (!completedAt) return '';
+  try {
+    const d = parseISO(completedAt);
+    return format(d, 'EEE, MMM d, yyyy');
+  } catch {
+    return completedAt.slice(0, 10);
+  }
+}
+
 /**
  * Maps each task to its exact focus time and pomodoro count within the selected time horizon
  * Without any artificial 4-5 task truncation.
@@ -111,33 +138,36 @@ export function calculateTaskPeriodFocus(
   timeHorizon: TimeHorizon
 ): TaskPeriodFocusItem[] {
   const focusOnlySessions = sessions.filter((s) => s.mode === 'focus');
-  const totalPeriodSeconds = focusOnlySessions.reduce((sum, s) => sum + s.durationSeconds, 0);
+  const totalPeriodSeconds = focusOnlySessions.reduce((sum, s) => sum + (s.durationSeconds || 1500), 0);
 
-  // Map to store per-task focus seconds and pomodoros within the active sessions
-  const taskFocusMap = new Map<string, { seconds: number; pomodoros: number }>();
+  // Map to store per-task focus seconds, pomodoros, and contributing sessions
+  const taskFocusMap = new Map<string, { seconds: number; pomodoros: number; sessions: FocusSession[] }>();
+
+  const recordTaskContribution = (taskId: string, seconds: number, session: FocusSession) => {
+    const cur = taskFocusMap.get(taskId) || { seconds: 0, pomodoros: 0, sessions: [] };
+    cur.seconds += seconds;
+    cur.pomodoros += 1;
+    if (!cur.sessions.some((existing) => existing.id === session.id)) {
+      cur.sessions.push(session);
+    }
+    taskFocusMap.set(taskId, cur);
+  };
 
   focusOnlySessions.forEach((s) => {
     // 1. Explicit multi-task allocations
     if (s.taskTimeAllocations && Object.keys(s.taskTimeAllocations).length > 0) {
       Object.entries(s.taskTimeAllocations).forEach(([taskId, allocatedSec]) => {
-        const cur = taskFocusMap.get(taskId) || { seconds: 0, pomodoros: 0 };
-        cur.seconds += allocatedSec;
-        cur.pomodoros += 1;
-        taskFocusMap.set(taskId, cur);
+        if (allocatedSec > 0) {
+          recordTaskContribution(taskId, allocatedSec, s);
+        }
       });
     } else if (s.taskIds && s.taskIds.length > 0) {
-      const splitSec = Math.round(s.durationSeconds / s.taskIds.length);
+      const splitSec = Math.round((s.durationSeconds || 1500) / s.taskIds.length);
       s.taskIds.forEach((taskId) => {
-        const cur = taskFocusMap.get(taskId) || { seconds: 0, pomodoros: 0 };
-        cur.seconds += splitSec;
-        cur.pomodoros += 1;
-        taskFocusMap.set(taskId, cur);
+        recordTaskContribution(taskId, splitSec, s);
       });
     } else if (s.taskId) {
-      const cur = taskFocusMap.get(s.taskId) || { seconds: 0, pomodoros: 0 };
-      cur.seconds += s.durationSeconds;
-      cur.pomodoros += 1;
-      taskFocusMap.set(s.taskId, cur);
+      recordTaskContribution(s.taskId, s.durationSeconds || 1500, s);
     }
   });
 
@@ -155,9 +185,9 @@ export function calculateTaskPeriodFocus(
           status: 'completed',
           completed: true,
           priority: 'medium',
-          tags: [],
-          totalFocusSeconds: 0,
-          pomodoroCount: 0,
+          tags: s.tags || [],
+          totalFocusSeconds: s.durationSeconds || 1500,
+          pomodoroCount: 1,
           createdAt: s.completedAt || new Date().toISOString(),
           updatedAt: s.completedAt || new Date().toISOString(),
         });
@@ -179,6 +209,23 @@ export function calculateTaskPeriodFocus(
     if (s.taskId) {
       checkAndAdd(s.taskId, s.taskTitle);
     }
+
+    // Also match standalone focus sessions having non-generic title to existing tasks by title
+    if (!s.taskId && (!s.taskIds || s.taskIds.length === 0) && s.taskTitle) {
+      const normTitle = s.taskTitle.trim().toLowerCase();
+      if (normTitle !== 'focus session' && normTitle !== 'universal focus session' && normTitle !== 'linked task') {
+        const matchingTask = Array.from(knownTasksMap.values()).find(
+          (t) => (t.title || '').trim().toLowerCase() === normTitle
+        );
+        if (matchingTask) {
+          recordTaskContribution(matchingTask.id, s.durationSeconds || 1500, s);
+        } else {
+          const synthId = `task_synth_${normTitle.replace(/\s+/g, '_')}`;
+          checkAndAdd(synthId, s.taskTitle);
+          recordTaskContribution(synthId, s.durationSeconds || 1500, s);
+        }
+      }
+    }
   });
 
   const allTasks = Array.from(knownTasksMap.values());
@@ -187,6 +234,7 @@ export function calculateTaskPeriodFocus(
     const sessionStat = taskFocusMap.get(task.id);
     let periodFocusSeconds = sessionStat ? sessionStat.seconds : 0;
     let periodPomodoroCount = sessionStat ? sessionStat.pomodoros : 0;
+    const taskSessions = sessionStat ? sessionStat.sessions : [];
 
     // For all-time horizon, fallback to task's lifetime total if greater
     if (timeHorizon === 'all' && (task.totalFocusSeconds || 0) > periodFocusSeconds) {
@@ -204,6 +252,7 @@ export function calculateTaskPeriodFocus(
       periodFocusSeconds,
       periodPomodoroCount,
       percentOfTotalFocus: percent,
+      sessions: taskSessions,
     };
   });
 }

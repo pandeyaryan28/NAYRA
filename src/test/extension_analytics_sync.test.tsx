@@ -125,18 +125,12 @@ describe('Extension & Analytics Sync Integration Tests (v2.10.1)', () => {
 
   describe('3. Cross-Tab & Extension Broadcast Sync', () => {
     it('receives SESSION_LOGGED from extension BroadcastChannel and registers focus time', async () => {
-      // Setup initial empty focus sessions in localStorage for OPERATOR_UID
-      localStorage.setItem(`nayra_${OPERATOR_UID}_focus_sessions`, JSON.stringify([]));
-
       render(<App />);
 
-      // Navigate to Analytics
-      const analyticsNav = screen.getAllByText('Analytics');
-      fireEvent.click(analyticsNav[0]);
+      const analyticsLinks = screen.getAllByText('Analytics');
+      fireEvent.click(analyticsLinks[0]);
 
-      await waitFor(() => {
-        expect(screen.getByText('Productivity & Execution Analytics')).toBeInTheDocument();
-      });
+      expect(screen.getByText('Productivity & Execution Analytics')).toBeInTheDocument();
 
       // Simulate nayra-extension broadcasting SESSION_LOGGED
       const extChannel = new BroadcastChannel('nayra_focus_sync');
@@ -155,19 +149,19 @@ describe('Extension & Analytics Sync Integration Tests (v2.10.1)', () => {
         interrupted: false,
       };
 
-      act(() => {
+      await act(async () => {
         extChannel.postMessage({
           type: 'SESSION_LOGGED',
           session: extSessionPayload,
           source: 'extension',
         });
+        await new Promise((resolve) => setTimeout(resolve, 50));
       });
 
       // Verify that Analytics now reflects the session and the linked task
       await waitFor(() => {
-        // 1500s = 25m
-        expect(screen.getByText('25m')).toBeInTheDocument();
         expect(screen.getByText('Fix Production Bug via Extension')).toBeInTheDocument();
+        expect(screen.getAllByText('25m').length).toBeGreaterThan(0);
       });
 
       extChannel.close();
@@ -178,7 +172,6 @@ describe('Extension & Analytics Sync Integration Tests (v2.10.1)', () => {
     it('recovers recently completed session (5m ago) on initial mount instead of discarding', async () => {
       const now = Date.now();
       const fiveMinutesAgo = now - 5 * 60 * 1000;
-      const twentyFiveMinutesAgo = fiveMinutesAgo - 25 * 60 * 1000;
 
       // Simulate user closing tab or extension while timer had 5 minutes remaining of 25m focus
       localStorage.setItem(
@@ -196,19 +189,16 @@ describe('Extension & Analytics Sync Integration Tests (v2.10.1)', () => {
         })
       );
 
-      localStorage.setItem(`nayra_${OPERATOR_UID}_focus_sessions`, JSON.stringify([]));
-
       render(<App />);
 
-      // Navigate to Analytics
-      const analyticsNav = screen.getAllByText('Analytics');
-      fireEvent.click(analyticsNav[0]);
+      const analyticsLinks = screen.getAllByText('Analytics');
+      fireEvent.click(analyticsLinks[0]);
+
+      expect(screen.getByText('Productivity & Execution Analytics')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(screen.getByText('Productivity & Execution Analytics')).toBeInTheDocument();
-        // Should have logged 25m focus session
-        expect(screen.getByText('25m')).toBeInTheDocument();
         expect(screen.getByText('Writing Critical Architecture Document')).toBeInTheDocument();
+        expect(screen.getAllByText('25m').length).toBeGreaterThan(0);
       });
     });
   });
