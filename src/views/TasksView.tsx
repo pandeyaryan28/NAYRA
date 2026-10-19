@@ -26,6 +26,7 @@ import {
   Folder,
 } from 'lucide-react';
 import { useData } from '@/context/DataContext';
+import { useAuth } from '@/context/AuthContext';
 import { useFocus } from '@/context/FocusContext';
 import { Button } from '@/components/common/Button';
 import { Modal } from '@/components/common/Modal';
@@ -130,7 +131,11 @@ export const TasksView: React.FC = () => {
     isGoogleTokenExpired,
     lastSyncTime,
     focusSessions,
+    fetchCompletedTasksFromCloud,
   } = useData();
+
+  const { user } = useAuth();
+  const [isLoadingCloudCompleted, setIsLoadingCloudCompleted] = useState(false);
 
   const { selectTask, selectTasks, startTimer, setSessionTags, setSessionIntention } = useFocus();
   const location = useLocation();
@@ -2052,7 +2057,7 @@ export const TasksView: React.FC = () => {
         </div>
 
         {/* Collapsible Completed Section */}
-        {filterMode === 'active' && completedScopedTasks.length > 0 && activeTaskListId !== 'archived_view' && (
+        {((filterMode === 'active' && completedScopedTasks.length > 0) || filterMode === 'all') && activeTaskListId !== 'archived_view' && (
           <div className="pt-2 space-y-2 animate-fade-in">
             <div className="flex items-center justify-between">
               <button
@@ -2071,16 +2076,38 @@ export const TasksView: React.FC = () => {
                 </span>
               </button>
 
-              {isCompletedSectionOpen && (
-                <button
-                  type="button"
-                  onClick={() => archiveCompletedTasks(activeTaskListId)}
-                  className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer swiftui-press"
-                  title="Archive all completed tasks in this list"
-                >
-                  Archive Completed
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {user && !user.isGuest && isCompletedSectionOpen && (
+                  <button
+                    type="button"
+                    disabled={isLoadingCloudCompleted}
+                    onClick={async () => {
+                      setIsLoadingCloudCompleted(true);
+                      try {
+                        await fetchCompletedTasksFromCloud(50);
+                      } finally {
+                        setIsLoadingCloudCompleted(false);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer swiftui-press px-2 py-0.5 rounded-md hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+                    title="Load older completed tasks on-demand from cloud"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${isLoadingCloudCompleted ? 'animate-spin' : ''}`} />
+                    <span>{isLoadingCloudCompleted ? 'Loading...' : 'Fetch from Cloud'}</span>
+                  </button>
+                )}
+
+                {isCompletedSectionOpen && completedScopedTasks.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => archiveCompletedTasks(activeTaskListId)}
+                    className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer swiftui-press"
+                    title="Archive all completed tasks in this list"
+                  >
+                    Archive Completed
+                  </button>
+                )}
+              </div>
             </div>
 
             {isCompletedSectionOpen && (
@@ -2091,7 +2118,13 @@ export const TasksView: React.FC = () => {
                     : 'space-y-2.5 pt-1'
                 }`}
               >
-                {completedScopedTasks.map(renderTaskItem)}
+                {completedScopedTasks.length > 0 ? (
+                  completedScopedTasks.map(renderTaskItem)
+                ) : (
+                  <div className="py-6 text-center text-xs text-zinc-400">
+                    No completed tasks in local storage. Click &quot;Fetch from Cloud&quot; to load past records.
+                  </div>
+                )}
               </div>
             )}
           </div>

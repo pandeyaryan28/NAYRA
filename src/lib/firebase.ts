@@ -118,6 +118,27 @@ export const getUserCATopicsCollection = (userId: string) => collection(db, 'use
 export const getUserCATestsCollection = (userId: string) => collection(db, 'users', userId, 'caTests');
 export const getUserCARevisionsCollection = (userId: string) => collection(db, 'users', userId, 'caRevisions');
 
+// User-scoped Optimized Query Helpers
+/**
+ * Active-Only Tasks Query: Only retrieves non-completed tasks (status: 'needsAction')
+ * to eliminate streaming and downloading completed tasks repeatedly.
+ */
+export const getActiveTasksQuery = (userId: string) =>
+  query(getUserTasksCollection(userId), where('status', '==', 'needsAction'));
+
+/**
+ * Recent Focus Sessions Query: Only retrieves recent sessions (ordered by completedAt desc, limited count)
+ * to eliminate downloading historical sessions while ensuring newly logged sessions stream instantly.
+ */
+export const getRecentFocusSessionsQuery = (userId: string, count = 30) =>
+  query(getUserFocusSessionsCollection(userId), orderBy('completedAt', 'desc'), limit(count));
+
+/**
+ * On-demand Completed Tasks Query: Only used when user explicitly requests historical completed tasks
+ */
+export const getCompletedTasksQuery = (userId: string, count = 50) =>
+  query(getUserTasksCollection(userId), where('status', '==', 'completed'), limit(count));
+
 export const OPERATOR_UID = 'yApeiNzo23bPTvpEXHgNIgiTX0y1';
 
 export interface ActiveTasksCloudDoc {

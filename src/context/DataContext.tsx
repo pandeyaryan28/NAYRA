@@ -58,12 +58,16 @@ import {
   getUserFocusSessionsCollection,
   getUserCATopicsCollection,
   getUserCATestsCollection,
+  getActiveTasksQuery,
+  getRecentFocusSessionsQuery,
+  getCompletedTasksQuery,
   getDoc,
   getDocs,
   onSnapshot,
   setDoc,
   deleteDoc,
   doc,
+  writeBatch,
   sanitizeForFirestore,
   GUEST_USER_ID,
   syncActiveTasksToFirestore,
@@ -143,6 +147,9 @@ export interface DataContextValue {
   reconnectAndSync: () => Promise<void>;
   isGoogleTokenExpired: boolean;
   lastSyncTime: Date | null;
+
+  // On-Demand Historical Fetch
+  fetchCompletedTasksFromCloud: (count?: number) => Promise<TaskItem[]>;
 }
 
 export const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -425,7 +432,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTokenWithTimestamp,
   } = useAuth();
   const userId = user?.uid || GUEST_USER_ID;
-  const effectiveUid = user?.uid && !user.isGuest ? user.uid : OPERATOR_UID;
+  const effectiveUid = user?.uid && !user.isGuest ? user.uid : null;
 
   const isGuest = !user || user.isGuest;
 
@@ -505,11 +512,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tasksRef.current = normalizedTasks;
       persistActiveTasks(normalizedTasks, 'webApp');
       if (user && !user.isGuest) {
-        normalizedTasks.forEach((t) => {
-          if (t.tags && t.tags.length > 0) {
-            setDoc(doc(getUserTasksCollection(user.uid), t.id), { title: t.title, tags: t.tags }, { merge: true }).catch(console.warn);
+        try {
+          const batch = writeBatch(db);
+          let opCount = 0;
+          normalizedTasks.forEach((t) => {
+            if (t.tags && t.tags.length > 0) {
+              batch.set(doc(getUserTasksCollection(user.uid), t.id), { title: t.title, tags: t.tags }, { merge: true });
+              opCount++;
+            }
+          });
+          if (opCount > 0) {
+            batch.commit().catch(console.warn);
           }
-        });
+        } catch (bErr) {
+          console.warn('Batch normalization notice:', bErr);
+        }
       }
     }
   }, []);
@@ -605,7 +622,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .join('|');
       if (signature !== lastSyncedActiveTasksSignatureRef.current) {
         lastSyncedActiveTasksSignatureRef.current = signature;
-        syncActiveTasksToFirestore(effectiveUid, activeOnly, source).catch(console.warn);
+        if (effectiveUid) {
+          syncActiveTasksToFirestore(effectiveUid, activeOnly, source).catch(console.warn);
+        }
       }
     },
     [effectiveUid]
@@ -723,7 +742,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // 3. Tasks (Real-time snapshot listener with merge)
           try {
             const unsubTasks = onSnapshot(
-              getUserTasksCollection(uid),
+              getActiveTasksQuery(uid),
               (tSnap) => {
                 if (active) {
                   const fTasks = tSnap.docs
@@ -751,10 +770,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     })
                     .filter(Boolean) as TaskItem[];
                   setTasks((prev) => {
+                    // Preserve locally stored completed and archived tasks without re-streaming them from cloud
+                    const completedOrArchivedLocal = prev.filter((t) => t.status === 'completed' || t.completed || t.archived);
+                    const activeCloudIds = new Set(fTasks.map((t) => t.id));
+                    const remainingCompleted = completedOrArchivedLocal.filter((t) => !activeCloudIds.has(t.id));
+
                     const localMetrics = new Map(
                       prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
                     );
-                    const merged = fTasks.map((item) => {
+                    const mergedActive = fTasks.map((item) => {
                       const local = localMetrics.get(item.id);
                       if (local && local.totalFocusSeconds > (item.totalFocusSeconds || 0)) {
                         return {
@@ -765,8 +789,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       }
                       return item;
                     });
+                    const merged = [...mergedActive, ...remainingCompleted];
                     tasksRef.current = merged;
-                    const activeOnly = merged.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
+                    const activeOnly = mergedActive.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
                     const activeSignature = activeOnly
                       .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
                       .sort()
@@ -945,7 +970,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             unsubs.push(unsubActiveTasks);
           } catch (tErr) {
-            const tSnap = await getDocs(getUserTasksCollection(uid));
+            const tSnap = await getDocs(getActiveTasksQuery(uid));
             if (!tSnap.empty && active) {
               const fTasks = tSnap.docs.map((d) => {
                 const data = d.data() as TaskItem;
@@ -966,10 +991,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 } as TaskItem;
               });
               setTasks((prev) => {
+                const completedOrArchivedLocal = prev.filter((t) => t.status === 'completed' || t.completed || t.archived);
+                const activeCloudIds = new Set(fTasks.map((t) => t.id));
+                const remainingCompleted = completedOrArchivedLocal.filter((t) => !activeCloudIds.has(t.id));
+
                 const localMetrics = new Map(
                   prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
                 );
-                const merged = fTasks.map((item) => {
+                const mergedActive = fTasks.map((item) => {
                   const local = localMetrics.get(item.id);
                   if (local && local.totalFocusSeconds > (item.totalFocusSeconds || 0)) {
                     return {
@@ -980,6 +1009,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   }
                   return item;
                 });
+                const merged = [...mergedActive, ...remainingCompleted];
                 tasksRef.current = merged;
                 return merged;
               });
@@ -1045,22 +1075,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setCalorieEntries(cSnap.docs.map((d) => d.data() as CalorieEntry));
           }
 
-          // 8. Focus Sessions (Real-time snapshot listener)
+          // 8. Focus Sessions (Real-time snapshot listener on bounded recent sessions)
           try {
             const unsubFocus = onSnapshot(
-              getUserFocusSessionsCollection(uid),
+              getRecentFocusSessionsQuery(uid, 30),
               (fSnap) => {
                 if (!fSnap.empty && active) {
-                  setFocusSessions(deduplicateFocusSessions(fSnap.docs.map((d) => d.data() as FocusSession)));
+                  const cloudRecent = fSnap.docs.map((d) => d.data() as FocusSession);
+                  setFocusSessions((prev) => deduplicateFocusSessions([...cloudRecent, ...prev]));
                 }
               },
               (err) => console.warn('Focus sessions realtime sync warning:', err)
             );
             unsubs.push(unsubFocus);
           } catch (fErr) {
-            const fSnap = await getDocs(getUserFocusSessionsCollection(uid));
+            const fSnap = await getDocs(getRecentFocusSessionsQuery(uid, 30));
             if (!fSnap.empty && active) {
-              setFocusSessions(deduplicateFocusSessions(fSnap.docs.map((d) => d.data() as FocusSession)));
+              const cloudRecent = fSnap.docs.map((d) => d.data() as FocusSession);
+              setFocusSessions((prev) => deduplicateFocusSessions([...cloudRecent, ...prev]));
             }
           }
 
@@ -1094,112 +1126,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user?.uid, user?.isGuest]);
 
-  // Real-time synchronization of Focus Sessions and Active Tasks with Cloud Firestore & BroadcastChannel
+  // Real-time zero-cost instant synchronization across local peer tabs & extensions via BroadcastChannel
   useEffect(() => {
     let active = true;
-    const unsubs: Array<() => void> = [];
-    const syncUid = effectiveUid;
-    if (!syncUid) return;
-
-    // 1. Initial active tasks fetch
-    fetchActiveTasksFromFirestore(syncUid).then((cloudActive) => {
-      if (!active || !Array.isArray(cloudActive) || cloudActive.length === 0) return;
-      setTasks((prev) => {
-        const prevMap = new Map(prev.map((t) => [t.id, t]));
-        let changed = false;
-        cloudActive.forEach((t) => {
-          if (!prevMap.has(t.id)) {
-            prevMap.set(t.id, t);
-            changed = true;
-          } else {
-            const existing = prevMap.get(t.id)!;
-            const cloudFocus = t.totalFocusSeconds || 0;
-            const cloudPomodoro = t.pomodoroCount || 0;
-            if (cloudFocus > (existing.totalFocusSeconds || 0) || cloudPomodoro > (existing.pomodoroCount || 0)) {
-              prevMap.set(t.id, {
-                ...existing,
-                totalFocusSeconds: Math.max(existing.totalFocusSeconds || 0, cloudFocus),
-                pomodoroCount: Math.max(existing.pomodoroCount || 0, cloudPomodoro),
-              });
-              changed = true;
-            }
-          }
-        });
-        return changed ? Array.from(prevMap.values()) : prev;
-      });
-    }).catch(console.warn);
-
-    // 2. Real-time active tasks listener
-    const unsubActive = subscribeActiveTasksFromFirestore(syncUid, (activeDoc) => {
-      if (!active || !activeDoc || !Array.isArray(activeDoc.tasks)) return;
-      const incoming = activeDoc.tasks;
-      setTasks((prev) => {
-        const prevMap = new Map(prev.map((t) => [t.id, t]));
-        let changed = false;
-        incoming.forEach((t) => {
-          if (!prevMap.has(t.id)) {
-            prevMap.set(t.id, t);
-            changed = true;
-          } else {
-            const existing = prevMap.get(t.id)!;
-            const incFocus = t.totalFocusSeconds || 0;
-            const incCount = t.pomodoroCount || 0;
-            if (incFocus > (existing.totalFocusSeconds || 0) || incCount > (existing.pomodoroCount || 0)) {
-              prevMap.set(t.id, {
-                ...existing,
-                totalFocusSeconds: Math.max(existing.totalFocusSeconds || 0, incFocus),
-                pomodoroCount: Math.max(existing.pomodoroCount || 0, incCount),
-              });
-              changed = true;
-            }
-          }
-        });
-        return changed ? Array.from(prevMap.values()) : prev;
-      });
-    });
-    unsubs.push(unsubActive);
-
-    // 3. Real-time focus sessions listener
-    try {
-      const unsubFocus = onSnapshot(
-        getUserFocusSessionsCollection(syncUid),
-        (fSnap) => {
-          if (!active) return;
-          const cloudSessions = fSnap.docs.map((d) => d.data() as FocusSession);
-          if (cloudSessions.length > 0) {
-            setFocusSessions((prev) => deduplicateFocusSessions([...cloudSessions, ...prev]));
-          }
-        },
-        (err) => console.warn('Focus sessions realtime sync warning:', err)
-      );
-      unsubs.push(unsubFocus);
-    } catch (fErr) {
-      getDocs(getUserFocusSessionsCollection(syncUid)).then((fSnap) => {
-        if (!active || fSnap.empty) return;
-        const cloudSessions = fSnap.docs.map((d) => d.data() as FocusSession);
-        setFocusSessions((prev) => deduplicateFocusSessions([...cloudSessions, ...prev]));
-      }).catch(console.warn);
-    }
-
-    // 4. Also listen to OPERATOR_UID if syncUid is different
-    if (syncUid !== OPERATOR_UID) {
-      try {
-        const unsubOperatorFocus = onSnapshot(
-          getUserFocusSessionsCollection(OPERATOR_UID),
-          (opSnap) => {
-            if (!active) return;
-            const opSessions = opSnap.docs.map((d) => d.data() as FocusSession);
-            if (opSessions.length > 0) {
-              setFocusSessions((prev) => deduplicateFocusSessions([...opSessions, ...prev]));
-            }
-          },
-          () => {}
-        );
-        unsubs.push(unsubOperatorFocus);
-      } catch {}
-    }
-
-    // 5. BroadcastChannel listener for local peer tabs and extensions
     let peerChannel: BroadcastChannel | null = null;
     if (typeof BroadcastChannel !== 'undefined') {
       try {
@@ -1226,13 +1155,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       active = false;
       if (peerChannel) {
-        try { peerChannel.close(); } catch {}
+        try {
+          peerChannel.close();
+        } catch {}
       }
-      unsubs.forEach((u) => {
-        try { u(); } catch {}
-      });
     };
-  }, [effectiveUid]);
+  }, []);
 
   // Sync to user-isolated localStorage immediately on change
   useEffect(() => {
@@ -2063,7 +1991,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     persistActiveTasks(tasksRef.current, 'webApp');
 
-    setDoc(doc(getUserTasksCollection(effectiveUid), newId), sanitizeForFirestore(newTask)).catch(console.warn);
+    if (effectiveUid) {
+      setDoc(doc(getUserTasksCollection(effectiveUid), newId), sanitizeForFirestore(newTask)).catch(console.warn);
+    }
 
     // 2. Asynchronous Google Tasks synchronization without blocking the UI
     if (googleAccessToken && targetListId) {
@@ -2075,7 +2005,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setTasks((prev) => prev.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t)));
             tasksRef.current = tasksRef.current.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t));
             persistActiveTasks(tasksRef.current, 'webApp');
-            setDoc(doc(getUserTasksCollection(effectiveUid), newId), { googleTaskId: resp.id }, { merge: true }).catch(console.warn);
+            if (effectiveUid) {
+              setDoc(doc(getUserTasksCollection(effectiveUid), newId), { googleTaskId: resp.id }, { merge: true }).catch(console.warn);
+            }
           }
         } catch (e: any) {
           if (
@@ -2806,6 +2738,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [focusSessions]);
 
+  // On-demand fetch of historical completed tasks from Firestore
+  const fetchCompletedTasksFromCloud = useCallback(async (count = 50): Promise<TaskItem[]> => {
+    if (!user || user.isGuest) return [];
+    try {
+      const snap = await getDocs(getCompletedTasksQuery(user.uid, count));
+      if (!snap.empty) {
+        const cloudCompleted = snap.docs.map((d) => {
+          const data = d.data() as TaskItem;
+          return {
+            ...data,
+            id: d.id,
+            status: 'completed' as const,
+            completed: true,
+          };
+        });
+
+        setTasks((prev) => {
+          const prevMap = new Map(prev.map((t) => [t.id, t]));
+          cloudCompleted.forEach((c) => {
+            if (!prevMap.has(c.id)) {
+              prevMap.set(c.id, c);
+            }
+          });
+          const combined = Array.from(prevMap.values());
+          tasksRef.current = combined;
+          return combined;
+        });
+
+        return cloudCompleted;
+      }
+    } catch (err) {
+      console.warn('[DataContext] Failed to fetch completed tasks on-demand:', err);
+    }
+    return [];
+  }, [user?.uid, user?.isGuest]);
+
   // Clean Slate: wipe all local state and cache
   const resetAllDataToCleanSlate = useCallback(async () => {
     setEvents([]);
@@ -2902,6 +2870,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         reconnectAndSync,
         isGoogleTokenExpired,
         lastSyncTime,
+        fetchCompletedTasksFromCloud,
       }}
     >
       {children}

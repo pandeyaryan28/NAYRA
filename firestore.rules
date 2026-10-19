@@ -1,10 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User-scoped data isolation
+    // User-scoped data isolation - strictly requires authenticated UID match
     match /users/{userId}/{document=**} {
-      allow read, write: if (request.auth != null && request.auth.uid == userId)
-        || (userId == 'yApeiNzo23bPTvpEXHgNIgiTX0y1');
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     // Block any other arbitrary document paths by default
     match /{document=**} {

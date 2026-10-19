@@ -60,7 +60,7 @@ interface StoredFocusState {
 export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { settings, logFocusSession, tasks } = useData();
   const { user } = useAuth();
-  const effectiveUid = user?.uid || OPERATOR_UID;
+  const effectiveUid = user?.uid && !user.isGuest ? user.uid : null;
 
   const getDurationForMode = useCallback(
     (targetMode: PomodoroMode): number => {
@@ -282,18 +282,20 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
 
-      // Sync to Firestore activeTimer for cross-app synchronization
-      syncActiveTimerToFirestore(effectiveUid, {
-        mode: nextMode,
-        timerState: nextState,
-        remainingSeconds: nextRem,
-        targetEndTime: nextTargetEnd,
-        currentCycle: nextCycle,
-        activeTaskIds: nextActiveTaskIds || [],
-        selectedTaskId: nextSelectedTaskId,
-        updatedAt: new Date().toISOString(),
-        updatedBy: 'web',
-      });
+      // Sync to Firestore activeTimer for cross-app synchronization (authenticated only)
+      if (effectiveUid) {
+        syncActiveTimerToFirestore(effectiveUid, {
+          mode: nextMode,
+          timerState: nextState,
+          remainingSeconds: nextRem,
+          targetEndTime: nextTargetEnd,
+          currentCycle: nextCycle,
+          activeTaskIds: nextActiveTaskIds || [],
+          selectedTaskId: nextSelectedTaskId,
+          updatedAt: new Date().toISOString(),
+          updatedBy: 'web',
+        });
+      }
     },
     [effectiveUid, mode, remainingSeconds, targetEndTime, currentCycle, activeTaskIds, selectedTaskId]
   );
@@ -608,8 +610,10 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  // Listen for real-time Cloud Firestore activeTimer updates from nayra-extension or nayra-tab
+  // Listen for real-time Cloud Firestore activeTimer updates from nayra-extension or nayra-tab (authenticated only)
   useEffect(() => {
+    if (!effectiveUid) return;
+
     const unsubTimer = subscribeActiveTimerFromFirestore(effectiveUid, (cloudState) => {
       if (!cloudState || cloudState.updatedBy === 'web') return;
 
