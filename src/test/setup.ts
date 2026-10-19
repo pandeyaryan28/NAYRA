@@ -50,3 +50,41 @@ class MockAudioContext {
 
 (window as any).AudioContext = MockAudioContext;
 (window as any).webkitAudioContext = MockAudioContext;
+
+// Mock BroadcastChannel if missing or incomplete in test environment
+class MockBroadcastChannel {
+  name: string;
+  onmessage: ((event: any) => void) | null = null;
+  static channels = new Map<string, Set<MockBroadcastChannel>>();
+
+  constructor(name: string) {
+    this.name = name;
+    if (!MockBroadcastChannel.channels.has(name)) {
+      MockBroadcastChannel.channels.set(name, new Set());
+    }
+    MockBroadcastChannel.channels.get(name)!.add(this);
+  }
+
+  postMessage(data: any) {
+    const set = MockBroadcastChannel.channels.get(this.name);
+    if (set) {
+      set.forEach((ch) => {
+        if (ch !== this && ch.onmessage) {
+          ch.onmessage({ data } as any);
+        }
+      });
+    }
+  }
+
+  close() {
+    const set = MockBroadcastChannel.channels.get(this.name);
+    if (set) {
+      set.delete(this);
+    }
+  }
+}
+
+if (typeof (globalThis as any).BroadcastChannel === 'undefined' || !(globalThis as any).BroadcastChannel) {
+  (globalThis as any).BroadcastChannel = MockBroadcastChannel;
+  (window as any).BroadcastChannel = MockBroadcastChannel;
+}

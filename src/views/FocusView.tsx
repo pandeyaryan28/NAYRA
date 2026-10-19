@@ -405,9 +405,9 @@ export const FocusView: React.FC = () => {
                           {formatSecondsToTimer(liveSec)} in session
                         </span>
 
-                        {t.totalFocusSeconds > 0 && (
+                        {(t.totalFocusSeconds || 0) > 0 && (
                           <span className="text-[10px] font-mono text-zinc-400">
-                            Total: {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
+                            Total: {formatSecondsToHoursMinutes(t.totalFocusSeconds || 0)}
                           </span>
                         )}
 

@@ -169,14 +169,45 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     Math.max(0, Math.round(((totalDurationSeconds - remainingSeconds) / totalDurationSeconds) * 100))
   );
 
-  const selectedTasks = useMemo(() => {
-    return tasks.filter((t) => activeTaskIds.includes(t.id));
+  const selectedTasks = useMemo<TaskItem[]>(() => {
+    return activeTaskIds.map((tid) => {
+      const found = tasks.find((t) => t.id === tid);
+      if (found) return found;
+      return {
+        id: tid,
+        taskListId: '@default',
+        title: 'Linked Task',
+        status: 'needsAction' as const,
+        completed: false,
+        priority: 'medium' as const,
+        tags: [],
+        totalFocusSeconds: 0,
+        pomodoroCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    });
   }, [tasks, activeTaskIds]);
 
-  const selectedTask = useMemo(() => {
+  const selectedTask = useMemo<TaskItem | null>(() => {
     if (selectedTaskId) {
       const found = tasks.find((t) => t.id === selectedTaskId);
       if (found) return found;
+      const foundInSelected = selectedTasks.find((t) => t.id === selectedTaskId);
+      if (foundInSelected) return foundInSelected;
+      return {
+        id: selectedTaskId,
+        taskListId: '@default',
+        title: 'Linked Task',
+        status: 'needsAction' as const,
+        completed: false,
+        priority: 'medium' as const,
+        tags: [],
+        totalFocusSeconds: 0,
+        pomodoroCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
     }
     return selectedTasks[0] || null;
   }, [selectedTaskId, tasks, selectedTasks]);
@@ -285,31 +316,214 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, payload);
   }, [mode, timerState, remainingSeconds, targetEndTime, currentCycle, selectedTaskId, activeTaskIds, taskTimeAllocations, sessionIntention, sessionTags]);
 
+  const handleTimerExpiry = useCallback(
+    (options?: { silent?: boolean }) => {
+      // 1. Play synthesized Web Audio chime
+      if (!options?.silent && settings.soundEnabled) {
+        if (mode === 'focus') {
+          playSessionCompleteSound();
+        } else {
+          playBreakCompleteSound();
+        }
+      }
+
+      // 2. Desktop notification
+      if (!options?.silent && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        const notifTitle = mode === 'focus' ? 'Focus Session Completed' : 'Break Completed';
+        const notifBody =
+          mode === 'focus'
+            ? 'Great work! Time for a short break.'
+            : 'Break is over. Ready for your next focus session?';
+        try {
+          new Notification(notifTitle, { body: notifBody });
+        } catch {
+          // Notification fallback
+        }
+      }
+
+      // 3. Record completed session ONLY for focus intervals (never log breaks as focus sessions)
+      if (mode === 'focus') {
+        const duration = getDurationForMode('focus');
+        const nowIso = new Date().toISOString();
+
+        // Flush final slice
+        const flushedAllocations = flushSliceSync();
+        lastSliceTimeRef.current = null;
+
+        // Consolidate allocations
+        const allLinkedIds = Array.from(
+          new Set([...Object.keys(flushedAllocations), ...activeTaskIdsRef.current])
+        );
+        const linkedTasks: TaskItem[] = allLinkedIds.map((tid) => {
+          const found = tasks.find((t) => t.id === tid);
+          return (
+            found || {
+              id: tid,
+              taskListId: '@default',
+              title: 'Linked Task',
+              status: 'needsAction' as const,
+              completed: false,
+              priority: 'medium' as const,
+              tags: [],
+              totalFocusSeconds: 0,
+              pomodoroCount: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }
+          );
+        });
+
+        const finalAllocations: Record<string, number> = { ...flushedAllocations };
+        // Active tasks receive recorded credit; if no time was recorded across the entire session, distribute or fallback to duration
+        if (activeTaskIdsRef.current.length > 0) {
+          const recordedSum = Object.values(finalAllocations).reduce((a, b) => a + b, 0);
+          if (recordedSum === 0) {
+            const splitSec = Math.round(duration / activeTaskIdsRef.current.length);
+            for (const tid of activeTaskIdsRef.current) {
+              finalAllocations[tid] = splitSec;
+            }
+          } else {
+            for (const tid of activeTaskIdsRef.current) {
+              if (finalAllocations[tid] === undefined) {
+                finalAllocations[tid] = 0;
+              } else {
+                finalAllocations[tid] = Math.min(duration, finalAllocations[tid]);
+              }
+            }
+          }
+        }
+
+        const intentionTags = extractHashtags(sessionIntentionRef.current);
+        const allSessionTags = Array.from(
+          new Set(
+            [
+              ...linkedTasks.flatMap((t) => t.tags || []),
+              ...sessionTagsRef.current,
+              ...intentionTags,
+            ]
+              .map(normalizeTag)
+              .filter(Boolean)
+          )
+        );
+
+        const primary = linkedTasks[0] || null;
+        const primaryTitle = primary?.title && primary.title !== 'Linked Task' ? primary.title : null;
+        const fallbackTitle = sessionIntentionRef.current.trim() || primaryTitle || 'Focus Session';
+
+        const sessionPayload = {
+          taskId: primary?.id || null,
+          taskTitle: primaryTitle || fallbackTitle,
+          taskIds: allLinkedIds,
+          taskTitles:
+            linkedTasks.length > 0
+              ? linkedTasks.map((t) => (t.title && t.title !== 'Linked Task' ? t.title : fallbackTitle))
+              : [fallbackTitle],
+          tags: allSessionTags,
+          taskTimeAllocations: finalAllocations,
+          mode: 'focus' as const,
+          durationSeconds: duration,
+          startedAt: new Date(Date.now() - duration * 1000).toISOString(),
+          completedAt: nowIso,
+          interrupted: false,
+        };
+
+        logFocusSession(sessionPayload);
+
+        // Broadcast SESSION_LOGGED on nayra_focus_sync so nayra-tab / extension is instantly notified
+        if (typeof BroadcastChannel !== 'undefined') {
+          try {
+            const ch = new BroadcastChannel('nayra_focus_sync');
+            ch.postMessage({
+              type: 'SESSION_LOGGED',
+              session: sessionPayload,
+              source: 'web',
+            });
+            ch.close();
+          } catch {
+            // ignore
+          }
+        }
+
+        // Reset allocations for subsequent session
+        taskAllocationsRef.current = {};
+        setTaskTimeAllocations({});
+      }
+
+      // 4. Cycle progression respecting auto-start settings
+      if (mode === 'focus') {
+        const isLongBreak = currentCycle % (settings.longBreakInterval || 4) === 0;
+        const nextMode: PomodoroMode = isLongBreak ? 'longBreak' : 'shortBreak';
+        const nextDuration = getDurationForMode(nextMode);
+        setModeState(nextMode);
+        setRemainingSeconds(nextDuration);
+
+        if (settings.autoStartBreaks) {
+          isExpiringRef.current = false;
+          lastSliceTimeRef.current = Date.now();
+          const nextTarget = Date.now() + nextDuration * 1000;
+          setTargetEndTime(nextTarget);
+          setTimerState('running');
+          broadcastStateTransition('running', nextMode, nextDuration, nextTarget, currentCycle, activeTaskIds, selectedTaskId);
+        } else {
+          setTargetEndTime(null);
+          setTimerState('idle');
+          broadcastStateTransition('idle', nextMode, nextDuration, null, currentCycle, activeTaskIds, selectedTaskId);
+        }
+      } else {
+        // Completed break
+        const nextCycle = currentCycle + 1;
+        const nextDuration = getDurationForMode('focus');
+        setModeState('focus');
+        setCurrentCycle(nextCycle);
+        setRemainingSeconds(nextDuration);
+
+        if (settings.autoStartPomodoros) {
+          isExpiringRef.current = false;
+          lastSliceTimeRef.current = Date.now();
+          const nextTarget = Date.now() + nextDuration * 1000;
+          setTargetEndTime(nextTarget);
+          setTimerState('running');
+          broadcastStateTransition('running', 'focus', nextDuration, nextTarget, nextCycle, activeTaskIds, selectedTaskId);
+        } else {
+          setTargetEndTime(null);
+          setTimerState('idle');
+          broadcastStateTransition('idle', 'focus', nextDuration, null, nextCycle, activeTaskIds, selectedTaskId);
+        }
+      }
+    },
+    [mode, currentCycle, flushSliceSync, getDurationForMode, logFocusSession, settings, tasks, activeTaskIds, selectedTaskId, broadcastStateTransition]
+  );
+
   // Clean up any stale/expired timer state from an abandoned session on initial mount
   useEffect(() => {
     if (hasProcessedMountRef.current) return;
     hasProcessedMountRef.current = true;
 
     if (initialStored?.timerState === 'running' && initialStored.targetEndTime) {
-      if (Date.now() >= initialStored.targetEndTime) {
-        setTargetEndTime(null);
-        setTimerState('idle');
-        lastSliceTimeRef.current = null;
-        taskAllocationsRef.current = {};
-        setTaskTimeAllocations({});
-        const defaultDur = getDurationForMode(initialStored.mode || 'focus');
-        setRemainingSeconds(defaultDur);
-        safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, {
-          ...initialStored,
-          timerState: 'idle',
-          targetEndTime: null,
-          remainingSeconds: defaultDur,
-          taskTimeAllocations: {},
-          lastSliceTime: null,
-        });
+      const overdueMs = Date.now() - initialStored.targetEndTime;
+      if (overdueMs >= 0) {
+        if (overdueMs < 30 * 60 * 1000 && (initialStored.mode || 'focus') === 'focus') {
+          handleTimerExpiry({ silent: true });
+        } else {
+          setTargetEndTime(null);
+          setTimerState('idle');
+          lastSliceTimeRef.current = null;
+          taskAllocationsRef.current = {};
+          setTaskTimeAllocations({});
+          const defaultDur = getDurationForMode(initialStored.mode || 'focus');
+          setRemainingSeconds(defaultDur);
+          safeLocalStorageSet(FOCUS_STORAGE_KEYS.STATE, {
+            ...initialStored,
+            timerState: 'idle',
+            targetEndTime: null,
+            remainingSeconds: defaultDur,
+            taskTimeAllocations: {},
+            lastSliceTime: null,
+          });
+        }
       }
     }
-  }, [initialStored, getDurationForMode]);
+  }, [initialStored, getDurationForMode, handleTimerExpiry]);
 
   const tasksRef = useRef(tasks);
   useEffect(() => {
@@ -439,131 +653,7 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, [effectiveUid]);
 
-  const handleTimerExpiry = useCallback(() => {
-    // 1. Play synthesized Web Audio chime
-    if (settings.soundEnabled) {
-      if (mode === 'focus') {
-        playSessionCompleteSound();
-      } else {
-        playBreakCompleteSound();
-      }
-    }
 
-    // 2. Desktop notification
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      const notifTitle = mode === 'focus' ? 'Focus Session Completed' : 'Break Completed';
-      const notifBody = mode === 'focus'
-        ? 'Great work! Time for a short break.'
-        : 'Break is over. Ready for your next focus session?';
-      try {
-        new Notification(notifTitle, { body: notifBody });
-      } catch {
-        // Notification fallback
-      }
-    }
-
-    // 3. Record completed session ONLY for focus intervals (never log breaks as focus sessions)
-    if (mode === 'focus') {
-      const duration = getDurationForMode('focus');
-      const nowIso = new Date().toISOString();
-
-      // Flush final slice
-      const flushedAllocations = flushSliceSync();
-      lastSliceTimeRef.current = null;
-
-      // Consolidate allocations
-      const allLinkedIds = Array.from(
-        new Set([...Object.keys(flushedAllocations), ...activeTaskIdsRef.current])
-      );
-      const linkedTasks = tasks.filter((t) => allLinkedIds.includes(t.id));
-
-      const finalAllocations: Record<string, number> = { ...flushedAllocations };
-      // Active tasks receive recorded credit; if no time was recorded across the entire session, fallback to duration
-      for (const tid of activeTaskIdsRef.current) {
-        if (finalAllocations[tid] === undefined) {
-          if (Object.keys(flushedAllocations).length === 0) {
-            finalAllocations[tid] = duration;
-          } else {
-            finalAllocations[tid] = 0;
-          }
-        } else {
-          finalAllocations[tid] = Math.min(duration, finalAllocations[tid]);
-        }
-      }
-
-      const intentionTags = extractHashtags(sessionIntentionRef.current);
-      const allSessionTags = Array.from(
-        new Set([
-          ...linkedTasks.flatMap((t) => t.tags || []),
-          ...sessionTagsRef.current,
-          ...intentionTags,
-        ].map(normalizeTag).filter(Boolean))
-      );
-
-      const primary = linkedTasks[0] || null;
-      const fallbackTitle = sessionIntentionRef.current.trim() || null;
-
-      logFocusSession({
-        taskId: primary?.id || null,
-        taskTitle: primary?.title || fallbackTitle,
-        taskIds: allLinkedIds,
-        taskTitles: linkedTasks.length > 0 ? linkedTasks.map((t) => t.title) : (fallbackTitle ? [fallbackTitle] : []),
-        tags: allSessionTags,
-        taskTimeAllocations: finalAllocations,
-        mode: 'focus',
-        durationSeconds: duration,
-        startedAt: new Date(Date.now() - duration * 1000).toISOString(),
-        completedAt: nowIso,
-        interrupted: false,
-      });
-
-      // Reset allocations for subsequent session
-      taskAllocationsRef.current = {};
-      setTaskTimeAllocations({});
-    }
-
-    // 4. Cycle progression respecting auto-start settings
-    if (mode === 'focus') {
-      const isLongBreak = currentCycle % (settings.longBreakInterval || 4) === 0;
-      const nextMode: PomodoroMode = isLongBreak ? 'longBreak' : 'shortBreak';
-      const nextDuration = getDurationForMode(nextMode);
-      setModeState(nextMode);
-      setRemainingSeconds(nextDuration);
-
-      if (settings.autoStartBreaks) {
-        isExpiringRef.current = false;
-        lastSliceTimeRef.current = Date.now();
-        const nextTarget = Date.now() + nextDuration * 1000;
-        setTargetEndTime(nextTarget);
-        setTimerState('running');
-        broadcastStateTransition('running', nextMode, nextDuration, nextTarget, currentCycle, activeTaskIds, selectedTaskId);
-      } else {
-        setTargetEndTime(null);
-        setTimerState('idle');
-        broadcastStateTransition('idle', nextMode, nextDuration, null, currentCycle, activeTaskIds, selectedTaskId);
-      }
-    } else {
-      // Completed break
-      const nextCycle = currentCycle + 1;
-      const nextDuration = getDurationForMode('focus');
-      setModeState('focus');
-      setCurrentCycle(nextCycle);
-      setRemainingSeconds(nextDuration);
-
-      if (settings.autoStartPomodoros) {
-        isExpiringRef.current = false;
-        lastSliceTimeRef.current = Date.now();
-        const nextTarget = Date.now() + nextDuration * 1000;
-        setTargetEndTime(nextTarget);
-        setTimerState('running');
-        broadcastStateTransition('running', 'focus', nextDuration, nextTarget, nextCycle, activeTaskIds, selectedTaskId);
-      } else {
-        setTargetEndTime(null);
-        setTimerState('idle');
-        broadcastStateTransition('idle', 'focus', nextDuration, null, nextCycle, activeTaskIds, selectedTaskId);
-      }
-    }
-  }, [mode, currentCycle, flushSliceSync, getDurationForMode, logFocusSession, settings, tasks, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   // High-accuracy drift-proof ticker: updates remaining seconds locally without flooding cloud writes
   useEffect(() => {

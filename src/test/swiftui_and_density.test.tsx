@@ -349,7 +349,7 @@ describe('NAYRA v2.4.0 — Apple SwiftUI Architecture Overhaul, Design System & 
     expect(checkbox.className).toContain('rounded-[999px]');
 
     // Verify Star task button exists and can be toggled
-    const starBtn = screen.getByTitle('Star task');
+    const starBtn = screen.getAllByTitle('Star task')[0];
     expect(starBtn).toBeInTheDocument();
     fireEvent.click(starBtn);
 

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useData } from '@/context/DataContext';
 import { TagAnalyticsItem } from '@/types';
 import { formatSecondsToHoursMinutes, getTodayDateString } from '@/lib/utils';
-import { subDays, addDays, format } from 'date-fns';
+import { subDays, addDays, format, parseISO } from 'date-fns';
 import { Clock, CheckSquare, Flame, TrendingUp, TrendingDown, Target } from 'lucide-react';
 
 import {
@@ -22,6 +22,15 @@ import {
 } from '@/lib/tagUtils';
 
 export type TimeHorizon = 'today' | 'yesterday' | 'tomorrow' | '7d' | '30d' | 'all';
+
+export const toLocalDateString = (isoString?: string | null): string => {
+  if (!isoString) return '';
+  try {
+    return format(parseISO(isoString), 'yyyy-MM-dd');
+  } catch {
+    return isoString.slice(0, 10);
+  }
+};
 
 export const AnalyticsView: React.FC = () => {
   const { tasks, focusSessions, focusStats, habits } = useData();
@@ -94,6 +103,9 @@ export const AnalyticsView: React.FC = () => {
       if (s.taskIds && s.taskIds.some((id) => allowedTaskIds.has(id))) {
         return true;
       }
+      if (s.taskTimeAllocations && Object.keys(s.taskTimeAllocations).some((id) => allowedTaskIds.has(id))) {
+        return true;
+      }
       return false;
     });
   }, [focusSessions, tagScopedTasks, activeTagFilter]);
@@ -102,7 +114,7 @@ export const AnalyticsView: React.FC = () => {
   const horizonSessions = useMemo(() => {
     return tagScopedSessions.filter((s) => {
       if (s.mode !== 'focus') return false;
-      const completedDate = s.completedAt.slice(0, 10);
+      const completedDate = toLocalDateString(s.completedAt);
       switch (timeHorizon) {
         case 'today':
           return completedDate === todayStr;
@@ -125,7 +137,7 @@ export const AnalyticsView: React.FC = () => {
   const priorPeriodSessions = useMemo(() => {
     return tagScopedSessions.filter((s) => {
       if (s.mode !== 'focus') return false;
-      const completedDate = s.completedAt.slice(0, 10);
+      const completedDate = toLocalDateString(s.completedAt);
       switch (timeHorizon) {
         case 'today':
           return completedDate === yesterdayStr;
@@ -146,7 +158,7 @@ export const AnalyticsView: React.FC = () => {
   // Horizon-filtered tasks
   const horizonTasks = useMemo(() => {
     return tagScopedTasks.filter((t) => {
-      const taskDate = (t.due || t.completedAt || t.createdAt || '').slice(0, 10);
+      const taskDate = toLocalDateString(t.due || t.completedAt || t.createdAt);
       switch (timeHorizon) {
         case 'today':
           return taskDate === todayStr;
@@ -183,7 +195,7 @@ export const AnalyticsView: React.FC = () => {
 
   const priorCompletedTasks = useMemo(() => {
     return tagScopedTasks.filter((t) => {
-      const d = (t.completedAt || t.due || '').slice(0, 10);
+      const d = toLocalDateString(t.completedAt || t.due);
       switch (timeHorizon) {
         case 'today':
           return d === yesterdayStr && (t.status === 'completed' || t.archived);
@@ -237,7 +249,7 @@ export const AnalyticsView: React.FC = () => {
       const dayName = count === 30 ? format(d, 'd MMM') : format(d, 'EEE');
 
       const daySessions = tagScopedSessions.filter(
-        (s) => s.mode === 'focus' && s.completedAt.slice(0, 10) === dateStr
+        (s) => s.mode === 'focus' && toLocalDateString(s.completedAt) === dateStr
       );
 
       const totalSec = daySessions.reduce((sum, s) => sum + s.durationSeconds, 0);
@@ -253,10 +265,12 @@ export const AnalyticsView: React.FC = () => {
     return days;
   }, [tagScopedSessions, timeHorizon]);
 
-  // Hourly distribution for single day (Today or Yesterday)
+  // Hourly distribution for single day (Today or Yesterday) with complete 24h coverage
   const singleDayHourlyDistribution = useMemo(() => {
     const targetDate = timeHorizon === 'yesterday' ? yesterdayStr : todayStr;
     const hours = [
+      { start: 0, end: 4, label: '0-4', name: '00:00 - 04:00' },
+      { start: 4, end: 8, label: '4-8', name: '04:00 - 08:00' },
       { start: 8, end: 10, label: '8-10', name: '08:00 - 10:00' },
       { start: 10, end: 12, label: '10-12', name: '10:00 - 12:00' },
       { start: 12, end: 14, label: '12-14', name: '12:00 - 14:00' },
@@ -268,13 +282,13 @@ export const AnalyticsView: React.FC = () => {
     ];
 
     const daySessions = tagScopedSessions.filter(
-      (s) => s.mode === 'focus' && s.completedAt.slice(0, 10) === targetDate
+      (s) => s.mode === 'focus' && toLocalDateString(s.completedAt) === targetDate
     );
 
     return hours.map((h) => {
       const bucketSessions = daySessions.filter((s) => {
         try {
-          const dt = new Date(s.completedAt);
+          const dt = parseISO(s.completedAt);
           const hr = dt.getHours();
           return hr >= h.start && hr < h.end;
         } catch {
@@ -296,7 +310,7 @@ export const AnalyticsView: React.FC = () => {
 
   // Tomorrow projected blocks
   const tomorrowProjectedBlocks = useMemo(() => {
-    const tomorrowTasks = tagScopedTasks.filter((t) => t.due && t.due.slice(0, 10) === tomorrowStr);
+    const tomorrowTasks = tagScopedTasks.filter((t) => t.due && toLocalDateString(t.due) === tomorrowStr);
     const high = tomorrowTasks.filter((t) => t.priority === 'high').length;
     const med = tomorrowTasks.filter((t) => t.priority === 'medium').length;
     const low = tomorrowTasks.filter((t) => t.priority === 'low' || !t.priority).length;
@@ -307,6 +321,7 @@ export const AnalyticsView: React.FC = () => {
       { key: 'total', label: 'Total Scheduled', count: tomorrowTasks.length },
     ];
   }, [tagScopedTasks, tomorrowStr]);
+
 
   // Peak focus time for scaling charts
   const maxFocusSec = useMemo(() => {

@@ -141,7 +141,49 @@ export function calculateTaskPeriodFocus(
     }
   });
 
-  return tasks.map((task) => {
+  const knownTasksMap = new Map<string, TaskItem>();
+  tasks.forEach((t) => knownTasksMap.set(t.id, t));
+
+  // Synthesize task entries for tasks present in focus sessions but missing from tasks array
+  focusOnlySessions.forEach((s) => {
+    const checkAndAdd = (tid: string, fallbackTitle?: string | null) => {
+      if (!knownTasksMap.has(tid)) {
+        knownTasksMap.set(tid, {
+          id: tid,
+          taskListId: '@default',
+          title: fallbackTitle || s.taskTitle || 'Linked Task',
+          status: 'completed',
+          completed: true,
+          priority: 'medium',
+          tags: [],
+          totalFocusSeconds: 0,
+          pomodoroCount: 0,
+          createdAt: s.completedAt || new Date().toISOString(),
+          updatedAt: s.completedAt || new Date().toISOString(),
+        });
+      }
+    };
+
+    if (s.taskTimeAllocations) {
+      Object.keys(s.taskTimeAllocations).forEach((tid, idx) => {
+        const title = s.taskTitles && s.taskTitles[idx] ? s.taskTitles[idx] : s.taskTitle;
+        checkAndAdd(tid, title);
+      });
+    }
+    if (s.taskIds) {
+      s.taskIds.forEach((tid, idx) => {
+        const title = s.taskTitles && s.taskTitles[idx] ? s.taskTitles[idx] : s.taskTitle;
+        checkAndAdd(tid, title);
+      });
+    }
+    if (s.taskId) {
+      checkAndAdd(s.taskId, s.taskTitle);
+    }
+  });
+
+  const allTasks = Array.from(knownTasksMap.values());
+
+  return allTasks.map((task) => {
     const sessionStat = taskFocusMap.get(task.id);
     let periodFocusSeconds = sessionStat ? sessionStat.seconds : 0;
     let periodPomodoroCount = sessionStat ? sessionStat.pomodoros : 0;
