@@ -227,51 +227,53 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
   );
 
   return (
-    <div className="space-y-6">
-      {/* Controls Bar: Subject Buttons, Search & Actions */}
+    <div className="space-y-6 animate-fade-in">
+      {/* Controls Bar: Subject Segmented Bar, Search & Actions */}
       <div className="space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          {/* Subject Filter Buttons */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 w-full max-w-full min-w-0 flex-nowrap">
-            <button
-              type="button"
-              onClick={() => setSelectedSubject('all')}
-              className={cn(
-                'px-3.5 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors shrink-0',
-                selectedSubject === 'all'
-                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-sm'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-              )}
-            >
-              All Papers (4)
-            </button>
-            {subjects.map((sub) => (
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+          {/* Apple Segmented Subject Control */}
+          <div className="overflow-x-auto no-scrollbar pb-1 w-full max-w-full min-w-0 flex-nowrap">
+            <div className="inline-flex p-1 rounded-full bg-zinc-500/10 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-xs">
               <button
-                key={sub.id}
                 type="button"
-                onClick={() => setSelectedSubject(sub.id)}
+                onClick={() => setSelectedSubject('all')}
                 className={cn(
-                  'px-3.5 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors shrink-0',
-                  selectedSubject === sub.id
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-sm'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  'px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] swiftui-press active:scale-[0.97] touch-target shrink-0',
+                  selectedSubject === 'all'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50 shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
                 )}
               >
-                {sub.code} - {sub.shortName}
+                All Papers (4)
               </button>
-            ))}
+              {subjects.map((sub) => (
+                <button
+                  key={sub.id}
+                  type="button"
+                  onClick={() => setSelectedSubject(sub.id)}
+                  className={cn(
+                    'px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] swiftui-press active:scale-[0.97] touch-target shrink-0',
+                    selectedSubject === sub.id
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50 shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  )}
+                >
+                  {sub.code} - {sub.shortName}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Search Bar & Action Buttons */}
-          <div className="flex items-center gap-2 w-full lg:w-auto">
+          <div className="flex items-center gap-2.5 w-full lg:w-auto shrink-0">
             <div className="relative flex-1 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <input
                 type="text"
                 placeholder="Search topics, chapters..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                className="w-full pl-9.5 pr-4 py-2 text-xs rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/10 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
               />
             </div>
 
@@ -280,6 +282,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
               variant="primary"
               leftIcon={<Plus className="w-4 h-4" />}
               onClick={() => setShowAddModal(true)}
+              className="rounded-full shadow-xs shrink-0"
             >
               Add Topic
             </Button>
@@ -287,73 +290,77 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
         </div>
 
         {/* Sub-Filters: Status & Due Date Filter */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-3">
-          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 w-full sm:w-auto min-w-0">
-            <span className="text-xs text-zinc-500 font-medium shrink-0">Status:</span>
-            {(['all', 'pending', 'in_progress', 'completed'] as const).map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setStatusFilter(st)}
-                className={cn(
-                  'px-2.5 py-1 rounded-md text-xs font-medium transition-colors shrink-0',
-                  statusFilter === st
-                    ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold'
-                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                )}
-              >
-                {st === 'all'
-                  ? 'All'
-                  : st === 'in_progress'
-                  ? 'In Progress'
-                  : st.charAt(0).toUpperCase() + st.slice(1)}
-              </button>
-            ))}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-black/[0.04] dark:border-white/[0.06] pt-3">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto min-w-0">
+            {/* Status Segmented Bar */}
+            <div className="inline-flex items-center p-0.5 rounded-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.08] shrink-0">
+              <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 px-2 select-none">Status</span>
+              {(['all', 'pending', 'in_progress', 'completed'] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setStatusFilter(st)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] swiftui-press active:scale-[0.96] shrink-0',
+                    statusFilter === st
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50 shadow-xs font-semibold'
+                      : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                  )}
+                >
+                  {st === 'all'
+                    ? 'All'
+                    : st === 'in_progress'
+                    ? 'In Progress'
+                    : st.charAt(0).toUpperCase() + st.slice(1)}
+                </button>
+              ))}
+            </div>
 
-            <span className="text-zinc-300 dark:text-zinc-700 mx-1 shrink-0">|</span>
-
-            <span className="text-xs text-zinc-500 font-medium shrink-0">Schedule:</span>
-            {(
-              [
-                { id: 'all', label: 'All' },
-                { id: 'today', label: 'Due Today' },
-                { id: 'overdue', label: 'Overdue' },
-                { id: 'scheduled', label: 'Scheduled' },
-                { id: 'unscheduled', label: 'Unscheduled' },
-              ] as const
-            ).map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => setDateFilter(d.id)}
-                className={cn(
-                  'px-2.5 py-1 rounded-md text-xs font-medium transition-colors shrink-0',
-                  dateFilter === d.id
-                    ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold'
-                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                )}
-              >
-                {d.label}
-              </button>
-            ))}
+            {/* Schedule Segmented Bar */}
+            <div className="inline-flex items-center p-0.5 rounded-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.08] shrink-0">
+              <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 px-2 select-none">Schedule</span>
+              {(
+                [
+                  { id: 'all', label: 'All' },
+                  { id: 'today', label: 'Due Today' },
+                  { id: 'overdue', label: 'Overdue' },
+                  { id: 'scheduled', label: 'Scheduled' },
+                  { id: 'unscheduled', label: 'Unscheduled' },
+                ] as const
+              ).map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setDateFilter(d.id)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] swiftui-press active:scale-[0.96] shrink-0',
+                    dateFilter === d.id
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-zinc-50 shadow-xs font-semibold'
+                      : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                  )}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Expand / Collapse Controls */}
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <span>{totalMatchingTopics} topics</span>
-            <span>•</span>
+          <div className="flex items-center gap-2 text-xs text-zinc-500 shrink-0">
+            <span className="tabular-nums font-medium">{totalMatchingTopics} topics</span>
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
             <button
               type="button"
               onClick={handleExpandAll}
-              className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors font-medium cursor-pointer"
             >
               Expand All
             </button>
-            <span>/</span>
+            <span className="text-zinc-300 dark:text-zinc-700">/</span>
             <button
               type="button"
               onClick={handleCollapseAll}
-              className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors font-medium cursor-pointer"
             >
               Collapse All
             </button>
@@ -439,24 +446,25 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                       <Card
                         key={chapter.id}
                         className={cn(
-                          'p-0 overflow-hidden transition-all',
-                          isChapterCompleted && 'border-l-4 border-l-emerald-500 bg-emerald-50/10 dark:bg-emerald-950/10'
+                          'p-0 overflow-hidden transition-all rounded-2xl border border-black/[0.06] dark:border-white/[0.08]',
+                          isChapterCompleted && 'border-l-4 border-l-emerald-500 bg-emerald-500/[0.03] dark:bg-emerald-950/10'
                         )}
                       >
                         {/* Chapter Header Row */}
                         <div
                           className={cn(
-                            'w-full flex flex-col sm:flex-row sm:items-center justify-between transition-colors text-left select-none p-2.5 sm:p-3 gap-2',
+                            'w-full flex flex-col sm:flex-row sm:items-center justify-between transition-colors text-left select-none p-3 sm:p-3.5 gap-2.5',
                             isChapterCompleted
-                              ? 'bg-emerald-50/30 dark:bg-emerald-950/20'
-                              : 'bg-zinc-50/60 dark:bg-zinc-900/40'
+                              ? 'bg-emerald-500/[0.04] dark:bg-emerald-950/20'
+                              : 'bg-black/[0.015] dark:bg-white/[0.02]'
                           )}
                         >
                           <div className="flex items-center gap-2 min-w-0 flex-1">
+                            {/* Fast Chapter Toggle Checkbox (Apple Pill-Spring) */}
                             <button
                               type="button"
                               onClick={() => handleToggleChapter(chapter)}
-                              className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0 flex items-center justify-center"
+                              className="touch-target p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center swiftui-press active:scale-[0.88] cursor-pointer"
                               title={
                                 isChapterCompleted
                                   ? 'Chapter completed. Click to mark all units as pending.'
@@ -469,22 +477,23 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                               }
                             >
                               {isChapterCompleted ? (
-                                <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-500/10" />
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-500/20" />
                               ) : isChapterInProgress ? (
                                 <Clock className="w-5 h-5 text-blue-500" />
                               ) : (
-                                <Circle className="w-5 h-5 text-zinc-300 dark:text-zinc-600 hover:text-zinc-400" />
+                                <Circle className="w-5 h-5 text-zinc-300 dark:text-zinc-600 hover:text-zinc-400 transition-colors" />
                               )}
                             </button>
 
+                            {/* Accordion Expand/Collapse Button containing Chapter Title */}
                             <button
                               type="button"
                               onClick={() => toggleChapter(chapter.id)}
                               aria-expanded={isExpanded}
-                              className="flex-1 flex items-center gap-2.5 text-left py-1 px-1 rounded-md hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors min-w-0 cursor-pointer"
+                              className="flex-1 flex items-center gap-2.5 text-left py-1 px-1.5 rounded-xl hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors min-w-0 cursor-pointer min-h-[44px]"
                             >
                               <div
-                                className="p-1 rounded-md text-zinc-400 shrink-0"
+                                className="p-1 rounded-lg text-zinc-400 shrink-0"
                                 title={isExpanded ? 'Collapse chapter units' : 'Expand chapter units'}
                               >
                                 <ChevronDown
@@ -527,7 +536,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                     </Badge>
                                   )}
                                   {isChapterCompleted && (
-                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-300/80 dark:border-emerald-800/80 shrink-0">
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 shrink-0">
                                       <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Completed
                                     </span>
                                   )}
@@ -537,7 +546,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                     </Badge>
                                   )}
                                   {scheduledDates.length > 0 && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
                                       <Calendar className="w-3 h-3 text-indigo-500 shrink-0" />
                                       <span>{scheduledDates.map((d) => formatCompactDate(d)).join(', ')}</span>
                                     </span>
@@ -548,14 +557,14 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                           </div>
 
                           {/* Right: Lecture, PDF & Progress */}
-                          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-zinc-200/50 dark:border-zinc-800/50 pl-2">
+                          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-black/[0.04] dark:border-white/[0.06] pl-2">
                             <div className="flex items-center gap-1.5">
                               {chapter.videoUrl && (
                                 <a
                                   href={chapter.videoUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-red-50 text-red-700 dark:bg-red-950/70 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/80 transition-colors border border-red-200 dark:border-red-800/80 shrink-0"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all border border-red-500/20 shrink-0 touch-target min-h-[36px]"
                                   title={chapter.videoTitle ? `Watch Lecture: ${chapter.videoTitle}` : `Watch Lecture for Chapter ${chapter.chapterNumber}`}
                                 >
                                   <Play className="w-3.5 h-3.5 text-red-600 dark:text-red-400 fill-current" />
@@ -568,7 +577,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                   href={chapter.pdfUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors border border-blue-200 dark:border-blue-800/80 shrink-0"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-all border border-blue-500/20 shrink-0 touch-target min-h-[36px]"
                                   title={`Open official ICAI Study Material for Chapter ${chapter.chapterNumber}`}
                                 >
                                   <BookOpen className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -584,7 +593,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                     e.stopPropagation();
                                     onNavigateToExercise(chapter.chapterNumber, undefined, chapter.subjectId);
                                   }}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition-colors border border-emerald-200 dark:border-emerald-800/80 shrink-0 cursor-pointer min-h-[32px]"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-all border border-emerald-500/20 shrink-0 touch-target min-h-[36px] cursor-pointer swiftui-press active:scale-[0.95]"
                                   title={`Practice Digital Exercise for Chapter ${chapter.chapterNumber}`}
                                 >
                                   <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -605,10 +614,10 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                               </span>
                               {isChapterCompleted && (
                                 <span
-                                  className="p-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 shrink-0"
+                                  className="p-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0"
                                   title="Chapter completed"
                                 >
-                                  <Check className="w-3.5 h-3.5" />
+                                  <Check className="w-3 h-3" />
                                 </span>
                               )}
                             </div>
@@ -617,7 +626,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
 
                         {/* Subunit Rows */}
                         {isExpanded && (
-                          <div className="divide-y divide-zinc-100 dark:divide-zinc-800/60 p-2">
+                          <div className="divide-y divide-black/[0.04] dark:divide-white/[0.05] p-2 sm:p-2.5 space-y-1">
                             {chapter.topics.map((topic) => {
                               const isOverdue =
                                 topic.targetDate &&
@@ -627,22 +636,23 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                               return (
                                 <div
                                   key={topic.id}
-                                  className="p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between rounded-md hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60 transition-colors gap-2.5 sm:gap-3"
+                                  className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all gap-2.5 sm:gap-3"
                                 >
                                   <div className="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
+                                    {/* 1-Tap Toggle Icon */}
                                     <button
                                       type="button"
                                       onClick={() => handleNextStatus(topic.id, topic.status)}
-                                      className="mt-0.5 p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0 flex items-center justify-center"
+                                      className="mt-0.5 touch-target p-1 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center swiftui-press active:scale-[0.88] cursor-pointer"
                                       title={`Status: ${topic.status}. Click to cycle status.`}
                                       aria-label={`Toggle status for ${topic.title}`}
                                     >
                                       {topic.status === 'completed' ? (
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-500/10" />
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-500/20" />
                                       ) : topic.status === 'in_progress' ? (
                                         <Clock className="w-5 h-5 text-blue-500" />
                                       ) : (
-                                        <Circle className="w-5 h-5 text-zinc-300 dark:text-zinc-600" />
+                                        <Circle className="w-5 h-5 text-zinc-300 dark:text-zinc-600 hover:text-zinc-400 transition-colors" />
                                       )}
                                     </button>
 
@@ -661,21 +671,21 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                         {topic.targetDate && (
                                           <span
                                             className={cn(
-                                              'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border transition-all select-none shrink-0',
+                                              'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border transition-all select-none shrink-0',
                                               topic.status === 'completed'
-                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300/80 dark:border-emerald-800/80'
+                                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
                                                 : topic.targetDate === today
                                                 ? 'bg-amber-500/15 text-amber-800 dark:text-amber-200 border-amber-500/40 ring-1 ring-amber-500/30'
                                                 : isOverdue
-                                                ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300/80 dark:border-rose-800/80'
-                                                : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/80'
+                                                ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20'
+                                                : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20'
                                             )}
                                             title={`Scheduled target date: ${topic.targetDate}`}
                                           >
                                             <Calendar className="w-3 h-3 shrink-0" />
                                             <span>{formatCompactDate(topic.targetDate)}</span>
                                             {topic.targetDate === today && (
-                                              <span className="text-[9px] font-bold uppercase bg-amber-500 text-white dark:text-zinc-950 px-1 py-0.2 rounded ml-0.5">
+                                              <span className="text-[9px] font-bold uppercase bg-amber-500 text-white dark:text-zinc-950 px-1 py-0.2 rounded-full ml-0.5">
                                                 Today
                                               </span>
                                             )}
@@ -707,32 +717,34 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto pt-1.5 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/40">
+                                  <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 shrink-0 w-full sm:w-auto pt-1.5 sm:pt-0 border-t sm:border-t-0 border-black/[0.04] dark:border-white/[0.06]">
                                     <div className="flex items-center gap-1.5">
+                                      {/* Direct Video Lecture Link */}
                                       {topic.videoUrl && (
                                         <a
                                           href={topic.videoUrl}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="p-1.5 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors inline-flex items-center gap-1 text-xs"
+                                          className="px-2.5 py-1 rounded-full text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 transition-colors inline-flex items-center gap-1 touch-target min-h-[36px] text-xs font-medium"
                                           title={topic.videoTitle ? `Watch Lecture: ${topic.videoTitle}` : 'Watch YouTube Lecture'}
                                         >
                                           <Play className="w-3.5 h-3.5 fill-current" />
-                                          <span className="text-[11px] font-medium">Lecture</span>
+                                          <span className="text-[11px]">Lecture</span>
                                           <ExternalLink className="w-3 h-3 opacity-70" />
                                         </a>
                                       )}
 
+                                      {/* Direct PDF Link */}
                                       {topic.pdfUrl && (
                                         <a
                                           href={topic.pdfUrl}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="p-1.5 rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors inline-flex items-center gap-1 text-xs"
+                                          className="px-2.5 py-1 rounded-full text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 transition-colors inline-flex items-center gap-1 touch-target min-h-[36px] text-xs font-medium"
                                           title={topic.pdfTitle ? `Open ICAI PDF: ${topic.pdfTitle}` : 'Open ICAI Study Material PDF'}
                                         >
                                           <FileText className="w-3.5 h-3.5" />
-                                          <span className="text-[11px] font-medium">PDF</span>
+                                          <span className="text-[11px]">PDF</span>
                                           <ExternalLink className="w-3 h-3 opacity-70" />
                                         </a>
                                       )}
@@ -746,32 +758,34 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                             type="button"
                                             aria-label={topicUnitNumber ? `Practice Digital Exercise for Unit ${topicUnitNumber}` : `Practice Digital Exercise for ${topic.title}`}
                                             onClick={() => onNavigateToExercise(chapter.chapterNumber, topicUnitNumber, chapter.subjectId)}
-                                            className="p-1.5 rounded-md text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors inline-flex items-center gap-1 cursor-pointer min-h-[32px]"
+                                            className="px-2.5 py-1 rounded-full text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 transition-colors inline-flex items-center gap-1 touch-target min-h-[36px] cursor-pointer text-xs font-semibold swiftui-press active:scale-[0.95]"
                                             title={topicUnitNumber ? `Practice Digital Exercise for Unit ${topicUnitNumber}` : `Practice Digital Exercise for ${topic.title}`}
                                           >
                                             <HelpCircle className="w-3.5 h-3.5" />
-                                            <span className="text-[11px] font-semibold">Exercise</span>
+                                            <span className="text-[11px]">Exercise</span>
                                           </button>
                                         );
                                       })()}
 
+                                      {/* Date editor button */}
                                       <button
                                         type="button"
                                         onClick={() => {
                                           setEditingTopicDate(topic);
                                           setNewTargetDateValue(topic.targetDate || '');
                                         }}
-                                        className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50 transition-colors flex items-center justify-center"
+                                        className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors touch-target min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer"
                                         title="Set Target Date"
                                       >
                                         <Calendar className="w-4 h-4" />
                                       </button>
                                     </div>
 
+                                    {/* 1-Tap Status Pill */}
                                     <button
                                       type="button"
                                       onClick={() => handleNextStatus(topic.id, topic.status)}
-                                      className="focus:outline-none"
+                                      className="focus:outline-none touch-target cursor-pointer swiftui-press active:scale-[0.95]"
                                     >
                                       <Badge variant={topic.status} size="sm">
                                         {topic.status === 'in_progress'
@@ -798,30 +812,32 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
 
       {/* Add Custom Topic Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Plus className="w-5 h-5 text-emerald-500" />
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <Card className="w-full max-w-md p-6 sm:p-7 space-y-4 rounded-3xl shadow-2xl border border-black/[0.08] dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Plus className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 Add Custom Topic or Module
               </h3>
             </div>
 
             {customValidationError && (
-              <div className="p-2.5 rounded-md bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs">
+              <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-300 text-xs font-medium">
                 {customValidationError}
               </div>
             )}
 
-            <form onSubmit={handleCreateCustomTopic} className="space-y-3">
+            <form onSubmit={handleCreateCustomTopic} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Subject Paper
                 </label>
                 <select
                   value={customSubject}
                   onChange={(e) => setCustomSubject(e.target.value as SubjectId)}
-                  className="w-full p-2.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                  className="w-full p-2.5 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 >
                   {subjects.map((sub) => (
                     <option key={sub.id} value={sub.id}>
@@ -832,7 +848,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Chapter / Section Name (Optional)
                 </label>
                 <input
@@ -840,12 +856,12 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                   placeholder="e.g. RTP Practice Nov 2024 / MTP Series"
                   value={customChapterName}
                   onChange={(e) => setCustomChapterName(e.target.value)}
-                  className="w-full p-2.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                  className="w-full p-2.5 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Topic Title *
                 </label>
                 <input
@@ -853,15 +869,15 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                   placeholder="e.g. Partnership Dissolution Advanced Sums"
                   value={customTitle}
                   onChange={(e) => setCustomTitle(e.target.value)}
-                  className="w-full p-2.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                  className="w-full p-2.5 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                   required
                   autoFocus
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Est. Study Hours
                   </label>
                   <input
@@ -870,19 +886,19 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                     min="0.1"
                     value={customEstHours}
                     onChange={(e) => setCustomEstHours(e.target.value)}
-                    className="w-full p-2.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                    className="w-full p-2.5 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                     Target Date
                   </label>
                   <input
                     type="date"
                     value={customTargetDate}
                     onChange={(e) => setCustomTargetDate(e.target.value)}
-                    className="w-full p-2 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                    className="w-full p-2 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                   />
                 </div>
               </div>
@@ -893,10 +909,11 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAddModal(false)}
+                  className="rounded-full"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm">
+                <Button type="submit" variant="primary" size="sm" className="rounded-full">
                   Add to Checklist
                 </Button>
               </div>
@@ -907,25 +924,27 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
 
       {/* Target Date Picker Modal */}
       {editingTopicDate && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-sm p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <Card className="w-full max-w-sm p-6 space-y-4 rounded-3xl shadow-2xl border border-black/[0.08] dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-black/[0.04] dark:bg-white/[0.08]">
+                <Calendar className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 Set Target Date
               </h3>
             </div>
             <p className="text-xs text-zinc-500 truncate">{editingTopicDate.title}</p>
             <form onSubmit={handleSaveTopicDate} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Target Completion Date
                 </label>
                 <input
                   type="date"
                   value={newTargetDateValue}
                   onChange={(e) => setNewTargetDateValue(e.target.value)}
-                  className="w-full p-2.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                  className="w-full p-2.5 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                 />
               </div>
 
@@ -938,6 +957,7 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                     setEditingTopicDate(null);
                     setNewTargetDateValue('');
                   }}
+                  className="rounded-full"
                 >
                   Cancel
                 </Button>
@@ -949,10 +969,11 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                     updateTopic(editingTopicDate.id, { targetDate: undefined });
                     setEditingTopicDate(null);
                   }}
+                  className="rounded-full"
                 >
                   Clear Date
                 </Button>
-                <Button type="submit" variant="primary" size="sm">
+                <Button type="submit" variant="primary" size="sm" className="rounded-full">
                   Save
                 </Button>
               </div>

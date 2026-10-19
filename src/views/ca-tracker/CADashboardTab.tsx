@@ -165,13 +165,13 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
       : 0;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* Hero Command Center Banner */}
-      <Card className="relative overflow-hidden bg-zinc-900 text-white dark:bg-zinc-950 border-zinc-800 p-6 sm:p-8">
+      <Card className="relative overflow-hidden bg-white/80 dark:bg-zinc-900/70 backdrop-blur-2xl border border-black/[0.06] dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-6 sm:p-8 rounded-3xl">
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-xl">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="border-zinc-700 text-zinc-300">
+              <Badge variant="outline">
                 ICAI CA Foundation 2024 New Scheme
               </Badge>
               <Badge
@@ -187,19 +187,19 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               </Badge>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
               Syllabus Completion: {metrics.overallProgressPercentage}%
             </h2>
 
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               {metrics.completedTopics} of {metrics.totalTopics} topics completed across all 4
               papers. {totalRemainingStudyHours} hrs of study remaining.
             </p>
 
             {/* Live Precision Countdown Ticker */}
             <div className="pt-2">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 font-medium mb-1.5">
-                <Clock className="w-4 h-4 text-emerald-400" />
+              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-1.5">
+                <Clock className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                 <span>Target Countdown:</span>
                 <button
                   type="button"
@@ -207,82 +207,82 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                     setNewExamDate(settings.examDate);
                     setShowDatePicker(true);
                   }}
-                  className="underline hover:text-white transition-colors"
+                  className="underline hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   Edit Exam Date ({settings.examDate})
                 </button>
                 {syncNotice && (
-                  <span className="text-[11px] font-semibold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-md">
-                    Synced to Cloud
+                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full animate-fade-in">
+                    ✓ Synced to Cloud
                   </span>
                 )}
               </div>
 
               <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-w-sm">
-                <div className="bg-zinc-800/80 rounded-md p-1.5 sm:p-2 text-center border border-zinc-700/60">
-                  <span className="text-base sm:text-xl font-bold text-white tabular-nums block">
+                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
+                  <span className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums block">
                     {timeRemaining.days}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Days</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Days</span>
                 </div>
-                <div className="bg-zinc-800/80 rounded-md p-1.5 sm:p-2 text-center border border-zinc-700/60">
-                  <span className="text-base sm:text-xl font-bold text-white tabular-nums block">
+                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
+                  <span className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums block">
                     {timeRemaining.hours}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Hours</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Hours</span>
                 </div>
-                <div className="bg-zinc-800/80 rounded-md p-1.5 sm:p-2 text-center border border-zinc-700/60">
-                  <span className="text-base sm:text-xl font-bold text-white tabular-nums block">
+                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
+                  <span className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums block">
                     {timeRemaining.minutes}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Mins</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Mins</span>
                 </div>
-                <div className="bg-zinc-800/80 rounded-md p-1.5 sm:p-2 text-center border border-zinc-700/60">
-                  <span className="text-base sm:text-xl font-bold text-emerald-400 tabular-nums block">
+                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
+                  <span className="text-base sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block">
                     {timeRemaining.seconds}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Secs</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Secs</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Quick Metrics Columns */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 border-t lg:border-t-0 lg:border-l border-zinc-800 pt-4 lg:pt-0 lg:pl-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 border-t lg:border-t-0 lg:border-l border-black/[0.06] dark:border-white/10 pt-4 lg:pt-0 lg:pl-8">
             <div className="space-y-1">
-              <span className="text-xs text-zinc-400 font-medium">Daily Study Streak</span>
-              <div className="text-xl sm:text-2xl font-bold text-orange-400 tabular-nums flex items-center gap-1.5">
-                <Flame className="w-5 h-5 text-orange-400" />
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Daily Study Streak</span>
+              <div className="text-xl sm:text-2xl font-bold text-orange-500 tabular-nums flex items-center gap-1.5">
+                <Flame className="w-5 h-5 text-orange-500 fill-orange-500/20" />
                 {metrics.currentStreakDays}d
               </div>
-              <span className="text-[11px] text-zinc-500 block">
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
                 Best: {metrics.bestStreakDays} days
               </span>
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs text-zinc-400 font-medium">Study Logged</span>
-              <div className="text-xl sm:text-2xl font-bold text-emerald-400 tabular-nums flex items-center gap-1.5">
-                <Award className="w-5 h-5 text-emerald-400" />
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Study Logged</span>
+              <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums flex items-center gap-1.5">
+                <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 {metrics.totalStudyHoursLogged}h
               </div>
-              <span className="text-[11px] text-zinc-500 block">
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
                 Goal: {settings.dailyGoalHours}h / day
               </span>
             </div>
 
             <div className="space-y-1 col-span-2 sm:col-span-1">
-              <span className="text-xs text-zinc-400 font-medium">Pace Required</span>
-              <div className="text-xl sm:text-2xl font-bold text-cyan-400 tabular-nums flex items-center gap-1.5">
-                <Target className="w-5 h-5 text-cyan-400" />
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Pace Required</span>
+              <div className="text-xl sm:text-2xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums flex items-center gap-1.5">
+                <Target className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                 {requiredDailyStudyHours}h
               </div>
-              <span className="text-[11px] text-zinc-500 block">per day to finish syllabus</span>
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">per day to finish syllabus</span>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-zinc-800/80">
+        <div className="mt-6 pt-4 border-t border-black/[0.06] dark:border-white/10">
           <ProgressBar value={metrics.overallProgressPercentage} size="md" colorHex="#10B981" />
         </div>
       </Card>
@@ -302,7 +302,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
             <button
               type="button"
               onClick={() => onNavigateTab('checklist')}
-              className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 flex items-center gap-1 font-medium"
+              className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 flex items-center gap-1 font-medium transition-colors"
             >
               View Checklist <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -319,11 +319,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               <Card
                 key={paperId}
                 hoverEffect
-                className="flex flex-col items-center justify-between p-5 space-y-4 text-center"
+                className="flex flex-col items-center justify-between p-5 space-y-4 text-center rounded-2xl"
               >
                 <div className="w-full flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-zinc-100 dark:bg-zinc-800">
+                    <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800">
                       {getSubjectIcon(paperId)}
                     </div>
                     <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
@@ -346,7 +346,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                   label={meta.shortName}
                 />
 
-                <div className="w-full space-y-2 border-t border-zinc-100 dark:border-zinc-800/80 pt-3">
+                <div className="w-full space-y-2 border-t border-black/[0.04] dark:border-white/[0.06] pt-3">
                   <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 tabular-nums">
                     <span>{group.completedTopics} of {group.totalTopics} Topics</span>
                     <span className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -366,22 +366,22 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
       </section>
 
       {/* Digital Exercises Quick-Access Banner Card */}
-      <Card className="p-5 sm:p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+      <Card className="p-6 sm:p-7 border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_12px_40px_rgb(0,0,0,0.45)] rounded-3xl">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200/60 dark:border-cyan-800/60">
                 Paper 3 • Quantitative Aptitude
               </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60">
                 Paper 4 • Business Economics
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                 Official ICAI Study Module MCQ Bank
               </span>
             </div>
 
-            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
               Digital Exercise & Practice Hub
             </h3>
 
@@ -389,16 +389,16 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               2,547 official ICAI multiple-choice questions across 28 chapters in Paper 3 (Quantitative Aptitude: 1,930 Qs) and Paper 4 (Business Economics: 617 Qs) with verified answer keys, step-by-step mathematical explanations, and instant keyboard shortcuts.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] text-zinc-700 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.08]">
                 <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">2,547</span>
                 <span className="text-zinc-500">Total MCQs</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] text-zinc-700 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.08]">
                 <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">28</span>
                 <span className="text-zinc-500">Chapters</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] text-zinc-700 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.08]">
                 <span className="font-bold tabular-nums text-rose-600 dark:text-rose-400">-0.25</span>
                 <span className="text-zinc-500">Exam Negative Marking</span>
               </div>
@@ -417,7 +417,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                 }
               }}
               leftIcon={<HelpCircle className="w-4 h-4" />}
-              className="w-full sm:w-auto font-semibold justify-center"
+              className="w-full sm:w-auto font-semibold justify-center rounded-full"
             >
               Practice Exercises
             </Button>
@@ -451,8 +451,8 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
         </div>
 
         {actionPlan.length === 0 ? (
-          <Card className="text-center py-10 space-y-2">
-            <div className="w-12 h-12 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+          <Card className="text-center py-12 space-y-3 rounded-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
@@ -467,11 +467,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
             {actionPlan.map((item) => (
               <Card
                 key={item.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:p-4 gap-3 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3.5 rounded-2xl hover:border-black/10 dark:hover:border-white/20 transition-all duration-200"
               >
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="p-2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 shrink-0 mt-0.5">
-                    {item.type === 'lesson' && <BookOpen className="w-4 h-4" />}
+                <div className="flex items-start gap-3.5 min-w-0">
+                  <div className="p-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-300 shrink-0 mt-0.5">
+                    {item.type === 'lesson' && <BookOpen className="w-4 h-4 text-emerald-500" />}
                     {item.type === 'schedule' && <Calendar className="w-4 h-4 text-cyan-500" />}
                     {item.type === 'revision' && <RefreshCw className="w-4 h-4 text-violet-500" />}
                     {item.type === 'test' && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
@@ -497,7 +497,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                       </h4>
                     </div>
                     {item.chapterName && (
-                      <p className="text-xs text-zinc-500 mt-0.5">{item.chapterName}</p>
+                      <p className="text-xs text-zinc-500 mt-1">{item.chapterName}</p>
                     )}
                     {item.notes && (
                       <p className="text-[11px] text-zinc-400 dark:text-zinc-500 italic mt-0.5">
@@ -507,11 +507,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/80">
+                <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-black/[0.04] dark:border-white/[0.06]">
                   <span className="text-xs text-zinc-400 tabular-nums mr-1">
                     {formatMinutes(item.estimatedMinutes)}
                   </span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     {(() => {
                       const matchingTopic = item.topicId
                         ? topics.find((t) => t.id === item.topicId)
@@ -525,11 +525,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                               href={matchingTopic.videoUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors inline-flex items-center gap-1 text-xs"
+                              className="p-1.5 px-2.5 rounded-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors inline-flex items-center gap-1.5 text-xs font-medium"
                               title={matchingTopic.videoTitle ? `Watch Lecture: ${matchingTopic.videoTitle}` : 'Watch YouTube Lecture'}
                             >
                               <Play className="w-3.5 h-3.5 fill-current" />
-                              <span className="hidden xs:inline font-medium">Lecture</span>
+                              <span className="hidden xs:inline">Lecture</span>
                               <ExternalLink className="w-3 h-3 opacity-70" />
                             </a>
                           )}
@@ -538,11 +538,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                               href={matchingTopic.pdfUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors inline-flex items-center gap-1 text-xs"
+                              className="p-1.5 px-2.5 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors inline-flex items-center gap-1.5 text-xs font-medium"
                               title="Open ICAI Study Material PDF"
                             >
                               <FileText className="w-3.5 h-3.5" />
-                              <span className="hidden xs:inline font-medium">PDF</span>
+                              <span className="hidden xs:inline">PDF</span>
                               <ExternalLink className="w-3 h-3 opacity-70" />
                             </a>
                           )}
@@ -561,6 +561,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                           }
                         }}
                         leftIcon={<CheckCircle2 className="w-4 h-4" />}
+                        className="rounded-full"
                       >
                         Complete
                       </Button>
@@ -571,7 +572,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                           type="button"
                           onClick={() => handleScheduleToggle(item.scheduleEntryId!, false)}
                           title="Click to mark incomplete"
-                          className="hover:opacity-80 transition-opacity"
+                          className="hover:opacity-80 transition-opacity cursor-pointer"
                         >
                           <Badge variant="completed" size="sm">
                             ✓ Done
@@ -593,11 +594,13 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
 
       {/* Edit Exam Date Modal */}
       {showDatePicker && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-sm p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <Card className="w-full max-w-sm p-6 space-y-4 rounded-3xl shadow-2xl border border-black/[0.08] dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-black/[0.04] dark:bg-white/[0.08]">
+                <Calendar className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 Set CA Foundation Exam Date
               </h3>
             </div>
@@ -605,7 +608,7 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               <div>
                 <label
                   htmlFor="dashboard-exam-date"
-                  className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+                  className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5"
                 >
                   Target Exam Date
                 </label>
@@ -614,10 +617,10 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                   type="date"
                   value={newExamDate}
                   onChange={(e) => setNewExamDate(e.target.value)}
-                  className="w-full p-2.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                  className="w-full p-2.5 text-xs rounded-xl bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/10 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400"
                   required
                 />
-                <p className="text-[11px] text-zinc-500 mt-1.5">
+                <p className="text-[11px] text-zinc-500 mt-2">
                   Synchronized across all your devices via Firebase Cloud Firestore.
                 </p>
               </div>
@@ -629,10 +632,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
                   size="sm"
                   onClick={() => setShowDatePicker(false)}
                   disabled={isSavingDate}
+                  className="rounded-full"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm" disabled={isSavingDate}>
+                <Button type="submit" variant="primary" size="sm" disabled={isSavingDate} className="rounded-full">
                   {isSavingDate ? 'Saving...' : 'Save Date & Cloud Sync'}
                 </Button>
               </div>

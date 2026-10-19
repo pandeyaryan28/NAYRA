@@ -6,9 +6,11 @@ import {
   ExternalLink,
   Search,
   Cloud,
+  Check,
   Film,
   Calendar,
   Layers,
+  TrendingUp,
   Clock,
   BookOpen,
 } from 'lucide-react';
@@ -141,15 +143,15 @@ export const CALecturesTab: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
-      {/* Top Header & Cloud Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Top Header & Cloud Status — Apple Liquid Glass Command Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 p-6 sm:p-7 rounded-3xl border border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_12px_40px_rgb(0,0,0,0.45)]">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             <Badge variant={headerInfo.badgeVariant} size="sm">
               {headerInfo.badgeText}
             </Badge>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
-              <span className="w-1.5 h-1.5 rounded-xs bg-emerald-600 dark:bg-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
               Cloud Synced (Firestore)
             </span>
           </div>
@@ -157,13 +159,13 @@ export const CALecturesTab: React.FC = () => {
             <Film className="w-7 h-7 text-red-600 dark:text-red-500" />
             {headerInfo.title}
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1.5 max-w-2xl leading-relaxed">
             {headerInfo.subtitle}
           </p>
         </div>
 
         {/* Sync Info */}
-        <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-50 dark:bg-zinc-800/60 px-3 py-1.5 rounded-md border border-zinc-200 dark:border-zinc-700/60 self-start sm:self-center">
+        <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100/70 dark:bg-zinc-800/70 px-3.5 py-1.5 rounded-full border border-zinc-200/50 dark:border-zinc-700/50 self-start sm:self-center">
           <Cloud className="w-4 h-4 text-blue-500" />
           <span>
             {isCloudConnected ? 'Connected to Cloud Firestore' : 'Reconnecting...'}
@@ -176,26 +178,26 @@ export const CALecturesTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Subject Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full min-w-0 flex-nowrap">
+      {/* Subject Filter Tabs — Apple Segmented Control */}
+      <div className="inline-flex items-center gap-1.5 p-1.5 rounded-full bg-zinc-200/50 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-300/40 dark:border-zinc-700/40 overflow-x-auto max-w-full">
         <button
           type="button"
           onClick={() => setSelectedSubject('all')}
           className={cn(
-            'px-3.5 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-2 border whitespace-nowrap shrink-0',
+            'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center gap-2 whitespace-nowrap shrink-0 swiftui-press active:scale-[0.98]',
             selectedSubject === 'all'
-              ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-sm'
-              : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100'
+              ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
           )}
         >
           <Film className="w-3.5 h-3.5" />
           <span>All Papers</span>
           <span
             className={cn(
-              'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
+              'px-1.5 py-0.2 rounded-full text-[10px] font-bold',
               selectedSubject === 'all'
-                ? 'bg-zinc-700 text-zinc-100 dark:bg-zinc-300 dark:text-zinc-900'
-                : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
             )}
           >
             {sortedLectures.length}
@@ -206,20 +208,20 @@ export const CALecturesTab: React.FC = () => {
           type="button"
           onClick={() => setSelectedSubject('paper1')}
           className={cn(
-            'px-3.5 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-2 border whitespace-nowrap shrink-0',
+            'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center gap-2 whitespace-nowrap shrink-0 swiftui-press active:scale-[0.98]',
             selectedSubject === 'paper1'
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-              : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10'
           )}
         >
           <BookOpen className="w-3.5 h-3.5" />
           <span>Paper 1: Accounting</span>
           <span
             className={cn(
-              'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
+              'px-1.5 py-0.2 rounded-full text-[10px] font-bold',
               selectedSubject === 'paper1'
-                ? 'bg-emerald-800 text-emerald-100'
-                : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'
+                ? 'bg-emerald-700 text-white'
+                : 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300'
             )}
           >
             {paper1Lectures.length}
@@ -230,20 +232,20 @@ export const CALecturesTab: React.FC = () => {
           type="button"
           onClick={() => setSelectedSubject('paper2')}
           className={cn(
-            'px-3.5 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-2 border whitespace-nowrap shrink-0',
+            'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center gap-2 whitespace-nowrap shrink-0 swiftui-press active:scale-[0.98]',
             selectedSubject === 'paper2'
-              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-              : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100'
+              ? 'bg-violet-600 text-white shadow-sm'
+              : 'text-violet-700 dark:text-violet-400 hover:bg-violet-500/10'
           )}
         >
           <BookOpen className="w-3.5 h-3.5" />
           <span>Paper 2: Business Laws</span>
           <span
             className={cn(
-              'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
+              'px-1.5 py-0.2 rounded-full text-[10px] font-bold',
               selectedSubject === 'paper2'
-                ? 'bg-violet-800 text-violet-100'
-                : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'
+                ? 'bg-violet-700 text-white'
+                : 'bg-violet-100 dark:bg-violet-900/60 text-violet-800 dark:text-violet-300'
             )}
           >
             {paper2Lectures.length}
@@ -254,20 +256,20 @@ export const CALecturesTab: React.FC = () => {
           type="button"
           onClick={() => setSelectedSubject('paper4')}
           className={cn(
-            'px-3.5 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-2 border whitespace-nowrap shrink-0',
+            'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center gap-2 whitespace-nowrap shrink-0 swiftui-press active:scale-[0.98]',
             selectedSubject === 'paper4'
-              ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-              : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100'
+              ? 'bg-amber-600 text-white shadow-sm'
+              : 'text-amber-700 dark:text-amber-400 hover:bg-amber-500/10'
           )}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>Paper 4: Business Economics</span>
+          <span>Paper 4: Economics</span>
           <span
             className={cn(
-              'px-1.5 py-0.5 rounded-md text-[10px] font-bold',
+              'px-1.5 py-0.2 rounded-full text-[10px] font-bold',
               selectedSubject === 'paper4'
-                ? 'bg-amber-800 text-amber-100'
-                : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'
+                ? 'bg-amber-700 text-white'
+                : 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300'
             )}
           >
             {paper4Lectures.length}
@@ -275,279 +277,287 @@ export const CALecturesTab: React.FC = () => {
         </button>
       </div>
 
-      {/* Progress Cards Row */}
+      {/* Progress Cards — Apple Squircle Glass Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-zinc-500">
-            <span>Watch Progress</span>
-            <span>{watchedCount} / {totalCount} Videos</span>
+        <Card className="p-5 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-900/60 backdrop-blur-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Total Lectures</span>
+            <Film className="w-4 h-4 text-zinc-400" />
           </div>
-          <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums">
-            {watchPercentage}%
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{totalCount}</span>
+            <span className="text-xs text-zinc-400 font-medium">{headerInfo.totalSubtitle}</span>
           </div>
-          <ProgressBar
-            value={watchPercentage}
-            size="sm"
-            colorHex={
-              selectedSubject === 'paper1'
-                ? '#10B981'
-                : selectedSubject === 'paper2'
-                ? '#8B5CF6'
-                : selectedSubject === 'paper4'
-                ? '#F59E0B'
-                : '#ef4444'
-            }
-          />
+          <div className="mt-3">
+            <ProgressBar value={100} size="sm" />
+          </div>
         </Card>
 
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-zinc-500">
-            <span>Completed Videos</span>
+        <Card className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 backdrop-blur-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Watched</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-            {watchedCount}
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{watchedCount}</span>
+            <span className="text-xs text-zinc-400 font-medium">/ {totalCount} completed</span>
           </div>
-          <div className="text-xs text-zinc-500">
-            {watchedCount === totalCount && totalCount > 0
-              ? 'All lectures marked watched!'
-              : `${remainingCount} videos left to watch`}
+          <div className="mt-3">
+            <ProgressBar value={watchPercentage} colorHex="#10B981" size="sm" />
           </div>
         </Card>
 
-        <Card className="p-4 space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-zinc-500">
-            <span>Remaining Videos</span>
-            <Clock className="w-4 h-4 text-amber-500" />
+        <Card className="p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10 backdrop-blur-xl shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">Watch Completion</span>
+            <TrendingUp className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 tabular-nums">
-            {remainingCount}
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{watchPercentage}%</span>
+            <span className="text-xs text-zinc-400 font-medium">{remainingCount} left to watch</span>
           </div>
-          <div className="text-xs text-zinc-500">
-            Synchronized directly with syllabus chapters
+          <div className="mt-3">
+            <ProgressBar value={watchPercentage} subjectId={headerInfo.progressSubject} size="sm" />
           </div>
         </Card>
       </div>
 
-      {/* Controls: Search & Sub-Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 pt-4">
-        {/* Status Filter */}
-        <div className="flex items-center gap-1.5">
-          {(['all', 'unwatched', 'watched'] as const).map((tab) => (
+      {/* Search & Filter Controls — Apple Liquid Glass Toolbar */}
+      <Card className="p-4 rounded-2xl border border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          {/* Filter Pills */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-full bg-zinc-200/50 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-300/40 dark:border-zinc-700/40">
             <button
-              key={tab}
               type="button"
-              onClick={() => setFilter(tab)}
+              onClick={() => setFilter('all')}
               className={cn(
-                'px-3 py-1.5 text-xs font-medium rounded-md transition-all',
-                filter === tab
-                  ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all swiftui-press active:scale-[0.98]',
+                filter === 'all'
+                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               )}
             >
-              {tab === 'all'
-                ? `All (${totalCount})`
-                : tab === 'unwatched'
-                ? `Unwatched (${remainingCount})`
-                : `Watched (${watchedCount})`}
+              All ({totalCount})
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              onClick={() => setFilter('unwatched')}
+              className={cn(
+                'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all swiftui-press active:scale-[0.98]',
+                filter === 'unwatched'
+                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+              )}
+            >
+              Unwatched ({remainingCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('watched')}
+              className={cn(
+                'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all swiftui-press active:scale-[0.98]',
+                filter === 'watched'
+                  ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700/60'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+              )}
+            >
+              Watched ({watchedCount})
+            </button>
+          </div>
 
-        {/* Search Bar */}
-        <div className="relative sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Search lecture title or chapter..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500"
-          />
+          {/* Search Box */}
+          <div className="relative flex-1 sm:max-w-xs">
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search lectures or chapters..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3.5 py-2 text-xs rounded-full bg-white/70 dark:bg-zinc-800/70 border border-zinc-200/70 dark:border-zinc-700/70 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400"
+            />
+          </div>
         </div>
-      </div>
+      </Card>
 
-      {/* Lectures List Grid */}
-      <div className="space-y-3">
+      {/* Embedded Video Player Modal (Optional In-App Viewer) */}
+      {activePreviewLecture && (
+        <Card className="p-5 rounded-3xl border border-red-500/30 bg-zinc-900 text-zinc-100 overflow-hidden shadow-2xl">
+          <div className="flex items-center justify-between pb-3.5 border-b border-zinc-800 mb-3.5">
+            <div className="flex items-center gap-2">
+              <Play className="w-4 h-4 text-red-500 fill-current" />
+              <span className="text-xs font-semibold text-zinc-200 truncate max-w-xl">
+                Watching: {activePreviewLecture.title}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActivePreviewLecture(null)}
+              className="text-xs text-zinc-400 hover:text-zinc-100 px-3 py-1 rounded-full bg-zinc-800 transition-colors swiftui-press"
+            >
+              Close Player
+            </button>
+          </div>
+          <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${activePreviewLecture.youtubeId}?autoplay=1`}
+              title={activePreviewLecture.title}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </Card>
+      )}
+
+      {/* Lectures List */}
+      <div className="space-y-3.5">
         {filteredLectures.length === 0 ? (
-          <Card className="text-center py-12 space-y-3">
-            <Film className="w-12 h-12 text-zinc-300 dark:text-zinc-600 mx-auto" />
-            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-              No lectures found
-            </h3>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Try adjusting your search query or switching the status filter tab.
-            </p>
+          <Card className="p-12 text-center rounded-3xl border border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-2xl shadow-sm">
+            <Film className="w-10 h-10 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
+            <h3 className="text-base font-semibold text-zinc-800 dark:text-zinc-200">No lectures found</h3>
+            <p className="text-xs text-zinc-400 mt-1">Try adjusting your filter or search query.</p>
           </Card>
         ) : (
-          filteredLectures.map((lecture) => {
-            const subId = normalizeSubjectId(lecture.subjectId);
-            const badgeVariant = subId === 'paper1' ? 'paper1' : subId === 'paper2' ? 'paper2' : 'paper4';
+          filteredLectures.map((lec) => {
+            const isLaw = normalizeSubjectId(lec.subjectId) === 'paper2';
+            const isEco = normalizeSubjectId(lec.subjectId) === 'paper4';
 
             return (
               <Card
-                key={lecture.id}
+                key={lec.id}
                 className={cn(
-                  'p-4 transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between gap-4',
-                  lecture.watched
-                    ? 'bg-zinc-50/60 dark:bg-zinc-900/40 border-zinc-200/80 dark:border-zinc-800/80 opacity-80'
-                    : 'bg-white dark:bg-zinc-800/70 hover:border-zinc-300 dark:hover:border-zinc-700'
+                  'p-5 rounded-2xl transition-all duration-200 hover:shadow-md border border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/70 backdrop-blur-xl',
+                  lec.watched && 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08] border-emerald-500/30'
                 )}
               >
-                {/* Left: Thumbnail & Details */}
-                <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                  {/* YouTube Thumbnail Preview Trigger */}
-                  <div
-                    onClick={() => setActivePreviewLecture(lecture)}
-                    className="relative w-28 sm:w-36 aspect-video bg-zinc-900 rounded-md overflow-hidden shrink-0 cursor-pointer group shadow-xs border border-zinc-200 dark:border-zinc-700/60"
-                    title="Click to play embedded preview"
-                  >
-                    <img
-                      src={`https://img.youtube.com/vi/${lecture.youtubeId}/mqdefault.jpg`}
-                      alt={lecture.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-md bg-red-600/90 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                        <Play className="w-4 h-4 fill-current ml-0.5" />
-                      </div>
-                    </div>
-                    {lecture.watched && (
-                      <div className="absolute top-1 left-1 bg-emerald-600/90 text-white px-1.5 py-0.5 rounded text-[9px] font-bold">
-                        Watched
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Title & Metadata */}
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge variant={badgeVariant} size="sm">
-                        Lec {lecture.order}
-                      </Badge>
-                      <span className="text-[11px] font-semibold text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md border border-zinc-200/60 dark:border-zinc-700/60">
-                        {lecture.curriculumMapping}
-                      </span>
-                    </div>
-
-                    <h4
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  {/* Left: Sequence & Details */}
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    {/* Sequence Badge */}
+                    <div
                       className={cn(
-                        'text-sm font-semibold break-words',
-                        lecture.watched
-                          ? 'line-through text-zinc-400 dark:text-zinc-500'
-                          : 'text-zinc-900 dark:text-zinc-100'
+                        'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs',
+                        lec.watched
+                          ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                          : isLaw
+                          ? 'bg-violet-500/20 text-violet-700 dark:text-violet-300'
+                          : isEco
+                          ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                          : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
                       )}
                     >
-                      {lecture.title}
-                    </h4>
+                      #{lec.order}
+                    </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 pt-0.5">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-zinc-400" />
-                        Uploaded {formatUploadDate(lecture.uploadDate)}
-                      </span>
-                      {lecture.watchedAt && (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                          • Watched {lecture.watchedAt.split('T')[0]}
+                    {/* Title & Metas */}
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Paper Indicator (when in All view) */}
+                        {selectedSubject === 'all' && (
+                          <Badge
+                            variant={isLaw ? 'paper2' : isEco ? 'paper4' : 'paper1'}
+                            size="sm"
+                          >
+                            {isLaw ? 'Paper 2: Law' : isEco ? 'Paper 4: Eco' : 'Paper 1: Accounts'}
+                          </Badge>
+                        )}
+
+                        {/* Upload Date */}
+                        <span className="text-xs text-zinc-400 font-medium inline-flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          Uploaded {formatUploadDate(lec.uploadDate)}
                         </span>
-                      )}
+
+                        {/* Duration chip if available */}
+                        {lec.duration && (
+                          <span className="text-xs text-zinc-400 font-medium inline-flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            {lec.duration}
+                          </span>
+                        )}
+
+                        {lec.watched && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                            <Check className="w-3 h-3" />
+                            Watched
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">
+                        {lec.title}
+                      </h3>
+
+                      {/* Mapped Curriculum Chapter & Unit */}
+                      <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                        <Layers className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                        <span className="font-medium truncate" title={lec.curriculumMapping}>
+                          {lec.curriculumMapping}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Right: Actions */}
-                <div className="flex items-center justify-between md:justify-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-100 dark:border-zinc-800">
-                  <a
-                    href={lecture.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
-                  >
-                    <span>YouTube</span>
-                    <ExternalLink className="w-3.5 h-3.5 opacity-60" />
-                  </a>
+                  {/* Right: Actions */}
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2.5 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/60 shrink-0">
+                    {/* Inline Preview Player Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setActivePreviewLecture(activePreviewLecture?.id === lec.id ? null : lec)
+                      }
+                      className="text-xs rounded-full swiftui-press active:scale-[0.96]"
+                      title="Watch inside app"
+                    >
+                      <Play className="w-3.5 h-3.5 mr-1" />
+                      Preview
+                    </Button>
 
-                  <Button
-                    size="sm"
-                    variant={lecture.watched ? 'outline' : 'primary'}
-                    onClick={() => toggleLectureWatched(lecture.id)}
-                    leftIcon={
-                      lecture.watched ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    {/* Watch on YouTube Link */}
+                    <a
+                      href={lec.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-red-600 hover:bg-red-700 text-white transition-all shadow-sm swiftui-press active:scale-[0.98]"
+                      title="Watch Lecture on YouTube"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      YouTube
+                      <ExternalLink className="w-3 h-3 opacity-80" />
+                    </a>
+
+                    {/* Cloud Synced Watched Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => toggleLectureWatched(lec.id)}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border swiftui-press active:scale-[0.98]',
+                        lec.watched
+                          ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                      )}
+                      title={lec.watched ? 'Click to mark unwatched' : 'Click to mark as watched'}
+                    >
+                      {lec.watched ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 fill-current text-white" />
+                          <span>Completed</span>
+                        </>
                       ) : (
-                        <Circle className="w-4 h-4" />
-                      )
-                    }
-                  >
-                    {lecture.watched ? 'Watched' : 'Mark Watched'}
-                  </Button>
+                        <>
+                          <Circle className="w-4 h-4 text-zinc-400" />
+                          <span>Mark Watched</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </Card>
             );
           })
         )}
       </div>
-
-      {/* Embedded YouTube Preview Modal */}
-      {activePreviewLecture && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setActivePreviewLecture(null)}
-        >
-          <div
-            className="w-full max-w-4xl bg-zinc-900 border border-zinc-800 rounded-md overflow-hidden shadow-2xl space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950">
-              <div className="min-w-0 pr-4">
-                <span className="text-xs text-red-500 font-bold uppercase tracking-wider block">
-                  YouTube Lecture Player
-                </span>
-                <h3 className="text-sm sm:text-base font-bold text-white truncate">
-                  {activePreviewLecture.title}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActivePreviewLecture(null)}
-                className="text-zinc-400 hover:text-white p-1 rounded-md text-sm font-semibold"
-              >
-                Close ✕
-              </button>
-            </div>
-
-            <div className="aspect-video w-full bg-black">
-              <iframe
-                src={`https://www.youtube.com/embed/${activePreviewLecture.youtubeId}?autoplay=1`}
-                title={activePreviewLecture.title}
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            <div className="p-4 flex items-center justify-between bg-zinc-950 border-t border-zinc-800">
-              <div className="text-xs text-zinc-400">
-                <span>Mapping: </span>
-                <span className="text-zinc-200 font-medium">
-                  {activePreviewLecture.curriculumMapping}
-                </span>
-              </div>
-              <Button
-                size="sm"
-                variant={activePreviewLecture.watched ? 'outline' : 'primary'}
-                onClick={() => {
-                  toggleLectureWatched(activePreviewLecture.id);
-                  setActivePreviewLecture((prev) => (prev ? { ...prev, watched: !prev.watched } : null));
-                }}
-              >
-                {activePreviewLecture.watched ? 'Mark as Unwatched' : 'Mark as Watched'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
