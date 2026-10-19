@@ -19,6 +19,7 @@ import {
   normalizeTag,
   areTagsSimilar,
   calculateComprehensiveTagAnalytics,
+  getEffectiveTaskTags,
 } from '@/lib/tagUtils';
 
 export type TimeHorizon = 'today' | 'yesterday' | 'tomorrow' | '7d' | '30d' | 'all';
@@ -59,14 +60,12 @@ export const AnalyticsView: React.FC = () => {
   const availableTags = useMemo(() => {
     const map = new Map<string, number>();
     tasks.forEach((t) => {
-      if (t.tags) {
-        t.tags.forEach((tag) => {
-          const clean = normalizeTag(tag);
-          if (clean) {
-            map.set(clean, (map.get(clean) || 0) + 1);
-          }
-        });
-      }
+      getEffectiveTaskTags(t).forEach((tag) => {
+        const clean = normalizeTag(tag);
+        if (clean) {
+          map.set(clean, (map.get(clean) || 0) + 1);
+        }
+      });
     });
     focusSessions.forEach((s) => {
       if (s.tags) {
@@ -85,7 +84,7 @@ export const AnalyticsView: React.FC = () => {
   const tagScopedTasks = useMemo(() => {
     if (!activeTagFilter) return tasks;
     return tasks.filter((t) =>
-      t.tags && t.tags.some((tg) => areTagsSimilar(tg, activeTagFilter))
+      getEffectiveTaskTags(t).some((tg) => areTagsSimilar(tg, activeTagFilter))
     );
   }, [tasks, activeTagFilter]);
 
@@ -372,7 +371,7 @@ export const AnalyticsView: React.FC = () => {
   }, [tagAnalytics]);
 
   const totalTaggedFocusSeconds = useMemo(() => {
-    const taggedTasks = tasks.filter((t) => t.tags && t.tags.some((tg) => tg.trim().length > 0));
+    const taggedTasks = tasks.filter((t) => getEffectiveTaskTags(t).length > 0);
     const taskSec = taggedTasks.reduce((sum, item) => sum + (item.totalFocusSeconds || 0), 0);
     const autonomousTaggedSessions = focusSessions.filter(
       (s) =>

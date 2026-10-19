@@ -36,7 +36,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { formatTimeRange, getTodayDateString } from '@/lib/utils';
-import { normalizeTag } from '@/lib/tagUtils';
+import { normalizeTag, getEffectiveTaskTags, cleanTitleWithHashtags } from '@/lib/tagUtils';
 import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 import { SwiftUISegmentedControl } from '@/components/swiftui/SwiftUISegmentedControl';
 
@@ -214,7 +214,8 @@ export const CalendarView: React.FC = () => {
     setEditingTask(task);
     setEditingEvent(null);
     setModalTab('task');
-    setTaskTitle(task.title);
+    const { cleanTitle } = cleanTitleWithHashtags(task.title);
+    setTaskTitle(cleanTitle || task.title);
     const isAllDay = !task.due?.includes('T');
     setTaskAllDay(isAllDay);
     if (task.due) {
@@ -225,7 +226,7 @@ export const CalendarView: React.FC = () => {
     setTaskListId(task.taskListId || activeTaskListId || 'list_default');
     setTaskPriority(task.priority || 'medium');
     setTaskNotes(task.notes || '');
-    setTaskTags(task.tags ? [...task.tags] : []);
+    setTaskTags(getEffectiveTaskTags(task));
     setTaskNewTag('');
     setIsModalOpen(true);
   };
@@ -1191,9 +1192,9 @@ export const CalendarView: React.FC = () => {
                                   {t.notes}
                                 </p>
                               )}
-                              {t.tags && t.tags.length > 0 && (
+                              {getEffectiveTaskTags(t).length > 0 && (
                                 <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                                  {t.tags.map((tg) => (
+                                  {getEffectiveTaskTags(t).map((tg) => (
                                     <span
                                       key={tg}
                                       className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 shadow-xs"

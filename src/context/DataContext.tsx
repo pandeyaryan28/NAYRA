@@ -72,7 +72,7 @@ import {
   OPERATOR_UID,
 } from '@/lib/firebase';
 import { generateId, safeLocalStorageGet, safeLocalStorageSet, getTodayDateString } from '@/lib/utils';
-import { extractHashtags, cleanTitleWithHashtags, mergeTags } from '@/lib/tagUtils';
+import { extractHashtags, cleanTitleWithHashtags, mergeTags, getEffectiveTaskTags } from '@/lib/tagUtils';
 import { subDays, isSameWeek, isSameMonth, parseISO, format } from 'date-fns';
 
 export interface DataContextValue {
@@ -311,6 +311,48 @@ export function deduplicateFocusSessions(sessions: FocusSession[]): FocusSession
   return clean;
 }
 
+/**
+ * Automatically extracts hashtags from task titles and notes wherever '#' appears,
+ * deduplicating and merging them into `tags` case-insensitively, so existing tasks
+ * immediately participate in tag monitoring without requiring manual recreation.
+ */
+export function normalizeTasksHashtags(rawTasks: TaskItem[]): {
+  normalizedTasks: TaskItem[];
+  hasChanges: boolean;
+} {
+  if (!Array.isArray(rawTasks)) return { normalizedTasks: [], hasChanges: false };
+  let hasChanges = false;
+  const normalizedTasks = rawTasks.map((t) => {
+    if (!t) return t;
+    const { cleanTitle, extractedTags: titleTags } = cleanTitleWithHashtags(t.title);
+    const notesTags = extractHashtags(t.notes);
+    const allExtracted = [...titleTags, ...notesTags];
+
+    if (allExtracted.length === 0) {
+      return t;
+    }
+
+    const merged = mergeTags(t.tags, allExtracted);
+    const existingTags = Array.isArray(t.tags) ? t.tags.map((x) => x.toLowerCase()) : [];
+    const tagsChanged =
+      merged.length !== existingTags.length ||
+      merged.some((tg) => !existingTags.includes(tg.toLowerCase()));
+    const titleChanged = Boolean(cleanTitle && cleanTitle !== t.title && t.title.includes('#'));
+
+    if (tagsChanged || titleChanged) {
+      hasChanges = true;
+      return {
+        ...t,
+        title: titleChanged ? cleanTitle : t.title,
+        tags: merged,
+      };
+    }
+    return t;
+  });
+
+  return { normalizedTasks, hasChanges };
+}
+
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const {
     user,
@@ -363,12 +405,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ? cleanLists
       : [{ id: 'list_default', title: 'My Tasks', isDefault: true, updatedAt: new Date().toISOString() }];
   });
-  const [tasks, setTasks] = useState<TaskItem[]>(() =>
-    safeLocalStorageGet<TaskItem[]>(
+  const [tasks, setTasks] = useState<TaskItem[]>(() => {
+    const raw = safeLocalStorageGet<TaskItem[]>(
       `nayra_${user?.uid || GUEST_USER_ID}_tasks`,
       isGuest ? INITIAL_TASKS : []
-    )
-  );
+    );
+    const { normalizedTasks } = normalizeTasksHashtags(raw);
+    return normalizedTasks;
+  });
   const [activeTaskListId, setActiveTaskListId] = useState<string>(() => {
     return taskLists[0]?.id || 'list_default';
   });
@@ -387,6 +431,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })
         );
         setActiveTaskListId((prev) => idRemap.get(prev) || prev);
+      }
+    }
+  }, []);
+
+  // Normalize hashtags from existing task titles so the user never has to recreate them
+  useEffect(() => {
+    const { normalizedTasks, hasChanges } = normalizeTasksHashtags(tasks);
+    if (hasChanges) {
+      setTasks(normalizedTasks);
+      tasksRef.current = normalizedTasks;
+      persistActiveTasks(normalizedTasks, 'webApp');
+      if (user && !user.isGuest) {
+        normalizedTasks.forEach((t) => {
+          if (t.tags && t.tags.length > 0) {
+            setDoc(doc(getUserTasksCollection(user.uid), t.id), { title: t.title, tags: t.tags }, { merge: true }).catch(console.warn);
+          }
+        });
       }
     }
   }, []);

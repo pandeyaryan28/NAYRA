@@ -34,7 +34,7 @@ import { Select } from '@/components/common/Select';
 import { Badge } from '@/components/common/Badge';
 import { TaskItem, TaskPriority, TaskList } from '@/types';
 import { formatSecondsToHoursMinutes, formatGoogleTasksDue, safeLocalStorageGet, safeLocalStorageSet } from '@/lib/utils';
-import { extractHashtags, cleanTitleWithHashtags, mergeTags, normalizeTag } from '@/lib/tagUtils';
+import { extractHashtags, cleanTitleWithHashtags, mergeTags, normalizeTag, getEffectiveTaskTags, areTagsSimilar } from '@/lib/tagUtils';
 import { isToday, isPast, isTomorrow, isThisWeek, parseISO, format, addDays, isAfter, startOfDay } from 'date-fns';
 import { HStack, VStack, Spacer, Divider } from '@/components/swiftui/SwiftUIStack';
 
@@ -243,12 +243,8 @@ export const TasksView: React.FC = () => {
   const allUniqueTags = useMemo(() => {
     const map = new Map<string, number>();
     tasks.forEach((t) => {
-      if (!t || !Array.isArray(t.tags)) return;
-      const uniqueTaskTags = new Set(
-        t.tags
-          .filter((tg): tg is string => typeof tg === 'string' && tg.trim().length > 0)
-          .map((tg) => normalizeTag(tg))
-      );
+      if (!t) return;
+      const uniqueTaskTags = new Set(getEffectiveTaskTags(t));
       uniqueTaskTags.forEach((lower) => {
         if (lower) {
           map.set(lower, (map.get(lower) || 0) + 1);
@@ -265,11 +261,13 @@ export const TasksView: React.FC = () => {
   const tagFocusTimeMap = useMemo(() => {
     const map = new Map<string, number>();
     tasks.forEach((t) => {
-      if (!t || !Array.isArray(t.tags)) return;
-      t.tags.forEach((tg) => {
+      if (!t) return;
+      const effectiveTags = getEffectiveTaskTags(t);
+      const sec = t.totalFocusSeconds || 0;
+      effectiveTags.forEach((tg) => {
         const norm = normalizeTag(tg);
         if (norm) {
-          map.set(norm, (map.get(norm) || 0) + (t.totalFocusSeconds || 0));
+          map.set(norm, (map.get(norm) || 0) + sec);
         }
       });
     });
@@ -527,7 +525,10 @@ export const TasksView: React.FC = () => {
 
     if (selectedTag) {
       const lowerTag = selectedTag.toLowerCase();
-      result = result.filter((t) => Array.isArray(t.tags) && t.tags.some((tg) => typeof tg === 'string' && tg.toLowerCase() === lowerTag));
+      result = result.filter((t) => {
+        const effTags = getEffectiveTaskTags(t);
+        return effTags.some((tg) => areTagsSimilar(tg, lowerTag));
+      });
     }
 
     if (searchQuery.trim()) {
@@ -536,7 +537,7 @@ export const TasksView: React.FC = () => {
         (t) =>
           ((t.title || '').toLowerCase().includes(q)) ||
           ((t.notes || '').toLowerCase().includes(q)) ||
-          (Array.isArray(t.tags) && t.tags.some((tg) => typeof tg === 'string' && tg.toLowerCase().includes(q)))
+          getEffectiveTaskTags(t).some((tg) => tg.toLowerCase().includes(q))
       );
     }
 
@@ -735,9 +736,7 @@ export const TasksView: React.FC = () => {
     e.preventDefault();
     if (!quickTaskTitle.trim()) return;
 
-    const tagMatches = quickTaskTitle.match(/#([a-zA-Z0-9_\-]+)/g);
-    const extractedTags = tagMatches ? tagMatches.map((m) => m.slice(1).toLowerCase()) : [];
-    const cleanTitle = quickTaskTitle.replace(/#[a-zA-Z0-9_\-]+/g, '').trim();
+    const { cleanTitle, extractedTags } = cleanTitleWithHashtags(quickTaskTitle);
 
     if (!cleanTitle && !quickTaskTitle.trim()) return;
 
@@ -755,7 +754,7 @@ export const TasksView: React.FC = () => {
     const initialTags = Array.from(
       new Set([
         ...extractedTags,
-        ...(selectedTag ? [selectedTag.toLowerCase()] : []),
+        ...(selectedTag ? [normalizeTag(selectedTag)] : []),
       ])
     );
 
@@ -774,7 +773,7 @@ export const TasksView: React.FC = () => {
 
     const targetList = uniqueTaskLists.find((l) => l.id === targetListId);
     await createTask({
-      title: (cleanTitle || quickTaskTitle).trim(),
+      title: cleanTitle.trim(),
       due: resolvedDue,
       taskListId: targetListId,
       taskListName: targetList?.title || (targetListId === defaultListId ? defaultList?.title : undefined),
@@ -800,19 +799,20 @@ export const TasksView: React.FC = () => {
 
   const openEditModal = (task: TaskItem) => {
     setEditingTask(task);
-    setEditTitle(task.title);
+    const { cleanTitle } = cleanTitleWithHashtags(task.title);
+    setEditTitle(cleanTitle || task.title);
     setEditNotes(task.notes || '');
     setEditDue(task.due || '');
     setEditPriority(task.priority);
     setEditStarred(Boolean(task.starred));
-    setEditTags(task.tags ? [...task.tags] : []);
+    setEditTags(getEffectiveTaskTags(task));
     setNewTagInput('');
     setModalNewSubtask('');
   };
 
   const handleAddEditTag = (tagToAdd?: string) => {
     const raw = tagToAdd !== undefined ? tagToAdd : newTagInput;
-    const clean = raw.trim().replace(/^#/, '').toLowerCase();
+    const clean = normalizeTag(raw);
     if (!clean) return;
     if (!editTags.includes(clean)) {
       setEditTags((prev) => [...prev, clean]);
@@ -974,7 +974,7 @@ export const TasksView: React.FC = () => {
                   )}
 
                   {/* Tags */}
-                  {t.tags?.map((tg) => (
+                  {getEffectiveTaskTags(t).map((tg) => (
                     <span
                       key={tg}
                       onClick={(e) => {
@@ -1240,9 +1240,9 @@ export const TasksView: React.FC = () => {
               )}
 
               {/* Task Tags */}
-              {t.tags && t.tags.length > 0 && (
+              {getEffectiveTaskTags(t).length > 0 && (
                 <div className="flex items-center gap-1 flex-wrap">
-                  {t.tags.map((tg) => (
+                  {getEffectiveTaskTags(t).map((tg) => (
                     <span
                       key={tg}
                       onClick={(e) => {

@@ -59,12 +59,12 @@ export function extractHashtags(text: string | null | undefined): string[] {
 
 /**
  * Cleans a task or event title that contains hashtags:
- * - Extracts all hashtags
- * - If hashtags appear at the end of the title (e.g. "Prepare Q3 filings #finance #compliance"),
- *   strips trailing hashtags so the title reads cleanly ("Prepare Q3 filings")
- * - If the entire string is hashtags (e.g. "#deepwork"), preserves the text
- * - If hashtags appear inline within a sentence (e.g. "Meeting with #investors on Friday"),
- *   preserves the title as-is while extracting the tags.
+ * - Extracts all hashtags case-insensitively
+ * - Strips trailing hashtags completely (e.g. "Prepare Q3 filings #finance #compliance" -> "Prepare Q3 filings")
+ * - If hashtags appear inline or leading (e.g. "Meeting with #investors on Friday" or "#urgent Review PR"),
+ *   extracts the '#' symbol from the word so the title reads naturally ("Meeting with investors on Friday" / "urgent Review PR")
+ * - If the entire string is hashtags (e.g. "#deepwork" or "#study #law"),
+ *   removes the '#' symbols ("deepwork" / "study law") so the title is never empty
  */
 export function cleanTitleWithHashtags(title: string | null | undefined): {
   cleanTitle: string;
@@ -79,13 +79,34 @@ export function cleanTitleWithHashtags(title: string | null | undefined): {
     return { cleanTitle: title.trim(), extractedTags: [] };
   }
 
-  // Strip trailing hashtags block (e.g. "  #work #urgent")
-  const strippedTrailing = title.replace(/(?:\s*#[a-zA-Z0-9_\-]+)+$/, '').trim();
+  // 1. Strip trailing hashtags block (e.g. "Prepare report #work #urgent" -> "Prepare report")
+  let cleaned = title.replace(/(?:\s*#[a-zA-Z0-9_\-]+)+$/, '').trim();
 
-  // If stripping trailing hashtags removed everything, keep original
-  const cleanTitle = strippedTrailing.length > 0 ? strippedTrailing : title.trim();
+  // 2. If stripping trailing hashtags removed everything (e.g. "#deepwork" or "#study #audit"),
+  // convert each hashtag to plain text without '#' so the title isn't blank
+  if (cleaned.length === 0) {
+    cleaned = title.replace(/#([a-zA-Z0-9_\-]+)/g, '$1').replace(/\s+/g, ' ').trim();
+  } else {
+    // 3. For any remaining inline/leading hashtags (e.g. "Review #important file" or "#urgent Review file"),
+    // strip the '#' character so the title reads naturally without '#' clutter
+    cleaned = cleaned.replace(/#([a-zA-Z0-9_\-]+)/g, '$1').replace(/\s+/g, ' ').trim();
+  }
 
-  return { cleanTitle, extractedTags };
+  return { cleanTitle: cleaned || title.trim(), extractedTags };
+}
+
+/**
+ * Returns all normalized, case-insensitive tags for a task, combining:
+ * 1. Tags in task.tags
+ * 2. Hashtags extracted from task.title
+ * 3. Hashtags extracted from task.notes
+ * All lowercased, trimmed, and deduplicated.
+ */
+export function getEffectiveTaskTags(task: Partial<TaskItem> | null | undefined): string[] {
+  if (!task) return [];
+  const fromTitle = extractHashtags(task.title);
+  const fromNotes = extractHashtags(task.notes);
+  return mergeTags(task.tags, [...fromTitle, ...fromNotes]);
 }
 
 /**
@@ -160,10 +181,11 @@ export function calculateComprehensiveTagAnalytics(
     return cluster;
   };
 
-  // 1. Accumulate task metrics
+  // 1. Accumulate task metrics using effective tags (explicit tags + hashtags extracted from title/notes)
   tasks.forEach((t) => {
-    if (!t || !Array.isArray(t.tags) || t.tags.length === 0) return;
-    const taskTags = new Set(t.tags.map(normalizeTag).filter(Boolean));
+    if (!t) return;
+    const taskTags = new Set(getEffectiveTaskTags(t));
+    if (taskTags.size === 0) return;
 
     taskTags.forEach((tag) => {
       const cluster = getOrCreateCluster(tag);
@@ -225,12 +247,12 @@ export function calculateComprehensiveTagAnalytics(
       });
     }
 
-    // Also look up tags from linked tasks
+    // Also look up tags from linked tasks using effective tags
     if (s.taskTimeAllocations && Object.keys(s.taskTimeAllocations).length > 0) {
       Object.entries(s.taskTimeAllocations).forEach(([taskId, allocatedSec]) => {
         const linkedTask = tasks.find((t) => t.id === taskId);
-        if (linkedTask && Array.isArray(linkedTask.tags)) {
-          linkedTask.tags.forEach((tg) => {
+        if (linkedTask) {
+          getEffectiveTaskTags(linkedTask).forEach((tg) => {
             const cluster = getOrCreateCluster(tg);
             cluster.periodFocusSeconds += allocatedSec;
             cluster.periodPomodoroCount += 1;
@@ -241,8 +263,8 @@ export function calculateComprehensiveTagAnalytics(
       const splitSec = Math.round(s.durationSeconds / s.taskIds.length);
       s.taskIds.forEach((taskId) => {
         const linkedTask = tasks.find((t) => t.id === taskId);
-        if (linkedTask && Array.isArray(linkedTask.tags)) {
-          linkedTask.tags.forEach((tg) => {
+        if (linkedTask) {
+          getEffectiveTaskTags(linkedTask).forEach((tg) => {
             const cluster = getOrCreateCluster(tg);
             cluster.periodFocusSeconds += splitSec;
             cluster.periodPomodoroCount += 1;
@@ -251,8 +273,8 @@ export function calculateComprehensiveTagAnalytics(
       });
     } else if (s.taskId) {
       const linkedTask = tasks.find((t) => t.id === s.taskId);
-      if (linkedTask && Array.isArray(linkedTask.tags)) {
-        linkedTask.tags.forEach((tg) => {
+      if (linkedTask) {
+        getEffectiveTaskTags(linkedTask).forEach((tg) => {
           const cluster = getOrCreateCluster(tg);
           cluster.periodFocusSeconds += s.durationSeconds;
           cluster.periodPomodoroCount += 1;

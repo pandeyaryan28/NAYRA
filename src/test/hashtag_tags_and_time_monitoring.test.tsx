@@ -6,10 +6,11 @@ import {
   getCanonicalTagKey,
   areTagsSimilar,
   calculateComprehensiveTagAnalytics,
+  getEffectiveTaskTags,
 } from '@/lib/tagUtils';
 import { TaskItem, FocusSession } from '@/types';
 
-describe('Hashtags as Tags & Time Monitoring Engine (v2.10.0)', () => {
+describe('Hashtags as Tags & Time Monitoring Engine (v2.10.1)', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
@@ -22,7 +23,13 @@ describe('Hashtags as Tags & Time Monitoring Engine (v2.10.0)', () => {
       expect(tags).toEqual(['ca_law', 'study', 'audit2026']);
     });
 
-    it('cleans trailing hashtags from titles while keeping in-sentence words', () => {
+    it('extracts hashtags case-insensitively and deduplicates them', () => {
+      const text = 'Study #Physics and more #PHYSICS with #physics';
+      const tags = extractHashtags(text);
+      expect(tags).toEqual(['physics']);
+    });
+
+    it('cleans trailing hashtags from titles while removing # symbol from inline words', () => {
       const titleWithTrailing = 'Synthesize Neural Matrix #deepwork #ai';
       const resultTrailing = cleanTitleWithHashtags(titleWithTrailing);
       expect(resultTrailing.cleanTitle).toBe('Synthesize Neural Matrix');
@@ -30,14 +37,39 @@ describe('Hashtags as Tags & Time Monitoring Engine (v2.10.0)', () => {
 
       const titleWithInline = 'Review #important document before meeting #audit';
       const resultInline = cleanTitleWithHashtags(titleWithInline);
-      expect(resultInline.cleanTitle).toBe('Review #important document before meeting');
+      expect(resultInline.cleanTitle).toBe('Review important document before meeting');
       expect(resultInline.extractedTags).toEqual(['important', 'audit']);
+    });
+
+    it('cleans leading hashtags by removing the # symbol so title remains natural', () => {
+      const title = '#Physics assignment chapter 5';
+      const result = cleanTitleWithHashtags(title);
+      expect(result.cleanTitle).toBe('Physics assignment chapter 5');
+      expect(result.extractedTags).toEqual(['physics']);
+    });
+
+    it('handles standalone hashtag titles without leaving an empty title', () => {
+      const title = '#deepwork';
+      const result = cleanTitleWithHashtags(title);
+      expect(result.cleanTitle).toBe('deepwork');
+      expect(result.extractedTags).toEqual(['deepwork']);
     });
 
     it('normalizes tags by stripping symbols, punctuation, and lowercasing', () => {
       expect(normalizeTag('#Deep-Work!')).toBe('deep-work');
       expect(normalizeTag('#CA_LAW,')).toBe('ca_law');
       expect(normalizeTag('  #Focus  ')).toBe('focus');
+      expect(normalizeTag('#Physics')).toBe('physics');
+    });
+
+    it('extracts effective tags from task title, notes, and tags array', () => {
+      const task: Partial<TaskItem> = {
+        title: '#Physics assignment due Friday',
+        notes: 'Need to review #mechanics notes',
+        tags: ['homework', 'PHYSICS'],
+      };
+      const effectiveTags = getEffectiveTaskTags(task);
+      expect(effectiveTags).toEqual(['homework', 'physics', 'mechanics']);
     });
   });
 
