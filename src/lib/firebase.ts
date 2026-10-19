@@ -2,7 +2,8 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import {
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager,
+  persistentSingleTabManager,
+  memoryLocalCache,
   Firestore,
   getFirestore,
   collection,
@@ -18,6 +19,7 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
+import { cleanupLocalStorageQuota } from './utils';
 import {
   getAuth,
   Auth,
@@ -51,16 +53,32 @@ if (!firebaseConfig.apiKey && import.meta.env?.DEV) {
 // Singleton Firebase App Initialization
 export const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Persistent Multi-Tab Firestore Initialization
+// Clean up bloated/zombie localStorage keys on startup to ensure abundant quota
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    cleanupLocalStorageQuota();
+  } catch (e) {
+    console.warn('Storage cleanup notice:', e);
+  }
+}
+
+// Persistent Firestore Initialization using persistentSingleTabManager to prevent localStorage exhaustion
 let firestoreInstance: Firestore;
 try {
   firestoreInstance = initializeFirestore(app, {
     localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
+      tabManager: persistentSingleTabManager(undefined),
     }),
   });
-} catch {
-  firestoreInstance = getFirestore(app);
+} catch (e) {
+  console.warn('Persistent cache initialization notice, attempting memory fallback:', e);
+  try {
+    firestoreInstance = initializeFirestore(app, {
+      localCache: memoryLocalCache(),
+    });
+  } catch {
+    firestoreInstance = getFirestore(app);
+  }
 }
 
 import { getFunctions, Functions, httpsCallable } from 'firebase/functions';

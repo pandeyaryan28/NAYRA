@@ -97,11 +97,116 @@ export function safeLocalStorageGet<T>(key: string, fallback: T): T {
   }
 }
 
+/**
+ * Proactively cleans up bloated, orphaned, and obsolete localStorage keys
+ * to guarantee that the 5MB browser quota is never breached.
+ */
+export function cleanupLocalStorageQuota(preserveKey?: string): boolean {
+  if (typeof window === 'undefined' || !window.localStorage) return false;
+
+  try {
+    const keysToRemove: string[] = [];
+    const keysToTrim: string[] = [];
+
+    // Phase 1: Identify obsolete Firebase client/zombie keys and dead session keys
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (!k) continue;
+
+      // 1. All Firebase WebStorageTabManager heartbeat and client keys
+      if (
+        k.startsWith('firestore_clients_') ||
+        k.startsWith('firestore_zombied_') ||
+        k.startsWith('firestore_mutation_') ||
+        k.startsWith('firestore_sequence_number_')
+      ) {
+        keysToRemove.push(k);
+        continue;
+      }
+
+      // 2. Dead/corrupted keys from undefined or null users
+      if (
+        k.includes('_null_') ||
+        k.includes('_undefined_') ||
+        k.startsWith('nayra_null_') ||
+        k.startsWith('nayra_undefined_')
+      ) {
+        if (k !== preserveKey) {
+          keysToRemove.push(k);
+          continue;
+        }
+      }
+
+      // 3. Candidate high-volume keys for pruning if needed (focus sessions, events, tasks)
+      if (k.endsWith('_focus_sessions') || k.endsWith('_events') || k.endsWith('_tasks') || k.endsWith('_ca_topics')) {
+        keysToTrim.push(k);
+      }
+    }
+
+    // Remove obsolete keys
+    keysToRemove.forEach((k) => {
+      try {
+        window.localStorage.removeItem(k);
+      } catch {
+        // ignore
+      }
+    });
+
+    // Phase 2: If keys are huge, trim high-volume array keys to prevent exceeding quota
+    for (const k of keysToTrim) {
+      if (k === preserveKey) continue;
+      try {
+        const raw = window.localStorage.getItem(k);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 80) {
+            // Keep the most recent 80 items (Firestore has full historical records)
+            const trimmed = parsed.slice(-80);
+            window.localStorage.setItem(k, JSON.stringify(trimmed));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    return true;
+  } catch (e) {
+    console.warn('[Storage] Quota cleanup notice:', e);
+    return false;
+  }
+}
+
 export function safeLocalStorageSet<T>(key: string, value: T): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || !window.localStorage) return;
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.warn(`Error writing localStorage key "${key}":`, e);
+  } catch (e: any) {
+    const isQuota =
+      e?.name === 'QuotaExceededError' ||
+      e?.code === 22 ||
+      e?.code === 1014 ||
+      e?.number === -2147024882 ||
+      (e?.message && typeof e.message === 'string' && (e.message.toLowerCase().includes('quota') || e.message.toLowerCase().includes('storage')));
+
+    if (isQuota) {
+      console.warn(`[Storage] Quota exceeded on key "${key}". Running emergency storage cleanup...`);
+      cleanupLocalStorageQuota(key);
+
+      // Attempt to save again after cleanup
+      try {
+        let valueToStore = value;
+        if (Array.isArray(value) && value.length > 50) {
+          valueToStore = (value as unknown[]).slice(-50) as unknown as T;
+        }
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        console.info(`[Storage] Successfully saved "${key}" after quota recovery.`);
+        return;
+      } catch (retryErr) {
+        console.warn(`[Storage] Storage quota still exceeded after cleanup for "${key}". Skipping write.`);
+      }
+    } else {
+      console.warn(`Error writing localStorage key "${key}":`, e);
+    }
   }
 }

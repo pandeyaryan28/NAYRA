@@ -29,6 +29,7 @@ import {
   getTodayDateString,
   calculateNextRevisionDate,
 } from '@/lib/ca/utils';
+import { safeLocalStorageSet } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import {
   DEFAULT_USER_ID,
@@ -94,9 +95,9 @@ function loadCachedSettings(): CAUserSettings {
 function saveCachedSettings(settings: CAUserSettings): void {
   try {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(CA_STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+      safeLocalStorageSet(CA_STORAGE_KEYS.SETTINGS, settings);
       if (settings.examDate && settings.examDate.trim()) {
-        localStorage.setItem(CA_STORAGE_KEYS.TARGET_EXAM_DATE, settings.examDate.trim());
+        safeLocalStorageSet(CA_STORAGE_KEYS.TARGET_EXAM_DATE, settings.examDate.trim());
       }
     }
   } catch (err) {
@@ -142,7 +143,7 @@ function loadCachedTopics(): Topic[] {
 function saveCachedTopics(topics: Topic[]): void {
   try {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(CA_STORAGE_KEYS.TOPICS, JSON.stringify(topics));
+      safeLocalStorageSet(CA_STORAGE_KEYS.TOPICS, topics);
     }
   } catch (err) {
     console.warn('[CATrackerContext] Error saving topics to localStorage:', err);

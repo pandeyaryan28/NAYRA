@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TasksView, isTaskInList } from '../views/TasksView';
 import { DataProvider, deduplicateTaskLists } from '../context/DataContext';
 import { resolveGoogleTaskListId } from '../lib/googleApi';
+import { cleanupLocalStorageQuota, safeLocalStorageSet } from '../lib/utils';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { FocusProvider } from '../context/FocusContext';
@@ -352,5 +353,48 @@ describe('Tasks View Fixes & Reliability', () => {
     expect(resolveGoogleTaskListId('list_default', lists)).toBe('@default');
     expect(resolveGoogleTaskListId('gtl_custom_1', lists)).toBe('google_custom_1');
     expect(resolveGoogleTaskListId('google_custom_1', lists)).toBe('google_custom_1');
+  });
+
+  it('cleanupLocalStorageQuota purges dead Firestore client tokens and trims bloated arrays', () => {
+    window.localStorage.setItem('firestore_clients_firestore/[DEFAULT]/nayra/client1', 'dummy');
+    window.localStorage.setItem('firestore_zombied_clients/client2', 'dummy');
+    window.localStorage.setItem('nayra_null_tasks', '[]');
+    window.localStorage.setItem('nayra_test_tasks', JSON.stringify([{ id: '1', title: 'Task 1' }]));
+
+    // Bloated focus sessions (150 items)
+    const bigArray = new Array(150).fill(null).map((_, i) => ({
+      id: `session_${i}`,
+      duration: 1500,
+      timestamp: '2026-10-18T00:00:00Z',
+      notes: 'Extended study session description taking up storage',
+    }));
+    window.localStorage.setItem('nayra_test_focus_sessions', JSON.stringify(bigArray));
+
+    expect(window.localStorage.getItem('firestore_clients_firestore/[DEFAULT]/nayra/client1')).toBeDefined();
+
+    cleanupLocalStorageQuota();
+
+    // Dead firestore client keys must be purged
+    expect(window.localStorage.getItem('firestore_clients_firestore/[DEFAULT]/nayra/client1')).toBeNull();
+    expect(window.localStorage.getItem('firestore_zombied_clients/client2')).toBeNull();
+    expect(window.localStorage.getItem('nayra_null_tasks')).toBeNull();
+
+    // Valid tasks must be preserved
+    expect(window.localStorage.getItem('nayra_test_tasks')).toBeDefined();
+
+    // Bloated focus sessions should be trimmed to the most recent items
+    const trimmed = JSON.parse(window.localStorage.getItem('nayra_test_focus_sessions')!);
+    expect(trimmed.length).toBeLessThanOrEqual(80);
+  });
+
+  it('safeLocalStorageSet handles QuotaExceededError smoothly and cleans storage', () => {
+    // Fill storage with a dummy firestore client key
+    window.localStorage.setItem('firestore_clients_firestore/[DEFAULT]/nayra/token', 'dead_token');
+
+    // Test writing via safeLocalStorageSet
+    safeLocalStorageSet('nayra_test_key', { saved: true });
+
+    const retrieved = JSON.parse(window.localStorage.getItem('nayra_test_key')!);
+    expect(retrieved.saved).toBe(true);
   });
 });
