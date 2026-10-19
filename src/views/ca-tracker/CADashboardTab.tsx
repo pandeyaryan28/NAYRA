@@ -365,11 +365,14 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
         </div>
       </section>
 
-      {/* Economics Exercises Quick-Access Banner Card */}
+      {/* Digital Exercises Quick-Access Banner Card */}
       <Card className="p-5 sm:p-6 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                Paper 3 • Quantitative Aptitude
+              </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                 Paper 4 • Business Economics
               </span>
@@ -383,16 +386,16 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
             </h3>
 
             <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-              All 617 ICAI multiple-choice questions across 10 chapters (including 4 multi-unit chapters) with full verified answer keys, conceptual solutions, and keyboard shortcuts.
+              2,547 official ICAI multiple-choice questions across 28 chapters in Paper 3 (Quantitative Aptitude: 1,930 Qs) and Paper 4 (Business Economics: 617 Qs) with verified answer keys, step-by-step mathematical explanations, and instant keyboard shortcuts.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-                <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">617</span>
-                <span className="text-zinc-500">MCQs</span>
+                <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">2,547</span>
+                <span className="text-zinc-500">Total MCQs</span>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-                <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">10</span>
+                <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">28</span>
                 <span className="text-zinc-500">Chapters</span>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">

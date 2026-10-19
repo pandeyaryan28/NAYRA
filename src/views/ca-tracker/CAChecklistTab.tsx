@@ -27,7 +27,7 @@ export type DateFilter = 'all' | 'today' | 'overdue' | 'scheduled' | 'unschedule
 
 interface CAChecklistTabProps {
   initialSubjectId?: string;
-  onNavigateToExercise?: (chapterNum?: number, unitNum?: number) => void;
+  onNavigateToExercise?: (chapterNum?: number, unitNum?: number, subjectId?: string) => void;
 }
 
 export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
@@ -576,13 +576,13 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                   <ExternalLink className="w-3 h-3 opacity-70" />
                                 </a>
                               )}
-                              {chapter.subjectId === 'paper4' && onNavigateToExercise && (
+                              {(chapter.subjectId === 'paper3' || chapter.subjectId === 'paper4') && onNavigateToExercise && (
                                 <button
                                   type="button"
                                   aria-label={`Practice Digital Exercise for Chapter ${chapter.chapterNumber}`}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    onNavigateToExercise(chapter.chapterNumber);
+                                    onNavigateToExercise(chapter.chapterNumber, undefined, chapter.subjectId);
                                   }}
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition-colors border border-emerald-200 dark:border-emerald-800/80 shrink-0 cursor-pointer min-h-[32px]"
                                   title={`Practice Digital Exercise for Chapter ${chapter.chapterNumber}`}
@@ -737,15 +737,15 @@ export const CAChecklistTab: React.FC<CAChecklistTabProps> = ({
                                         </a>
                                       )}
 
-                                      {/* Direct Unit-Level Exercise Practice (for Paper 4 Units) */}
-                                      {chapter.subjectId === 'paper4' && onNavigateToExercise && (() => {
+                                      {/* Direct Unit-Level Exercise Practice (for Paper 3 and Paper 4 Units) */}
+                                      {(chapter.subjectId === 'paper3' || chapter.subjectId === 'paper4') && onNavigateToExercise && (() => {
                                         const unitMatch = topic.title.match(/Unit\s*(\d+)/i);
                                         const topicUnitNumber = (topic as any).unitNumber ?? (unitMatch ? Number(unitMatch[1]) : undefined);
                                         return (
                                           <button
                                             type="button"
                                             aria-label={topicUnitNumber ? `Practice Digital Exercise for Unit ${topicUnitNumber}` : `Practice Digital Exercise for ${topic.title}`}
-                                            onClick={() => onNavigateToExercise(chapter.chapterNumber, topicUnitNumber)}
+                                            onClick={() => onNavigateToExercise(chapter.chapterNumber, topicUnitNumber, chapter.subjectId)}
                                             className="p-1.5 rounded-md text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors inline-flex items-center gap-1 cursor-pointer min-h-[32px]"
                                             title={topicUnitNumber ? `Practice Digital Exercise for Unit ${topicUnitNumber}` : `Practice Digital Exercise for ${topic.title}`}
                                           >

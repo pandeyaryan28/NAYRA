@@ -56,6 +56,7 @@ export const CATrackerView: React.FC = () => {
   const [exerciseTarget, setExerciseTarget] = useState<{
     chapterNumber?: number;
     unitNumber?: number;
+    subjectId?: string;
     timestamp?: number;
   } | undefined>(undefined);
 
@@ -82,7 +83,7 @@ export const CATrackerView: React.FC = () => {
       id: 'exercises',
       label: 'Exercises & Tests',
       icon: HelpCircle,
-      badge: '617 Qs',
+      badge: '2,547 Qs',
     },
     {
       id: 'schedule',
@@ -136,15 +137,16 @@ export const CATrackerView: React.FC = () => {
     }
   };
 
-  const handleNavigateToExercise = (chapterNum?: number, unitNum?: number) => {
+  const handleNavigateToExercise = (chapterNum?: number, unitNum?: number, subjectId?: string) => {
     if (chapterNum) {
       setExerciseTarget({
         chapterNumber: chapterNum,
         unitNumber: unitNum,
+        subjectId: subjectId,
         timestamp: Date.now(),
       });
     } else {
-      setExerciseTarget(undefined);
+      setExerciseTarget(subjectId ? { subjectId, timestamp: Date.now() } : undefined);
     }
     setActiveHub('exercises');
     setExercisesSubTab('exercises');
@@ -340,7 +342,7 @@ export const CATrackerView: React.FC = () => {
                     }`}
                   >
                     <HelpCircle className="w-3.5 h-3.5" />
-                    <span>Digital Exercises (617 Qs)</span>
+                    <span>Digital Exercises (2,547 Qs)</span>
                   </button>
 
                   <button
@@ -366,6 +368,7 @@ export const CATrackerView: React.FC = () => {
 
             {exercisesSubTab === 'exercises' ? (
               <CAExercisesTab
+                initialSubjectId={exerciseTarget?.subjectId}
                 initialChapterNumber={exerciseTarget?.chapterNumber}
                 initialUnitNumber={exerciseTarget?.unitNumber}
                 navTimestamp={exerciseTarget?.timestamp}
