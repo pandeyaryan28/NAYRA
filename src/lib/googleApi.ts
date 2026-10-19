@@ -415,7 +415,6 @@ export async function fetchGoogleTasks(
 
   const matchingList = taskLists?.find((l) => l.id === resolvedLocalId || l.googleTaskListId === gtlId);
   const resolvedTaskListName = matchingList?.title;
-
   return activeItems.map((t) => {
     const isCompleted = t.status === 'completed';
     const subtasks = (childItemsByParent.get(t.id) || []).map((sub) => ({

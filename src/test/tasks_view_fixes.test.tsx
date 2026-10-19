@@ -397,4 +397,30 @@ describe('Tasks View Fixes & Reliability', () => {
     const retrieved = JSON.parse(window.localStorage.getItem('nayra_test_key')!);
     expect(retrieved.saved).toBe(true);
   });
+
+  it('isTaskInList keeps task in custom list and excludes from My Tasks even when taskListName is defaulted to My Tasks', () => {
+    const allLists = [
+      { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_work', googleTaskListId: 'work_gid', title: 'Work', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+      { id: 'gtl_personal', googleTaskListId: 'personal_gid', title: 'Personal', isDefault: false, updatedAt: '2026-10-18T00:00:00Z' },
+    ];
+    const defaultList = allLists[0];
+    const workList = allLists[1];
+    const personalList = allLists[2];
+
+    // Android/Peer sync task with custom taskListId but defaulted taskListName: "My Tasks"
+    const androidSyncedTask: any = {
+      id: 'task_work_android',
+      title: 'Prepare quarterly financial review',
+      taskListId: 'gtl_work',
+      taskListName: 'My Tasks', // Defaulted or stale title
+    };
+
+    // Must be in Work list by ID
+    expect(isTaskInList(androidSyncedTask, workList, allLists)).toBe(true);
+    // Must NOT leak into My Tasks
+    expect(isTaskInList(androidSyncedTask, defaultList, allLists)).toBe(false);
+    // Must NOT be in Personal
+    expect(isTaskInList(androidSyncedTask, personalList, allLists)).toBe(false);
+  });
 });

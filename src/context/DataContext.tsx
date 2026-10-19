@@ -440,6 +440,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const tasksRef = useRef(tasks);
   const taskListsRef = useRef(taskLists);
   const calendarsRef = useRef(calendars);
+  const deletedTaskListIdsRef = useRef<Set<string>>(new Set());
+
+  // Load tombstoned deleted list IDs on mount
+  useEffect(() => {
+    const storedDeleted = safeLocalStorageGet<string[]>(
+      `nayra_${user?.uid || GUEST_USER_ID}_deleted_task_lists`,
+      []
+    );
+    if (Array.isArray(storedDeleted)) {
+      storedDeleted.forEach((id) => deletedTaskListIdsRef.current.add(id));
+    }
+  }, [user?.uid]);
 
   useEffect(() => {
     eventsRef.current = events;
@@ -586,24 +598,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               getUserTasksCollection(uid),
               (tSnap) => {
                 if (active) {
-                  const fTasks = tSnap.docs.map((d) => {
-                    const data = d.data() as TaskItem;
-                    const gId = data.googleTaskId || (d.id.startsWith('gtask_') ? d.id.replace('gtask_', '') : undefined);
-                    const matchingList = taskListsRef.current.find(
-                      (l) =>
-                        (data.taskListId && (l.id === data.taskListId || l.googleTaskListId === data.taskListId || l.id === `gtl_${data.taskListId}`)) ||
-                        (data.taskListName && (l.title || '').trim().toLowerCase() === data.taskListName.trim().toLowerCase())
-                    );
-                    const resolvedListId = matchingList ? matchingList.id : (data.taskListId || 'list_default');
-                    const resolvedListName = matchingList ? matchingList.title : (data.taskListName || (resolvedListId === 'list_default' ? 'My Tasks' : undefined));
-                    return {
-                      ...data,
-                      id: d.id,
-                      googleTaskId: gId,
-                      taskListId: resolvedListId,
-                      taskListName: resolvedListName,
-                    } as TaskItem;
-                  });
+                  const fTasks = tSnap.docs
+                    .map((d) => {
+                      const data = d.data() as TaskItem;
+                      if (data.taskListId && deletedTaskListIdsRef.current.has(data.taskListId)) {
+                        deleteDoc(doc(getUserTasksCollection(uid), d.id)).catch(console.warn);
+                        return null;
+                      }
+                      const gId = data.googleTaskId || (d.id.startsWith('gtask_') ? d.id.replace('gtask_', '') : undefined);
+                      const matchingList = taskListsRef.current.find(
+                        (l) =>
+                          (data.taskListId && (l.id === data.taskListId || l.googleTaskListId === data.taskListId || l.id === `gtl_${data.taskListId}`)) ||
+                          (data.taskListName && (l.title || '').trim().toLowerCase() === data.taskListName.trim().toLowerCase())
+                      );
+                      const resolvedListId = matchingList ? matchingList.id : (data.taskListId || 'list_default');
+                      const resolvedListName = matchingList ? matchingList.title : (data.taskListName || (resolvedListId === 'list_default' ? 'My Tasks' : undefined));
+                      return {
+                        ...data,
+                        id: d.id,
+                        googleTaskId: gId,
+                        taskListId: resolvedListId,
+                        taskListName: resolvedListName,
+                      } as TaskItem;
+                    })
+                    .filter(Boolean) as TaskItem[];
                   setTasks((prev) => {
                     const localMetrics = new Map(
                       prev.map((t) => [t.id, { totalFocusSeconds: t.totalFocusSeconds || 0, pomodoroCount: t.pomodoroCount || 0 }])
@@ -730,6 +748,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                       const rc = inc.pomodoroCount || 0;
                       const lf = existing.totalFocusSeconds || 0;
                       const lc = existing.pomodoroCount || 0;
+                      const isExistingCustom =
+                        existing.taskListId &&
+                        existing.taskListId !== 'list_default' &&
+                        existing.taskListId !== '@default';
+                      const isIncomingDefault =
+                        !inc.taskListId ||
+                        inc.taskListId === 'list_default' ||
+                        inc.taskListId === '@default';
+                      const preservedListId =
+                        isExistingCustom && isIncomingDefault ? existing.taskListId : inc.taskListId || existing.taskListId;
+                      const preservedListName =
+                        isExistingCustom && isIncomingDefault ? existing.taskListName : inc.taskListName || existing.taskListName;
                       const isRemoteComplete = inc.status === 'completed' || inc.completed === true || inc.archived === true;
 
                       if (
@@ -742,6 +772,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         prevMap.set(inc.id, {
                           ...existing,
                           ...inc,
+                          taskListId: preservedListId,
+                          taskListName: preservedListName,
                           totalFocusSeconds: Math.max(lf, rf),
                           pomodoroCount: Math.max(lc, rc),
                           ...(isRemoteComplete ? { status: 'completed', completed: true, archived: Boolean(inc.archived ?? existing.archived) } : {}),
@@ -832,7 +864,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               getUserTaskListsCollection(uid),
               (tlSnap) => {
                 if (active && !tlSnap.empty) {
-                  const loadedLists = tlSnap.docs.map((d) => d.data() as TaskList);
+                  const loadedLists = tlSnap.docs
+                    .map((d) => d.data() as TaskList)
+                    .filter((l) => !deletedTaskListIdsRef.current.has(l.id) && (!l.googleTaskListId || !deletedTaskListIdsRef.current.has(l.googleTaskListId)));
                   const { cleanLists } = deduplicateTaskLists(loadedLists);
                   setTaskLists(cleanLists);
                   taskListsRef.current = cleanLists;
@@ -850,7 +884,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } catch (tlErr) {
             const tlSnap = await getDocs(getUserTaskListsCollection(uid));
             if (!tlSnap.empty && active) {
-              const loadedLists = tlSnap.docs.map((d) => d.data() as TaskList);
+              const loadedLists = tlSnap.docs
+                .map((d) => d.data() as TaskList)
+                .filter((l) => !deletedTaskListIdsRef.current.has(l.id) && (!l.googleTaskListId || !deletedTaskListIdsRef.current.has(l.googleTaskListId)));
               const { cleanLists } = deduplicateTaskLists(loadedLists);
               setTaskLists(cleanLists);
               taskListsRef.current = cleanLists;
@@ -1114,8 +1150,53 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             { id: 'list_default', googleTaskListId: '@default', title: 'My Tasks', isDefault: true, updatedAt: new Date().toISOString() }
           ];
 
+          const remoteGtlIds = new Set(
+            remoteLists.map((l) => l.googleTaskListId || (l.id.startsWith('gtl_') ? l.id.replace('gtl_', '') : l.id)).filter(Boolean)
+          );
+
+          // Purge any local task lists that were deleted on Google Tasks
+          const deletedRemotely = taskListsRef.current.filter((l) => {
+            const isDef = l.isDefault || l.id === 'list_default' || (l.title || '').trim().toLowerCase() === 'my tasks';
+            if (isDef) return false;
+            const gtlId = l.googleTaskListId || (l.id.startsWith('gtl_') ? l.id.replace('gtl_', '') : undefined);
+            return gtlId && !remoteGtlIds.has(gtlId);
+          });
+
+          if (deletedRemotely.length > 0) {
+            deletedRemotely.forEach((dl) => {
+              deletedTaskListIdsRef.current.add(dl.id);
+              if (dl.googleTaskListId) {
+                deletedTaskListIdsRef.current.add(dl.googleTaskListId);
+                deletedTaskListIdsRef.current.add(`gtl_${dl.googleTaskListId}`);
+              }
+              if (user && !user.isGuest) {
+                deleteDoc(doc(getUserTaskListsCollection(user.uid), dl.id)).catch(console.warn);
+                // Also clean up any orphan tasks in Firestore for this deleted list
+                tasksRef.current
+                  .filter((t) => t.taskListId === dl.id || (dl.googleTaskListId && t.taskListId === dl.googleTaskListId))
+                  .forEach((t) => {
+                    deleteDoc(doc(getUserTasksCollection(user.uid), t.id)).catch(console.warn);
+                  });
+              }
+            });
+            safeLocalStorageSet(
+              getUserStorageKey('deleted_task_lists'),
+              Array.from(deletedTaskListIdsRef.current)
+            );
+          }
+
+          const survivingLocal = taskListsRef.current.filter((l) => {
+            if (deletedTaskListIdsRef.current.has(l.id)) return false;
+            if (l.googleTaskListId && deletedTaskListIdsRef.current.has(l.googleTaskListId)) return false;
+            const isDef = l.isDefault || l.id === 'list_default' || (l.title || '').trim().toLowerCase() === 'my tasks';
+            if (isDef) return true;
+            const gtlId = l.googleTaskListId || (l.id.startsWith('gtl_') ? l.id.replace('gtl_', '') : undefined);
+            return !gtlId || remoteGtlIds.has(gtlId);
+          });
+
           const previousListsMap = new Map(taskListsRef.current.map((l) => [l.id, l]));
-          const combined = [...taskListsRef.current, ...listsToProcess];
+          // Google remote lists placed first so canonical Google Task List IDs take precedence
+          const combined = [...listsToProcess, ...survivingLocal];
           const { cleanLists, idRemap } = deduplicateTaskLists(combined);
           // Push any local custom task lists to Google Tasks if they don't have a googleTaskListId yet
           for (let i = 0; i < cleanLists.length; i++) {
@@ -1172,7 +1253,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const mappedId = idRemap.get(t.taskListId);
                 if (mappedId && mappedId !== t.taskListId) {
                   changed = true;
-                  return { ...t, taskListId: mappedId };
+                  const updatedTask = { ...t, taskListId: mappedId };
+                  if (user && !user.isGuest) {
+                    setDoc(doc(getUserTasksCollection(user.uid), t.id), { taskListId: mappedId }, { merge: true }).catch(console.warn);
+                  }
+                  return updatedTask;
                 }
                 return t;
               });
@@ -1234,6 +1319,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           let allListsFetchedSuccessfully = true;
 
           for (const list of activeLists) {
+            if (deletedTaskListIdsRef.current.has(list.id)) continue;
+            if (list.googleTaskListId && deletedTaskListIdsRef.current.has(list.googleTaskListId)) continue;
+
             const isDefaultList = list.isDefault || list.id === 'list_default' || (list.title || '').trim().toLowerCase() === 'my tasks';
             const gtlId = list.googleTaskListId && list.googleTaskListId !== '@default'
               ? list.googleTaskListId
@@ -1263,6 +1351,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               ) {
                 await handleAuthFailure();
                 return;
+              }
+              if (listErr?.status === 404 || listErr?.message?.includes('404')) {
+                // List was deleted on Google Tasks! Prune it from local state and Firestore
+                deletedTaskListIdsRef.current.add(list.id);
+                if (list.googleTaskListId) deletedTaskListIdsRef.current.add(list.googleTaskListId);
+                if (user && !user.isGuest) {
+                  deleteDoc(doc(getUserTaskListsCollection(user.uid), list.id)).catch(console.warn);
+                }
+                console.info(`[Sync] Pruned remotely deleted task list ${list.title} (404 Not Found)`);
+                continue;
               }
               allListsFetchedSuccessfully = false;
               console.warn(`Failed to fetch tasks for list ${list.title}:`, listErr);
@@ -1564,25 +1662,60 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const list = taskLists.find((l) => l.id === listId);
     if (!list || list.isDefault) return; // Do not delete default task list
 
-    if (googleAccessToken && list.googleTaskListId) {
-      deleteGoogleTaskList(googleAccessToken, list.googleTaskListId).catch(console.warn);
+    const gtlId =
+      list.googleTaskListId && list.googleTaskListId !== '@default' && list.googleTaskListId !== 'list_default'
+        ? list.googleTaskListId
+        : list.id.startsWith('gtl_')
+        ? list.id.replace('gtl_', '')
+        : undefined;
+
+    // Record tombstone so neither Firestore snapshot nor Google sync can resurrect it
+    deletedTaskListIdsRef.current.add(listId);
+    if (gtlId) {
+      deletedTaskListIdsRef.current.add(gtlId);
+      deletedTaskListIdsRef.current.add(`gtl_${gtlId}`);
+    }
+    safeLocalStorageSet(
+      getUserStorageKey('deleted_task_lists'),
+      Array.from(deletedTaskListIdsRef.current)
+    );
+
+    if (googleAccessToken && gtlId) {
+      deleteGoogleTaskList(googleAccessToken, gtlId).catch(console.warn);
     }
 
-    setTaskLists((prev) => prev.filter((l) => l.id !== listId));
-    taskListsRef.current = taskListsRef.current.filter((l) => l.id !== listId);
+    setTaskLists((prev) => prev.filter((l) => l.id !== listId && (!gtlId || l.googleTaskListId !== gtlId)));
+    taskListsRef.current = taskListsRef.current.filter((l) => l.id !== listId && (!gtlId || l.googleTaskListId !== gtlId));
     if (user && !user.isGuest) {
       deleteDoc(doc(getUserTaskListsCollection(user.uid), listId)).catch(console.warn);
+      if (gtlId && listId !== `gtl_${gtlId}`) {
+        deleteDoc(doc(getUserTaskListsCollection(user.uid), `gtl_${gtlId}`)).catch(console.warn);
+      }
+    }
+
+    // Delete tasks belonging to this deleted list so they NEVER leak into 'My Tasks'
+    const tasksToDelete = tasksRef.current.filter(
+      (t) => t.taskListId === listId || (gtlId && (t.taskListId === gtlId || t.taskListId === `gtl_${gtlId}`))
+    );
+    if (user && !user.isGuest && tasksToDelete.length > 0) {
+      tasksToDelete.forEach((t) => {
+        deleteDoc(doc(getUserTasksCollection(user.uid), t.id)).catch(console.warn);
+      });
     }
 
     setTasks((prev) => {
-      const remainingTasks = prev.filter((t) => t.taskListId !== listId);
+      const remainingTasks = prev.filter(
+        (t) => t.taskListId !== listId && (!gtlId || (t.taskListId !== gtlId && t.taskListId !== `gtl_${gtlId}`))
+      );
       tasksRef.current = remainingTasks;
       persistActiveTasks(remainingTasks, 'webApp');
       return remainingTasks;
     });
-    if (activeTaskListId === listId) {
-      const remaining = taskLists.filter((l) => l.id !== listId);
+
+    if (activeTaskListId === listId || (gtlId && (activeTaskListId === gtlId || activeTaskListId === `gtl_${gtlId}`))) {
+      const remaining = taskLists.filter((l) => l.id !== listId && (!gtlId || l.googleTaskListId !== gtlId));
       if (remaining.length > 0) setActiveTaskListId(remaining[0].id);
+      else setActiveTaskListId('list_default');
     }
   };
 

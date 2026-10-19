@@ -48,46 +48,54 @@ export function isTaskInList(task: TaskItem, list: TaskList, allLists?: TaskList
   const taskListTitle = (task.taskListName || '').trim().toLowerCase();
   const targetListTitle = (list.title || '').trim().toLowerCase();
 
-  // If the task explicitly carries a taskListName:
-  if (taskListTitle) {
-    if (taskListTitle === targetListTitle) {
-      return true;
-    }
-    // If the task names a different known custom list, exclude it from this list
-    if (allLists && allLists.length > 0) {
-      const matchesAnotherList = allLists.some(
-        (other) =>
-          other.id !== list.id &&
-          (other.title || '').trim().toLowerCase() === taskListTitle
-      );
-      if (matchesAnotherList) {
-        return false;
+  // Helper: check if task explicitly matches a list by exact ID or Google Task List ID
+  const matchesListById = (t: TaskItem, l: TaskList): boolean => {
+    if (!t.taskListId) return false;
+    if (t.taskListId === l.id) return true;
+    if (l.googleTaskListId && l.googleTaskListId !== '@default' && l.googleTaskListId !== 'list_default') {
+      if (
+        t.taskListId === l.googleTaskListId ||
+        t.taskListId === `gtl_${l.googleTaskListId}` ||
+        t.taskListId.replace('gtl_', '') === l.googleTaskListId
+      ) {
+        return true;
       }
     }
+    return false;
+  };
+
+  // 1. Direct ID match on custom list: absolute precedence
+  const isCustomList = !isListDefault;
+  if (isCustomList && matchesListById(task, list)) {
+    return true;
   }
 
-  // Exact ID match
-  if (task.taskListId === list.id) return true;
-
-  // Google Task List ID match
-  if (list.googleTaskListId && list.googleTaskListId !== '@default') {
-    if (
-      task.taskListId === list.googleTaskListId ||
-      task.taskListId === `gtl_${list.googleTaskListId}` ||
-      (task.taskListId && task.taskListId.replace('gtl_', '') === list.googleTaskListId)
-    ) {
-      return true;
+  // 2. If the task's taskListId belongs to another custom list, it CANNOT belong to this list
+  if (allLists && allLists.length > 0) {
+    const belongsToAnotherCustomList = allLists.some(
+      (other) =>
+        other.id !== list.id &&
+        !(other.isDefault || other.id === 'list_default' || (other.title || '').trim().toLowerCase() === 'my tasks') &&
+        matchesListById(task, other)
+    );
+    if (belongsToAnotherCustomList) {
+      return false;
     }
   }
 
-  // Fallback for default list
+  // 3. Fallback: If task carries a taskListName naming a known custom list (e.g. recovering corrupted list_default tasks)
+  if (taskListTitle && taskListTitle !== 'my tasks') {
+    if (allLists && allLists.some((other) => (other.title || '').trim().toLowerCase() === taskListTitle)) {
+      return targetListTitle === taskListTitle;
+    }
+  }
+
+  // 4. Default list resolution
   if (isListDefault) {
     if (!task.taskListId || task.taskListId === 'list_default' || task.taskListId === '@default') {
-      if (taskListTitle && taskListTitle !== 'my tasks') {
-        if (allLists && allLists.some((other) => (other.title || '').trim().toLowerCase() === taskListTitle)) {
-          return false;
-        }
-      }
+      return true;
+    }
+    if (matchesListById(task, list)) {
       return true;
     }
   }
@@ -306,7 +314,8 @@ export const TasksView: React.FC = () => {
         continue;
       }
       if (list.googleTaskListId && seenGtl.has(list.googleTaskListId)) continue;
-      if (seenTitles.has(norm)) continue;
+      if (res.some((r) => r.id === list.id)) continue;
+      if (!list.googleTaskListId && seenTitles.has(norm)) continue;
 
       if (list.googleTaskListId) seenGtl.add(list.googleTaskListId);
       seenTitles.add(norm);
