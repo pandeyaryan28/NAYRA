@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, cleanup } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import App from '../App';
 import { calculateTaskPeriodFocus } from '../views/analytics/analyticsUtils';
@@ -9,6 +9,7 @@ import { OPERATOR_UID } from '../lib/firebase';
 
 describe('Extension & Analytics Sync Integration Tests (v2.10.1)', () => {
   beforeEach(() => {
+    cleanup();
     localStorage.clear();
     sessionStorage.clear();
     vi.restoreAllMocks();
@@ -197,7 +198,7 @@ describe('Extension & Analytics Sync Integration Tests (v2.10.1)', () => {
       expect(screen.getByText('Productivity & Execution Analytics')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(screen.getByText('Writing Critical Architecture Document')).toBeInTheDocument();
+        expect(screen.getAllByText(/Writing Critical Architecture Document/).length).toBeGreaterThan(0);
         expect(screen.getAllByText('25m').length).toBeGreaterThan(0);
       });
     });

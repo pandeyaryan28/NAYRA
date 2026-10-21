@@ -629,7 +629,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     (taskList: TaskItem[], source: 'googleTasks' | 'webApp' = 'webApp') => {
       const activeOnly = (taskList || []).filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
       const signature = activeOnly
-        .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
+        .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.title || ''}`)
         .sort()
         .join('|');
       if (signature !== lastSyncedActiveTasksSignatureRef.current) {
@@ -725,7 +725,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCalorieEntries(uCalories);
         setCaTopics(uCaTopics);
         setCaTests(uCaTests);
-        setFocusSessions(deduplicateFocusSessions(uFocus));
+        setFocusSessions((prev) => deduplicateFocusSessions([...prev, ...uFocus]));
       }
     }
     prevUserIdRef.current = uid || null;
@@ -805,7 +805,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     tasksRef.current = merged;
                     const activeOnly = mergedActive.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
                     const activeSignature = activeOnly
-                      .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
+                      .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.title || ''}`)
                       .sort()
                       .join('|');
                     if (activeSignature !== lastSyncedActiveTasksSignatureRef.current) {
@@ -1634,7 +1634,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             const activeOnly = newArr.filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
             const activeSignature = activeOnly
-              .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.totalFocusSeconds || 0}`)
+              .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.title || ''}`)
               .sort()
               .join('|');
             if (activeSignature !== lastSyncedActiveTasksSignatureRef.current) {

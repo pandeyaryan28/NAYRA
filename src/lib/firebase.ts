@@ -150,26 +150,66 @@ export interface ActiveTasksCloudDoc {
 
 export const getUserActiveTasksDoc = (userId: string) => doc(db, 'users', userId, 'config', 'activeTasks');
 
+// Debounce and signature guard for active tasks sync to avoid write loops and excessive billing
+let lastSyncedTasksHash = '';
+let pendingTasksSyncTimer: any = null;
+let lastSyncedTasksTimestamp = 0;
+const TASKS_SYNC_DEBOUNCE_MS = 2000;
+const MIN_TASKS_SYNC_COOLDOWN_MS = 10000;
+
 /**
  * Persists the clean active task list to users/{uid}/config/activeTasks in Firestore.
+ * Guarded with structural signature hashing and cooldown debounce.
  */
 export async function syncActiveTasksToFirestore(
   uid: string = OPERATOR_UID,
   tasks: any[],
   source: 'googleTasks' | 'webApp' | 'tab' | 'extension' | 'androidApp' = 'webApp'
 ): Promise<void> {
-  try {
-    const ref = getUserActiveTasksDoc(uid);
-    const activeOnly = (Array.isArray(tasks) ? tasks : [])
-      .filter((t) => !t.archived && t.status !== 'completed' && !t.completed)
-      .map((t) => sanitizeForFirestore(t));
-    await setDoc(ref, {
-      tasks: activeOnly,
-      updatedAt: new Date().toISOString(),
-      source,
-    });
-  } catch (err) {
-    console.warn('[Firebase] Could not sync active tasks to Firestore:', err);
+  if (!uid) return;
+
+  const activeOnly = (Array.isArray(tasks) ? tasks : [])
+    .filter((t) => !t.archived && t.status !== 'completed' && !t.completed)
+    .map((t) => sanitizeForFirestore(t));
+
+  // Compute signature based on structural identity and content, excluding live focus second increments
+  const currentHash = activeOnly
+    .map((t) => `${t.id}:${t.status}:${t.googleTaskId || ''}:${t.title || ''}`)
+    .sort()
+    .join('|');
+
+  if (currentHash === lastSyncedTasksHash) {
+    return;
+  }
+
+  const executeSync = async () => {
+    try {
+      lastSyncedTasksHash = currentHash;
+      lastSyncedTasksTimestamp = Date.now();
+      const ref = getUserActiveTasksDoc(uid);
+      await setDoc(ref, {
+        tasks: activeOnly,
+        updatedAt: new Date().toISOString(),
+        source,
+      });
+    } catch (err) {
+      console.warn('[Firebase] Could not sync active tasks to Firestore:', err);
+    }
+  };
+
+  if (pendingTasksSyncTimer) {
+    clearTimeout(pendingTasksSyncTimer);
+    pendingTasksSyncTimer = null;
+  }
+
+  const timeSinceLast = Date.now() - lastSyncedTasksTimestamp;
+  if (timeSinceLast < MIN_TASKS_SYNC_COOLDOWN_MS) {
+    pendingTasksSyncTimer = setTimeout(() => {
+      pendingTasksSyncTimer = null;
+      executeSync();
+    }, TASKS_SYNC_DEBOUNCE_MS);
+  } else {
+    await executeSync();
   }
 }
 
@@ -220,14 +260,39 @@ export async function fetchActiveTasksFromFirestore(
   return [];
 }
 
+// In-memory guard to prevent redundant / rapid loop timer writes
+let lastSyncedTimerStateHash = '';
+let lastSyncedTimerTimestamp = 0;
+const MIN_TIMER_SYNC_INTERVAL_MS = 15000;
+
 /**
  * Sync active timer state across extension, tab, and web app via users/{uid}/config/activeTimer
+ * Guarded against redundant 1-second countdown writes and rapid cross-client loops.
  */
 export async function syncActiveTimerToFirestore(
   uid: string = OPERATOR_UID,
   state: any
 ): Promise<void> {
+  if (!uid || !state) return;
   try {
+    // When timer is running, remainingSeconds decrements every second, but targetEndTime remains constant.
+    // We only need to write to the cloud when mode, timerState, targetEndTime, or selectedTaskId changes.
+    const stateHash = state.timerState === 'running'
+      ? `${state.timerState}:${state.mode}:${state.targetEndTime || 0}:${state.selectedTaskId || ''}:${(state.activeTaskIds || []).sort().join(',')}`
+      : `${state.timerState}:${state.mode}:${state.remainingSeconds ?? ''}:${state.selectedTaskId || ''}:${(state.activeTaskIds || []).sort().join(',')}`;
+
+    const now = Date.now();
+    const isStateTransition = stateHash !== lastSyncedTimerStateHash;
+    const isThrottleExceeded = (now - lastSyncedTimerTimestamp) >= MIN_TIMER_SYNC_INTERVAL_MS;
+
+    // Suppress redundant writes: if the state hasn't meaningfully transitioned and interval hasn't elapsed, do NOT write!
+    if (!isStateTransition && !isThrottleExceeded) {
+      return;
+    }
+
+    lastSyncedTimerStateHash = stateHash;
+    lastSyncedTimerTimestamp = now;
+
     const ref = doc(db, 'users', uid, 'config', 'activeTimer');
     await setDoc(ref, state, { merge: true });
   } catch (err) {
