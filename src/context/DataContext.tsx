@@ -56,8 +56,6 @@ import {
   getUserHabitsCollection,
   getUserCalorieEntriesCollection,
   getUserFocusSessionsCollection,
-  getUserCATopicsCollection,
-  getUserCATestsCollection,
   getActiveTasksQuery,
   getRecentFocusSessionsQuery,
   getCompletedTasksQuery,
@@ -1096,17 +1094,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
 
-          // 9. CA Topics
-          const ctSnap = await getDocs(getUserCATopicsCollection(uid));
-          if (!ctSnap.empty && active) {
-            setCaTopics(ctSnap.docs.map((d) => d.data() as CATopic));
-          }
-
-          // 10. CA Tests
-          const ctestSnap = await getDocs(getUserCATestsCollection(uid));
-          if (!ctestSnap.empty && active) {
-            setCaTests(ctestSnap.docs.map((d) => d.data() as CATestRecord));
-          }
+          // 9. CA Topics & 10. CA Tests:
+          // CA Tracker is completely cached locally and isolated in CATrackerContext.
+          // We avoid eager Firestore reads here to prevent unnecessary read costs on app startup.
         } catch (err) {
           console.warn('Firestore fetch failed (offline/sandbox):', err);
         }
@@ -2428,9 +2418,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             startedAt: status === 'in_progress' && !t.startedAt ? now : t.startedAt,
             completedAt: status === 'completed' ? now : t.completedAt,
           };
-          if (user && !user.isGuest) {
-            setDoc(doc(getUserCATopicsCollection(user.uid), topicId), sanitizeForFirestore(updated), { merge: true }).catch(console.warn);
-          }
           return updated;
         }
         return t;
