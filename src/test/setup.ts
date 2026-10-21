@@ -100,36 +100,28 @@ vi.mock('firebase/firestore', () => {
     memoryLocalCache: vi.fn(() => ({})),
     collection: vi.fn(() => dummyRef),
     doc: vi.fn(() => dummyRef),
-    getDoc: vi.fn().mockResolvedValue({
+    getDoc: vi.fn(async () => ({
       exists: () => false,
       data: () => null,
       id: 'mock-doc',
-    }),
-    getDocs: vi.fn().mockResolvedValue({
+    })),
+    getDocs: vi.fn(async () => ({
       empty: true,
       docs: [],
       size: 0,
       forEach: () => {},
-    }),
-    setDoc: vi.fn().mockResolvedValue(undefined),
-    deleteDoc: vi.fn().mockResolvedValue(undefined),
-    updateDoc: vi.fn().mockResolvedValue(undefined),
-    onSnapshot: vi.fn((_target: any, onNext: any) => {
-      if (typeof onNext === 'function') {
-        // Provide safe empty snapshot immediately
-        setTimeout(() => {
-          try {
-            onNext({ empty: true, docs: [], size: 0, exists: () => false, data: () => null });
-          } catch {}
-        }, 0);
-      }
+    })),
+    setDoc: vi.fn(async () => undefined),
+    deleteDoc: vi.fn(async () => undefined),
+    updateDoc: vi.fn(async () => undefined),
+    onSnapshot: vi.fn((_target: any, _onNext: any) => {
       return () => {};
     }),
     writeBatch: vi.fn(() => ({
       set: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
-      commit: vi.fn().mockResolvedValue(undefined),
+      commit: vi.fn(async () => undefined),
     })),
     query: vi.fn(() => dummyRef),
     where: vi.fn(() => ({})),

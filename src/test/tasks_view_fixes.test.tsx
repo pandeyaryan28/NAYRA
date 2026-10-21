@@ -64,9 +64,14 @@ describe('Tasks View Fixes & Reliability', () => {
       expect(screen.getByText(/All active tasks completed!/i)).toBeInTheDocument();
     });
 
-    // Completed section toggle should exist
-    expect(screen.getByRole('button', { name: /^Completed/i })).toBeInTheDocument();
-    expect(screen.getByText('Alpha Task To Complete')).toBeInTheDocument();
+    // Completed section toggle should exist and defaults to collapsed
+    const completedToggle = screen.getByRole('button', { name: /^Completed/i });
+    expect(completedToggle).toBeInTheDocument();
+    expect(screen.queryByText('Alpha Task To Complete')).not.toBeInTheDocument();
+
+    // Clicking completed toggle expands the section and reveals completed task
+    fireEvent.click(completedToggle);
+    expect(await screen.findByText('Alpha Task To Complete')).toBeInTheDocument();
 
     // Clicking complete again restores the task back to active
     const completedCheckbox = screen.getByLabelText('Toggle complete');
@@ -151,6 +156,10 @@ describe('Tasks View Fixes & Reliability', () => {
     );
 
     expect(await screen.findByText('Task Active Two')).toBeInTheDocument();
+    // Task Compact One is completed and initially hidden in collapsed Completed section
+    expect(screen.queryByText('Task Compact One')).not.toBeInTheDocument();
+    const completedToggle = screen.getByRole('button', { name: /^Completed/i });
+    fireEvent.click(completedToggle);
     expect(screen.getByText('Task Compact One')).toBeInTheDocument();
 
     // Switch to Comfortable

@@ -154,6 +154,20 @@ export const DataContext = createContext<DataContextValue | undefined>(undefined
 
 const CURRENT_DATA_VERSION = 'v1.0.4_clean';
 
+/**
+ * Safely handles Firestore writes and prevents unhandled promise rejections
+ * when mocked or executed in sandbox / offline conditions.
+ */
+function safeFirestoreWrite<T = any>(promise: Promise<T> | any): void {
+  try {
+    if (promise && typeof (promise as any).catch === 'function') {
+      (promise as any).catch(console.warn);
+    }
+  } catch (err) {
+    console.warn('Firestore write warning suppressed:', err);
+  }
+}
+
 const KEYS = {
   SETTINGS: 'nayra_settings',
   CALENDARS: 'nayra_calendars',
@@ -1982,7 +1996,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persistActiveTasks(tasksRef.current, 'webApp');
 
     if (effectiveUid) {
-      setDoc(doc(getUserTasksCollection(effectiveUid), newId), sanitizeForFirestore(newTask)).catch(console.warn);
+      safeFirestoreWrite(setDoc(doc(getUserTasksCollection(effectiveUid), newId), sanitizeForFirestore(newTask)));
     }
 
     // 2. Asynchronous Google Tasks synchronization without blocking the UI
@@ -1996,7 +2010,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             tasksRef.current = tasksRef.current.map((t) => (t.id === newId ? { ...t, googleTaskId: resp.id } : t));
             persistActiveTasks(tasksRef.current, 'webApp');
             if (effectiveUid) {
-              setDoc(doc(getUserTasksCollection(effectiveUid), newId), { googleTaskId: resp.id }, { merge: true }).catch(console.warn);
+              safeFirestoreWrite(setDoc(doc(getUserTasksCollection(effectiveUid), newId), { googleTaskId: resp.id }, { merge: true }));
             }
           }
         } catch (e: any) {
@@ -2018,7 +2032,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   tasksRef.current = tasksRef.current.map((t) => (t.id === newId ? { ...t, googleTaskId: retryResp.id } : t));
                   persistActiveTasks(tasksRef.current, 'webApp');
                   if (user && !user.isGuest) {
-                    setDoc(doc(getUserTasksCollection(user.uid), newId), { googleTaskId: retryResp.id }, { merge: true }).catch(console.warn);
+                    safeFirestoreWrite(setDoc(doc(getUserTasksCollection(user.uid), newId), { googleTaskId: retryResp.id }, { merge: true }));
                   }
                 }
               } catch (retryErr) {

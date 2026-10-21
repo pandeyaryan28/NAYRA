@@ -179,11 +179,11 @@ export const TasksView: React.FC = () => {
   // Filters & State
   const [filterMode, setFilterMode] = useState<'active' | 'archived' | 'all'>('active');
   const [sortBy, setSortBy] = useState<'order' | 'due' | 'priority' | 'title'>('order');
-  const [groupBy, setGroupBy] = useState<'due' | 'priority' | 'none'>(() => {
-    return safeLocalStorageGet<'due' | 'priority' | 'none'>('nayra_tasks_group_by', 'due');
+  const [groupBy, setGroupBy] = useState<'status' | 'due' | 'priority' | 'none'>(() => {
+    return safeLocalStorageGet<'status' | 'due' | 'priority' | 'none'>('nayra_tasks_group_by', 'due');
   });
 
-  const handleSetGroupBy = (val: 'due' | 'priority' | 'none') => {
+  const handleSetGroupBy = (val: 'status' | 'due' | 'priority' | 'none') => {
     setGroupBy(val);
     safeLocalStorageSet('nayra_tasks_group_by', val);
   };
@@ -204,10 +204,20 @@ export const TasksView: React.FC = () => {
   const [newListTitle, setNewListTitle] = useState('');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
-  // Collapsible sections
-  const [isCompletedSectionOpen, setIsCompletedSectionOpen] = useState(true);
+  // Collapsible sections - Completed tasks default to collapsed until opened
+  const [isCompletedSectionOpen, setIsCompletedSectionOpen] = useState(() =>
+    safeLocalStorageGet<boolean>('nayra_tasks_completed_open', false)
+  );
   const [isArchivedSectionOpen, setIsArchivedSectionOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  const toggleCompletedSection = () => {
+    setIsCompletedSectionOpen((prev) => {
+      const next = !prev;
+      safeLocalStorageSet('nayra_tasks_completed_open', next);
+      return next;
+    });
+  };
 
   const toggleGroupCollapse = (groupId: string) => {
     setCollapsedGroups((prev) => {
@@ -571,11 +581,72 @@ export const TasksView: React.FC = () => {
   }
 
   const taskGroups = useMemo<TaskGroup[]>(() => {
-    if (groupBy === 'none' || activeTaskListId === 'archived_view' || filterMode === 'archived') {
+    if (activeTaskListId === 'archived_view' || filterMode === 'archived') {
       return [];
     }
 
     const priorityWeight: Record<TaskPriority, number> = { high: 3, medium: 2, low: 1 };
+
+    // Status Grouping: Used for explicit 'status' group and as default swimlanes in Board mode when groupBy is 'status' or 'none'
+    if (groupBy === 'status' || (densityMode === 'board' && groupBy === 'none')) {
+      const todo: TaskItem[] = [];
+      const inProgress: TaskItem[] = [];
+      const done: TaskItem[] = [];
+
+      const pool = densityMode === 'board' ? [...displayedTasks, ...completedScopedTasks] : displayedTasks;
+      const seenIds = new Set<string>();
+
+      pool.forEach((t) => {
+        if (seenIds.has(t.id)) return;
+        seenIds.add(t.id);
+        if (t.status === 'completed' || Boolean(t.completed)) {
+          done.push(t);
+        } else if (t.totalFocusSeconds > 0 || t.priority === 'high' || Boolean(t.starred)) {
+          inProgress.push(t);
+        } else {
+          todo.push(t);
+        }
+      });
+
+      const sortByPriorityAndDue = (arr: TaskItem[]) =>
+        [...arr].sort((a, b) => {
+          const diff = (priorityWeight[b.priority] || 2) - (priorityWeight[a.priority] || 2);
+          if (diff !== 0) return diff;
+          if (!a.due) return 1;
+          if (!b.due) return -1;
+          return (a.due || '').localeCompare(b.due || '');
+        });
+
+      const groups: TaskGroup[] = [
+        {
+          id: 'status_todo',
+          title: 'To Do',
+          icon: <ListTodo className="h-3.5 w-3.5 text-zinc-500" />,
+          accentClass: 'text-zinc-700 dark:text-zinc-300 font-semibold',
+          tasks: sortByPriorityAndDue(todo),
+        },
+        {
+          id: 'status_in_progress',
+          title: 'In Focus / Urgent',
+          icon: <Clock className="h-3.5 w-3.5 text-[#007AFF]" />,
+          accentClass: 'text-[#007AFF] font-semibold',
+          tasks: sortByPriorityAndDue(inProgress),
+        },
+        {
+          id: 'status_completed',
+          title: 'Completed',
+          icon: <Check className="h-3.5 w-3.5 text-emerald-500" />,
+          accentClass: 'text-emerald-500 font-semibold',
+          tasks: done,
+        },
+      ];
+
+      return densityMode === 'board' ? groups : groups.filter((g) => g.tasks.length > 0);
+    }
+
+    if (groupBy === 'none') {
+      return [];
+    }
 
     if (groupBy === 'due') {
       const overdue: TaskItem[] = [];
@@ -618,7 +689,7 @@ export const TasksView: React.FC = () => {
       const groups: TaskGroup[] = [
         {
           id: 'overdue',
-          title: 'Past',
+          title: 'Past Due',
           icon: <AlertCircle className="h-3.5 w-3.5 text-rose-500" />,
           accentClass: 'text-rose-500 font-semibold',
           tasks: sortByPriorityThenTitle(overdue),
@@ -639,7 +710,7 @@ export const TasksView: React.FC = () => {
         },
         {
           id: 'this_week',
-          title: 'Upcoming This Week',
+          title: 'This Week',
           icon: <CalendarIcon className="h-3.5 w-3.5 text-[#FF9500]" />,
           accentClass: 'text-[#FF9500] font-semibold',
           tasks: sortByPriorityThenTitle(thisWeek),
@@ -660,7 +731,9 @@ export const TasksView: React.FC = () => {
         },
       ];
 
-      return groups.filter((g) => g.tasks.length > 0);
+      return densityMode === 'board'
+        ? groups.filter((g) => g.id !== 'overdue' || g.tasks.length > 0)
+        : groups.filter((g) => g.tasks.length > 0);
     }
 
     if (groupBy === 'priority') {
@@ -705,11 +778,11 @@ export const TasksView: React.FC = () => {
         },
       ];
 
-      return groups.filter((g) => g.tasks.length > 0);
+      return densityMode === 'board' ? groups : groups.filter((g) => g.tasks.length > 0);
     }
 
     return [];
-  }, [groupBy, displayedTasks, activeTaskListId, filterMode]);
+  }, [groupBy, displayedTasks, completedScopedTasks, densityMode, activeTaskListId, filterMode]);
 
   const toggleTaskExpanded = (taskId: string) => {
     setExpandedTaskIds((prev) => {
@@ -878,6 +951,220 @@ export const TasksView: React.FC = () => {
     if (taskWithName?.taskListName) return taskWithName.taskListName;
     return 'My Tasks';
   }, [activeTaskListId, activeList, tasks]);
+
+  // Dedicated Apple Liquid Glass Kanban Board Card
+  const renderBoardCard = (t: TaskItem) => {
+    const isCompleted = t.status === 'completed' || Boolean(t.completed);
+    const isArchived = Boolean(t.archived);
+    const isOverdue = t.due && isPast(parseISO(t.due)) && !isToday(parseISO(t.due)) && !isCompleted;
+    const isDueToday = t.due && isToday(parseISO(t.due)) && !isCompleted;
+    const effectiveTags = getEffectiveTaskTags(t);
+    const completedSubtasks = (t.subtasks || []).filter((s) => s.completed).length;
+    const totalSubtasks = (t.subtasks || []).length;
+    const subtaskProgress = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+
+    return (
+      <div
+        key={t.id}
+        onClick={() => openEditModal(t)}
+        className={`group relative flex flex-col p-3.5 rounded-2xl transition-all duration-200 cursor-pointer task-item-enter swiftui-press ${
+          isCompleted || isArchived
+            ? 'border border-black/[0.04] dark:border-white/[0.04] bg-white/40 dark:bg-zinc-900/30 opacity-60 backdrop-blur-sm'
+            : 'bg-white/90 dark:bg-zinc-900/85 backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.03),inset_0_1px_0_rgba(255,255,255,0.85)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_12px_28px_rgba(0,0,0,0.6)] hover:border-black/[0.12] dark:hover:border-white/[0.16] hover:-translate-y-0.5 active:scale-[0.98]'
+        }`}
+      >
+        {/* Top Header: Circular Checkbox, Priority Badge & Star Action */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleTaskComplete(t.id);
+              }}
+              className={`apple-checkbox rounded-[999px] shrink-0 ${isCompleted ? 'checked' : ''}`}
+              aria-label="Toggle complete"
+            >
+              {isCompleted && (
+                <Check className="h-2.5 w-2.5 stroke-[3.5] text-white apple-check-spring" />
+              )}
+            </button>
+
+            {t.priority === 'high' && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shrink-0">
+                High
+              </span>
+            )}
+
+            {t.priority === 'low' && (
+              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-md bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border border-zinc-500/15 shrink-0">
+                Low
+              </span>
+            )}
+
+            {isArchived && (
+              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+                Archived
+              </span>
+            )}
+          </div>
+
+          {/* Star Toggle */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleStar(t);
+            }}
+            className={`p-1 rounded-lg transition-all duration-150 swiftui-press cursor-pointer shrink-0 ${
+              t.starred
+                ? 'text-[#FF9F0A]'
+                : 'text-zinc-400 hover:text-[#FF9F0A] opacity-0 group-hover:opacity-100'
+            }`}
+            title={t.starred ? 'Starred task' : 'Star task'}
+          >
+            <Star className={`h-3.5 w-3.5 ${t.starred ? 'fill-[#FF9F0A] text-[#FF9F0A]' : ''}`} />
+          </button>
+        </div>
+
+        {/* Task Title */}
+        <h4
+          className={`text-[13px] font-semibold leading-snug tracking-tight line-clamp-2 transition-colors ${
+            isCompleted
+              ? 'line-through text-zinc-400 dark:text-zinc-500'
+              : 'text-zinc-900 dark:text-zinc-100 group-hover:text-[#007AFF] dark:group-hover:text-[#0A84FF]'
+          }`}
+        >
+          {t.title}
+        </h4>
+
+        {/* Notes preview */}
+        {t.notes && (
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 leading-relaxed">
+            {t.notes}
+          </p>
+        )}
+
+        {/* Subtask Progress */}
+        {totalSubtasks > 0 && (
+          <div className="mt-2.5 pt-2 border-t border-zinc-100 dark:border-white/[0.04]">
+            <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 dark:text-zinc-500 mb-1">
+              <span className="flex items-center gap-1">
+                <CheckSquare className="h-3 w-3" />
+                <span>Subtasks</span>
+              </span>
+              <span>{completedSubtasks}/{totalSubtasks}</span>
+            </div>
+            <div className="h-1 w-full bg-zinc-100 dark:bg-white/[0.08] rounded-md overflow-hidden">
+              <div
+                className="h-full bg-[#007AFF] transition-all duration-300 rounded-md"
+                style={{ width: `${subtaskProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {effectiveTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2.5">
+            {effectiveTags.map((tg) => (
+              <span
+                key={tg}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedTag(selectedTag === tg.toLowerCase() ? null : tg.toLowerCase());
+                }}
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-md border transition-all duration-150 cursor-pointer shadow-xs active:scale-95 swiftui-press ${
+                  selectedTag === tg.toLowerCase()
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white font-semibold'
+                    : 'bg-zinc-100/70 dark:bg-white/[0.05] text-zinc-600 dark:text-zinc-400 border-black/[0.04] dark:border-white/[0.06] hover:border-zinc-300 dark:hover:border-zinc-700'
+                }`}
+              >
+                #{tg}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Footer: Due date, focus metrics, and progressive disclosure actions */}
+        <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-zinc-100 dark:border-white/[0.04]">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+            {t.due ? (
+              <span
+                className={`text-[10px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 ${
+                  isOverdue
+                    ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 font-semibold'
+                    : isDueToday
+                    ? 'text-[#007AFF] dark:text-[#0A84FF] bg-blue-50 dark:bg-blue-950/40 font-semibold'
+                    : 'text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-white/[0.06]'
+                }`}
+              >
+                <Clock className="h-2.5 w-2.5 shrink-0" />
+                <span>{formatGoogleTasksDue(t.due)}</span>
+              </span>
+            ) : (
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-600 font-mono">
+                No due date
+              </span>
+            )}
+
+            {t.totalFocusSeconds > 0 && (
+              <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100/60 dark:bg-white/[0.04]">
+                <Clock className="h-2.5 w-2.5 text-[#007AFF]" />
+                {formatSecondsToHoursMinutes(t.totalFocusSeconds)}
+              </span>
+            )}
+          </div>
+
+          {/* Quick Actions (Progressive disclosure on hover) */}
+          <div
+            className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {!isCompleted && !isArchived && (
+              <button
+                type="button"
+                onClick={() => handleStartFocus(t)}
+                className="p-1 rounded-md text-zinc-400 hover:text-[#007AFF] hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-colors cursor-pointer swiftui-press"
+                title="Focus on this task"
+              >
+                <Clock className="h-3 w-3 text-[#007AFF]" />
+              </button>
+            )}
+
+            {isArchived || isCompleted ? (
+              <button
+                type="button"
+                onClick={() => unarchiveTask(t.id)}
+                className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-colors cursor-pointer swiftui-press"
+                title="Restore task"
+              >
+                <RotateCcw className="h-3 w-3" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => archiveTask(t.id)}
+                className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] transition-colors cursor-pointer swiftui-press"
+                title="Archive task"
+              >
+                <Archive className="h-3 w-3" />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => deleteTask(t.id)}
+              className="p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer swiftui-press"
+              title="Delete task"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Render a task item across density modes
   const renderTaskItem = (t: TaskItem) => {
@@ -1790,6 +2077,7 @@ export const TasksView: React.FC = () => {
                 className="bg-transparent text-xs font-medium text-zinc-600 dark:text-zinc-300 px-2 py-1 focus:outline-none cursor-pointer"
               >
                 <option value="due" className="dark:bg-zinc-900">Due Date</option>
+                <option value="status" className="dark:bg-zinc-900">Status</option>
                 <option value="priority" className="dark:bg-zinc-900">Priority</option>
                 <option value="none" className="dark:bg-zinc-900">Flat List</option>
               </select>
@@ -1978,26 +2266,40 @@ export const TasksView: React.FC = () => {
                 {taskGroups.map((group) => (
                   <div
                     key={group.id}
-                    className="apple-card-surface liquid-glass-card p-4 flex flex-col gap-2 min-w-0"
+                    className="flex flex-col rounded-3xl bg-zinc-100/60 dark:bg-white/[0.03] backdrop-blur-md border border-black/[0.04] dark:border-white/[0.06] p-3.5 min-w-0 transition-all duration-200"
                   >
-                    <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-white/[0.06]">
-                      <div className="flex items-center gap-1.5 min-w-0 font-bold text-xs text-zinc-800 dark:text-zinc-200">
-                        {group.icon}
-                        <span className="truncate">{group.title}</span>
+                    {/* Swimlane Column Header */}
+                    <div className="flex items-center justify-between pb-3 px-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="p-1.5 rounded-xl bg-white dark:bg-white/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-black/[0.04] dark:border-white/[0.08]">
+                          {group.icon}
+                        </div>
+                        <span className={`text-xs font-bold truncate ${group.accentClass}`}>
+                          {group.title}
+                        </span>
                       </div>
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-zinc-100 dark:bg-white/[0.06] text-zinc-500">
+                      <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-white/80 dark:bg-white/[0.08] text-zinc-600 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.06] shadow-xs">
                         {group.tasks.length}
                       </span>
                     </div>
-                    <div className="space-y-2 mt-1 overflow-y-auto max-h-[70vh]">
-                      {group.tasks.map(renderTaskItem)}
+
+                    {/* Swimlane Column Cards */}
+                    <div className="space-y-2.5 overflow-y-auto max-h-[calc(100vh-280px)] pr-0.5">
+                      {group.tasks.length > 0 ? (
+                        group.tasks.map(renderBoardCard)
+                      ) : (
+                        <div className="py-10 px-4 text-center border border-dashed border-zinc-200/80 dark:border-white/[0.08] rounded-2xl flex flex-col items-center justify-center gap-1.5 text-zinc-400 dark:text-zinc-500">
+                          <ListTodo className="h-5 w-5 stroke-1 opacity-50" />
+                          <span className="text-[11px]">No tasks</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start animate-fade-in">
-                {displayedTasks.map(renderTaskItem)}
+                {displayedTasks.map(renderBoardCard)}
               </div>
             )
           ) : taskGroups.length > 0 ? (
@@ -2057,12 +2359,14 @@ export const TasksView: React.FC = () => {
         </div>
 
         {/* Collapsible Completed Section */}
-        {((filterMode === 'active' && completedScopedTasks.length > 0) || filterMode === 'all') && activeTaskListId !== 'archived_view' && (
+        {((filterMode === 'active' && completedScopedTasks.length > 0) || filterMode === 'all') &&
+          activeTaskListId !== 'archived_view' &&
+          (densityMode !== 'board' || groupBy !== 'status') && (
           <div className="pt-2 space-y-2 animate-fade-in">
             <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setIsCompletedSectionOpen(!isCompletedSectionOpen)}
+                onClick={toggleCompletedSection}
                 className="flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors group cursor-pointer swiftui-press"
               >
                 <ChevronRight
