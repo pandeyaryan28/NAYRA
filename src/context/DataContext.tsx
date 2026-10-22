@@ -1478,19 +1478,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return false;
           };
 
+          const normalizeStr = (s?: string | null) => (s || '').replace(/\r\n/g, '\n').trim();
+          const normalizeDateStr = (d?: string | null) => {
+            if (!d) return '';
+            try {
+              return new Date(d).toISOString().slice(0, 10);
+            } catch {
+              return d.trim();
+            }
+          };
+
           const isTaskDirty = (incoming: TaskItem, existing?: TaskItem) => {
             if (!existing) return true;
             return (
-              incoming.title !== existing.title ||
+              normalizeStr(incoming.title) !== normalizeStr(existing.title) ||
               incoming.status !== existing.status ||
-              incoming.completed !== existing.completed ||
-              incoming.archived !== existing.archived ||
+              Boolean(incoming.completed) !== Boolean(existing.completed) ||
+              Boolean(incoming.archived) !== Boolean(existing.archived) ||
               incoming.taskListId !== existing.taskListId ||
-              incoming.taskListName !== existing.taskListName ||
               incoming.googleTaskId !== existing.googleTaskId ||
-              incoming.due !== existing.due ||
-              incoming.notes !== existing.notes ||
-              incoming.priority !== existing.priority ||
+              normalizeDateStr(incoming.due) !== normalizeDateStr(existing.due) ||
+              normalizeStr(incoming.notes) !== normalizeStr(existing.notes) ||
+              (incoming.priority || 'medium') !== (existing.priority || 'medium') ||
               (incoming.subtasks?.length ?? 0) !== (existing.subtasks?.length ?? 0)
             );
           };
@@ -2488,7 +2497,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFocusSessions(nextSessions);
     focusSessionsRef.current = nextSessions;
 
-    // Update credited tasks in memory and Firestore
+    // Update credited tasks in memory and Firestore (updateTask handles persisting to Firestore)
     if (sessionData.taskTimeAllocations && Object.keys(sessionData.taskTimeAllocations).length > 0) {
       for (const [taskId, allocatedSeconds] of Object.entries(sessionData.taskTimeAllocations)) {
         if (allocatedSeconds > 0) {
@@ -2499,13 +2508,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             totalFocusSeconds: newSec,
             pomodoroCount: newCnt,
           });
-          if (effectiveUid) {
-            setDoc(
-              doc(getUserTasksCollection(effectiveUid), taskId),
-              { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
-              { merge: true }
-            ).catch(console.warn);
-          }
         }
       }
     } else if (sessionData.taskIds && sessionData.taskIds.length > 0) {
@@ -2518,13 +2520,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           totalFocusSeconds: newSec,
           pomodoroCount: newCnt,
         });
-        if (effectiveUid) {
-          setDoc(
-            doc(getUserTasksCollection(effectiveUid), taskId),
-            { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
-            { merge: true }
-          ).catch(console.warn);
-        }
       }
     } else if (sessionData.taskId) {
       const currentTask = tasksRef.current.find((t) => t.id === sessionData.taskId) || tasks.find((t) => t.id === sessionData.taskId);
@@ -2534,13 +2529,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         totalFocusSeconds: newSec,
         pomodoroCount: newCnt,
       });
-      if (effectiveUid) {
-        setDoc(
-          doc(getUserTasksCollection(effectiveUid), sessionData.taskId),
-          { totalFocusSeconds: newSec, pomodoroCount: newCnt, updatedAt: new Date().toISOString() },
-          { merge: true }
-        ).catch(console.warn);
-      }
     }
 
     if (effectiveUid) {

@@ -150,8 +150,28 @@ export interface ActiveTasksCloudDoc {
 
 export const getUserActiveTasksDoc = (userId: string) => doc(db, 'users', userId, 'config', 'activeTasks');
 
+const TASKS_STORAGE_HASH_KEY = 'nayra_last_synced_tasks_hash';
+const TIMER_STORAGE_HASH_KEY = 'nayra_last_synced_timer_hash';
+
+function getStoredHash(key: string): string {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem(key) || '';
+    }
+  } catch {}
+  return '';
+}
+
+function setStoredHash(key: string, val: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(key, val);
+    }
+  } catch {}
+}
+
 // Debounce and signature guard for active tasks sync to avoid write loops and excessive billing
-let lastSyncedTasksHash = '';
+let lastSyncedTasksHash = getStoredHash(TASKS_STORAGE_HASH_KEY);
 let pendingTasksSyncTimer: any = null;
 let lastSyncedTasksTimestamp = 0;
 const TASKS_SYNC_DEBOUNCE_MS = 2000;
@@ -185,6 +205,7 @@ export async function syncActiveTasksToFirestore(
   const executeSync = async () => {
     try {
       lastSyncedTasksHash = currentHash;
+      setStoredHash(TASKS_STORAGE_HASH_KEY, currentHash);
       lastSyncedTasksTimestamp = Date.now();
       const ref = getUserActiveTasksDoc(uid);
       await setDoc(ref, {
@@ -261,7 +282,7 @@ export async function fetchActiveTasksFromFirestore(
 }
 
 // In-memory guard to prevent redundant / rapid loop timer writes
-let lastSyncedTimerStateHash = '';
+let lastSyncedTimerStateHash = getStoredHash(TIMER_STORAGE_HASH_KEY);
 let lastSyncedTimerTimestamp = 0;
 const MIN_TIMER_SYNC_INTERVAL_MS = 15000;
 
@@ -283,14 +304,14 @@ export async function syncActiveTimerToFirestore(
 
     const now = Date.now();
     const isStateTransition = stateHash !== lastSyncedTimerStateHash;
-    const isThrottleExceeded = (now - lastSyncedTimerTimestamp) >= MIN_TIMER_SYNC_INTERVAL_MS;
 
-    // Suppress redundant writes: if the state hasn't meaningfully transitioned and interval hasn't elapsed, do NOT write!
-    if (!isStateTransition && !isThrottleExceeded) {
+    // Suppress redundant writes: ONLY write to Firestore if the state has genuinely transitioned
+    if (!isStateTransition) {
       return;
     }
 
     lastSyncedTimerStateHash = stateHash;
+    setStoredHash(TIMER_STORAGE_HASH_KEY, stateHash);
     lastSyncedTimerTimestamp = now;
 
     const ref = doc(db, 'users', uid, 'config', 'activeTimer');
