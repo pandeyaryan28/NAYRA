@@ -29,7 +29,7 @@ export interface FocusContextValue {
   addSessionTask: (task: TaskItem) => void;
   removeSessionTask: (taskId: string) => void;
   getTaskLiveSeconds: (taskId: string) => number;
-  startTimer: () => void;
+  startTimer: (taskToSelect?: any) => void;
   pauseTimer: () => void;
   resumeTimer: () => void;
   stopTimer: () => void;
@@ -698,13 +698,31 @@ export const FocusProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, [timerState, targetEndTime, handleTimerExpiry]);
 
-  const startTimer = useCallback(() => {
+  const startTimer = useCallback((taskToSelect?: any) => {
     isExpiringRef.current = false;
     lastSliceTimeRef.current = Date.now();
     const target = Date.now() + remainingSeconds * 1000;
     setTargetEndTime(target);
     setTimerState('running');
-    broadcastStateTransition('running', mode, remainingSeconds, target, currentCycle, activeTaskIds, selectedTaskId);
+
+    let nextActive = activeTaskIds;
+    let nextSelected = selectedTaskId;
+    // Check if taskToSelect is a valid TaskItem (avoiding synthetic events from onClick={startTimer})
+    if (taskToSelect && typeof taskToSelect === 'object' && typeof taskToSelect.id === 'string') {
+      nextActive = [taskToSelect.id];
+      nextSelected = taskToSelect.id;
+      activeTaskIdsRef.current = nextActive;
+      setActiveTaskIds(nextActive);
+      setSelectedTaskId(nextSelected);
+    } else if (taskToSelect === null) {
+      nextActive = [];
+      nextSelected = null;
+      activeTaskIdsRef.current = nextActive;
+      setActiveTaskIds(nextActive);
+      setSelectedTaskId(nextSelected);
+    }
+
+    broadcastStateTransition('running', mode, remainingSeconds, target, currentCycle, nextActive, nextSelected);
   }, [remainingSeconds, mode, currentCycle, activeTaskIds, selectedTaskId, broadcastStateTransition]);
 
   const pauseTimer = useCallback(() => {

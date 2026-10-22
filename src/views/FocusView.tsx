@@ -226,7 +226,7 @@ export const FocusView: React.FC = () => {
             <Button
               variant="primary"
               size="lg"
-              onClick={startTimer}
+              onClick={() => startTimer()}
               className="gap-2 px-8 rounded-xl shadow-[0_4px_14px_-2px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.25)] dark:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.85)] swiftui-press"
             >
               <Play className="h-5 w-5 fill-current" />

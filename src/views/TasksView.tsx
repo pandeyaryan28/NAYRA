@@ -870,8 +870,7 @@ export const TasksView: React.FC = () => {
   };
 
   const handleStartFocus = (task: TaskItem) => {
-    selectTask(task);
-    startTimer();
+    startTimer(task);
     navigate('/focus');
   };
 

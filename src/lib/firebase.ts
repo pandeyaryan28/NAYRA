@@ -284,41 +284,58 @@ export async function fetchActiveTasksFromFirestore(
 // In-memory guard to prevent redundant / rapid loop timer writes
 let lastSyncedTimerStateHash = getStoredHash(TIMER_STORAGE_HASH_KEY);
 let lastSyncedTimerTimestamp = 0;
+let pendingTimerSyncTimeout: any = null;
+const TIMER_SYNC_DEBOUNCE_MS = 300;
 const MIN_TIMER_SYNC_INTERVAL_MS = 15000;
 
 /**
  * Sync active timer state across extension, tab, and web app via users/{uid}/config/activeTimer
- * Guarded against redundant 1-second countdown writes and rapid cross-client loops.
+ * Guarded against redundant 1-second countdown writes, rapid consecutive task-selection/start transitions,
+ * and rapid cross-client loops via a 300ms trailing debounce and state hash verification.
  */
 export async function syncActiveTimerToFirestore(
   uid: string = OPERATOR_UID,
   state: any
 ): Promise<void> {
   if (!uid || !state) return;
-  try {
-    // When timer is running, remainingSeconds decrements every second, but targetEndTime remains constant.
-    // We only need to write to the cloud when mode, timerState, targetEndTime, or selectedTaskId changes.
-    const stateHash = state.timerState === 'running'
-      ? `${state.timerState}:${state.mode}:${state.targetEndTime || 0}:${state.selectedTaskId || ''}:${(state.activeTaskIds || []).sort().join(',')}`
-      : `${state.timerState}:${state.mode}:${state.remainingSeconds ?? ''}:${state.selectedTaskId || ''}:${(state.activeTaskIds || []).sort().join(',')}`;
 
-    const now = Date.now();
-    const isStateTransition = stateHash !== lastSyncedTimerStateHash;
-
-    // Suppress redundant writes: ONLY write to Firestore if the state has genuinely transitioned
-    if (!isStateTransition) {
-      return;
-    }
-
-    lastSyncedTimerStateHash = stateHash;
-    setStoredHash(TIMER_STORAGE_HASH_KEY, stateHash);
-    lastSyncedTimerTimestamp = now;
-
-    const ref = doc(db, 'users', uid, 'config', 'activeTimer');
-    await setDoc(ref, state, { merge: true });
-  } catch (err) {
-    console.warn('[Firebase] Could not sync active timer to Firestore:', err);
+  if (pendingTimerSyncTimeout) {
+    clearTimeout(pendingTimerSyncTimeout);
+    pendingTimerSyncTimeout = null;
   }
+
+  return new Promise<void>((resolve) => {
+    pendingTimerSyncTimeout = setTimeout(async () => {
+      pendingTimerSyncTimeout = null;
+      try {
+        // When timer is running, remainingSeconds decrements every second, but targetEndTime remains constant.
+        // We only need to write to the cloud when mode, timerState, targetEndTime, or selectedTaskId changes.
+        const stateHash = state.timerState === 'running'
+          ? `${state.timerState}:${state.mode}:${state.targetEndTime || 0}:${state.selectedTaskId || ''}:${(state.activeTaskIds || []).sort().join(',')}`
+          : `${state.timerState}:${state.mode}:${state.remainingSeconds ?? ''}:${state.selectedTaskId || ''}:${(state.activeTaskIds || []).sort().join(',')}`;
+
+        const storedHash = getStoredHash(TIMER_STORAGE_HASH_KEY);
+        const isStateTransition = stateHash !== (storedHash || lastSyncedTimerStateHash);
+
+        // Suppress redundant writes: ONLY write to Firestore if the state has genuinely transitioned
+        if (!isStateTransition) {
+          resolve();
+          return;
+        }
+
+        lastSyncedTimerStateHash = stateHash;
+        setStoredHash(TIMER_STORAGE_HASH_KEY, stateHash);
+        lastSyncedTimerTimestamp = Date.now();
+
+        const ref = doc(db, 'users', uid, 'config', 'activeTimer');
+        await setDoc(ref, state, { merge: true });
+        resolve();
+      } catch (err) {
+        console.warn('[Firebase] Could not sync active timer to Firestore:', err);
+        resolve();
+      }
+    }, TIMER_SYNC_DEBOUNCE_MS);
+  });
 }
 
 /**
@@ -334,7 +351,16 @@ export function subscribeActiveTimerFromFirestore(
       ref,
       (snap) => {
         if (snap.exists()) {
-          onUpdate(snap.data());
+          const data = snap.data();
+          if (data) {
+            // Absorb incoming remote state hash into local cache so this client does not echo it back
+            const stateHash = data.timerState === 'running'
+              ? `${data.timerState}:${data.mode}:${data.targetEndTime || 0}:${data.selectedTaskId || ''}:${(data.activeTaskIds || []).sort().join(',')}`
+              : `${data.timerState}:${data.mode}:${data.remainingSeconds ?? ''}:${data.selectedTaskId || ''}:${(data.activeTaskIds || []).sort().join(',')}`;
+            lastSyncedTimerStateHash = stateHash;
+            setStoredHash(TIMER_STORAGE_HASH_KEY, stateHash);
+          }
+          onUpdate(data);
         }
       },
       (err) => {
