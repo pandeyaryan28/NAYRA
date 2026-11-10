@@ -989,18 +989,6 @@ export const TasksView: React.FC = () => {
               )}
             </button>
 
-            {t.priority === 'high' && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 shrink-0">
-                High
-              </span>
-            )}
-
-            {t.priority === 'low' && (
-              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-md bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border border-zinc-500/15 shrink-0">
-                Low
-              </span>
-            )}
-
             {isArchived && (
               <span className="text-[10px] font-medium px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
                 Archived
@@ -1225,13 +1213,6 @@ export const TasksView: React.FC = () => {
                       <Clock className="h-2.5 w-2.5 shrink-0" />
                       <span>{formatGoogleTasksDue(t.due)}</span>
                     </span>
-                  )}
-
-                  {/* Priority Tag */}
-                  {t.priority === 'high' && (
-                    <Badge variant="danger" className="text-[10px] py-0 px-1.5">
-                      High
-                    </Badge>
                   )}
 
                   {/* Focus duration badge */}
@@ -1496,10 +1477,6 @@ export const TasksView: React.FC = () => {
                   <Clock className="h-3 w-3" />
                   {formatSecondsToHoursMinutes(t.totalFocusSeconds)} ({t.pomodoroCount} pomodoros)
                 </span>
-              )}
-
-              {t.priority === 'high' && (
-                <Badge variant="danger">High</Badge>
               )}
 
               {isArchived && (

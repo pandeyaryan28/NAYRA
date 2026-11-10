@@ -301,17 +301,6 @@ export const TaskFocusBreakdown: React.FC<TaskFocusBreakdownProps> = ({
                         >
                           {task.title}
                         </span>
-
-                        {task.priority === 'high' && (
-                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200/50 dark:border-red-900/50">
-                            HIGH
-                          </span>
-                        )}
-                        {task.priority === 'medium' && (
-                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/50">
-                            MED
-                          </span>
-                        )}
                       </div>
 
                       {/* Tags */}

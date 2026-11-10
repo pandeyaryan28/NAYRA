@@ -1181,11 +1181,6 @@ export const CalendarView: React.FC = () => {
                                 <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200">
                                   Task
                                 </span>
-                                {t.priority === 'high' && (
-                                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-semibold">
-                                    High Priority
-                                  </span>
-                                )}
                               </div>
                               {t.notes && (
                                 <p className="text-xs text-zinc-500 dark:text-zinc-400 pt-0.5">
