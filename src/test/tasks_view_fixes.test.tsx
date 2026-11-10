@@ -135,8 +135,8 @@ describe('Tasks View Fixes & Reliability', () => {
         id: 'task_1',
         title: 'Task Compact One',
         taskListId: 'list_default',
-        status: 'completed',
-        completed: true,
+        status: 'needsAction',
+        completed: false,
         priority: 'medium',
       },
       {
@@ -155,12 +155,16 @@ describe('Tasks View Fixes & Reliability', () => {
       </TestWrapper>
     );
 
+    expect(await screen.findByText('Task Compact One')).toBeInTheDocument();
     expect(await screen.findByText('Task Active Two')).toBeInTheDocument();
+
+    const completeButtons = screen.getAllByLabelText('Toggle complete');
+    fireEvent.click(completeButtons[0]);
+
     // Task Compact One is completed and initially hidden in collapsed Completed section
-    expect(screen.queryByText('Task Compact One')).not.toBeInTheDocument();
-    const completedToggle = screen.getByRole('button', { name: /^Completed/i });
+    const completedToggle = await screen.findByRole('button', { name: /^Completed/i });
     fireEvent.click(completedToggle);
-    expect(screen.getByText('Task Compact One')).toBeInTheDocument();
+    expect(await screen.findByText('Task Compact One')).toBeInTheDocument();
 
     // Switch to Comfortable
     const comfortableBtn = screen.getByRole('button', { name: /^Comfortable$/i });

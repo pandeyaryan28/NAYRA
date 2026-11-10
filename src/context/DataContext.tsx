@@ -685,7 +685,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let uTasks = safeLocalStorageGet<TaskItem[]>(
           `nayra_${uid}_tasks`,
           isUserGuest ? INITIAL_TASKS : []
-        );
+        ).filter((t) => !t.archived && t.status !== 'completed' && !t.completed);
         if (idRemap.size > 0) {
           uTasks = uTasks.map((t) => {
             const mapped = idRemap.get(t.taskListId);
@@ -1578,9 +1578,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           // Only delete tasks if all lists were successfully fetched, avoiding false deletions on transient network errors.
           // Check across ALL remote lists so moving a task between lists on Google Tasks doesn't trigger deletion.
+          // Completed tasks are excluded from Google active fetches, so only active tasks are eligible for missing-pruning.
           if (allListsFetchedSuccessfully) {
             initialTasks.forEach((t) => {
-              if (t.googleTaskId && !allRemoteGoogleTaskIds.has(t.googleTaskId)) {
+              if (t.googleTaskId && !t.completed && t.status !== 'completed' && !t.archived && !allRemoteGoogleTaskIds.has(t.googleTaskId)) {
                 allDeletedTaskIds.push(t.id);
                 unifiedMap.delete(t.googleTaskId);
                 unifiedMap.delete(t.id);
@@ -1631,11 +1632,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setTasks(newArr);
 
           if (user && !user.isGuest) {
-            // Write ONLY tasks that have actual field changes compared to initial state
-            const dirtyTasks = newArr.filter((item) => {
-              const existing = initialTasksMap.get(item.id) || (item.googleTaskId ? googleIdToLocalMap.get(item.googleTaskId) : undefined);
-              return isTaskDirty(item, existing);
-            });
+            // Write ONLY tasks that have actual field changes compared to initial state, excluding completed/archived tasks
+            const dirtyTasks = newArr
+              .filter((item) => !item.archived && item.status !== 'completed' && !item.completed)
+              .filter((item) => {
+                const existing = initialTasksMap.get(item.id) || (item.googleTaskId ? googleIdToLocalMap.get(item.googleTaskId) : undefined);
+                return isTaskDirty(item, existing);
+              });
 
             dirtyTasks.forEach((taskItem) => {
               setDoc(doc(getUserTasksCollection(user.uid), taskItem.id), sanitizeForFirestore(taskItem), { merge: true }).catch(console.warn);

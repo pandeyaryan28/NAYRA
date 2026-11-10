@@ -371,8 +371,8 @@ export async function fetchGoogleTasks(
 
   do {
     const params = new URLSearchParams({
-      showCompleted: 'true',
-      showHidden: 'true',
+      showCompleted: 'false',
+      showHidden: 'false',
       maxResults: '100',
     });
     if (pageToken) {
@@ -398,7 +398,7 @@ export async function fetchGoogleTasks(
       ? taskListId
       : `gtl_${taskListId}`);
 
-  const activeItems = allRawItems.filter((t) => !t.deleted);
+  const activeItems = allRawItems.filter((t) => !t.deleted && t.status !== 'completed' && !t.hidden);
 
   // Group subtasks by parent id
   const itemsById = new Map<string, any>();
@@ -432,6 +432,7 @@ export async function fetchGoogleTasks(
       title: t.title || 'Untitled Task',
       notes: t.notes || '',
       status: isCompleted ? 'completed' : 'needsAction',
+      completed: isCompleted,
       archived: Boolean(t.hidden),
       archivedAt: t.hidden ? (t.completed || t.updated || new Date().toISOString()) : undefined,
       due: t.due ? (t.due.includes('T00:00:00') ? t.due.split('T')[0] : t.due.replace('.000Z', '').replace('Z', '')) : undefined,
