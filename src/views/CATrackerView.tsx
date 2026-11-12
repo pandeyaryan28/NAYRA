@@ -175,30 +175,15 @@ export const CATrackerView: React.FC = () => {
           </div>
         </div>
 
-        {/* Apple Dynamic Island Style Status Capsule */}
+        {/* Apple-Style Minimalist Toolbar Status & Actions */}
         <div className="flex items-center gap-2 self-start sm:self-center">
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-200/50 dark:bg-zinc-800/50 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-xs text-xs">
-            {/* Streak */}
-            <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-semibold" title={`Current study streak: ${metrics.currentStreakDays} days`}>
-              <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20" />
-              <span>{metrics.currentStreakDays}d</span>
-            </div>
-
-            <span className="w-px h-3 bg-zinc-300 dark:bg-zinc-700" />
-
-            {/* Countdown */}
-            <div className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 font-semibold" title={`${metrics.daysUntilExam} days remaining until exam (${settings.examDate})`}>
-              <Clock className="w-3.5 h-3.5 text-zinc-400" />
-              <span>{metrics.daysUntilExam}d</span>
-            </div>
-
-            <span className="w-px h-3 bg-zinc-300 dark:bg-zinc-700" />
-
-            {/* Cloud Sync Status */}
-            <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400" title={isCloudConnected ? 'Cloud synced to Firestore' : 'Syncing...'}>
-              <Cloud className={`w-3.5 h-3.5 ${isCloudConnected ? 'text-emerald-500' : 'text-amber-500'}`} />
-              <span className="text-[11px] hidden xs:inline">{isCloudConnected ? 'Synced' : 'Syncing'}</span>
-            </div>
+          {/* Cloud Sync Status Pill */}
+          <div
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-200/50 dark:bg-zinc-800/50 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-xs text-xs text-zinc-600 dark:text-zinc-400"
+            title={isCloudConnected ? 'Cloud synced to Firestore' : 'Syncing changes...'}
+          >
+            <Cloud className={`w-3.5 h-3.5 ${isCloudConnected ? 'text-emerald-500' : 'text-amber-500 animate-pulse'}`} />
+            <span className="text-[11px] font-medium">{isCloudConnected ? 'Cloud Synced' : 'Syncing...'}</span>
           </div>
 
           {/* Settings & Backup Trigger Button */}
@@ -208,11 +193,12 @@ export const CATrackerView: React.FC = () => {
               setSettingsModalTab('settings');
               setIsSettingsOpen(true);
             }}
-            className="flex items-center justify-center p-2 rounded-full border border-black/10 dark:border-white/10 bg-white/70 dark:bg-zinc-800/70 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white dark:hover:bg-zinc-700 transition-all shadow-xs swiftui-press active:scale-[0.95]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-white/70 dark:bg-zinc-800/70 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-white dark:hover:bg-zinc-700 transition-all text-xs font-medium shadow-xs swiftui-press active:scale-[0.97]"
             title="Settings & Data Backup"
             aria-label="Open CA Tracker Settings and Backup"
           >
-            <Settings className="w-4 h-4 text-zinc-600 dark:text-zinc-300" />
+            <Settings className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+            <span className="hidden sm:inline">Settings</span>
           </button>
         </div>
       </div>

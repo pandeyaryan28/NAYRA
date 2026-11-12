@@ -28,8 +28,9 @@ import {
   generateId,
   getTodayDateString,
   calculateNextRevisionDate,
+  sanitizeExamDate,
 } from '@/lib/ca/utils';
-import { safeLocalStorageSet } from '@/lib/utils';
+import { safeLocalStorageSet, safeLocalStorageGet } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import {
   DEFAULT_USER_ID,
@@ -65,29 +66,29 @@ function loadCachedSettings(): CAUserSettings {
     const raw = typeof window !== 'undefined' ? localStorage.getItem(CA_STORAGE_KEYS.SETTINGS) : null;
     const dedicatedExamDate =
       typeof window !== 'undefined' && CA_STORAGE_KEYS.TARGET_EXAM_DATE
-        ? localStorage.getItem(CA_STORAGE_KEYS.TARGET_EXAM_DATE)
+        ? safeLocalStorageGet<string | null>(CA_STORAGE_KEYS.TARGET_EXAM_DATE, null)
         : null;
 
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        const resolvedExamDate =
-          (dedicatedExamDate && dedicatedExamDate.trim()) ||
+        const candidateDate =
+          (dedicatedExamDate && typeof dedicatedExamDate === 'string' && dedicatedExamDate.trim()) ||
           (parsed.examDate && String(parsed.examDate).trim()) ||
           DEFAULT_CA_SETTINGS.examDate;
 
         return {
           ...DEFAULT_CA_SETTINGS,
           ...parsed,
-          examDate: resolvedExamDate,
+          examDate: sanitizeExamDate(candidateDate),
         };
       }
     }
 
-    if (dedicatedExamDate && dedicatedExamDate.trim()) {
+    if (dedicatedExamDate && typeof dedicatedExamDate === 'string' && dedicatedExamDate.trim()) {
       return {
         ...DEFAULT_CA_SETTINGS,
-        examDate: dedicatedExamDate.trim(),
+        examDate: sanitizeExamDate(dedicatedExamDate),
       };
     }
   } catch (err) {
@@ -99,10 +100,13 @@ function loadCachedSettings(): CAUserSettings {
 function saveCachedSettings(settings: CAUserSettings): void {
   try {
     if (typeof window !== 'undefined') {
-      safeLocalStorageSet(CA_STORAGE_KEYS.SETTINGS, settings);
-      if (settings.examDate && settings.examDate.trim()) {
-        safeLocalStorageSet(CA_STORAGE_KEYS.TARGET_EXAM_DATE, settings.examDate.trim());
-      }
+      const cleanExamDate = sanitizeExamDate(settings.examDate);
+      const cleanSettings = {
+        ...settings,
+        examDate: cleanExamDate,
+      };
+      safeLocalStorageSet(CA_STORAGE_KEYS.SETTINGS, cleanSettings);
+      safeLocalStorageSet(CA_STORAGE_KEYS.TARGET_EXAM_DATE, cleanExamDate);
     }
   } catch (err) {
     console.warn('[CATrackerContext] Error saving settings to localStorage:', err);
@@ -117,14 +121,14 @@ function resolveSettingsConflict(cached: CAUserSettings, cloudSettings: CAUserSe
     return {
       ...cloudSettings,
       ...cached,
-      examDate: cached.examDate || cloudSettings.examDate || DEFAULT_CA_SETTINGS.examDate,
+      examDate: sanitizeExamDate(cached.examDate || cloudSettings.examDate || DEFAULT_CA_SETTINGS.examDate),
     };
   }
 
   return {
     ...cached,
     ...cloudSettings,
-    examDate: (cloudSettings.examDate && cloudSettings.examDate.trim()) || cached.examDate || DEFAULT_CA_SETTINGS.examDate,
+    examDate: sanitizeExamDate(cloudSettings.examDate || cached.examDate || DEFAULT_CA_SETTINGS.examDate),
   };
 }
 

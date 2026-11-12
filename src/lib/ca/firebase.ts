@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Topic, RevisionRecord, TestRecord, CAUserSettings, Lecture, ScheduleEntry } from '@/types/ca';
+import { sanitizeExamDate } from './utils';
 
 export const isTestEnv =
   (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || Boolean(process.env?.VITEST))) ||
@@ -144,7 +145,11 @@ export async function saveSettingsToFirestore(
 ): Promise<void> {
   try {
     const settingsRef = getUserSettingsDoc(userId);
-    await setDoc(settingsRef, sanitizeForFirestore(settings), { merge: true });
+    const cleanSettings = {
+      ...settings,
+      examDate: sanitizeExamDate(settings.examDate),
+    };
+    await setDoc(settingsRef, sanitizeForFirestore(cleanSettings), { merge: true });
   } catch (err) {
     console.warn(`[Firestore Sync] Failed to save settings:`, err);
   }
@@ -178,10 +183,11 @@ export async function syncSettingsWithCloud(
       const localTime = localSettings.lastSyncedAt ? new Date(localSettings.lastSyncedAt).getTime() : 0;
       const cloudTime = cloudData.lastSyncedAt ? new Date(cloudData.lastSyncedAt).getTime() : 0;
 
-      let resolvedExamDate = (cloudData.examDate && cloudData.examDate.trim()) || localSettings.examDate;
-      if (localTime > cloudTime) {
-        resolvedExamDate = localSettings.examDate;
-      }
+      const resolvedExamDate = sanitizeExamDate(
+        localTime > cloudTime
+          ? localSettings.examDate
+          : (cloudData.examDate || localSettings.examDate)
+      );
 
       const merged: CAUserSettings = {
         ...localSettings,
@@ -189,7 +195,7 @@ export async function syncSettingsWithCloud(
         examDate: resolvedExamDate,
       };
 
-      if (localTime > cloudTime) {
+      if (localTime > cloudTime || cloudData.examDate !== resolvedExamDate) {
         await setDoc(settingsRef, sanitizeForFirestore(merged), { merge: true });
       }
 

@@ -16,6 +16,7 @@ import {
 import { useCATracker } from '@/context/CATrackerContext';
 import { Card } from './components/Card';
 import { Button } from './components/Button';
+import { sanitizeExamDate } from '@/lib/ca/utils';
 
 export const CASettingsTab: React.FC = () => {
   const {
@@ -152,10 +153,10 @@ export const CASettingsTab: React.FC = () => {
           <input
             id="settings-exam-date"
             type="date"
-            value={settings.examDate}
+            value={sanitizeExamDate(settings.examDate)}
             onChange={(e) => {
               if (e.target.value && e.target.value.trim()) {
-                updateSettings({ examDate: e.target.value.trim() });
+                updateSettings({ examDate: sanitizeExamDate(e.target.value) });
               }
             }}
             className="w-full sm:w-auto px-4 py-2.5 text-xs font-medium rounded-2xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"

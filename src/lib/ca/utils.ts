@@ -1,13 +1,41 @@
 import { ConfidenceLevel, SubjectId, TestRecord } from '@/types/ca';
 
 /**
+ * Sanitize exam date string, stripping corrupted backslashes, escape sequences, or extra quotes.
+ * Guarantees a clean, unescaped YYYY-MM-DD date string.
+ */
+export function sanitizeExamDate(dateStr?: string | null): string {
+  if (!dateStr || typeof dateStr !== 'string') return '2027-01-01';
+  try {
+    // 1. Strip all escape backslashes, quotes, and whitespace
+    const cleaned = dateStr.replace(/["'\\]/g, '').trim();
+    // 2. Extract valid YYYY-MM-DD pattern
+    const match = cleaned.match(/\b\d{4}-\d{2}-\d{2}\b/);
+    if (match) return match[0];
+    // 3. Fallback to parseable date
+    const parsed = new Date(cleaned);
+    if (!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth() + 1).padStart(2, '0');
+      const d = String(parsed.getDate()).padStart(2, '0');
+      if (y >= 2024 && y <= 2035) {
+        return `${y}-${m}-${d}`;
+      }
+    }
+    return '2027-01-01';
+  } catch {
+    return '2027-01-01';
+  }
+}
+
+/**
  * Format a date string (YYYY-MM-DD or ISO) into readable text
  */
 export function formatDate(dateString?: string | null): string {
   if (!dateString || typeof dateString !== 'string') return 'Not set';
   try {
-    const clean = dateString.split('T')[0];
-    const parts = clean.split('-');
+    const sanitized = sanitizeExamDate(dateString);
+    const parts = sanitized.split('-');
     if (parts.length === 3) {
       const year = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10);
@@ -23,7 +51,7 @@ export function formatDate(dateString?: string | null): string {
         }
       }
     }
-    const directDate = new Date(dateString);
+    const directDate = new Date(sanitized);
     if (!isNaN(directDate.getTime())) {
       return directDate.toLocaleDateString('en-US', {
         month: 'short',
@@ -31,7 +59,7 @@ export function formatDate(dateString?: string | null): string {
         year: 'numeric',
       });
     }
-    return dateString;
+    return sanitized;
   } catch {
     return dateString;
   }
@@ -102,7 +130,7 @@ export function generateId(prefix: string = 'id'): string {
  * Calculate days remaining until target date (YYYY-MM-DD)
  */
 export function getDaysRemaining(targetDateStr?: string | null, fromDateStr?: string): number {
-  if (!targetDateStr || typeof targetDateStr !== 'string') return 0;
+  if (!targetDateStr) return 0;
   try {
     const today = fromDateStr ? new Date(fromDateStr) : new Date();
     if (isNaN(today.getTime())) {
@@ -110,15 +138,15 @@ export function getDaysRemaining(targetDateStr?: string | null, fromDateStr?: st
     }
     today.setHours(0, 0, 0, 0);
 
-    const cleanStr = targetDateStr.split('T')[0];
+    const cleanStr = sanitizeExamDate(targetDateStr);
     const parts = cleanStr.split('-');
     if (parts.length !== 3) {
-      const direct = new Date(targetDateStr);
+      const direct = new Date(cleanStr);
       if (isNaN(direct.getTime())) return 0;
       direct.setHours(0, 0, 0, 0);
       const diff = direct.getTime() - today.getTime();
       const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-      return isNaN(days) ? 0 : days;
+      return isNaN(days) ? 0 : Math.max(0, days);
     }
 
     const year = parseInt(parts[0], 10);
@@ -133,14 +161,11 @@ export function getDaysRemaining(targetDateStr?: string | null, fromDateStr?: st
     if (isNaN(target.getTime())) {
       return 0;
     }
-    if (target.getFullYear() !== year || target.getMonth() !== month - 1 || target.getDate() !== day) {
-      return 0;
-    }
     target.setHours(0, 0, 0, 0);
 
-    const diffTime = target.getTime() - today.getTime();
-    const result = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return isNaN(result) ? 0 : result;
+    const diffMs = target.getTime() - today.getTime();
+    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return isNaN(days) ? 0 : Math.max(0, days);
   } catch {
     return 0;
   }
