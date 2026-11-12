@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient (Full bleed, no rounded corner) -->
+    <linearGradient id="bgGradMask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141419" />
+      <stop offset="50%" stop-color="#0a0a0d" />
+      <stop offset="100%" stop-color="#060608" />
+    </linearGradient>
+
+    <!-- Prism Glow Filter -->
+    <filter id="prismGlowMask" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="20" result="blur" />
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 0.45 0" result="glow" />
+      <feMerge>
+        <feMergeNode in="glow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="coreBlurMask" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="35" />
+    </filter>
+
+    <linearGradient id="leftStemGradM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+
+    <linearGradient id="diagPrismGradM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="45%" stop-color="#6366F1" />
+      <stop offset="85%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+
+    <linearGradient id="rightStemGradM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC" />
+      <stop offset="50%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+
+    <linearGradient id="glassSpecularM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45" />
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <linearGradient id="depthGradientM" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Full Bleed Background -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#bgGradMask)" />
+
+  <!-- Ethereal Radial Glow scaled to safe area (80% circle safe zone) -->
+  <circle cx="256" cy="256" r="105" fill="#6366F1" opacity="0.22" filter="url(#coreBlurMask)" />
+  <circle cx="210" cy="230" r="65" fill="#06B6D4" opacity="0.18" filter="url(#coreBlurMask)" />
+  <circle cx="300" cy="280" r="65" fill="#A855F7" opacity="0.20" filter="url(#coreBlurMask)" />
+
+  <!-- Scaled Mark centered inside 80% circle (scale 0.78 around center 256,256) -->
+  <g transform="translate(256, 256) scale(0.78) translate(-256, -256)" filter="url(#prismGlowMask)">
+    <!-- 1. Left Vertical Prism Stem -->
+    <path d="M 148 144 C 148 135 155 128 164 128 L 204 128 C 213 128 220 135 220 144 L 220 368 C 220 377 213 384 204 384 L 164 384 C 155 384 148 377 148 368 Z" fill="url(#leftStemGradM)" />
+    <path d="M 148 144 C 148 135 155 128 164 128 L 204 128 C 213 128 220 135 220 144 L 220 230 L 148 180 Z" fill="url(#glassSpecularM)" />
+
+    <!-- 2. Right Vertical Prism Stem -->
+    <path d="M 292 144 C 292 135 299 128 308 128 L 348 128 C 357 128 364 135 364 144 L 364 368 C 364 377 357 384 348 384 L 308 384 C 299 384 292 377 292 368 Z" fill="url(#rightStemGradM)" />
+    <path d="M 292 270 L 364 320 L 364 368 C 364 377 357 384 348 384 L 308 384 C 299 384 292 377 292 368 Z" fill="url(#depthGradientM)" />
+
+    <!-- 3. Dynamic Diagonal Refractive Prism Bridge -->
+    <path d="M 148 132 C 148 126 154 122 160 126 L 360 366 C 366 373 360 384 350 384 L 298 384 C 291 384 285 380 281 374 L 152 152 C 149 146 148 139 148 132 Z" fill="url(#diagPrismGradM)" />
+    <path d="M 152 142 L 356 376" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.65" />
+    <path d="M 150 134 C 150 129 155 126 160 129 L 276 256 L 260 272 L 148 152 Z" fill="url(#glassSpecularM)" opacity="0.6" />
+  </g>
+</svg>

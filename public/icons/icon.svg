@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181f" />
+      <stop offset="50%" stop-color="#0e0e13" />
+      <stop offset="100%" stop-color="#060608" />
+    </linearGradient>
+
+    <!-- Specular Rim Gradient -->
+    <linearGradient id="rimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28" />
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0.08" />
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.02" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.12" />
+    </linearGradient>
+
+    <!-- Prism Glow Filter -->
+    <filter id="prismGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="24" result="blur" />
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 0.5 0" result="glow" />
+      <feMerge>
+        <feMergeNode in="glow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Ambient Core Blur -->
+    <filter id="coreBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="40" />
+    </filter>
+
+    <!-- Gradient Left Stem (Cyan to Electric Blue) -->
+    <linearGradient id="leftStemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+
+    <!-- Gradient Diagonal Prism (Cyan to Indigo to Violet) -->
+    <linearGradient id="diagPrismGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="45%" stop-color="#6366F1" />
+      <stop offset="85%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+
+    <!-- Gradient Right Stem (Violet to Orchid to Fuchsia) -->
+    <linearGradient id="rightStemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC" />
+      <stop offset="50%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+
+    <!-- Glass Specular Highlight -->
+    <linearGradient id="glassSpecular" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45" />
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- Inner Shadow / Depth -->
+    <linearGradient id="depthGradient" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Squircle with Apple continuous curve -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bgGrad)" />
+
+  <!-- Ethereal Radial Glow behind Prism -->
+  <circle cx="256" cy="256" r="130" fill="#6366F1" opacity="0.22" filter="url(#coreBlur)" />
+  <circle cx="200" cy="220" r="80" fill="#06B6D4" opacity="0.18" filter="url(#coreBlur)" />
+  <circle cx="312" cy="290" r="80" fill="#A855F7" opacity="0.20" filter="url(#coreBlur)" />
+
+  <!-- The NAYRA Prism Mark -->
+  <g filter="url(#prismGlow)">
+    <!-- 1. Left Vertical Prism Stem -->
+    <path d="M 148 144 C 148 135 155 128 164 128 L 204 128 C 213 128 220 135 220 144 L 220 368 C 220 377 213 384 204 384 L 164 384 C 155 384 148 377 148 368 Z" fill="url(#leftStemGrad)" />
+    <!-- Left Stem Specular Edge -->
+    <path d="M 148 144 C 148 135 155 128 164 128 L 204 128 C 213 128 220 135 220 144 L 220 230 L 148 180 Z" fill="url(#glassSpecular)" />
+
+    <!-- 2. Right Vertical Prism Stem -->
+    <path d="M 292 144 C 292 135 299 128 308 128 L 348 128 C 357 128 364 135 364 144 L 364 368 C 364 377 357 384 348 384 L 308 384 C 299 384 292 377 292 368 Z" fill="url(#rightStemGrad)" />
+    <!-- Right Stem Depth -->
+    <path d="M 292 270 L 364 320 L 364 368 C 364 377 357 384 348 384 L 308 384 C 299 384 292 377 292 368 Z" fill="url(#depthGradient)" />
+
+    <!-- 3. Dynamic Diagonal Refractive Prism Bridge -->
+    <!-- Connects Top-Left to Bottom-Right across the stems with faceted cuts -->
+    <path d="M 148 132 C 148 126 154 122 160 126 L 360 366 C 366 373 360 384 350 384 L 298 384 C 291 384 285 380 281 374 L 152 152 C 149 146 148 139 148 132 Z" fill="url(#diagPrismGrad)" />
+
+    <!-- Specular Facet Ridge on Diagonal -->
+    <path d="M 152 142 L 356 376" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.65" />
+    <path d="M 150 134 C 150 129 155 126 160 129 L 276 256 L 260 272 L 148 152 Z" fill="url(#glassSpecular)" opacity="0.6" />
+  </g>
+
+  <!-- Apple Liquid Glass Specular Rim Border -->
+  <rect x="1" y="1" width="510" height="510" rx="115" fill="none" stroke="url(#rimGrad)" stroke-width="2" />
+</svg>

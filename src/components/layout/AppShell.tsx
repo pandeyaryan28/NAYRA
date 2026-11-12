@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { PWAInstallPrompt, OfflineIndicator, UpdateAvailableToast } from '@/components/pwa';
 
 export const AppShell: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -43,7 +44,15 @@ export const AppShell: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden bg-gradient-to-br from-[#f8f9fc] via-[#f1f2f6] to-[#e8eaf0] dark:from-[#111113] dark:via-[#161619] dark:to-[#0f0f11] font-sans text-zinc-900 dark:text-zinc-100 select-none">
+    <div
+      className="relative flex h-screen h-[100dvh] w-screen overflow-hidden bg-gradient-to-br from-[#f8f9fc] via-[#f1f2f6] to-[#e8eaf0] dark:from-[#111113] dark:via-[#161619] dark:to-[#0f0f11] font-sans text-zinc-900 dark:text-zinc-100 select-none"
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+      }}
+    >
       {/* Ambient background refraction depth (multi-point optical blur) */}
       <div className="pointer-events-none fixed -top-28 -left-28 w-96 h-96 rounded-[999px] bg-blue-500/12 dark:bg-blue-600/12 blur-[100px] z-0" />
       <div className="pointer-events-none fixed top-1/4 -right-28 w-[30rem] h-[30rem] rounded-[999px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[120px] z-0" />
@@ -65,6 +74,11 @@ export const AppShell: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* PWA Lifecycle & Notification Layer */}
+      <OfflineIndicator />
+      <UpdateAvailableToast />
+      <PWAInstallPrompt />
     </div>
   );
 };
