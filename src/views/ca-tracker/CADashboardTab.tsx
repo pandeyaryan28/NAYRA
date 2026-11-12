@@ -29,8 +29,8 @@ import { formatMinutes } from '@/lib/ca/utils';
 import { loadExerciseAttempts, economicsExercises } from '@/lib/ca/exerciseStorage';
 
 interface CADashboardTabProps {
-  onNavigateTab?: (tab: string) => void;
-  onNavigateToExercise?: (chapterNum?: number, unitNum?: number) => void;
+  onNavigateTab?: (tab: string, filter?: string) => void;
+  onNavigateToExercise?: (chapterNum?: number, unitNum?: number, subjectId?: string) => void;
 }
 
 export const CADashboardTab: React.FC<CADashboardTabProps> = ({
@@ -167,9 +167,9 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* Hero Command Center Banner */}
-      <Card className="relative overflow-hidden bg-white/80 dark:bg-zinc-900/70 backdrop-blur-2xl border border-black/[0.06] dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-6 sm:p-8 rounded-3xl">
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-xl">
+      <Card className="relative overflow-hidden bg-white/80 dark:bg-zinc-900/70 backdrop-blur-2xl border border-black/[0.06] dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-6 sm:p-8 rounded-3xl space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">
                 ICAI CA Foundation 2024 New Scheme
@@ -185,6 +185,11 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               >
                 {metrics.aggregatePassingLikelihood}
               </Badge>
+              {syncNotice && (
+                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full animate-fade-in">
+                  ✓ Synced to Cloud
+                </span>
+              )}
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -195,95 +200,88 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               {metrics.completedTopics} of {metrics.totalTopics} topics completed across all 4
               papers. {totalRemainingStudyHours} hrs of study remaining.
             </p>
-
-            {/* Live Precision Countdown Ticker */}
-            <div className="pt-2">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-1.5">
-                <Clock className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                <span>Target Countdown:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewExamDate(settings.examDate);
-                    setShowDatePicker(true);
-                  }}
-                  className="underline hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  Edit Exam Date ({settings.examDate})
-                </button>
-                {syncNotice && (
-                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 rounded-full animate-fade-in">
-                    ✓ Synced to Cloud
-                  </span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-w-sm">
-                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
-                  <span className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums block">
-                    {timeRemaining.days}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Days</span>
-                </div>
-                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
-                  <span className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums block">
-                    {timeRemaining.hours}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Hours</span>
-                </div>
-                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
-                  <span className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums block">
-                    {timeRemaining.minutes}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Mins</span>
-                </div>
-                <div className="bg-black/[0.03] dark:bg-white/[0.05] rounded-2xl p-1.5 sm:p-2 text-center border border-black/[0.04] dark:border-white/[0.08]">
-                  <span className="text-base sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums block">
-                    {timeRemaining.seconds}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-semibold">Secs</span>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Quick Metrics Columns */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 border-t lg:border-t-0 lg:border-l border-black/[0.06] dark:border-white/10 pt-4 lg:pt-0 lg:pl-8">
-            <div className="space-y-1">
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Daily Study Streak</span>
-              <div className="text-xl sm:text-2xl font-bold text-orange-500 tabular-nums flex items-center gap-1.5">
-                <Flame className="w-5 h-5 text-orange-500 fill-orange-500/20" />
-                {metrics.currentStreakDays}d
-              </div>
-              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
-                Best: {metrics.bestStreakDays} days
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Study Logged</span>
-              <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums flex items-center gap-1.5">
-                <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                {metrics.totalStudyHoursLogged}h
-              </div>
-              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
-                Goal: {settings.dailyGoalHours}h / day
-              </span>
-            </div>
-
-            <div className="space-y-1 col-span-2 sm:col-span-1">
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Pace Required</span>
-              <div className="text-xl sm:text-2xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums flex items-center gap-1.5">
-                <Target className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                {requiredDailyStudyHours}h
-              </div>
-              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">per day to finish syllabus</span>
-            </div>
+          {/* Quick Target Date Pill & Edit Trigger */}
+          <div className="flex items-center gap-2 self-start lg:self-center">
+            <button
+              type="button"
+              onClick={() => {
+                setNewExamDate(settings.examDate);
+                setShowDatePicker(true);
+              }}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/10 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all cursor-pointer swiftui-press active:scale-[0.98]"
+              title="Click to edit exam date"
+            >
+              <Clock className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Target: <span className="font-semibold text-zinc-900 dark:text-zinc-100">{settings.examDate}</span> ({metrics.daysUntilExam}d)</span>
+              <span className="text-[10px] text-zinc-400 uppercase font-semibold">Edit</span>
+            </button>
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-black/[0.06] dark:border-white/10">
+        {/* Progress Bar */}
+        <div className="space-y-1.5">
           <ProgressBar value={metrics.overallProgressPercentage} size="md" colorHex="#10B981" />
+        </div>
+
+        {/* Harmonious 4-Tile Apple Bento Metric Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+          {/* Tile 1: Countdown */}
+          <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.08] space-y-1">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-emerald-500" />
+              Target Countdown
+            </span>
+            <div className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tabular-nums">
+              {metrics.daysUntilExam} <span className="text-xs font-normal text-zinc-400">Days</span>
+            </div>
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block truncate">
+              Exam: {settings.examDate}
+            </span>
+          </div>
+
+          {/* Tile 2: Streak */}
+          <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.08] space-y-1">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-orange-500" />
+              Daily Study Streak
+            </span>
+            <div className="text-xl sm:text-2xl font-bold text-orange-500 tabular-nums">
+              {metrics.currentStreakDays}d
+            </div>
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
+              Best: {metrics.bestStreakDays} days
+            </span>
+          </div>
+
+          {/* Tile 3: Study Logged */}
+          <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.08] space-y-1">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-emerald-500" />
+              Study Logged
+            </span>
+            <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              {metrics.totalStudyHoursLogged}h
+            </div>
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
+              Goal: {settings.dailyGoalHours}h / day
+            </span>
+          </div>
+
+          {/* Tile 4: Pace Required */}
+          <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.08] space-y-1">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-cyan-500" />
+              Pace Required
+            </span>
+            <div className="text-xl sm:text-2xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
+              {requiredDailyStudyHours}h
+            </div>
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 block">
+              per day to finish syllabus
+            </span>
+          </div>
         </div>
       </Card>
 
@@ -319,7 +317,9 @@ export const CADashboardTab: React.FC<CADashboardTabProps> = ({
               <Card
                 key={paperId}
                 hoverEffect
-                className="flex flex-col items-center justify-between p-5 space-y-4 text-center rounded-2xl"
+                onClick={() => onNavigateTab && onNavigateTab('checklist', paperId)}
+                className="flex flex-col items-center justify-between p-5 space-y-4 text-center rounded-2xl cursor-pointer swiftui-press active:scale-[0.98] transition-all"
+                title={`Click to open ${meta.code} (${meta.shortName}) checklist`}
               >
                 <div className="w-full flex items-center justify-between">
                   <div className="flex items-center gap-2">

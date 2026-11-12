@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   CheckCircle2,
   XCircle,
@@ -11,6 +11,8 @@ import {
   Award,
   Clock,
   Target,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import {
   ExerciseAttempt,
@@ -22,6 +24,7 @@ import { useCATracker } from '@/context/CATrackerContext';
 import { QuestionPalette } from './QuestionPalette';
 import { Button } from '../Button';
 import { Card } from '../Card';
+import { MathText } from '../MathText';
 import { cn } from '@/lib/utils';
 
 interface CrossVerificationReviewProps {
@@ -42,6 +45,58 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
   const [recordedToTestSeries, setRecordedToTestSeries] = useState(false);
   const [highlightedQuestionId, setHighlightedQuestionId] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Fullscreen Mode Toggle (HTML5 Fullscreen API with Viewport Immersive Fallback)
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement && !isFullscreen) {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+        setIsFullscreen(true);
+      } else {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+        setIsFullscreen(false);
+      }
+    } catch {
+      // Graceful fallback for browser restrictions / iframes
+      setIsFullscreen((prev) => !prev);
+    }
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  // Keyboard shortcut [F] to toggle fullscreen review mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if (e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleFullscreen]);
 
   // Local state for marked for review to allow toggling during post-submission review
   const [reviewMarkedForReview, setReviewMarkedForReview] = useState<Record<string, boolean>>(
@@ -174,9 +229,16 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
         };
 
   return (
-    <div className="flex flex-col max-w-6xl mx-auto px-4 py-6 gap-6 select-none">
-      {/* Top Header / Back Button */}
-      <div className="flex items-center justify-between">
+    <div
+      className={cn(
+        'flex flex-col select-none transition-all duration-300',
+        isFullscreen
+          ? 'fixed inset-0 z-[100] w-screen h-screen overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 sm:p-6 lg:p-8 gap-6'
+          : 'min-h-[calc(100vh-5rem)] max-w-6xl mx-auto px-4 py-6 gap-6'
+      )}
+    >
+      {/* Top Header / Back Button & Fullscreen Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={onBackToHub}
@@ -186,9 +248,46 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
           <span>Back to Exercises Hub</span>
         </button>
 
-        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono px-3 py-1 rounded-full bg-zinc-100/70 dark:bg-zinc-800/70 border border-zinc-200/50 dark:border-zinc-700/50">
-          Completed {new Date(attempt.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
+        <div className="flex items-center gap-2.5">
+          {isFullscreen && (
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+              Fullscreen Review
+            </span>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleFullscreen}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full min-h-[36px] px-3.5 swiftui-press active:scale-[0.97] transition-all',
+              isFullscreen
+                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-sm'
+                : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+            )}
+            title={isFullscreen ? 'Exit Fullscreen Review [Shortcut: F]' : 'Enter Fullscreen Review [Shortcut: F]'}
+            aria-label={isFullscreen ? 'Exit Fullscreen Review' : 'Enter Fullscreen Review'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline font-semibold">Exit Fullscreen</span>
+                <span className="text-[10px] opacity-70 font-mono">[F]</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline font-medium">Fullscreen</span>
+                <span className="text-[10px] opacity-70 font-mono">[F]</span>
+              </>
+            )}
+          </Button>
+
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono px-3 py-1 rounded-full bg-zinc-100/70 dark:bg-zinc-800/70 border border-zinc-200/50 dark:border-zinc-700/50">
+            Completed {new Date(attempt.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
       </div>
 
       {/* Primary Score & Performance Metric Card */}
@@ -555,13 +654,13 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
                   {/* Context Data Table if present */}
                   {q.context && q.context.trim() && !/test your knowledge/i.test(q.context) && !/multiple choice/i.test(q.context) && (
                     <div className="mb-4 p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/70 dark:bg-zinc-800/50 font-mono text-xs text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap leading-relaxed overflow-x-auto">
-                      {q.context}
+                      <MathText text={q.context} block />
                     </div>
                   )}
 
                   {/* Question Prompt */}
                   <div className="text-base font-medium text-zinc-900 dark:text-zinc-100 mb-5 leading-relaxed">
-                    {q.questionText}
+                    <MathText text={q.questionText} />
                   </div>
 
                   {/* Options List with High-Contrast Color Coding & Squircle Geometry */}
@@ -600,7 +699,9 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
                           >
                             {option.key}
                           </span>
-                          <span className="flex-1 mt-0.5">{option.text}</span>
+                          <span className="flex-1 mt-0.5">
+                            <MathText text={option.text} />
+                          </span>
 
                           {/* Indicators on option row */}
                           {isOptionCorrect && (
@@ -663,9 +764,9 @@ export const CrossVerificationReview: React.FC<CrossVerificationReviewProps> = (
                       <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <span>ICAI Conceptual Explanation & Reasoning</span>
                     </div>
-                    <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed font-normal">
-                      {q.explanation}
-                    </p>
+                    <div className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed font-normal">
+                      <MathText text={q.explanation} />
+                    </div>
                   </div>
                 </Card>
               );
